@@ -1,0 +1,46 @@
+run:
+  tests: false
+
+linters:
+  disable-all: true
+  enable:
+    - bodyclose
+    - decorder
+    - depguard
+    - dogsled
+    - dupword
+    # - errcheck
+    - errchkjson
+    - errorlint
+    - exhaustive
+    - goconst
+    - gocritic
+    - godot
+    - gofumpt
+    - revive
+    # - gosec
+    - gosimple
+    - govet
+    - grouper
+    - ineffassign
+    # - interfacer
+    - misspell
+    - nakedret
+    - nolintlint
+    - exportloopref
+    - staticcheck
+    - reassign
+    - stylecheck
+    - typecheck
+    - unconvert
+    - tenv
+    - thelper
+    - unused
+    - unparam
+    - misspell
+    # - wrapcheck
+    # - wsl
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
