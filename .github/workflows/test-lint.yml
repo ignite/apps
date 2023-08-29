@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   lint:
-    name: Lint Go code
+    name: Lint Go Code
     runs-on: ubuntu-latest
     timeout-minutes: 6
     steps:
