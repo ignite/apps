@@ -1,20 +1,10 @@
-.PHONY: build mocks format lint test test-unit govet govulncheck
-
-build:
-	@echo Building...
-	@go build -o ./cli-plugin-hermes .
-
-## mocks: generate mocks
-mocks:
-	@echo Generating mocks
-	@go install github.com/vektra/mockery/v2
-	@go generate ./...
+.PHONY: format lint test test-unit govet govulncheck
 
 ## format: Install and run goimports and gofumpt
 format:
 	@echo Formatting...
 	@go run mvdan.cc/gofumpt -w .
-	@go run golang.org/x/tools/cmd/goimports -w -local github.com/ignite/cli-plugin-hermes .
+	@go run golang.org/x/tools/cmd/goimports -w -local github.com/ignite/plugins .
 
 ## lint: Run Golang CI Lint.
 lint:

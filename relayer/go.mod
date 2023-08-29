@@ -1,4 +1,4 @@
-module hermes
+module relayer
 
 go 1.20
 

@@ -9,11 +9,11 @@ const (
 	flagFrom = "from"
 )
 
-// NewHermes creates a new hermes command that holds
+// NewRelayer creates a new relayer command that holds
 // some other sub commands related to hermes relayer.
-func NewHermes() *cobra.Command {
+func NewRelayer() *cobra.Command {
 	c := &cobra.Command{
-		Use:           "hermes [command]",
+		Use:           "relayer [command]",
 		Aliases:       []string{"h"},
 		Short:         "",
 		Long:          ``,
@@ -26,7 +26,7 @@ func NewHermes() *cobra.Command {
 
 	// add sub commands.
 	c.AddCommand(
-		NewHermesConfigure(),
+		NewRelayerConfigure(),
 	)
 
 	return c

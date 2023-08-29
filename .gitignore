@@ -1,5 +1,7 @@
 .DS_Store
-.idea
-.vscode
 *.test
 go.work
+release/
+build/
+.idea/
+.vscode/
