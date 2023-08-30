@@ -3,10 +3,11 @@ package main
 import (
 	"encoding/gob"
 	"os"
-	"relayer/cmd"
 
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/ignite/services/plugin"
+
+	"relayer/cmd"
 )
 
 func init() {
@@ -19,7 +20,7 @@ type p struct{}
 
 func (p) Manifest() (plugin.Manifest, error) {
 	m := plugin.Manifest{
-		Name: "relayer",
+		Name: "hermes",
 	}
 	m.ImportCobraCommand(cmd.NewRelayer(), "ignite")
 	return m, nil
@@ -49,7 +50,7 @@ func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
 
 func main() {
 	pluginMap := map[string]hplugin.Plugin{
-		"relayer": &plugin.InterfacePlugin{Impl: &p{}},
+		"hermes": &plugin.InterfacePlugin{Impl: &p{}},
 	}
 
 	hplugin.Serve(&hplugin.ServeConfig{

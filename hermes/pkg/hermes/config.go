@@ -1,6 +1,7 @@
 package hermes
 
 import (
+	"errors"
 	"fmt"
 	"net/url"
 	"os"
@@ -254,23 +255,63 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 	return nil
 }
 
-func (c *Config) Save() error {
-	configPath, err := ConfigPath()
+func (c *Config) Remove() error {
+	configPath, err := c.ConfigPath()
 	if err != nil {
 		return err
 	}
+	return os.RemoveAll(configPath)
+}
+
+func (c *Config) Save() (string, error) {
+	configPath, err := c.ConfigPath()
+	if err != nil {
+		return "", err
+	}
 
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		return err
+		return "", err
 	}
 
 	file, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return err
+		return "", err
 	}
 	defer file.Close()
 
-	return toml.NewEncoder(file).Encode(c)
+	return configPath, toml.NewEncoder(file).Encode(c)
+}
+
+func (c *Config) ConfigName() (string, error) {
+	name := ""
+	for _, chain := range c.Chains {
+		if name != "" {
+			name += "_"
+		}
+		name += chain.Id
+	}
+	if name == "" {
+		return name, errors.New("cannot create a config file without a chain")
+	}
+	return name, nil
+}
+
+func (c *Config) ConfigPath() (string, error) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	cfgName, err := c.ConfigName()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(
+		userHomeDir,
+		".ignite",
+		"relayer",
+		"hermes",
+		cfgName,
+	), nil
 }
 
 func Parse(path string) (cfg Config, err error) {
@@ -311,7 +352,7 @@ func DefaultConfig() *Config {
 	}
 }
 
-func ConfigPath() (string, error) {
+func DefaultConfigPath() (string, error) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err

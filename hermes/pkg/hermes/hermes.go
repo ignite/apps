@@ -8,6 +8,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"time"
 
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
@@ -29,6 +30,8 @@ const (
 	FlagShowCounterparty = "show-counterparty"
 	FlagChain            = "chain"
 	FlagMnemonicFile     = "mnemonic-file"
+	FlagConfig           = "config"
+	FlagJSON             = "json"
 )
 
 const (
@@ -77,9 +80,31 @@ type (
 	// Option configures Generate configs.
 	Option func(*configs)
 
-	// Configs holds Generate configs.
+	// configs holds Generate configs.
 	configs struct {
-		flags Flags
+		flags  Flags
+		config string
+		stdOut io.Writer
+		stdErr io.Writer
+	}
+
+	// Result represents the cli command result.
+	Result struct {
+		Result string `json:"result"`
+		Status string `json:"status"`
+	}
+
+	// Log represents the cli command logs.
+	Log struct {
+		Timestamp time.Time `json:"timestamp"`
+		Level     string    `json:"level"`
+		Fields    Fields    `json:"fields"`
+		ThreadId  string    `json:"threadId"`
+	}
+
+	// Fields represents the cli command result fields.
+	Fields struct {
+		Message string `json:"message"`
 	}
 )
 
@@ -87,6 +112,27 @@ type (
 func WithFlags(flags Flags) Option {
 	return func(c *configs) {
 		c.flags = flags
+	}
+}
+
+// WithConfigFile add a hermes config file.
+func WithConfigFile(config string) Option {
+	return func(c *configs) {
+		c.config = config
+	}
+}
+
+// WithStdOut add a std output.
+func WithStdOut(stdOut io.Writer) Option {
+	return func(c *configs) {
+		c.stdOut = stdOut
+	}
+}
+
+// WithStdErr add a std error output.
+func WithStdErr(stdErr io.Writer) Option {
+	return func(c *configs) {
+		c.stdErr = stdErr
 	}
 }
 
@@ -128,52 +174,59 @@ func (h *Hermes) Cleanup() error {
 	return os.RemoveAll(h.path)
 }
 
-func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string) ([]byte, error) {
-	return h.RunCmd(ctx, cmdKeys, "", WithFlags(
+func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string, options ...Option) error {
+	options = append(options, WithFlags(
 		Flags{
 			FlagChain:        chainID,
 			FlagMnemonicFile: keyfile,
 		},
 	))
+	return h.RunCmd(ctx, []string{string(cmdKeys)}, options...)
 }
 
-func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string) ([]byte, error) {
+func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string, options ...Option) error {
 	f, err := os.CreateTemp("", "hermes-key")
 	if err != nil {
-		return nil, err
+		return err
 	}
 	defer os.Remove(f.Name())
+
 	if _, err := f.Write([]byte(mnemonic)); err != nil {
-		return nil, err
+		return err
 	}
-	return h.RunCmd(ctx, cmdKeys, cmdKeysAdd, WithFlags(
+
+	options = append(options, WithFlags(
 		Flags{
 			FlagChain:        chainID,
 			FlagMnemonicFile: f.Name(),
 		},
 	))
+	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
 }
 
-func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain string) ([]byte, error) {
-	return h.RunCmd(ctx, cmdCreate, cmdClient, WithFlags(
+func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain string, options ...Option) error {
+	options = append(options, WithFlags(
 		Flags{
 			FlagHostChain:      hostChain,
 			FlagReferenceChain: referenceChain,
 		},
 	))
+	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdClient)}, options...)
 }
 
-func (h *Hermes) CreateConnection(ctx context.Context, chainA, clientA, clientB string) ([]byte, error) {
-	return h.RunCmd(ctx, cmdCreate, cmdConnection, WithFlags(
+func (h *Hermes) CreateConnection(ctx context.Context, chainA, clientA, clientB string, options ...Option) error {
+	options = append(options, WithFlags(
 		Flags{
 			FlagChainA:  chainA,
 			FlagClientA: clientA,
 			FlagClientB: clientB,
-		}))
+		},
+	))
+	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdConnection)}, options...)
 }
 
-func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB string) ([]byte, error) {
-	return h.RunCmd(ctx, cmdCreate, cmdChannel, WithFlags(
+func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB string, options ...Option) error {
+	options = append(options, WithFlags(
 		Flags{
 			FlagChainA:      chainA,
 			FlagConnectionA: connA,
@@ -181,32 +234,31 @@ func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB 
 			FlagPortB:       portB,
 		},
 	))
+	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdChannel)}, options...)
 }
 
-func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain string) ([]byte, error) {
+func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain string, options ...Option) error {
 	flags := Flags{
 		FlagChain: chain,
 	}
 	if showCounterparty {
 		flags[FlagShowCounterparty] = true
 	}
-	return h.RunCmd(ctx, cmdQuery, cmdChannels, WithFlags(flags))
+	options = append(options, WithFlags(flags))
+	return h.RunCmd(ctx, []string{string(cmdQuery), string(cmdChannels)}, options...)
 }
 
-func (h *Hermes) Start(ctx context.Context, options ...Option) ([]byte, error) {
-	return h.RunCmd(ctx, cmdStart, "", options...)
+func (h *Hermes) Start(ctx context.Context, options ...Option) error {
+	return h.RunCmd(ctx, []string{string(cmdStart)}, options...)
 }
 
-func (h *Hermes) RunCmd(ctx context.Context, command cmdName, subCommand subCmd, options ...Option) ([]byte, error) {
+func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) error {
 	c := configs{}
 	for _, o := range options {
 		o(&c)
 	}
 
-	cmd := []string{h.path, string(command)}
-	if subCommand != "" {
-		cmd = append(cmd, string(subCommand))
-	}
+	cmd := args
 	for flag, value := range c.flags {
 		if v, ok := value.(bool); ok && v {
 			cmd = append(cmd, fmt.Sprintf("--%s", flag))
@@ -215,7 +267,26 @@ func (h *Hermes) RunCmd(ctx context.Context, command cmdName, subCommand subCmd,
 		}
 	}
 
-	// execute the command.
-	buf := bytes.Buffer{}
-	return buf.Bytes(), exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(&buf)))
+	stdOut := c.stdOut
+	if stdOut == nil {
+		stdOut = os.Stdout
+	}
+
+	stderr := c.stdErr
+	if stderr == nil {
+		stderr = os.Stderr
+	}
+
+	return h.Run(ctx, stdOut, stderr, c.config, cmd...)
+}
+
+func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config string, args ...string) error {
+	cmd := []string{h.path}
+	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
+	if config != "" {
+		// the config flag should be added before the hermes subcommands
+		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, config))
+	}
+	cmd = append(cmd, args...)
+	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
 }

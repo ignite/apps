@@ -1,6 +1,7 @@
 .DS_Store
 *.test
 go.work
+hermes/hermes
 release/
 build/
 .idea/
