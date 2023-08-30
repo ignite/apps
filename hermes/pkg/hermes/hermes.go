@@ -282,11 +282,14 @@ func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) e
 
 func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config string, args ...string) error {
 	cmd := []string{h.path}
+
+	// the config and json flag should be added before the hermes subcommands
 	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
 	if config != "" {
-		// the config flag should be added before the hermes subcommands
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, config))
 	}
+
 	cmd = append(cmd, args...)
+
 	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
 }
