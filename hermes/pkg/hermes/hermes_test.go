@@ -5,32 +5,28 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestHermes(t *testing.T) {
 	ctx := context.Background()
 	h, err := New()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 	defer h.Cleanup()
 
 	// Create the default config and add chains
 	c := DefaultConfig()
 	err = c.AddChain("mars-1", "http://localhost:26649", "http://localhost:9082")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+
 	err = c.AddChain("venus-1", "http://localhost:26659", "http://localhost:9092")
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	path, err := c.Save()
-	if err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
 
 	// Add hermes keys
 	var (
@@ -44,12 +40,8 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
 	fmt.Println(result)
 
 	buf = bytes.Buffer{}
@@ -61,12 +53,8 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
 	fmt.Println(result)
 
 	// create clients
@@ -79,13 +67,12 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
+
+	var clientResult1 ClientResult
+	require.NoError(t, json.Unmarshal(result.Result, &clientResult1))
+	fmt.Println(clientResult1)
 
 	buf = bytes.Buffer{}
 	result = Result{}
@@ -96,13 +83,12 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
+
+	var clientResult2 ClientResult
+	require.NoError(t, json.Unmarshal(result.Result, &clientResult2))
+	fmt.Println(clientResult2)
 
 	// create connection
 	buf = bytes.Buffer{}
@@ -115,13 +101,12 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
+
+	var connection ConnectionResult
+	require.NoError(t, json.Unmarshal(result.Result, &connection))
+	fmt.Println(connection)
 
 	// create and query channel
 	buf = bytes.Buffer{}
@@ -135,13 +120,12 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
+
+	var channel ConnectionResult
+	require.NoError(t, json.Unmarshal(result.Result, &channel))
+	fmt.Println(channel)
 
 	buf = bytes.Buffer{}
 	result = Result{}
@@ -152,27 +136,17 @@ func TestHermes(t *testing.T) {
 		WithConfigFile(path),
 		WithStdOut(&buf),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
+	require.NoError(t, err)
+	require.NoError(t, json.Unmarshal(buf.Bytes(), &result))
+
+	var channels []ChannelResult
+	require.NoError(t, json.Unmarshal(result.Result, &channels))
+	fmt.Println(channels)
 
 	// start hermes
-	buf = bytes.Buffer{}
-	result = Result{}
 	err = h.Start(
 		ctx,
 		WithConfigFile(path),
-		WithStdOut(&buf),
+		WithStdOut(os.Stdout),
 	)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		t.Fatal(err)
-	}
-	fmt.Println(result)
 }

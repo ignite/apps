@@ -9,6 +9,7 @@ require (
 	github.com/ignite/ignite-files v0.0.0
 	github.com/pelletier/go-toml/v2 v2.0.7
 	github.com/spf13/cobra v1.7.0
+	github.com/stretchr/testify v1.8.2
 	github.com/vektra/mockery/v2 v2.27.1
 	golang.org/x/tools v0.12.0
 	golang.org/x/vuln v0.1.0
@@ -196,7 +197,6 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.2 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/tdakkota/asciicheck v0.1.1 // indirect
 	github.com/tetafro/godot v1.4.11 // indirect

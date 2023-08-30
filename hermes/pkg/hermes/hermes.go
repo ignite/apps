@@ -5,10 +5,10 @@ import (
 	"bytes"
 	"compress/gzip"
 	"context"
+	"encoding/json"
 	"fmt"
 	"io"
 	"os"
-	"time"
 
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
@@ -87,24 +87,54 @@ type (
 		stdOut io.Writer
 		stdErr io.Writer
 	}
+)
 
+type (
 	// Result represents the cli command result.
 	Result struct {
-		Result string `json:"result"`
-		Status string `json:"status"`
+		Result json.RawMessage `json:"result"`
+		Status string          `json:"status"`
 	}
 
-	// Log represents the cli command logs.
-	Log struct {
-		Timestamp time.Time `json:"timestamp"`
-		Level     string    `json:"level"`
-		Fields    Fields    `json:"fields"`
-		ThreadId  string    `json:"threadId"`
+	ClientResult struct {
+		CreateClient CreateClient `json:"CreateClient"`
+	}
+	CreateClient struct {
+		ClientId        string          `json:"client_id"`
+		ClientType      string          `json:"client_type"`
+		ConsensusHeight ConsensusHeight `json:"consensus_height"`
+	}
+	ConsensusHeight struct {
+		RevisionHeight int `json:"revision_height"`
+		RevisionNumber int `json:"revision_number"`
 	}
 
-	// Fields represents the cli command result fields.
-	Fields struct {
-		Message string `json:"message"`
+	ConnectionResult struct {
+		ASide           Side   `json:"a_side"`
+		BSide           Side   `json:"b_side"`
+		ConnectionDelay Time   `json:"connection_delay"`
+		DelayPeriod     Time   `json:"delay_period"`
+		Ordering        string `json:"ordering"`
+	}
+	Side struct {
+		ChannelId    string      `json:"channel_id"`
+		ClientId     string      `json:"client_id"`
+		ConnectionId string      `json:"connection_id"`
+		PortId       string      `json:"port_id"`
+		Version      interface{} `json:"version"`
+	}
+	Time struct {
+		Nanos int `json:"nanos"`
+		Secs  int `json:"secs"`
+	}
+
+	ChannelResult struct {
+		ChainIdA string `json:"chain_id_a"`
+		ChainIdB string `json:"chain_id_b"`
+		ChannelA string `json:"channel_a"`
+		ChannelB string `json:"channel_b"`
+		PortA    string `json:"port_a"`
+		PortB    string `json:"port_b"`
 	}
 )
 
