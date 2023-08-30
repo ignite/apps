@@ -202,7 +202,7 @@ func WithTrustThreshold(numerator, denominator string) ChainOption {
 	}
 }
 
-func WithAddressType(derivation string) ChainOption {
+func WithAddressPrefix(derivation string) ChainOption {
 	return func(c *Chain) {
 		c.AddressType = AddressType{Derivation: derivation}
 	}

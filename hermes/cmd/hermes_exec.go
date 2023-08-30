@@ -22,6 +22,23 @@ func NewHermesExecute() *cobra.Command {
 }
 
 func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
+	//WithEventSource(mode, url, batchDelay string)
+	//WithRPCTimeout(timeout string)
+	//WithAccountPrefix(prefix string)
+	//WithKeyName(key string)
+	//WithStorePrefix(prefix string)
+	//WithDefaultGas(defaultGas int)
+	//WithMaxGas(maxGas int)
+	//WithGasPrice(price float64, denom string)
+	//WithGasMultiplier(gasMultipler float64)
+	//WithMaxMsgNum(maxMsg int)
+	//WithMaxTxSize(size int)
+	//WithClockDrift(clock string)
+	//WithMaxBlockTime(maxBlockTime string)
+	//WithTrustingPeriod(trustingPeriod string)
+	//WithTrustThreshold(numerator, denominator string)
+	//WithAddressPrefix(derivation string)
+	
 	h, err := hermes.New()
 	if err != nil {
 		return err
