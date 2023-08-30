@@ -323,7 +323,7 @@ func DefaultConfig() *Config {
 	return &Config{
 		Chains: []Chain{},
 		Global: Global{
-			LogLevel: "info",
+			LogLevel: "error",
 		},
 		Mode: Mode{
 			Channels: Channels{
@@ -345,7 +345,7 @@ func DefaultConfig() *Config {
 			},
 		},
 		Telemetry: Telemetry{
-			Enabled: true,
+			Enabled: false,
 			Host:    "127.0.0.1",
 			Port:    3001,
 		},
