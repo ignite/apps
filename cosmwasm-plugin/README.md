@@ -15,18 +15,25 @@ $ ignite scaffold chain planet
 $ cd planet
 ```
 
-3. Add cosmwasm plugin within your project directory:
+3. Clone this repo locally
+
+4. Add cosmwasm plugin within your project directory:
 ```
-ignite plugin add <this repo>
+ignite plugin add /absolute/path/to/plugin/cosmwasm-plugin
 ```
 
-4. Run command
+or globally
 
+```
+ignite plugin add -g /absolute/path/to/plugin/osmwasm-plugin
+```
+
+5. Run command
 ```
 $ ignite cosmwasm-plugin add
 ```
 
-5. Launch your chain with CosmWasm support
+6. Launch your chain with CosmWasm support
 
 ```
 $ ignite chain serve
