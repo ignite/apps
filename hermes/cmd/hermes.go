@@ -4,11 +4,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	flagHome = "home"
-	flagFrom = "from"
-)
-
 // NewRelayer creates a new relayer command that holds
 // some other sub commands related to hermes relayer.
 func NewRelayer() *cobra.Command {

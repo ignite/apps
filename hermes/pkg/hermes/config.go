@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"os"
 	"path/filepath"
+	"strconv"
 
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -27,12 +29,12 @@ type (
 		AccountPrefix  string         `toml:"account_prefix" json:"account_prefix"`
 		KeyName        string         `toml:"key_name" json:"key_name"`
 		StorePrefix    string         `toml:"store_prefix" json:"store_prefix"`
-		DefaultGas     int            `toml:"default_gas" json:"default_gas"`
-		MaxGas         int            `toml:"max_gas" json:"max_gas"`
+		DefaultGas     uint64         `toml:"default_gas" json:"default_gas"`
+		MaxGas         uint64         `toml:"max_gas" json:"max_gas"`
 		GasPrice       GasPrice       `toml:"gas_price,inline" json:"gas_price"`
 		GasMultiplier  float64        `toml:"gas_multiplier" json:"gas_multiplier"`
-		MaxMsgNum      int            `toml:"max_msg_num" json:"max_msg_num"`
-		MaxTxSize      int            `toml:"max_tx_size" json:"max_tx_size"`
+		MaxMsgNum      uint64         `toml:"max_msg_num" json:"max_msg_num"`
+		MaxTxSize      uint64         `toml:"max_tx_size" json:"max_tx_size"`
 		ClockDrift     string         `toml:"clock_drift" json:"clock_drift"`
 		MaxBlockTime   string         `toml:"max_block_time" json:"max_block_time"`
 		TrustingPeriod string         `toml:"trusting_period" json:"trusting_period"`
@@ -67,7 +69,7 @@ type (
 	Telemetry struct {
 		Enabled bool   `toml:"enabled" json:"enabled"`
 		Host    string `toml:"host" json:"host"`
-		Port    int    `toml:"port" json:"port"`
+		Port    uint64 `toml:"port" json:"port"`
 	}
 
 	Mode struct {
@@ -92,168 +94,17 @@ type (
 	}
 
 	Packets struct {
-		ClearInterval  int  `toml:"clear_interval" json:"clear_interval"`
-		ClearOnStart   bool `toml:"clear_on_start" json:"clear_on_start"`
-		Enabled        bool `toml:"enabled" json:"enabled"`
-		TxConfirmation bool `toml:"tx_confirmation" json:"tx_confirmation"`
+		ClearInterval  uint64 `toml:"clear_interval" json:"clear_interval"`
+		ClearOnStart   bool   `toml:"clear_on_start" json:"clear_on_start"`
+		Enabled        bool   `toml:"enabled" json:"enabled"`
+		TxConfirmation bool   `toml:"tx_confirmation" json:"tx_confirmation"`
 	}
 
 	// ChainOption configures chain hermes configs.
 	ChainOption func(*Chain)
+	// ConfigOption configures hermes configs.
+	ConfigOption func(*Config)
 )
-
-func WithEventSource(mode, url, batchDelay string) ChainOption {
-	return func(c *Chain) {
-		c.EventSource = EventSource{
-			BatchDelay: batchDelay,
-			Mode:       mode,
-			Url:        url,
-		}
-	}
-}
-
-func WithRPCTimeout(timeout string) ChainOption {
-	return func(c *Chain) {
-		c.RpcTimeout = timeout
-	}
-}
-
-func WithAccountPrefix(prefix string) ChainOption {
-	return func(c *Chain) {
-		c.AccountPrefix = prefix
-	}
-}
-
-func WithKeyName(key string) ChainOption {
-	return func(c *Chain) {
-		c.KeyName = key
-	}
-}
-
-func WithStorePrefix(prefix string) ChainOption {
-	return func(c *Chain) {
-		c.StorePrefix = prefix
-	}
-}
-
-func WithDefaultGas(defaultGas int) ChainOption {
-	return func(c *Chain) {
-		c.DefaultGas = defaultGas
-	}
-}
-
-func WithMaxGas(maxGas int) ChainOption {
-	return func(c *Chain) {
-		c.MaxGas = maxGas
-	}
-}
-
-func WithGasPrice(price float64, denom string) ChainOption {
-	return func(c *Chain) {
-		c.GasPrice = GasPrice{
-			Denom: denom,
-			Price: price,
-		}
-	}
-}
-
-func WithGasMultiplier(gasMultipler float64) ChainOption {
-	return func(c *Chain) {
-		c.GasMultiplier = gasMultipler
-	}
-}
-
-func WithMaxMsgNum(maxMsg int) ChainOption {
-	return func(c *Chain) {
-		c.MaxMsgNum = maxMsg
-	}
-}
-
-func WithMaxTxSize(size int) ChainOption {
-	return func(c *Chain) {
-		c.MaxTxSize = size
-	}
-}
-
-func WithClockDrift(clock string) ChainOption {
-	return func(c *Chain) {
-		c.ClockDrift = clock
-	}
-}
-
-func WithMaxBlockTime(maxBlockTime string) ChainOption {
-	return func(c *Chain) {
-		c.MaxBlockTime = maxBlockTime
-	}
-}
-
-func WithTrustingPeriod(trustingPeriod string) ChainOption {
-	return func(c *Chain) {
-		c.TrustingPeriod = trustingPeriod
-	}
-}
-
-func WithTrustThreshold(numerator, denominator string) ChainOption {
-	return func(c *Chain) {
-		c.TrustThreshold = TrustThreshold{
-			Denominator: denominator,
-			Numerator:   numerator,
-		}
-	}
-}
-
-func WithAddressPrefix(derivation string) ChainOption {
-	return func(c *Chain) {
-		c.AddressType = AddressType{Derivation: derivation}
-	}
-}
-
-func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOption) error {
-	rpcUrl, err := url.Parse(rpcAddr)
-	if err != nil {
-		return err
-	}
-
-	chain := Chain{
-		Id:       chainID,
-		RpcAddr:  rpcAddr,
-		GrpcAddr: grpcAddr,
-		EventSource: EventSource{
-			BatchDelay: "500ms",
-			Mode:       "push",
-			Url:        fmt.Sprintf("ws://%s", rpcUrl.Host),
-		},
-		RpcTimeout:    "15s",
-		AccountPrefix: "cosmos",
-		KeyName:       "wallet",
-		StorePrefix:   "ibc",
-		DefaultGas:    100000,
-		MaxGas:        10000000,
-		GasPrice: GasPrice{
-			Denom: "stake",
-			Price: 0.01,
-		},
-		GasMultiplier:  1.1,
-		MaxMsgNum:      30,
-		MaxTxSize:      2097152,
-		ClockDrift:     "5s",
-		MaxBlockTime:   "10s",
-		TrustingPeriod: "14days",
-		TrustThreshold: TrustThreshold{
-			Denominator: "3",
-			Numerator:   "1",
-		},
-		AddressType: AddressType{
-			Derivation: "cosmos",
-		},
-	}
-	for _, o := range options {
-		o(&chain)
-	}
-
-	c.Chains = append(c.Chains, chain)
-	return nil
-}
 
 func (c *Config) Remove() error {
 	configPath, err := c.ConfigPath()
@@ -319,8 +170,88 @@ func Parse(path string) (cfg Config, err error) {
 	return
 }
 
-func DefaultConfig() *Config {
-	return &Config{
+func DefaultConfigPath() (string, error) {
+	userHomeDir, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(userHomeDir, ".hermes", "config.toml"), nil
+}
+
+func WithTelemetryEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Telemetry.Enabled = enabled
+	}
+}
+
+func WithTelemetryHost(host string) ConfigOption {
+	return func(c *Config) {
+		c.Telemetry.Host = host
+	}
+}
+
+func WithTelemetryPort(port uint64) ConfigOption {
+	return func(c *Config) {
+		c.Telemetry.Port = port
+	}
+}
+
+func WithModeChannelsEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Channels.Enabled = enabled
+	}
+}
+
+func WithModeClientsEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Clients.Enabled = enabled
+	}
+}
+
+func WithModeClientsMisbehaviour(misbehaviour bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Clients.Misbehaviour = misbehaviour
+	}
+}
+
+func WithModeClientsRefresh(refresh bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Clients.Refresh = refresh
+	}
+}
+
+func WithModeConnectionsEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Connections.Enabled = enabled
+	}
+}
+
+func WithModePacketsEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Packets.Enabled = enabled
+	}
+}
+
+func WithModePacketsClearInterval(clearInterval uint64) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Packets.ClearInterval = clearInterval
+	}
+}
+
+func WithModePacketsClearOnStart(clearOnStart bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Packets.ClearOnStart = clearOnStart
+	}
+}
+
+func WithModePacketsTxConfirmation(txConfirmation bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Packets.TxConfirmation = txConfirmation
+	}
+}
+
+func DefaultConfig(options ...ConfigOption) *Config {
+	cfg := &Config{
 		Chains: []Chain{},
 		Global: Global{
 			LogLevel: "error",
@@ -350,12 +281,162 @@ func DefaultConfig() *Config {
 			Port:    3001,
 		},
 	}
+	for _, o := range options {
+		o(cfg)
+	}
+	return cfg
 }
 
-func DefaultConfigPath() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
+func WithChainEventSource(mode, url, batchDelay string) ChainOption {
+	return func(c *Chain) {
+		c.EventSource = EventSource{
+			BatchDelay: batchDelay,
+			Mode:       mode,
+			Url:        url,
+		}
 	}
-	return filepath.Join(userHomeDir, ".hermes", "config.toml"), nil
+}
+
+func WithChainRPCTimeout(timeout string) ChainOption {
+	return func(c *Chain) {
+		c.RpcTimeout = timeout
+	}
+}
+
+func WithChainAccountPrefix(prefix string) ChainOption {
+	return func(c *Chain) {
+		c.AccountPrefix = prefix
+	}
+}
+
+func WithChainKeyName(key string) ChainOption {
+	return func(c *Chain) {
+		c.KeyName = key
+	}
+}
+
+func WithChainStorePrefix(prefix string) ChainOption {
+	return func(c *Chain) {
+		c.StorePrefix = prefix
+	}
+}
+
+func WithChainDefaultGas(defaultGas uint64) ChainOption {
+	return func(c *Chain) {
+		c.DefaultGas = defaultGas
+	}
+}
+
+func WithChainMaxGas(maxGas uint64) ChainOption {
+	return func(c *Chain) {
+		c.MaxGas = maxGas
+	}
+}
+
+func WithChainGasPrice(price sdk.Coin) ChainOption {
+	return func(c *Chain) {
+		f, _ := price.Amount.BigInt().Float64()
+		c.GasPrice = GasPrice{
+			Denom: price.Denom,
+			Price: f,
+		}
+	}
+}
+
+func WithChainGasMultiplier(gasMultipler float64) ChainOption {
+	return func(c *Chain) {
+		c.GasMultiplier = gasMultipler
+	}
+}
+
+func WithChainMaxMsgNum(maxMsg uint64) ChainOption {
+	return func(c *Chain) {
+		c.MaxMsgNum = maxMsg
+	}
+}
+
+func WithChainMaxTxSize(size uint64) ChainOption {
+	return func(c *Chain) {
+		c.MaxTxSize = size
+	}
+}
+
+func WithChainClockDrift(clock string) ChainOption {
+	return func(c *Chain) {
+		c.ClockDrift = clock
+	}
+}
+
+func WithChainMaxBlockTime(maxBlockTime string) ChainOption {
+	return func(c *Chain) {
+		c.MaxBlockTime = maxBlockTime
+	}
+}
+
+func WithChainTrustingPeriod(trustingPeriod string) ChainOption {
+	return func(c *Chain) {
+		c.TrustingPeriod = trustingPeriod
+	}
+}
+
+func WithChainTrustThreshold(numerator, denominator uint64) ChainOption {
+	return func(c *Chain) {
+		c.TrustThreshold = TrustThreshold{
+			Denominator: strconv.FormatUint(denominator, 10),
+			Numerator:   strconv.FormatUint(numerator, 10),
+		}
+	}
+}
+
+func WithChainAddressPrefix(derivation string) ChainOption {
+	return func(c *Chain) {
+		c.AddressType = AddressType{Derivation: derivation}
+	}
+}
+
+func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOption) error {
+	rpcUrl, err := url.Parse(rpcAddr)
+	if err != nil {
+		return err
+	}
+
+	chain := Chain{
+		Id:       chainID,
+		RpcAddr:  rpcAddr,
+		GrpcAddr: grpcAddr,
+		EventSource: EventSource{
+			BatchDelay: "500ms",
+			Mode:       "push",
+			Url:        fmt.Sprintf("ws://%s", rpcUrl.Host),
+		},
+		RpcTimeout:    "15s",
+		AccountPrefix: "cosmos",
+		KeyName:       "wallet",
+		StorePrefix:   "ibc",
+		DefaultGas:    100000,
+		MaxGas:        10000000,
+		GasPrice: GasPrice{
+			Denom: "stake",
+			Price: 0.01,
+		},
+		GasMultiplier:  1.1,
+		MaxMsgNum:      30,
+		MaxTxSize:      2097152,
+		ClockDrift:     "5s",
+		MaxBlockTime:   "10s",
+		TrustingPeriod: "14days",
+		TrustThreshold: TrustThreshold{
+			Denominator: "3",
+			Numerator:   "1",
+		},
+		AddressType: AddressType{
+			Derivation: "cosmos",
+		},
+	}
+	for _, o := range options {
+		o(&chain)
+	}
+
+	c.Chains = append(c.Chains, chain)
+	return nil
 }
