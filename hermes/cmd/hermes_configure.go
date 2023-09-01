@@ -4,10 +4,11 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/spf13/cobra"
 
 	"relayer/pkg/hermes"
+
+	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
 )
 
 const (
@@ -327,18 +328,16 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
+	cfgPath, err := c.Save()
+	if err != nil {
+		return err
+	}
 
 	h, err := hermes.New()
 	if err != nil {
 		return err
 	}
 	defer h.Cleanup()
-
-	// Create the default config and add chains
-	cfgPath, err := c.ConfigPath()
-	if err != nil {
-		return err
-	}
 
 	// create client A
 	buf := bytes.Buffer{}

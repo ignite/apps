@@ -7,6 +7,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/pelletier/go-toml/v2"
@@ -134,17 +135,14 @@ func (c *Config) Save() (string, error) {
 }
 
 func (c *Config) ConfigName() (string, error) {
-	name := ""
+	if len(c.Chains) < 2 {
+		return "", errors.New("cannot create a config file without unless two chains")
+	}
+	names := make([]string, 0)
 	for _, chain := range c.Chains {
-		if name != "" {
-			name += "_"
-		}
-		name += chain.Id
+		names = append(names, chain.Id)
 	}
-	if name == "" {
-		return name, errors.New("cannot create a config file without a chain")
-	}
-	return name, nil
+	return strings.Join(names, "_"), nil
 }
 
 func (c *Config) ConfigPath() (string, error) {
@@ -165,9 +163,13 @@ func (c *Config) ConfigPath() (string, error) {
 	), nil
 }
 
-func Parse(path string) (cfg Config, err error) {
-	err = toml.Unmarshal([]byte(path), &cfg)
-	return
+func LoadConfig(cfgPath string) (Config, error) {
+	cfgBytes, err := os.ReadFile(cfgPath)
+	if err != nil {
+		return Config{}, err
+	}
+	var cfg Config
+	return cfg, toml.Unmarshal(cfgBytes, &cfg)
 }
 
 func DefaultConfigPath() (string, error) {

@@ -21,8 +21,9 @@ func NewRelayer() *cobra.Command {
 
 	// add sub commands.
 	c.AddCommand(
-		NewHermesExecute(),
 		NewHermesConfigure(),
+		NewHermesStart(),
+		NewHermesExecute(),
 	)
 
 	return c
