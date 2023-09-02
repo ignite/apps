@@ -3,6 +3,7 @@ package hermes
 import (
 	"errors"
 	"fmt"
+	"math/big"
 	"net/url"
 	"os"
 	"path/filepath"
@@ -353,9 +354,9 @@ func WithChainGasPrice(price sdk.Coin) ChainOption {
 	}
 }
 
-func WithChainGasMultiplier(gasMultipler float64) ChainOption {
+func WithChainGasMultiplier(gasMultiplier *big.Float) ChainOption {
 	return func(c *Chain) {
-		c.GasMultiplier = gasMultipler
+		c.GasMultiplier, _ = gasMultiplier.Float64()
 	}
 }
 

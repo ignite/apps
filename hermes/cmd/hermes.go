@@ -16,9 +16,6 @@ func NewRelayer() *cobra.Command {
 		SilenceErrors: true,
 	}
 
-	// configure flags.
-	// c.PersistentFlags().BoolVar(&local, flagLocal, false, "blabla")
-
 	// add sub commands.
 	c.AddCommand(
 		NewHermesConfigure(),

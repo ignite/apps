@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"fmt"
+	"math/big"
 	"os"
 	"strings"
 
@@ -80,10 +82,10 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().String(flagChainBPortID, "transfer", "Port ID of the chain B")
 	c.Flags().String(flagChainAEventSourceUrl, "", "WS event source url of the chain A")
 	c.Flags().String(flagChainBEventSourceUrl, "", "WS event source url of the chain B")
-	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A")
-	c.Flags().String(flagChainBEventSourceMode, "push", "WS event source mode of the chain B")
-	c.Flags().String(flagChainAEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain A")
-	c.Flags().String(flagChainBEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain B")
+	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A (event source url should be set to use this flag)")
+	c.Flags().String(flagChainBEventSourceMode, "push", "WS event source mode of the chain B (event source url should be set to use this flag)")
+	c.Flags().String(flagChainAEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain A (event source url should be set to use this flag)")
+	c.Flags().String(flagChainBEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain B (event source url should be set to use this flag)")
 	c.Flags().String(flagChainARPCTimeout, "15s", "RPC timeout of the chain A")
 	c.Flags().String(flagChainBRPCTimeout, "15s", "RPC timeout of the chain B")
 	c.Flags().String(flagChainAAccountPrefix, "cosmos", "address prefix of the chain A")
@@ -98,8 +100,8 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Uint64(flagChainBMaxGas, 10000000, "max gas used for transactions on chain B")
 	c.Flags().String(flagChainAGasPrice, "1stake", "gas price used for transactions on chain A")
 	c.Flags().String(flagChainBGasPrice, "1stake", "gas price used for transactions on chain B")
-	c.Flags().Float64(flagChainAGasMultiplier, 1.1, "gas multiplier used for transactions on chain A")
-	c.Flags().Float64(flagChainBGasMultiplier, 1.1, "gas multiplier used for transactions on chain B")
+	c.Flags().String(flagChainAGasMultiplier, "1.1", "gas multiplier used for transactions on chain A")
+	c.Flags().String(flagChainBGasMultiplier, "1.1", "gas multiplier used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxMsgNum, 30, "max message number used for transactions on chain A")
 	c.Flags().Uint64(flagChainBMaxMsgNum, 30, "max message number used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxTxSize, 2097152, "max transaction size on chain A")
@@ -152,7 +154,11 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
-		// TODO if exist, ask if the user want to reuse or overwrite
+		// TODO FIXME - if exist, ask if the user want to reuse or overwrite
+		err := hermesCreateConfig(cmd, args)
+		if err != nil {
+			return err
+		}
 	}
 
 	h, err := hermes.New()
@@ -291,7 +297,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainADefaultGas, _                = cmd.Flags().GetUint64(flagChainADefaultGas)
 		chainAMaxGas, _                    = cmd.Flags().GetUint64(flagChainAMaxGas)
 		chainAGasPrice, _                  = cmd.Flags().GetString(flagChainAGasPrice)
-		chainAGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainAGasMultiplier)
+		chainAGasMultiplier, _             = cmd.Flags().GetString(flagChainAGasMultiplier)
 		chainAMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainAMaxMsgNum)
 		chainAMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainAMaxTxSize)
 		chainAClockDrift, _                = cmd.Flags().GetString(flagChainAClockDrift)
@@ -301,10 +307,17 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainATrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainATrustThresholdDenominator)
 	)
 
+	chainAGasMulti := new(big.Float)
+	chainAGasMulti, ok := chainAGasMulti.SetString(chainAGasMultiplier)
+	if !ok {
+		return fmt.Errorf("invalid chain A gas multiplier: %s", chainAGasMultiplier)
+	}
+
 	optChainA := []hermes.ChainOption{
 		hermes.WithChainTrustThreshold(chainATrustThresholdNumerator, chainATrustThresholdDenominator),
+		hermes.WithChainGasMultiplier(chainAGasMulti),
 	}
-	if chainAEventSourceMode != "" {
+	if chainAEventSourceUrl != "" {
 		optChainA = append(optChainA, hermes.WithChainEventSource(
 			chainAEventSourceMode,
 			chainAEventSourceUrl,
@@ -335,9 +348,6 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		optChainA = append(optChainA, hermes.WithChainGasPrice(gasPrice))
-	}
-	if chainAGasMultiplier > 0 {
-		optChainA = append(optChainA, hermes.WithChainGasMultiplier(chainAGasMultiplier))
 	}
 	if chainAMaxMsgNum > 0 {
 		optChainA = append(optChainA, hermes.WithChainMaxMsgNum(chainAMaxMsgNum))
@@ -376,7 +386,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainBDefaultGas, _                = cmd.Flags().GetUint64(flagChainBDefaultGas)
 		chainBMaxGas, _                    = cmd.Flags().GetUint64(flagChainBMaxGas)
 		chainBGasPrice, _                  = cmd.Flags().GetString(flagChainBGasPrice)
-		chainBGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainBGasMultiplier)
+		chainBGasMultiplier, _             = cmd.Flags().GetString(flagChainBGasMultiplier)
 		chainBMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainBMaxMsgNum)
 		chainBMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainBMaxTxSize)
 		chainBClockDrift, _                = cmd.Flags().GetString(flagChainBClockDrift)
@@ -386,10 +396,17 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainBTrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainBTrustThresholdDenominator)
 	)
 
+	chainBGasMulti := new(big.Float)
+	chainBGasMulti, ok = chainBGasMulti.SetString(chainBGasMultiplier)
+	if !ok {
+		return fmt.Errorf("invalid chain B gas multiplier: %s", chainBGasMultiplier)
+	}
+
 	optChainB := []hermes.ChainOption{
 		hermes.WithChainTrustThreshold(chainBTrustThresholdNumerator, chainBTrustThresholdDenominator),
+		hermes.WithChainGasMultiplier(chainBGasMulti),
 	}
-	if chainBEventSourceMode != "" {
+	if chainBEventSourceUrl != "" {
 		optChainB = append(optChainB, hermes.WithChainEventSource(
 			chainBEventSourceMode,
 			chainBEventSourceUrl,
@@ -420,9 +437,6 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 			return err
 		}
 		optChainB = append(optChainB, hermes.WithChainGasPrice(gasPrice))
-	}
-	if chainBGasMultiplier > 0 {
-		optChainB = append(optChainB, hermes.WithChainGasMultiplier(chainBGasMultiplier))
 	}
 	if chainBMaxMsgNum > 0 {
 		optChainB = append(optChainB, hermes.WithChainMaxMsgNum(chainBMaxMsgNum))
