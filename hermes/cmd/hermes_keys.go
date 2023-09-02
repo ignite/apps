@@ -13,9 +13,11 @@ func NewHermesKeys() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "keys",
 		Short: "manage the Hermes keys",
-		Args:  cobra.ExactArgs(2),
-		RunE:  hermesStartHandler,
 	}
+	c.AddCommand(
+		NewHermesKeyAddMnemonic(),
+		NewHermesKeyAddFile(),
+	)
 	return c
 }
 

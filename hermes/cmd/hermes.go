@@ -10,7 +10,7 @@ func NewRelayer() *cobra.Command {
 	c := &cobra.Command{
 		Use:           "hermes [command]",
 		Aliases:       []string{"h"},
-		Short:         "",
+		Short:         "Hermes relayer wrapper",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
