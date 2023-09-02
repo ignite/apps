@@ -24,7 +24,6 @@ func NewHermesKeyAddMnemonic() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "add [chain-id] [mnemonic]",
 		Short: "add a new key from mnemonic to Hermes relayer",
-		Long:  ``,
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			h, err := hermes.New()

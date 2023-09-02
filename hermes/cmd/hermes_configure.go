@@ -72,8 +72,7 @@ const (
 func NewHermesConfigure() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "configure [chain-a-id] [chain-a-rpc] [chain-a-grpc] [chain-b-id] [chain-b-rpc] [chain-b-grpc]",
-		Short: "",
-		Long:  ``,
+		Short: "Configure the Hermes realyer creating the config file, client, channels and connection",
 		Args:  cobra.ExactArgs(6),
 		RunE:  hermesConfigureHandler,
 	}

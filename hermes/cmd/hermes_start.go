@@ -14,8 +14,7 @@ import (
 func NewHermesStart() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "start [chain-a-id] [chain-a-rpc]",
-		Short: "",
-		Long:  ``,
+		Short: "Start the Hermes realyer",
 		Args:  cobra.ExactArgs(2),
 		RunE:  hermesStartHandler,
 	}

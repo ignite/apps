@@ -11,7 +11,6 @@ func NewRelayer() *cobra.Command {
 		Use:           "hermes [command]",
 		Aliases:       []string{"h"},
 		Short:         "",
-		Long:          ``,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
