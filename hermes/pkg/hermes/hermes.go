@@ -61,6 +61,9 @@ const (
 
 	// CommandKeysAdd is the Hermes keys add command.
 	cmdKeysAdd subCmd = "add"
+
+	// resultSuccess is the api result status success.
+	resultSuccess = "success"
 )
 
 type (
@@ -322,4 +325,15 @@ func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config strin
 	cmd = append(cmd, args...)
 
 	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
+}
+
+func UnmarshalResult(data []byte, v any) error {
+	var r Result
+	if err := json.Unmarshal(data, &r); err != nil {
+		return err
+	}
+	if r.Status != resultSuccess {
+		return fmt.Errorf("unmarshal result (%T) error: %v", v, r)
+	}
+	return json.Unmarshal(r.Result, v)
 }

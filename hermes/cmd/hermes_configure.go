@@ -2,8 +2,6 @@ package cmd
 
 import (
 	"bytes"
-	"encoding/json"
-	"fmt"
 
 	"relayer/pkg/hermes"
 
@@ -12,6 +10,7 @@ import (
 )
 
 const (
+	flagChainAPortID                    = "chain-a-port-id"
 	flagChainAEventSourceMode           = "chain-a-event-source-mode"
 	flagChainAEventSourceUrl            = "chain-a-event-source-url"
 	flagChainAEventSourceBatchDelay     = "chain-a-event-source-batch-delay"
@@ -31,6 +30,7 @@ const (
 	flagChainATrustThresholdNumerator   = "chain-a-trust-threshold-numerator"
 	flagChainATrustThresholdDenominator = "chain-a-trust-threshold-denominator"
 
+	flagChainBPortID                    = "chain-b-port-id"
 	flagChainBEventSourceMode           = "chain-b-event-source-mode"
 	flagChainBEventSourceUrl            = "chain-b-event-source-url"
 	flagChainBEventSourceBatchDelay     = "chain-b-event-source-batch-delay"
@@ -74,6 +74,8 @@ func NewHermesConfigure() *cobra.Command {
 		RunE:  hermesConfigureHandler,
 	}
 
+	c.Flags().String(flagChainAPortID, "transfer", "Port ID of the chain A")
+	c.Flags().String(flagChainBPortID, "transfer", "Port ID of the chain B")
 	c.Flags().String(flagChainAEventSourceUrl, "", "WS event source url of the chain A")
 	c.Flags().String(flagChainBEventSourceUrl, "", "WS event source url of the chain B")
 	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A")
@@ -165,6 +167,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainARPCAddr  = args[1]
 		chainAGRPCAddr = args[2]
 
+		chainAPortID, _                    = cmd.Flags().GetString(flagChainAPortID)
 		chainAEventSourceMode, _           = cmd.Flags().GetString(flagChainAEventSourceMode)
 		chainAEventSourceUrl, _            = cmd.Flags().GetString(flagChainAEventSourceUrl)
 		chainAEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainAEventSourceBatchDelay)
@@ -250,6 +253,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBRPCAddr  = args[4]
 		chainBGRPCAddr = args[5]
 
+		chainBPortID, _                    = cmd.Flags().GetString(flagChainBPortID)
 		chainBEventSourceMode, _           = cmd.Flags().GetString(flagChainBEventSourceMode)
 		chainBEventSourceUrl, _            = cmd.Flags().GetString(flagChainBEventSourceUrl)
 		chainBEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainBEventSourceBatchDelay)
@@ -340,101 +344,81 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	defer h.Cleanup()
 
 	// create client A
-	buf := bytes.Buffer{}
-	result := hermes.Result{}
-	clientAResult := hermes.ClientResult{}
+	var (
+		bufClientAResult = bytes.Buffer{}
+		clientAResult    = hermes.ClientResult{}
+	)
 	err = h.CreateClient(
 		cmd.Context(),
 		chainAID,
 		chainBID,
 		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&buf),
+		hermes.WithStdOut(&bufClientAResult),
 	)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		return err
-	}
-	if result.Status != "success" {
-		return fmt.Errorf("create client A error: %v", result)
-	}
-	if err := json.Unmarshal(result.Result, &clientAResult); err != nil {
+	if err := hermes.UnmarshalResult(bufClientAResult.Bytes(), &clientAResult); err != nil {
 		return err
 	}
 
 	// create client B
-	buf = bytes.Buffer{}
-	result = hermes.Result{}
-	clientBResult := hermes.ClientResult{}
+	var (
+		bufClientBResult = bytes.Buffer{}
+		clientBResult    = hermes.ClientResult{}
+	)
 	err = h.CreateClient(
 		cmd.Context(),
 		chainBID,
 		chainAID,
 		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&buf),
+		hermes.WithStdOut(&bufClientBResult),
 	)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		return err
-	}
-	if result.Status != "success" {
-		return fmt.Errorf("create client B error: %v", result)
-	}
-	if err := json.Unmarshal(result.Result, &clientBResult); err != nil {
+	if err := hermes.UnmarshalResult(bufClientBResult.Bytes(), &clientBResult); err != nil {
 		return err
 	}
 
 	// create connection
-	buf = bytes.Buffer{}
-	result = hermes.Result{}
-	connection := hermes.ConnectionResult{}
+	var (
+		bufConnection = bytes.Buffer{}
+		connection    = hermes.ConnectionResult{}
+	)
 	err = h.CreateConnection(
 		cmd.Context(),
 		chainAID,
 		clientAResult.CreateClient.ClientId,
 		clientBResult.CreateClient.ClientId,
 		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&buf),
+		hermes.WithStdOut(&bufConnection),
 	)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		return err
-	}
-	if result.Status != "success" {
-		return fmt.Errorf("create connection error: %v", result)
-	}
-	if err := json.Unmarshal(result.Result, &connection); err != nil {
+	if err := hermes.UnmarshalResult(bufConnection.Bytes(), &connection); err != nil {
 		return err
 	}
 
 	// create and query channel
-	buf = bytes.Buffer{}
-	result = hermes.Result{}
-	channel := hermes.ConnectionResult{}
+	var (
+		bufChannel = bytes.Buffer{}
+		channel    = hermes.ConnectionResult{}
+	)
 	err = h.CreateChannel(
 		cmd.Context(),
 		chainAID,
 		connection.ASide.ConnectionId,
-		"transfer",
-		"transfer",
+		chainAPortID,
+		chainBPortID,
 		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&buf),
+		hermes.WithStdOut(&bufChannel),
 	)
 	if err != nil {
 		return err
 	}
-	if err := json.Unmarshal(buf.Bytes(), &result); err != nil {
-		return err
-	}
-	if result.Status != "success" {
-		return fmt.Errorf("create channel error: %v", result)
-	}
-	if err := json.Unmarshal(result.Result, &channel); err != nil {
+	if err := hermes.UnmarshalResult(bufChannel.Bytes(), &channel); err != nil {
 		return err
 	}
 

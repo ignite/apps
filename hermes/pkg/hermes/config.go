@@ -13,6 +13,10 @@ import (
 	"github.com/pelletier/go-toml/v2"
 )
 
+const (
+	ConfigNameSeparator = "_"
+)
+
 type (
 	Config struct {
 		Chains    []Chain   `toml:"chains" json:"chains"`
@@ -142,7 +146,7 @@ func (c *Config) ConfigName() (string, error) {
 	for _, chain := range c.Chains {
 		names = append(names, chain.Id)
 	}
-	return strings.Join(names, "_"), nil
+	return strings.Join(names, ConfigNameSeparator), nil
 }
 
 func (c *Config) ConfigPath() (string, error) {

@@ -15,7 +15,7 @@ func NewHermesStart() *cobra.Command {
 		Use:   "start [chain-a-id] [chain-a-rpc]",
 		Short: "",
 		Long:  ``,
-		Args:  cobra.ExactArgs(6),
+		Args:  cobra.ExactArgs(2),
 		RunE:  hermesStartHandler,
 	}
 
@@ -23,7 +23,7 @@ func NewHermesStart() *cobra.Command {
 }
 
 func hermesStartHandler(cmd *cobra.Command, args []string) error {
-	cfgName := strings.Join(args, "_")
+	cfgName := strings.Join(args, hermes.ConfigNameSeparator)
 	cfg, err := hermes.LoadConfig(cfgName)
 	if err != nil {
 		return err
