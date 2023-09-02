@@ -16,7 +16,7 @@ import (
 const (
 	flagChainAPortID                    = "chain-a-port-id"
 	flagChainAEventSourceMode           = "chain-a-event-source-mode"
-	flagChainAEventSourceUrl            = "chain-a-event-source-url"
+	flagChainAEventSourceURL            = "chain-a-event-source-url"
 	flagChainAEventSourceBatchDelay     = "chain-a-event-source-batch-delay"
 	flagChainARPCTimeout                = "chain-a-rpc-timeout"
 	flagChainAAccountPrefix             = "chain-a-account-prefix"
@@ -36,7 +36,7 @@ const (
 
 	flagChainBPortID                    = "chain-b-port-id"
 	flagChainBEventSourceMode           = "chain-b-event-source-mode"
-	flagChainBEventSourceUrl            = "chain-b-event-source-url"
+	flagChainBEventSourceURL            = "chain-b-event-source-url"
 	flagChainBEventSourceBatchDelay     = "chain-b-event-source-batch-delay"
 	flagChainBRPCTimeout                = "chain-b-rpc-timeout"
 	flagChainBAccountPrefix             = "chain-b-account-prefix"
@@ -79,8 +79,8 @@ func NewHermesConfigure() *cobra.Command {
 
 	c.Flags().String(flagChainAPortID, "transfer", "Port ID of the chain A")
 	c.Flags().String(flagChainBPortID, "transfer", "Port ID of the chain B")
-	c.Flags().String(flagChainAEventSourceUrl, "", "WS event source url of the chain A")
-	c.Flags().String(flagChainBEventSourceUrl, "", "WS event source url of the chain B")
+	c.Flags().String(flagChainAEventSourceURL, "", "WS event source url of the chain A")
+	c.Flags().String(flagChainBEventSourceURL, "", "WS event source url of the chain B")
 	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A (event source url should be set to use this flag)")
 	c.Flags().String(flagChainBEventSourceMode, "push", "WS event source mode of the chain B (event source url should be set to use this flag)")
 	c.Flags().String(flagChainAEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain A (event source url should be set to use this flag)")
@@ -212,8 +212,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	err = h.CreateConnection(
 		cmd.Context(),
 		chainAID,
-		clientAResult.CreateClient.ClientId,
-		clientBResult.CreateClient.ClientId,
+		clientAResult.CreateClient.ClientID,
+		clientBResult.CreateClient.ClientID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufConnection),
 	)
@@ -232,7 +232,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	err = h.CreateChannel(
 		cmd.Context(),
 		chainAID,
-		connection.ASide.ConnectionId,
+		connection.ASide.ConnectionID,
 		chainAPortID,
 		chainBPortID,
 		hermes.WithConfigFile(cfgPath),
@@ -287,7 +287,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainAGRPCAddr = args[2]
 
 		chainAEventSourceMode, _           = cmd.Flags().GetString(flagChainAEventSourceMode)
-		chainAEventSourceUrl, _            = cmd.Flags().GetString(flagChainAEventSourceUrl)
+		chainAEventSourceURL, _            = cmd.Flags().GetString(flagChainAEventSourceURL)
 		chainAEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainAEventSourceBatchDelay)
 		chainARPCTimeout, _                = cmd.Flags().GetString(flagChainARPCTimeout)
 		chainAAccountPrefix, _             = cmd.Flags().GetString(flagChainAAccountPrefix)
@@ -316,10 +316,10 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		hermes.WithChainTrustThreshold(chainATrustThresholdNumerator, chainATrustThresholdDenominator),
 		hermes.WithChainGasMultiplier(chainAGasMulti),
 	}
-	if chainAEventSourceUrl != "" {
+	if chainAEventSourceURL != "" {
 		optChainA = append(optChainA, hermes.WithChainEventSource(
 			chainAEventSourceMode,
-			chainAEventSourceUrl,
+			chainAEventSourceURL,
 			chainAEventSourceBatchDelay,
 		))
 	}
@@ -376,7 +376,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		chainBGRPCAddr = args[5]
 
 		chainBEventSourceMode, _           = cmd.Flags().GetString(flagChainBEventSourceMode)
-		chainBEventSourceUrl, _            = cmd.Flags().GetString(flagChainBEventSourceUrl)
+		chainBEventSourceURL, _            = cmd.Flags().GetString(flagChainBEventSourceURL)
 		chainBEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainBEventSourceBatchDelay)
 		chainBRPCTimeout, _                = cmd.Flags().GetString(flagChainBRPCTimeout)
 		chainBAccountPrefix, _             = cmd.Flags().GetString(flagChainBAccountPrefix)
@@ -405,10 +405,10 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		hermes.WithChainTrustThreshold(chainBTrustThresholdNumerator, chainBTrustThresholdDenominator),
 		hermes.WithChainGasMultiplier(chainBGasMulti),
 	}
-	if chainBEventSourceUrl != "" {
+	if chainBEventSourceURL != "" {
 		optChainB = append(optChainB, hermes.WithChainEventSource(
 			chainBEventSourceMode,
-			chainBEventSourceUrl,
+			chainBEventSourceURL,
 			chainBEventSourceBatchDelay,
 		))
 	}

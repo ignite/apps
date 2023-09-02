@@ -107,7 +107,7 @@ type (
 
 	// CreateClient represents the result of the create client command.
 	CreateClient struct {
-		ClientId        string          `json:"client_id"`
+		ClientID        string          `json:"client_id"`
 		ClientType      string          `json:"client_type"`
 		ConsensusHeight ConsensusHeight `json:"consensus_height"`
 	}
@@ -129,10 +129,10 @@ type (
 
 	// Side represents the connection side.
 	Side struct {
-		ChannelId    string      `json:"channel_id"`
-		ClientId     string      `json:"client_id"`
-		ConnectionId string      `json:"connection_id"`
-		PortId       string      `json:"port_id"`
+		ChannelID    string      `json:"channel_id"`
+		ClientID     string      `json:"client_id"`
+		ConnectionID string      `json:"connection_id"`
+		PortID       string      `json:"port_id"`
 		Version      interface{} `json:"version"`
 	}
 
@@ -144,8 +144,8 @@ type (
 
 	// ChannelResult represents the result of the create channel command.
 	ChannelResult struct {
-		ChainIdA string `json:"chain_id_a"`
-		ChainIdB string `json:"chain_id_b"`
+		ChainIDA string `json:"chain_id_a"`
+		ChainIDB string `json:"chain_id_b"`
 		ChannelA string `json:"channel_a"`
 		ChannelB string `json:"channel_b"`
 		PortA    string `json:"port_a"`

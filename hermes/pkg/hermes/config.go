@@ -15,7 +15,7 @@ import (
 )
 
 const (
-	// ConfigNameSeparator config file chain name separator
+	// ConfigNameSeparator config file chain name separator.
 	ConfigNameSeparator = "_"
 )
 
@@ -30,11 +30,11 @@ type (
 
 	// Chain represents the chain into the Hermes config struct.
 	Chain struct {
-		Id             string         `toml:"id" json:"id"`
-		RpcAddr        string         `toml:"rpc_addr" json:"rpc_addr"`
-		GrpcAddr       string         `toml:"grpc_addr" json:"grpc_addr"`
+		ID             string         `toml:"id" json:"id"`
+		RPCAddr        string         `toml:"rpc_addr" json:"rpc_addr"`
+		GRPCAddr       string         `toml:"grpc_addr" json:"grpc_addr"`
 		EventSource    EventSource    `toml:"event_source,inline" json:"event_source"`
-		RpcTimeout     string         `toml:"rpc_timeout" json:"rpc_timeout"`
+		RPCTimeout     string         `toml:"rpc_timeout" json:"rpc_timeout"`
 		AccountPrefix  string         `toml:"account_prefix" json:"account_prefix"`
 		KeyName        string         `toml:"key_name" json:"key_name"`
 		StorePrefix    string         `toml:"store_prefix" json:"store_prefix"`
@@ -55,7 +55,7 @@ type (
 	EventSource struct {
 		BatchDelay string `toml:"batch_delay" json:"batch_delay"`
 		Mode       string `toml:"mode" json:"mode"`
-		Url        string `toml:"url" json:"url"`
+		URL        string `toml:"url" json:"url"`
 	}
 
 	// GasPrice represents the chain gas price into the Hermes config struct.
@@ -162,7 +162,7 @@ func (c *Config) ConfigName() (string, error) {
 	}
 	names := make([]string, 0)
 	for _, chain := range c.Chains {
-		names = append(names, chain.Id)
+		names = append(names, chain.ID)
 	}
 	return strings.Join(names, ConfigNameSeparator), nil
 }
@@ -338,7 +338,7 @@ func WithChainEventSource(mode, url, batchDelay string) ChainOption {
 		c.EventSource = EventSource{
 			BatchDelay: batchDelay,
 			Mode:       mode,
-			Url:        url,
+			URL:        url,
 		}
 	}
 }
@@ -346,7 +346,7 @@ func WithChainEventSource(mode, url, batchDelay string) ChainOption {
 // WithChainRPCTimeout set the chain rpc timeout into the Hermes config.
 func WithChainRPCTimeout(timeout string) ChainOption {
 	return func(c *Chain) {
-		c.RpcTimeout = timeout
+		c.RPCTimeout = timeout
 	}
 }
 
@@ -457,21 +457,21 @@ func WithChainAddressPrefix(derivation string) ChainOption {
 
 // AddChain adds a new chain into the Hermes config.
 func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOption) error {
-	rpcUrl, err := url.Parse(rpcAddr)
+	rpcURL, err := url.Parse(rpcAddr)
 	if err != nil {
 		return err
 	}
 
 	chain := Chain{
-		Id:       chainID,
-		RpcAddr:  rpcAddr,
-		GrpcAddr: grpcAddr,
+		ID:       chainID,
+		RPCAddr:  rpcAddr,
+		GRPCAddr: grpcAddr,
 		EventSource: EventSource{
 			BatchDelay: "500ms",
 			Mode:       "push",
-			Url:        fmt.Sprintf("ws://%s", rpcUrl.Host),
+			URL:        fmt.Sprintf("ws://%s", rpcURL.Host),
 		},
-		RpcTimeout:    "15s",
+		RPCTimeout:    "15s",
 		AccountPrefix: "cosmos",
 		KeyName:       "wallet",
 		StorePrefix:   "ibc",
