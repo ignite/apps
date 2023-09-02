@@ -119,23 +119,23 @@ func (c *Config) Remove() error {
 	return os.RemoveAll(configPath)
 }
 
-func (c *Config) Save() (string, error) {
+func (c *Config) Save() error {
 	configPath, err := c.ConfigPath()
 	if err != nil {
-		return "", err
+		return err
 	}
 
 	if err := os.MkdirAll(filepath.Dir(configPath), 0o755); err != nil {
-		return "", err
+		return err
 	}
 
 	file, err := os.OpenFile(configPath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0o644)
 	if err != nil {
-		return "", err
+		return err
 	}
 	defer file.Close()
 
-	return configPath, toml.NewEncoder(file).Encode(c)
+	return toml.NewEncoder(file).Encode(c)
 }
 
 func (c *Config) ConfigName() (string, error) {
@@ -150,11 +150,15 @@ func (c *Config) ConfigName() (string, error) {
 }
 
 func (c *Config) ConfigPath() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
+	cfgName, err := c.ConfigName()
 	if err != nil {
 		return "", err
 	}
-	cfgName, err := c.ConfigName()
+	return ConfigPath(cfgName)
+}
+
+func ConfigPath(cfgName string) (string, error) {
+	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
 	}

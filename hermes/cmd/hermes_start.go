@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
 	"strings"
 
@@ -24,14 +25,13 @@ func NewHermesStart() *cobra.Command {
 
 func hermesStartHandler(cmd *cobra.Command, args []string) error {
 	cfgName := strings.Join(args, hermes.ConfigNameSeparator)
-	cfg, err := hermes.LoadConfig(cfgName)
+	cfgPath, err := hermes.ConfigPath(cfgName)
 	if err != nil {
 		return err
 	}
 
-	cfgPath, err := cfg.ConfigPath()
-	if err != nil {
-		return err
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		return fmt.Errorf("config file (%s) not exist, try to configure you relayer first", cfgPath)
 	}
 
 	h, err := hermes.New()

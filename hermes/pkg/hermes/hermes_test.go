@@ -25,7 +25,10 @@ func TestHermes(t *testing.T) {
 	err = c.AddChain("venus-1", "http://localhost:26659", "http://localhost:9092")
 	require.NoError(t, err)
 
-	path, err := c.Save()
+	err = c.Save()
+	require.NoError(t, err)
+
+	cfgPath, err := c.ConfigPath()
 	require.NoError(t, err)
 
 	// Add hermes keys
@@ -37,7 +40,7 @@ func TestHermes(t *testing.T) {
 		ctx,
 		"mars-1",
 		"letter column benefit acoustic evidence false trim cave jump pluck awesome lion",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -50,7 +53,7 @@ func TestHermes(t *testing.T) {
 		ctx,
 		"venus-1",
 		"jeans payment lock client result enemy bullet rug crush deny month salad",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -64,7 +67,7 @@ func TestHermes(t *testing.T) {
 		ctx,
 		"mars-1",
 		"venus-1",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -80,7 +83,7 @@ func TestHermes(t *testing.T) {
 		ctx,
 		"venus-1",
 		"mars-1",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -98,7 +101,7 @@ func TestHermes(t *testing.T) {
 		"mars-1",
 		"07-tendermint-0",
 		"07-tendermint-0",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -117,7 +120,7 @@ func TestHermes(t *testing.T) {
 		"connection-0",
 		"transfer",
 		"transfer",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -133,7 +136,7 @@ func TestHermes(t *testing.T) {
 		ctx,
 		true,
 		"mars-1",
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(&buf),
 	)
 	require.NoError(t, err)
@@ -146,7 +149,7 @@ func TestHermes(t *testing.T) {
 	// start hermes
 	err = h.Start(
 		ctx,
-		WithConfigFile(path),
+		WithConfigFile(cfgPath),
 		WithStdOut(os.Stdout),
 	)
 }

@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"bytes"
+	"os"
+	"strings"
 
 	"relayer/pkg/hermes"
 
@@ -130,211 +132,27 @@ func NewHermesConfigure() *cobra.Command {
 }
 
 func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
-	// Create the default hermes config
 	var (
-		telemetryEnabled, _          = cmd.Flags().GetBool(flagTelemetryEnabled)
-		telemetryHost, _             = cmd.Flags().GetString(flagTelemetryHost)
-		telemetryPort, _             = cmd.Flags().GetUint64(flagTelemetryPort)
-		modeChannelsEnabled, _       = cmd.Flags().GetBool(flagModeChannelsEnabled)
-		modeClientsEnabled, _        = cmd.Flags().GetBool(flagModeClientsEnabled)
-		modeClientsMisbehaviour, _   = cmd.Flags().GetBool(flagModeClientsMisbehaviour)
-		modeClientsRefresh, _        = cmd.Flags().GetBool(flagModeClientsRefresh)
-		modeConnectionsEnabled, _    = cmd.Flags().GetBool(flagModeConnectionsEnabled)
-		modePacketsEnabled, _        = cmd.Flags().GetBool(flagModePacketsEnabled)
-		modePacketsClearInterval, _  = cmd.Flags().GetUint64(flagModePacketsClearInterval)
-		modePacketsClearOnStart, _   = cmd.Flags().GetBool(flagModePacketsClearOnStart)
-		modePacketsTxConfirmation, _ = cmd.Flags().GetBool(flagModePacketsTxConfirmation)
+		chainAID = args[0]
+		chainBID = args[3]
+
+		chainAPortID, _ = cmd.Flags().GetString(flagChainAPortID)
+		chainBPortID, _ = cmd.Flags().GetString(flagChainBPortID)
 	)
 
-	c := hermes.DefaultConfig(
-		hermes.WithTelemetryEnabled(telemetryEnabled),
-		hermes.WithTelemetryHost(telemetryHost),
-		hermes.WithTelemetryPort(telemetryPort),
-		hermes.WithModeChannelsEnabled(modeChannelsEnabled),
-		hermes.WithModeClientsEnabled(modeClientsEnabled),
-		hermes.WithModeClientsMisbehaviour(modeClientsMisbehaviour),
-		hermes.WithModeClientsRefresh(modeClientsRefresh),
-		hermes.WithModeConnectionsEnabled(modeConnectionsEnabled),
-		hermes.WithModePacketsEnabled(modePacketsEnabled),
-		hermes.WithModePacketsClearInterval(modePacketsClearInterval),
-		hermes.WithModePacketsClearOnStart(modePacketsClearOnStart),
-		hermes.WithModePacketsTxConfirmation(modePacketsTxConfirmation),
-	)
+	cfgName := strings.Join([]string{args[0], args[3]}, hermes.ConfigNameSeparator)
+	cfgPath, err := hermes.ConfigPath(cfgName)
+	if err != nil {
+		return err
+	}
 
-	// Add chain A into the config
-	var (
-		chainAID       = args[0]
-		chainARPCAddr  = args[1]
-		chainAGRPCAddr = args[2]
-
-		chainAPortID, _                    = cmd.Flags().GetString(flagChainAPortID)
-		chainAEventSourceMode, _           = cmd.Flags().GetString(flagChainAEventSourceMode)
-		chainAEventSourceUrl, _            = cmd.Flags().GetString(flagChainAEventSourceUrl)
-		chainAEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainAEventSourceBatchDelay)
-		chainARPCTimeout, _                = cmd.Flags().GetString(flagChainARPCTimeout)
-		chainAAccountPrefix, _             = cmd.Flags().GetString(flagChainAAccountPrefix)
-		chainAKeyName, _                   = cmd.Flags().GetString(flagChainAKeyName)
-		chainAStorePrefix, _               = cmd.Flags().GetString(flagChainAStorePrefix)
-		chainADefaultGas, _                = cmd.Flags().GetUint64(flagChainADefaultGas)
-		chainAMaxGas, _                    = cmd.Flags().GetUint64(flagChainAMaxGas)
-		chainAGasPrice, _                  = cmd.Flags().GetString(flagChainAGasPrice)
-		chainAGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainAGasMultiplier)
-		chainAMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainAMaxMsgNum)
-		chainAMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainAMaxTxSize)
-		chainAClockDrift, _                = cmd.Flags().GetString(flagChainAClockDrift)
-		chainAMaxBlockTime, _              = cmd.Flags().GetString(flagChainAMaxBlockTime)
-		chainATrustingPeriod, _            = cmd.Flags().GetString(flagChainATrustingPeriod)
-		chainATrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainATrustThresholdNumerator)
-		chainATrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainATrustThresholdDenominator)
-	)
-
-	optChainA := []hermes.ChainOption{
-		hermes.WithChainTrustThreshold(chainATrustThresholdNumerator, chainATrustThresholdDenominator),
-	}
-	if chainAEventSourceMode != "" {
-		optChainA = append(optChainA, hermes.WithChainEventSource(
-			chainAEventSourceMode,
-			chainAEventSourceUrl,
-			chainAEventSourceBatchDelay,
-		))
-	}
-	if chainARPCTimeout != "" {
-		optChainA = append(optChainA, hermes.WithChainRPCTimeout(chainARPCTimeout))
-	}
-	if chainAAccountPrefix != "" {
-		optChainA = append(optChainA, hermes.WithChainAddressPrefix(chainAAccountPrefix))
-	}
-	if chainAKeyName != "" {
-		optChainA = append(optChainA, hermes.WithChainKeyName(chainAKeyName))
-	}
-	if chainAStorePrefix != "" {
-		optChainA = append(optChainA, hermes.WithChainStorePrefix(chainAStorePrefix))
-	}
-	if chainADefaultGas > 0 {
-		optChainA = append(optChainA, hermes.WithChainDefaultGas(chainADefaultGas))
-	}
-	if chainAMaxGas > 0 {
-		optChainA = append(optChainA, hermes.WithChainMaxGas(chainAMaxGas))
-	}
-	if chainAGasPrice != "" {
-		gasPrice, err := sdk.ParseCoinNormalized(chainAGasPrice)
+	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+		err := hermesCreateConfig(cmd, args)
 		if err != nil {
 			return err
 		}
-		optChainA = append(optChainA, hermes.WithChainGasPrice(gasPrice))
-	}
-	if chainAGasMultiplier > 0 {
-		optChainA = append(optChainA, hermes.WithChainGasMultiplier(chainAGasMultiplier))
-	}
-	if chainAMaxMsgNum > 0 {
-		optChainA = append(optChainA, hermes.WithChainMaxMsgNum(chainAMaxMsgNum))
-	}
-	if chainAMaxTxSize > 0 {
-		optChainA = append(optChainA, hermes.WithChainMaxTxSize(chainAMaxTxSize))
-	}
-	if chainAClockDrift != "" {
-		optChainA = append(optChainA, hermes.WithChainClockDrift(chainAClockDrift))
-	}
-	if chainAMaxBlockTime != "" {
-		optChainA = append(optChainA, hermes.WithChainMaxBlockTime(chainAMaxBlockTime))
-	}
-	if chainATrustingPeriod != "" {
-		optChainA = append(optChainA, hermes.WithChainTrustingPeriod(chainATrustingPeriod))
-	}
-
-	err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
-	if err != nil {
-		return err
-	}
-
-	// Add chain B into the config
-	var (
-		chainBID       = args[3]
-		chainBRPCAddr  = args[4]
-		chainBGRPCAddr = args[5]
-
-		chainBPortID, _                    = cmd.Flags().GetString(flagChainBPortID)
-		chainBEventSourceMode, _           = cmd.Flags().GetString(flagChainBEventSourceMode)
-		chainBEventSourceUrl, _            = cmd.Flags().GetString(flagChainBEventSourceUrl)
-		chainBEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainBEventSourceBatchDelay)
-		chainBRPCTimeout, _                = cmd.Flags().GetString(flagChainBRPCTimeout)
-		chainBAccountPrefix, _             = cmd.Flags().GetString(flagChainBAccountPrefix)
-		chainBKeyName, _                   = cmd.Flags().GetString(flagChainBKeyName)
-		chainBStorePrefix, _               = cmd.Flags().GetString(flagChainBStorePrefix)
-		chainBDefaultGas, _                = cmd.Flags().GetUint64(flagChainBDefaultGas)
-		chainBMaxGas, _                    = cmd.Flags().GetUint64(flagChainBMaxGas)
-		chainBGasPrice, _                  = cmd.Flags().GetString(flagChainBGasPrice)
-		chainBGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainBGasMultiplier)
-		chainBMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainBMaxMsgNum)
-		chainBMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainBMaxTxSize)
-		chainBClockDrift, _                = cmd.Flags().GetString(flagChainBClockDrift)
-		chainBMaxBlockTime, _              = cmd.Flags().GetString(flagChainBMaxBlockTime)
-		chainBTrustingPeriod, _            = cmd.Flags().GetString(flagChainBTrustingPeriod)
-		chainBTrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainBTrustThresholdNumerator)
-		chainBTrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainBTrustThresholdDenominator)
-	)
-
-	optChainB := []hermes.ChainOption{
-		hermes.WithChainTrustThreshold(chainBTrustThresholdNumerator, chainBTrustThresholdDenominator),
-	}
-	if chainBEventSourceMode != "" {
-		optChainB = append(optChainB, hermes.WithChainEventSource(
-			chainBEventSourceMode,
-			chainBEventSourceUrl,
-			chainBEventSourceBatchDelay,
-		))
-	}
-	if chainBRPCTimeout != "" {
-		optChainB = append(optChainB, hermes.WithChainRPCTimeout(chainBRPCTimeout))
-	}
-	if chainBAccountPrefix != "" {
-		optChainB = append(optChainB, hermes.WithChainAddressPrefix(chainBAccountPrefix))
-	}
-	if chainBKeyName != "" {
-		optChainB = append(optChainB, hermes.WithChainKeyName(chainBKeyName))
-	}
-	if chainBStorePrefix != "" {
-		optChainB = append(optChainB, hermes.WithChainStorePrefix(chainBStorePrefix))
-	}
-	if chainBDefaultGas > 0 {
-		optChainB = append(optChainB, hermes.WithChainDefaultGas(chainBDefaultGas))
-	}
-	if chainBMaxGas > 0 {
-		optChainB = append(optChainB, hermes.WithChainMaxGas(chainBMaxGas))
-	}
-	if chainBGasPrice != "" {
-		gasPrice, err := sdk.ParseCoinNormalized(chainBGasPrice)
-		if err != nil {
-			return err
-		}
-		optChainB = append(optChainB, hermes.WithChainGasPrice(gasPrice))
-	}
-	if chainBGasMultiplier > 0 {
-		optChainB = append(optChainB, hermes.WithChainGasMultiplier(chainBGasMultiplier))
-	}
-	if chainBMaxMsgNum > 0 {
-		optChainB = append(optChainB, hermes.WithChainMaxMsgNum(chainBMaxMsgNum))
-	}
-	if chainBMaxTxSize > 0 {
-		optChainB = append(optChainB, hermes.WithChainMaxTxSize(chainBMaxTxSize))
-	}
-	if chainBClockDrift != "" {
-		optChainB = append(optChainB, hermes.WithChainClockDrift(chainBClockDrift))
-	}
-	if chainBMaxBlockTime != "" {
-		optChainB = append(optChainB, hermes.WithChainMaxBlockTime(chainBMaxBlockTime))
-	}
-	if chainBTrustingPeriod != "" {
-		optChainB = append(optChainB, hermes.WithChainTrustingPeriod(chainBTrustingPeriod))
-	}
-
-	err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
-	if err != nil {
-		return err
-	}
-	cfgPath, err := c.Save()
-	if err != nil {
-		return err
+	} else {
+		// TODO if exist, ask if the user want to reuse or overwrite
 	}
 
 	h, err := hermes.New()
@@ -423,4 +241,209 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
+}
+
+func hermesCreateConfig(cmd *cobra.Command, args []string) error {
+	// Create the default hermes config
+	var (
+		telemetryEnabled, _          = cmd.Flags().GetBool(flagTelemetryEnabled)
+		telemetryHost, _             = cmd.Flags().GetString(flagTelemetryHost)
+		telemetryPort, _             = cmd.Flags().GetUint64(flagTelemetryPort)
+		modeChannelsEnabled, _       = cmd.Flags().GetBool(flagModeChannelsEnabled)
+		modeClientsEnabled, _        = cmd.Flags().GetBool(flagModeClientsEnabled)
+		modeClientsMisbehaviour, _   = cmd.Flags().GetBool(flagModeClientsMisbehaviour)
+		modeClientsRefresh, _        = cmd.Flags().GetBool(flagModeClientsRefresh)
+		modeConnectionsEnabled, _    = cmd.Flags().GetBool(flagModeConnectionsEnabled)
+		modePacketsEnabled, _        = cmd.Flags().GetBool(flagModePacketsEnabled)
+		modePacketsClearInterval, _  = cmd.Flags().GetUint64(flagModePacketsClearInterval)
+		modePacketsClearOnStart, _   = cmd.Flags().GetBool(flagModePacketsClearOnStart)
+		modePacketsTxConfirmation, _ = cmd.Flags().GetBool(flagModePacketsTxConfirmation)
+	)
+
+	c := hermes.DefaultConfig(
+		hermes.WithTelemetryEnabled(telemetryEnabled),
+		hermes.WithTelemetryHost(telemetryHost),
+		hermes.WithTelemetryPort(telemetryPort),
+		hermes.WithModeChannelsEnabled(modeChannelsEnabled),
+		hermes.WithModeClientsEnabled(modeClientsEnabled),
+		hermes.WithModeClientsMisbehaviour(modeClientsMisbehaviour),
+		hermes.WithModeClientsRefresh(modeClientsRefresh),
+		hermes.WithModeConnectionsEnabled(modeConnectionsEnabled),
+		hermes.WithModePacketsEnabled(modePacketsEnabled),
+		hermes.WithModePacketsClearInterval(modePacketsClearInterval),
+		hermes.WithModePacketsClearOnStart(modePacketsClearOnStart),
+		hermes.WithModePacketsTxConfirmation(modePacketsTxConfirmation),
+	)
+
+	// Add chain A into the config
+	var (
+		chainAID       = args[0]
+		chainARPCAddr  = args[1]
+		chainAGRPCAddr = args[2]
+
+		chainAEventSourceMode, _           = cmd.Flags().GetString(flagChainAEventSourceMode)
+		chainAEventSourceUrl, _            = cmd.Flags().GetString(flagChainAEventSourceUrl)
+		chainAEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainAEventSourceBatchDelay)
+		chainARPCTimeout, _                = cmd.Flags().GetString(flagChainARPCTimeout)
+		chainAAccountPrefix, _             = cmd.Flags().GetString(flagChainAAccountPrefix)
+		chainAKeyName, _                   = cmd.Flags().GetString(flagChainAKeyName)
+		chainAStorePrefix, _               = cmd.Flags().GetString(flagChainAStorePrefix)
+		chainADefaultGas, _                = cmd.Flags().GetUint64(flagChainADefaultGas)
+		chainAMaxGas, _                    = cmd.Flags().GetUint64(flagChainAMaxGas)
+		chainAGasPrice, _                  = cmd.Flags().GetString(flagChainAGasPrice)
+		chainAGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainAGasMultiplier)
+		chainAMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainAMaxMsgNum)
+		chainAMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainAMaxTxSize)
+		chainAClockDrift, _                = cmd.Flags().GetString(flagChainAClockDrift)
+		chainAMaxBlockTime, _              = cmd.Flags().GetString(flagChainAMaxBlockTime)
+		chainATrustingPeriod, _            = cmd.Flags().GetString(flagChainATrustingPeriod)
+		chainATrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainATrustThresholdNumerator)
+		chainATrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainATrustThresholdDenominator)
+	)
+
+	optChainA := []hermes.ChainOption{
+		hermes.WithChainTrustThreshold(chainATrustThresholdNumerator, chainATrustThresholdDenominator),
+	}
+	if chainAEventSourceMode != "" {
+		optChainA = append(optChainA, hermes.WithChainEventSource(
+			chainAEventSourceMode,
+			chainAEventSourceUrl,
+			chainAEventSourceBatchDelay,
+		))
+	}
+	if chainARPCTimeout != "" {
+		optChainA = append(optChainA, hermes.WithChainRPCTimeout(chainARPCTimeout))
+	}
+	if chainAAccountPrefix != "" {
+		optChainA = append(optChainA, hermes.WithChainAddressPrefix(chainAAccountPrefix))
+	}
+	if chainAKeyName != "" {
+		optChainA = append(optChainA, hermes.WithChainKeyName(chainAKeyName))
+	}
+	if chainAStorePrefix != "" {
+		optChainA = append(optChainA, hermes.WithChainStorePrefix(chainAStorePrefix))
+	}
+	if chainADefaultGas > 0 {
+		optChainA = append(optChainA, hermes.WithChainDefaultGas(chainADefaultGas))
+	}
+	if chainAMaxGas > 0 {
+		optChainA = append(optChainA, hermes.WithChainMaxGas(chainAMaxGas))
+	}
+	if chainAGasPrice != "" {
+		gasPrice, err := sdk.ParseCoinNormalized(chainAGasPrice)
+		if err != nil {
+			return err
+		}
+		optChainA = append(optChainA, hermes.WithChainGasPrice(gasPrice))
+	}
+	if chainAGasMultiplier > 0 {
+		optChainA = append(optChainA, hermes.WithChainGasMultiplier(chainAGasMultiplier))
+	}
+	if chainAMaxMsgNum > 0 {
+		optChainA = append(optChainA, hermes.WithChainMaxMsgNum(chainAMaxMsgNum))
+	}
+	if chainAMaxTxSize > 0 {
+		optChainA = append(optChainA, hermes.WithChainMaxTxSize(chainAMaxTxSize))
+	}
+	if chainAClockDrift != "" {
+		optChainA = append(optChainA, hermes.WithChainClockDrift(chainAClockDrift))
+	}
+	if chainAMaxBlockTime != "" {
+		optChainA = append(optChainA, hermes.WithChainMaxBlockTime(chainAMaxBlockTime))
+	}
+	if chainATrustingPeriod != "" {
+		optChainA = append(optChainA, hermes.WithChainTrustingPeriod(chainATrustingPeriod))
+	}
+
+	err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
+	if err != nil {
+		return err
+	}
+
+	// Add chain B into the config
+	var (
+		chainBID       = args[3]
+		chainBRPCAddr  = args[4]
+		chainBGRPCAddr = args[5]
+
+		chainBEventSourceMode, _           = cmd.Flags().GetString(flagChainBEventSourceMode)
+		chainBEventSourceUrl, _            = cmd.Flags().GetString(flagChainBEventSourceUrl)
+		chainBEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainBEventSourceBatchDelay)
+		chainBRPCTimeout, _                = cmd.Flags().GetString(flagChainBRPCTimeout)
+		chainBAccountPrefix, _             = cmd.Flags().GetString(flagChainBAccountPrefix)
+		chainBKeyName, _                   = cmd.Flags().GetString(flagChainBKeyName)
+		chainBStorePrefix, _               = cmd.Flags().GetString(flagChainBStorePrefix)
+		chainBDefaultGas, _                = cmd.Flags().GetUint64(flagChainBDefaultGas)
+		chainBMaxGas, _                    = cmd.Flags().GetUint64(flagChainBMaxGas)
+		chainBGasPrice, _                  = cmd.Flags().GetString(flagChainBGasPrice)
+		chainBGasMultiplier, _             = cmd.Flags().GetFloat64(flagChainBGasMultiplier)
+		chainBMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainBMaxMsgNum)
+		chainBMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainBMaxTxSize)
+		chainBClockDrift, _                = cmd.Flags().GetString(flagChainBClockDrift)
+		chainBMaxBlockTime, _              = cmd.Flags().GetString(flagChainBMaxBlockTime)
+		chainBTrustingPeriod, _            = cmd.Flags().GetString(flagChainBTrustingPeriod)
+		chainBTrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainBTrustThresholdNumerator)
+		chainBTrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainBTrustThresholdDenominator)
+	)
+
+	optChainB := []hermes.ChainOption{
+		hermes.WithChainTrustThreshold(chainBTrustThresholdNumerator, chainBTrustThresholdDenominator),
+	}
+	if chainBEventSourceMode != "" {
+		optChainB = append(optChainB, hermes.WithChainEventSource(
+			chainBEventSourceMode,
+			chainBEventSourceUrl,
+			chainBEventSourceBatchDelay,
+		))
+	}
+	if chainBRPCTimeout != "" {
+		optChainB = append(optChainB, hermes.WithChainRPCTimeout(chainBRPCTimeout))
+	}
+	if chainBAccountPrefix != "" {
+		optChainB = append(optChainB, hermes.WithChainAddressPrefix(chainBAccountPrefix))
+	}
+	if chainBKeyName != "" {
+		optChainB = append(optChainB, hermes.WithChainKeyName(chainBKeyName))
+	}
+	if chainBStorePrefix != "" {
+		optChainB = append(optChainB, hermes.WithChainStorePrefix(chainBStorePrefix))
+	}
+	if chainBDefaultGas > 0 {
+		optChainB = append(optChainB, hermes.WithChainDefaultGas(chainBDefaultGas))
+	}
+	if chainBMaxGas > 0 {
+		optChainB = append(optChainB, hermes.WithChainMaxGas(chainBMaxGas))
+	}
+	if chainBGasPrice != "" {
+		gasPrice, err := sdk.ParseCoinNormalized(chainBGasPrice)
+		if err != nil {
+			return err
+		}
+		optChainB = append(optChainB, hermes.WithChainGasPrice(gasPrice))
+	}
+	if chainBGasMultiplier > 0 {
+		optChainB = append(optChainB, hermes.WithChainGasMultiplier(chainBGasMultiplier))
+	}
+	if chainBMaxMsgNum > 0 {
+		optChainB = append(optChainB, hermes.WithChainMaxMsgNum(chainBMaxMsgNum))
+	}
+	if chainBMaxTxSize > 0 {
+		optChainB = append(optChainB, hermes.WithChainMaxTxSize(chainBMaxTxSize))
+	}
+	if chainBClockDrift != "" {
+		optChainB = append(optChainB, hermes.WithChainClockDrift(chainBClockDrift))
+	}
+	if chainBMaxBlockTime != "" {
+		optChainB = append(optChainB, hermes.WithChainMaxBlockTime(chainBMaxBlockTime))
+	}
+	if chainBTrustingPeriod != "" {
+		optChainB = append(optChainB, hermes.WithChainTrustingPeriod(chainBTrustingPeriod))
+	}
+
+	err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
+	if err != nil {
+		return err
+	}
+
+	return c.Save()
 }
