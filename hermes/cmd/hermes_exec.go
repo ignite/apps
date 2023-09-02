@@ -12,8 +12,7 @@ import (
 func NewHermesExecute() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "exec [args...]",
-		Short: "",
-		Long:  ``,
+		Short: "execute a hermes raw command",
 		Args:  cobra.MinimumNArgs(1),
 		RunE:  hermesExecuteHandler,
 	}

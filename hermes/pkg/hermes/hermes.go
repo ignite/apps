@@ -74,6 +74,7 @@ type (
 	// SubCommand represents the sub command under Hermes.
 	subCmd string
 
+	// Hermes represents the hermes binary structure.
 	Hermes struct {
 		path    string
 		binary  []byte
@@ -201,12 +202,14 @@ func New() (*Hermes, error) {
 	}, nil
 }
 
+// Cleanup clean the temporary Hermes binary.
 func (h *Hermes) Cleanup() error {
 	h.cleanup()
 	h.binary = nil
 	return os.RemoveAll(h.path)
 }
 
+// AddKey adds a new key file into the Hermes.
 func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string, options ...Option) error {
 	options = append(options, WithFlags(
 		Flags{
@@ -217,6 +220,7 @@ func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string, options ..
 	return h.RunCmd(ctx, []string{string(cmdKeys)}, options...)
 }
 
+// AddMnemonic creates a new temporary key file based on the mnemonic and add into the Hermes.
 func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string, options ...Option) error {
 	f, err := os.CreateTemp("", "hermes-key")
 	if err != nil {
@@ -237,6 +241,7 @@ func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string, opti
 	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
 }
 
+// CreateClient creates a new relayer client.
 func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain string, options ...Option) error {
 	options = append(options, WithFlags(
 		Flags{
@@ -247,6 +252,7 @@ func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain str
 	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdClient)}, options...)
 }
 
+// CreateConnection creates a new relayer connection.
 func (h *Hermes) CreateConnection(ctx context.Context, chainA, clientA, clientB string, options ...Option) error {
 	options = append(options, WithFlags(
 		Flags{
@@ -258,6 +264,7 @@ func (h *Hermes) CreateConnection(ctx context.Context, chainA, clientA, clientB 
 	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdConnection)}, options...)
 }
 
+// CreateChannel creates a new relayer channel.
 func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB string, options ...Option) error {
 	options = append(options, WithFlags(
 		Flags{
@@ -270,6 +277,7 @@ func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB 
 	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdChannel)}, options...)
 }
 
+// QueryChannels query all Hermes channels based in a chain id.
 func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain string, options ...Option) error {
 	flags := Flags{
 		FlagChain: chain,
@@ -281,10 +289,12 @@ func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain
 	return h.RunCmd(ctx, []string{string(cmdQuery), string(cmdChannels)}, options...)
 }
 
+// Start starts the Hermes relayer.
 func (h *Hermes) Start(ctx context.Context, options ...Option) error {
 	return h.RunCmd(ctx, []string{string(cmdStart)}, options...)
 }
 
+// RunCmd runs a Hermes command using the options.
 func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) error {
 	c := configs{}
 	for _, o := range options {
@@ -313,6 +323,7 @@ func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) e
 	return h.Run(ctx, stdOut, stderr, c.config, cmd...)
 }
 
+// Run runs a Hermes command.
 func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config string, args ...string) error {
 	cmd := []string{h.path}
 
@@ -327,6 +338,7 @@ func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config strin
 	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
 }
 
+// UnmarshalResult unmarshal the command result into a interface.
 func UnmarshalResult(data []byte, v any) error {
 	var r Result
 	if err := json.Unmarshal(data, &r); err != nil {
