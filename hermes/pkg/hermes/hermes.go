@@ -94,25 +94,31 @@ type (
 )
 
 type (
-	// Result represents the cli command result.
+	// Result represents the command result.
 	Result struct {
 		Result json.RawMessage `json:"result"`
 		Status string          `json:"status"`
 	}
 
+	// ClientResult represents the result of the create client command.
 	ClientResult struct {
 		CreateClient CreateClient `json:"CreateClient"`
 	}
+
+	// CreateClient represents the result of the create client command.
 	CreateClient struct {
 		ClientId        string          `json:"client_id"`
 		ClientType      string          `json:"client_type"`
 		ConsensusHeight ConsensusHeight `json:"consensus_height"`
 	}
+
+	// ConsensusHeight represents the result consensus height.
 	ConsensusHeight struct {
 		RevisionHeight int `json:"revision_height"`
 		RevisionNumber int `json:"revision_number"`
 	}
 
+	// ConnectionResult represents the result of the create connection command.
 	ConnectionResult struct {
 		ASide           Side   `json:"a_side"`
 		BSide           Side   `json:"b_side"`
@@ -120,6 +126,8 @@ type (
 		DelayPeriod     Time   `json:"delay_period"`
 		Ordering        string `json:"ordering"`
 	}
+
+	// Side represents the connection side.
 	Side struct {
 		ChannelId    string      `json:"channel_id"`
 		ClientId     string      `json:"client_id"`
@@ -127,11 +135,14 @@ type (
 		PortId       string      `json:"port_id"`
 		Version      interface{} `json:"version"`
 	}
+
+	// Time represents the time.
 	Time struct {
 		Nanos int `json:"nanos"`
 		Secs  int `json:"secs"`
 	}
 
+	// ChannelResult represents the result of the create channel command.
 	ChannelResult struct {
 		ChainIdA string `json:"chain_id_a"`
 		ChainIdB string `json:"chain_id_b"`
