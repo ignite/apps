@@ -241,11 +241,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return err
 	}
-	if err := hermes.UnmarshalResult(bufChannel.Bytes(), &channel); err != nil {
-		return err
-	}
 
-	return nil
+	return hermes.UnmarshalResult(bufChannel.Bytes(), &channel)
 }
 
 func hermesCreateConfig(cmd *cobra.Command, args []string) error {
