@@ -23,6 +23,7 @@ require (
 	cosmossdk.io/math v1.1.2 // indirect
 	github.com/4meepo/tagalign v1.3.2 // indirect
 	github.com/Abirdcfly/dupword v0.0.12 // indirect
+	github.com/AlecAivazis/survey/v2 v2.3.6 // indirect
 	github.com/Antonboom/errname v0.1.12 // indirect
 	github.com/Antonboom/nilnil v0.1.7 // indirect
 	github.com/BurntSushi/toml v1.3.2 // indirect
@@ -46,6 +47,7 @@ require (
 	github.com/bombsimon/wsl/v3 v3.4.0 // indirect
 	github.com/breml/bidichk v0.2.4 // indirect
 	github.com/breml/errchkjson v0.3.1 // indirect
+	github.com/briandowns/spinner v1.23.0 // indirect
 	github.com/btcsuite/btcd/btcec/v2 v2.3.2 // indirect
 	github.com/butuzov/ireturn v0.2.0 // indirect
 	github.com/butuzov/mirror v1.1.0 // indirect
@@ -55,6 +57,7 @@ require (
 	github.com/charithe/durationcheck v0.0.10 // indirect
 	github.com/charmbracelet/lipgloss v0.6.0 // indirect
 	github.com/chavacava/garif v0.0.0-20230227094218-b8c73b2037b8 // indirect
+	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.3.3 // indirect
 	github.com/cometbft/cometbft v0.37.2 // indirect
 	github.com/cometbft/cometbft-db v0.7.0 // indirect
@@ -145,6 +148,7 @@ require (
 	github.com/jirfag/go-printf-func-name v0.0.0-20200119135958-7558a9eaa5af // indirect
 	github.com/jmhodges/levigo v1.0.0 // indirect
 	github.com/julz/importas v0.1.0 // indirect
+	github.com/kballard/go-shellquote v0.0.0-20180428030007-95032a82bc51 // indirect
 	github.com/kevinburke/ssh_config v1.2.0 // indirect
 	github.com/kisielk/errcheck v1.6.3 // indirect
 	github.com/kisielk/gotool v1.0.0 // indirect
@@ -160,6 +164,7 @@ require (
 	github.com/lucasb-eyer/go-colorful v1.2.0 // indirect
 	github.com/lufeee/execinquery v1.2.1 // indirect
 	github.com/magiconair/properties v1.8.7 // indirect
+	github.com/manifoldco/promptui v0.9.0 // indirect
 	github.com/maratori/testableexamples v1.0.0 // indirect
 	github.com/maratori/testpackage v1.1.1 // indirect
 	github.com/matoous/godox v0.0.0-20230222163458-006bad1f9d26 // indirect
@@ -169,6 +174,7 @@ require (
 	github.com/matttproud/golang_protobuf_extensions v1.0.4 // indirect
 	github.com/mbilski/exhaustivestruct v1.2.0 // indirect
 	github.com/mgechev/revive v1.3.2 // indirect
+	github.com/mgutz/ansi v0.0.0-20170206155736-9520e82c474b // indirect
 	github.com/microcosm-cc/bluemonday v1.0.20 // indirect
 	github.com/mimoo/StrobeGo v0.0.0-20210601165009-122bf33a46e0 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect

@@ -2,12 +2,15 @@ package cmd
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"math/big"
 	"os"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/ignite/cli/ignite/pkg/cliui"
+	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
 	"github.com/spf13/cobra"
 
 	"relayer/pkg/hermes"
@@ -132,7 +135,56 @@ func NewHermesConfigure() *cobra.Command {
 	return c
 }
 
+func VerifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Hermes, chainID, cfgPath string) error {
+	var (
+		bufKeysChain    = bytes.Buffer{}
+		keysChainResult = hermes.KeysListResult{}
+	)
+	if err := h.KeysList(
+		ctx,
+		chainID,
+		hermes.WithConfigFile(cfgPath),
+		hermes.WithStdOut(&bufKeysChain),
+	); err != nil {
+		return err
+	}
+	if err := hermes.UnmarshalResult(bufKeysChain.Bytes(), &keysChainResult); err != nil {
+		return err
+	}
+	if keysChainResult.Wallet.Account == "" {
+		var chainAMnemonic string
+		if err := session.Ask(cliquiz.NewQuestion(
+			fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue:", chainID),
+			&chainAMnemonic,
+			cliquiz.Required(),
+		)); err != nil {
+			return err
+		}
+
+		bufKeysChainAdd := bytes.Buffer{}
+		err := h.AddMnemonic(
+			ctx,
+			chainID,
+			chainAMnemonic,
+			hermes.WithConfigFile(cfgPath),
+			hermes.WithStdOut(&bufKeysChainAdd),
+		)
+		if err != nil {
+			return err
+		}
+		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
+	session := cliui.New(cliui.StartSpinner())
+	defer session.End()
+
+	session.StartSpinner("Generating Hermes config")
+
 	var (
 		chainAID = args[0]
 		chainBID = args[3]
@@ -148,14 +200,12 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		err := hermesCreateConfig(cmd, args)
-		if err != nil {
+		if err := hermesCreateConfig(cmd, args); err != nil {
 			return err
 		}
 	} else {
 		// TODO FIXME - if exist, ask if the user want to reuse or overwrite
-		err := hermesCreateConfig(cmd, args)
-		if err != nil {
+		if err := hermesCreateConfig(cmd, args); err != nil {
 			return err
 		}
 	}
@@ -165,6 +215,18 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 	defer h.Cleanup()
+
+	session.StartSpinner("Verifying chain keys")
+
+	if err := VerifyChainKeys(cmd.Context(), session, h, chainAID, cfgPath); err != nil {
+		return err
+	}
+
+	if err := VerifyChainKeys(cmd.Context(), session, h, chainBID, cfgPath); err != nil {
+		return err
+	}
+
+	session.StartSpinner("Creating clients")
 
 	// create client A
 	var (
@@ -204,6 +266,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StartSpinner("Creating connection")
+
 	// create connection
 	var (
 		bufConnection = bytes.Buffer{}
@@ -223,6 +287,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	if err := hermes.UnmarshalResult(bufConnection.Bytes(), &connection); err != nil {
 		return err
 	}
+
+	session.StartSpinner("Creating channel")
 
 	// create and query channel
 	var (

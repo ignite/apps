@@ -62,8 +62,14 @@ const (
 	// CommandKeysAdd is the Hermes keys add command.
 	cmdKeysAdd subCmd = "add"
 
-	// resultSuccess is the api result status success.
-	resultSuccess = "success"
+	// cmdKeysList is the Hermes keys list command.
+	cmdKeysList subCmd = "list"
+
+	// ResultSuccess is the api result status success.
+	ResultSuccess = "success"
+
+	// ResultError is the api result status error.
+	ResultError = "error"
 )
 
 type (
@@ -98,6 +104,20 @@ type (
 	Result struct {
 		Result json.RawMessage `json:"result"`
 		Status string          `json:"status"`
+	}
+
+	// KeysListResult represents the result of the keys list command.
+	KeysListResult struct {
+		Wallet Wallet `json:"wallet"`
+	}
+
+	// Wallet represents the wallet from a hermes key.
+	Wallet struct {
+		Account     string `json:"account"`
+		Address     []byte `json:"address"`
+		AddressType string `json:"address_type"`
+		PrivateKey  string `json:"private_key"`
+		PublicKey   string `json:"public_key"`
 	}
 
 	// ClientResult represents the result of the create client command.
@@ -228,7 +248,7 @@ func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string, options ..
 			FlagMnemonicFile: keyfile,
 		},
 	))
-	return h.RunCmd(ctx, []string{string(cmdKeys)}, options...)
+	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
 }
 
 // AddMnemonic creates a new temporary key file based on the mnemonic and add into the Hermes.
@@ -250,6 +270,12 @@ func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string, opti
 		},
 	))
 	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
+}
+
+// KeysList list all available Hermes keys.
+func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option) error {
+	options = append(options, WithFlags(Flags{FlagChain: chainID}))
+	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysList)}, options...)
 }
 
 // CreateClient creates a new relayer client.
@@ -355,8 +381,20 @@ func UnmarshalResult(data []byte, v any) error {
 	if err := json.Unmarshal(data, &r); err != nil {
 		return err
 	}
-	if r.Status != resultSuccess {
-		return fmt.Errorf("unmarshal result (%T) error: %v", v, r)
+	if r.Status != ResultSuccess {
+		return fmt.Errorf("error result (%T) error: %v", v, r)
 	}
 	return json.Unmarshal(r.Result, v)
+}
+
+// ValidateResult validate if the cmd result is success.
+func ValidateResult(data []byte) error {
+	var r Result
+	if err := json.Unmarshal(data, &r); err != nil {
+		return err
+	}
+	if r.Status != ResultSuccess {
+		return fmt.Errorf("error result (%T) error: %v", r)
+	}
+	return nil
 }
