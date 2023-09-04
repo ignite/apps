@@ -382,7 +382,7 @@ func UnmarshalResult(data []byte, v any) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("error result (%T) error: %v", v, r)
+		return fmt.Errorf("error result (%T) error: %v", v, string(r.Result))
 	}
 	return json.Unmarshal(r.Result, v)
 }
@@ -394,7 +394,7 @@ func ValidateResult(data []byte) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("error result (%T) error: %v", r)
+		return fmt.Errorf("error result error: %v", r)
 	}
 	return nil
 }
