@@ -41,7 +41,7 @@ func New() (*Gex, error) {
 		return nil, errors.Wrap(err, "failed to read tar entry")
 	}
 
-	path, cleanup, err := localfs.SaveBytesTemp(binary, "hermes", 0o755)
+	path, cleanup, err := localfs.SaveBytesTemp(binary, "gex", 0o755)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to save gex binary as temp file")
 	}
@@ -53,7 +53,7 @@ func New() (*Gex, error) {
 	}, nil
 }
 
-// Cleanup clean the temporary Hermes binary.
+// Cleanup clean the temporary Gex binary.
 func (g *Gex) Cleanup() error {
 	g.cleanup()
 	g.binary = nil
