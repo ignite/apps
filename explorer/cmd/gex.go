@@ -25,7 +25,7 @@ func NewGex() *cobra.Command {
 			port := defaultPort
 			ssl := false
 
-			if len(args) == 0 {
+			if len(args) == 1 {
 				rpcURL, err := url.Parse(args[0])
 				if err != nil {
 					return errors.Wrapf(err, "failed to parse rpc url %s", args[0])
