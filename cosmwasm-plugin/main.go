@@ -1,8 +1,11 @@
 package main
 
 import (
+	"embed"
 	"encoding/gob"
 	"fmt"
+	"io"
+	"io/fs"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -15,8 +18,13 @@ import (
 	"github.com/ignite/cli/ignite/services/plugin"
 )
 
-var chainName string
-var chainNamed string
+var (
+	chainName  string
+	chainNamed string
+	//go:embed wasm-wiring/*
+	templates embed.FS // Embedded template files
+
+)
 
 func init() {
 	gob.Register(plugin.Manifest{})
@@ -72,8 +80,6 @@ func (p) Execute(cmd plugin.ExecutedCommand) error {
 	default:
 		return fmt.Errorf("unknown command: %s", cmd.Use)
 	}
-
-	return nil
 }
 
 func handleAddCommand() error {
@@ -110,7 +116,7 @@ func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
 	return nil
 }
 
-// For future use
+// For future use ..
 func getChain(cmd plugin.ExecutedCommand, chainOption ...chain.Option) (*chain.Chain, error) {
 	var (
 		home, _ = cmd.Flags().GetString("home")
@@ -159,21 +165,38 @@ func replaceWordsInFile(filePath, targetWord, replacement string) error {
 }
 
 func createFile(inputFilename, outputDir, outputFilename string) error {
-	sourcePath := filepath.Join("..", "cosmwasm-plugin", "wasm-wiring", inputFilename)
 
-	sourceContent, err := ioutil.ReadFile(sourcePath)
+	// Load the embedded template files
+	templatesFS, err := fs.Sub(templates, "wasm-wiring")
+	if err != nil {
+		fmt.Println("Error:", err)
+		return err
+	}
+
+	// Open the embedded input file
+	inputFile, err := templatesFS.Open(inputFilename)
+
+	if err != nil {
+		return err
+	}
+	defer inputFile.Close() // This line schedules the file to be closed when the function returns
+
+	// Read content from the embedded file
+	sourceContent, err := io.ReadAll(inputFile)
 	if err != nil {
 		return err
 	}
 
+	// Construct the output file path
 	outputPath := filepath.Join(outputDir, outputFilename)
 
+	// Write the embedded content to the output file
 	err = ioutil.WriteFile(outputPath, sourceContent, 0644)
 	if err != nil {
 		return err
 	}
 
-	//replace chainName
+	// Replace chainName in the output file
 	err = replaceWordsInFile(outputPath, "planet", chainName)
 	if err != nil {
 		return err
@@ -184,6 +207,8 @@ func createFile(inputFilename, outputDir, outputFilename string) error {
 }
 
 func createNewFiles() error {
+	// Call createFile for each template file
+
 	// Create ante.go based on ante.txt content
 	err := createFile("ante.txt", "app", "ante.go")
 	if err != nil {
@@ -214,8 +239,8 @@ func createNewFiles() error {
 		return err
 	}
 
-	filePath := filepath.Join("cmd", chainNamed, "cmd")
 	// Create network.go based on network.txt content
+	filePath := filepath.Join("cmd", chainNamed, "cmd")
 	err = createFile("root.txt", filePath, "root.go")
 	if err != nil {
 		return err
