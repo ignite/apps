@@ -51,7 +51,7 @@ func NewGex() *cobra.Command {
 				errors.Wrap(err, "failed to initialize gex")
 			}
 
-			return g.Run(cmd.Context(), os.Stdout, os.Stderr, host, port, false)
+			return g.Run(cmd.Context(), os.Stdout, os.Stderr, host, port, ssl)
 		},
 	}
 
