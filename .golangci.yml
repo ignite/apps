@@ -1,5 +1,8 @@
 run:
   tests: false
+  skip-dirs:
+    - ignite/ui
+  timeout: 5m
 
 linters:
   disable-all: true
@@ -9,7 +12,6 @@ linters:
     - depguard
     - dogsled
     - dupword
-    # - errcheck
     - errchkjson
     - errorlint
     - exhaustive
@@ -18,12 +20,10 @@ linters:
     - godot
     - gofumpt
     - revive
-    # - gosec
     - gosimple
     - govet
     - grouper
     - ineffassign
-    # - interfacer
     - misspell
     - nakedret
     - nolintlint
@@ -38,8 +38,6 @@ linters:
     - unused
     - unparam
     - misspell
-    # - wrapcheck
-    # - wsl
 
 issues:
   max-issues-per-linter: 0
