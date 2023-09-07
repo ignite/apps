@@ -265,7 +265,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	_ = session.Println(color.Green.Sprintf(
-		"Client %s created (%s -> %s)",
+		"Client '%s' created (%s -> %s)",
 		clientAResult.CreateClient.ClientID,
 		chainAID,
 		chainBID,
@@ -291,7 +291,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	_ = session.Println(color.Green.Sprintf(
-		"Client %s created (%s -> %s)",
+		"Client %s' created (%s -> %s)",
 		clientBResult.CreateClient.ClientID,
 		chainBID,
 		chainAID,
@@ -348,9 +348,9 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	_ = session.Println(color.Green.Sprintf(
-		"Channel %s <-> %s created",
-		channel.ASide.ChannelID,
-		channel.BSide.ChannelID,
+		"Channel '%s <-> %s' created",
+		chainAID,
+		chainBID,
 	))
 
 	return nil
