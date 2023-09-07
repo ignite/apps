@@ -1,7 +1,9 @@
 package hermes
 
 import (
+	"encoding/json"
 	"fmt"
+	"reflect"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -27,16 +29,22 @@ func TestUnmarshalResult(t *testing.T) {
 			},
 		},
 		{
+			name: "invalid unmarshall object",
+			data: []byte(`{"status": "success", "result": {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}}`),
+			v:    &ClientResult{},
+			want: &ClientResult{},
+		},
+		{
 			name: "error result",
 			data: []byte(`{"status": "error", "result": {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}}`),
 			v:    &KeysListResult{},
-			err:  fmt.Errorf(`&errors.errorString{s:"error result (*hermes.KeysListResult) error: {\"wallet\":{\"account\":\"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg\",\"address_type\":\"Cosmos\"}}"}`),
+			err:  fmt.Errorf(`error result (*hermes.KeysListResult) error: {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}`),
 		},
 		{
 			name: "unmarshal error",
 			data: []byte(`{"status": "success", "result": {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}}`),
-			v:    &ClientResult{},
-			err:  fmt.Errorf("blablabla"),
+			v:    "",
+			err:  &json.InvalidUnmarshalError{Type: reflect.TypeOf("")},
 		},
 	}
 	for _, tt := range tests {
@@ -45,6 +53,7 @@ func TestUnmarshalResult(t *testing.T) {
 			if tt.err != nil {
 				require.Error(t, err)
 				require.Equal(t, tt.err, err)
+				return
 			}
 			require.NoError(t, err)
 			require.EqualValues(t, tt.want, tt.v)
@@ -65,7 +74,7 @@ func TestValidateResult(t *testing.T) {
 		{
 			name: "error result",
 			data: []byte(`{"status": "error", "result": "error data"}`),
-			err:  fmt.Errorf(""),
+			err:  fmt.Errorf(`result error: "error data"`),
 		},
 	}
 	for _, tt := range tests {
@@ -74,6 +83,7 @@ func TestValidateResult(t *testing.T) {
 			if tt.err != nil {
 				require.Error(t, err)
 				require.Equal(t, tt.err, err)
+				return
 			}
 			require.NoError(t, err)
 		})

@@ -394,7 +394,7 @@ func ValidateResult(data []byte) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("error result error: %v", r)
+		return fmt.Errorf("result error: %v", string(r.Result))
 	}
 	return nil
 }

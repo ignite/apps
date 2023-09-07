@@ -3,14 +3,17 @@ package cmd
 import (
 	"bytes"
 	"context"
+	"errors"
 	"fmt"
 	"math/big"
 	"os"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/gookit/color"
 	"github.com/ignite/cli/ignite/pkg/cliui"
 	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
+	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
 	"relayer/pkg/hermes"
@@ -175,6 +178,8 @@ func VerifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Herm
 		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
 			return err
 		}
+
+		return session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
 	}
 	return nil
 }
@@ -204,11 +209,23 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
-		// TODO FIXME - if exist, ask if the user want to reuse or overwrite
-		if err := hermesCreateConfig(cmd, args); err != nil {
-			return err
+		if err := session.AskConfirm(fmt.Sprintf(
+			"Hermes %s <-> %s config already exist at %s\nDo you want to reuse this config file?",
+			chainAID,
+			chainBID,
+			cfgPath,
+		)); err != nil {
+			if !errors.Is(err, promptui.ErrAbort) {
+				return err
+			}
+			if err := hermesCreateConfig(cmd, args); err != nil {
+				return err
+			}
 		}
+		return nil
 	}
+
+	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
 
 	h, err := hermes.New()
 	if err != nil {
@@ -247,6 +264,13 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	_ = session.Println(color.Green.Sprintf(
+		"Client %s created (%s -> %s)",
+		clientAResult.CreateClient.ClientID,
+		chainAID,
+		chainBID,
+	))
+
 	// create client B
 	var (
 		bufClientBResult = bytes.Buffer{}
@@ -266,6 +290,12 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	_ = session.Println(color.Green.Sprintf(
+		"Client %s created (%s -> %s)",
+		clientBResult.CreateClient.ClientID,
+		chainBID,
+		chainAID,
+	))
 	session.StartSpinner("Creating connection")
 
 	// create connection
@@ -288,6 +318,11 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	_ = session.Println(color.Green.Sprintf(
+		"Connection %s <-> %s created",
+		connection.ASide.ConnectionID,
+		connection.BSide.ConnectionID,
+	))
 	session.StartSpinner("Creating channel")
 
 	// create and query channel
@@ -308,7 +343,17 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	return hermes.UnmarshalResult(bufChannel.Bytes(), &channel)
+	if err := hermes.UnmarshalResult(bufChannel.Bytes(), &channel); err != nil {
+		return err
+	}
+
+	_ = session.Println(color.Green.Sprintf(
+		"Channel %s <-> %s created",
+		channel.ASide.ChannelID,
+		channel.BSide.ChannelID,
+	))
+
+	return nil
 }
 
 func hermesCreateConfig(cmd *cobra.Command, args []string) error {
@@ -516,8 +561,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string) error {
 		optChainB = append(optChainB, hermes.WithChainTrustingPeriod(chainBTrustingPeriod))
 	}
 
-	err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
-	if err != nil {
+	if err := c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...); err != nil {
 		return err
 	}
 
