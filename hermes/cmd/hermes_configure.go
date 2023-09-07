@@ -273,8 +273,10 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	_ = session.Println(color.Green.Sprintf(
-		"Connection %s <-> %s created",
+		"Connection '%s (%s) <-> %s (%s)' created",
+		chainAID,
 		connection.ASide.ConnectionID,
+		chainBID,
 		connection.BSide.ConnectionID,
 	))
 	session.StartSpinner("Creating channel")
@@ -302,9 +304,11 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	_ = session.Println(color.Green.Sprintf(
-		"Channel '%s <-> %s' created",
+		"Channel '%s (%s) <-> %s (%s)' created",
 		chainAID,
+		channel.ASide.ChannelID,
 		chainBID,
+		channel.BSide.ChannelID,
 	))
 
 	return nil

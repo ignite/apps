@@ -469,7 +469,7 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 		EventSource: EventSource{
 			BatchDelay: "500ms",
 			Mode:       "push",
-			URL:        fmt.Sprintf("ws://%s", rpcURL.Host),
+			URL:        fmt.Sprintf("ws://%s/websocket", rpcURL.Host),
 		},
 		RPCTimeout:    "15s",
 		AccountPrefix: "cosmos",
