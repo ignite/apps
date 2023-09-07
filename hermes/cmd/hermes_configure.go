@@ -210,7 +210,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		if err := session.AskConfirm(fmt.Sprintf(
-			"Hermes %s <-> %s config already exist at %s\nDo you want to reuse this config file?",
+			"Hermes %s <-> %s config already exist at %s. Do you want to reuse this config file?",
 			chainAID,
 			chainBID,
 			cfgPath,
@@ -222,7 +222,6 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 				return err
 			}
 		}
-		return nil
 	}
 
 	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
