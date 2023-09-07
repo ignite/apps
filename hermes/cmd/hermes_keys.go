@@ -49,7 +49,7 @@ func NewHermesKeyAddMnemonic() *cobra.Command {
 func NewHermesKeyAddFile() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "file [chain-id] [filepath]",
-		Short: "add a new key from a key file to Hermes relayer",
+		Short: "Add a new key from a key file to Hermes relayer",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			h, err := hermes.New()
