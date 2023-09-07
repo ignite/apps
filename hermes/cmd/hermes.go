@@ -20,7 +20,6 @@ func NewRelayer() *cobra.Command {
 	}
 
 	// configure flags.
-	// TODO if add the config file don't need to create it
 	c.PersistentFlags().StringP(flagConfig, "c", "", "Use a custom config instead create a new one")
 
 	// add sub commands.
@@ -32,4 +31,9 @@ func NewRelayer() *cobra.Command {
 	)
 
 	return c
+}
+
+func getConfig(cmd *cobra.Command) string {
+	config, _ := cmd.Flags().GetString(flagConfig)
+	return config
 }

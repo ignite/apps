@@ -138,52 +138,6 @@ func NewHermesConfigure() *cobra.Command {
 	return c
 }
 
-func VerifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Hermes, chainID, cfgPath string) error {
-	var (
-		bufKeysChain    = bytes.Buffer{}
-		keysChainResult = hermes.KeysListResult{}
-	)
-	if err := h.KeysList(
-		ctx,
-		chainID,
-		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&bufKeysChain),
-	); err != nil {
-		return err
-	}
-	if err := hermes.UnmarshalResult(bufKeysChain.Bytes(), &keysChainResult); err != nil {
-		return err
-	}
-	if keysChainResult.Wallet.Account == "" {
-		var chainAMnemonic string
-		if err := session.Ask(cliquiz.NewQuestion(
-			fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue:", chainID),
-			&chainAMnemonic,
-			cliquiz.Required(),
-		)); err != nil {
-			return err
-		}
-
-		bufKeysChainAdd := bytes.Buffer{}
-		err := h.AddMnemonic(
-			ctx,
-			chainID,
-			chainAMnemonic,
-			hermes.WithConfigFile(cfgPath),
-			hermes.WithStdOut(&bufKeysChainAdd),
-		)
-		if err != nil {
-			return err
-		}
-		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
-			return err
-		}
-
-		return session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
-	}
-	return nil
-}
-
 func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	session := cliui.New(cliui.StartSpinner())
 	defer session.End()
@@ -196,6 +150,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 
 		chainAPortID, _ = cmd.Flags().GetString(flagChainAPortID)
 		chainBPortID, _ = cmd.Flags().GetString(flagChainBPortID)
+		customCfg       = getConfig(cmd)
 	)
 
 	cfgName := strings.Join([]string{args[0], args[3]}, hermes.ConfigNameSeparator)
@@ -205,7 +160,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		if err := hermesCreateConfig(cmd, args); err != nil {
+		if err := hermesCreateConfig(cmd, args, customCfg); err != nil {
 			return err
 		}
 	} else {
@@ -218,7 +173,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 			if !errors.Is(err, promptui.ErrAbort) {
 				return err
 			}
-			if err := hermesCreateConfig(cmd, args); err != nil {
+			if err := hermesCreateConfig(cmd, args, customCfg); err != nil {
 				return err
 			}
 		}
@@ -234,11 +189,11 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 
 	session.StartSpinner("Verifying chain keys")
 
-	if err := VerifyChainKeys(cmd.Context(), session, h, chainAID, cfgPath); err != nil {
+	if err := verifyChainKeys(cmd.Context(), session, h, chainAID, cfgPath); err != nil {
 		return err
 	}
 
-	if err := VerifyChainKeys(cmd.Context(), session, h, chainBID, cfgPath); err != nil {
+	if err := verifyChainKeys(cmd.Context(), session, h, chainBID, cfgPath); err != nil {
 		return err
 	}
 
@@ -355,7 +310,62 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func hermesCreateConfig(cmd *cobra.Command, args []string) error {
+func verifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Hermes, chainID, cfgPath string) error {
+	var (
+		bufKeysChain    = bytes.Buffer{}
+		keysChainResult = hermes.KeysListResult{}
+	)
+	if err := h.KeysList(
+		ctx,
+		chainID,
+		hermes.WithConfigFile(cfgPath),
+		hermes.WithStdOut(&bufKeysChain),
+	); err != nil {
+		return err
+	}
+	if err := hermes.UnmarshalResult(bufKeysChain.Bytes(), &keysChainResult); err != nil {
+		return err
+	}
+	if keysChainResult.Wallet.Account == "" {
+		var chainAMnemonic string
+		if err := session.Ask(cliquiz.NewQuestion(
+			fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue:", chainID),
+			&chainAMnemonic,
+			cliquiz.Required(),
+		)); err != nil {
+			return err
+		}
+
+		bufKeysChainAdd := bytes.Buffer{}
+		err := h.AddMnemonic(
+			ctx,
+			chainID,
+			chainAMnemonic,
+			hermes.WithConfigFile(cfgPath),
+			hermes.WithStdOut(&bufKeysChainAdd),
+		)
+		if err != nil {
+			return err
+		}
+		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
+			return err
+		}
+
+		return session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
+	}
+	return nil
+}
+
+func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) error {
+	// if a custom config was set, save it in the ignite hermes folder
+	if customCfg != "" {
+		c, err := hermes.LoadConfig(customCfg)
+		if err != nil {
+			return err
+		}
+		return c.Save()
+	}
+
 	// Create the default hermes config
 	var (
 		telemetryEnabled, _          = cmd.Flags().GetBool(flagTelemetryEnabled)

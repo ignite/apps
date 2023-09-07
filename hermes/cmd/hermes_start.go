@@ -22,11 +22,18 @@ func NewHermesStart() *cobra.Command {
 	return c
 }
 
-func hermesStartHandler(cmd *cobra.Command, args []string) error {
-	cfgName := strings.Join(args, hermes.ConfigNameSeparator)
-	cfgPath, err := hermes.ConfigPath(cfgName)
-	if err != nil {
-		return err
+func hermesStartHandler(cmd *cobra.Command, args []string) (err error) {
+	var (
+		customCfg = getConfig(cmd)
+		cfgName   = strings.Join(args, hermes.ConfigNameSeparator)
+	)
+
+	cfgPath := customCfg
+	if cfgPath == "" {
+		cfgPath, err = hermes.ConfigPath(cfgName)
+		if err != nil {
+			return err
+		}
 	}
 
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
