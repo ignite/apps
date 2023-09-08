@@ -507,7 +507,8 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 	return nil
 }
 
-func (c *Chain) balance(ctx context.Context, rpcAddress, addr string) (sdk.Coins, error) {
+// Balance returns the total account balance.
+func (c *Chain) Balance(ctx context.Context, rpcAddress, addr string) (sdk.Coins, error) {
 	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(rpcAddress))
 	if err != nil {
 		return nil, err
@@ -527,5 +528,5 @@ func (c *Chain) TryRetrieve(ctx context.Context, addr, faucetAddr string) (sdk.C
 	if err := cosmosfaucet.TryRetrieve(ctx, c.ID, c.RPCAddr, faucetAddr, addr); err != nil {
 		return nil, err
 	}
-	return c.balance(ctx, c.RPCAddr, addr)
+	return c.Balance(ctx, c.RPCAddr, addr)
 }
