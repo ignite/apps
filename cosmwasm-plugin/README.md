@@ -2,6 +2,8 @@
 
 **This repo contains** an Ignite CLI plugin that can help you to add CosmWasm module support for newly scaffolded app. 
 
+**Limitations:**  the plugin works only for apps that were newly scaffolded with Ignite, custom changes and new modules should be added after cosmwasm module is integrated.
+
 ## Get started
 First scaffold a chain with [Ignite CLI](https://docs.ignite.com).
 
