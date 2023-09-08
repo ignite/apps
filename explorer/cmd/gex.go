@@ -16,7 +16,7 @@ const (
 
 func NewGex() *cobra.Command {
 	c := &cobra.Command{
-		Use:     "gex [rpc url]",
+		Use:     "gex [rpc_url]",
 		Aliases: []string{"g"},
 		Short:   "Run gex",
 		Args:    cobra.MaximumNArgs(1),
@@ -33,10 +33,7 @@ func NewGex() *cobra.Command {
 
 				host = rpcURL.Hostname()
 				port = rpcURL.Port()
-				ssl = false
-				if rpcURL.Scheme == "https" {
-					ssl = true
-				}
+				ssl = rpcURL.Scheme == "https"
 				if port == "" {
 					if ssl {
 						port = "443"
@@ -48,7 +45,7 @@ func NewGex() *cobra.Command {
 
 			g, err := gex.New()
 			if err != nil {
-				errors.Wrap(err, "failed to initialize gex")
+				return errors.Wrap(err, "failed to initialize gex")
 			}
 
 			return g.Run(cmd.Context(), os.Stdout, os.Stderr, host, port, ssl)

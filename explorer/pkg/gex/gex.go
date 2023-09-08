@@ -18,7 +18,6 @@ import (
 // Gex represents the gex binary structure.
 type Gex struct {
 	path    string
-	binary  []byte
 	cleanup func()
 }
 
@@ -48,7 +47,6 @@ func New() (*Gex, error) {
 
 	return &Gex{
 		path:    path,
-		binary:  binary,
 		cleanup: cleanup,
 	}, nil
 }
@@ -56,12 +54,11 @@ func New() (*Gex, error) {
 // Cleanup clean the temporary Gex binary.
 func (g *Gex) Cleanup() error {
 	g.cleanup()
-	g.binary = nil
 	return os.RemoveAll(g.path)
 }
 
 // Run runs gex with provided parameters.
-func (g *Gex) Run(ctx context.Context, stdOut, stdErr io.Writer, host, port string, ssl bool) error {
+func (g *Gex) Run(ctx context.Context, stdout, stderr io.Writer, host, port string, ssl bool) error {
 	cmd := []string{g.path}
 
 	if host != "" {
@@ -74,5 +71,5 @@ func (g *Gex) Run(ctx context.Context, stdOut, stdErr io.Writer, host, port stri
 		cmd = append(cmd, "-s")
 	}
 
-	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
+	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdout)), exec.StepOption(step.Stderr(stderr)))
 }

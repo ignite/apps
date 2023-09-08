@@ -16,6 +16,8 @@ func init() {
 	gob.Register(plugin.ExecutedHook{})
 }
 
+var _ plugin.Interface = (*p)(nil)
+
 type p struct{}
 
 func (p) Manifest() (plugin.Manifest, error) {
@@ -36,15 +38,15 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	return cmd.NewExplorer().Execute()
 }
 
-func (p) ExecuteHookPre(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookPre(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookPost(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookPost(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookCleanUp(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookCleanUp(plugin.ExecutedHook) error {
 	return nil
 }
 
