@@ -16,8 +16,6 @@ func init() {
 	gob.Register(plugin.ExecutedHook{})
 }
 
-var _ plugin.Interface = (*p)(nil)
-
 type p struct{}
 
 func (p) Manifest() (plugin.Manifest, error) {
