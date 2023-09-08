@@ -48,12 +48,12 @@ func (p *p) ChainNamed() string {
 }
 func (p) Manifest() (plugin.Manifest, error) {
 	return plugin.Manifest{
-		Name: "cosmwasm-plugin",
+		Name: "cosmwasm",
 		// Add commands here
 		Commands: []plugin.Command{
 			// Example of a command
 			{
-				Use:   "cosmwasm-plugin",
+				Use:   "cosmwasm",
 				Short: "Explain what the command is doing...",
 				Long:  "Long description goes here...",
 				Flags: []plugin.Flag{
@@ -66,7 +66,7 @@ func (p) Manifest() (plugin.Manifest, error) {
 						Use:               "add",
 						Short:             "Add a CosmWasm module to the chain",
 						Long:              "This command will install dependencies, create new files, and modify existing files to add a CosmWasm module to the chain.",
-						PlaceCommandUnder: "ignite cosmwasm-plugin",
+						PlaceCommandUnder: "ignite cosmwasm",
 					},
 				},
 			},
@@ -79,7 +79,7 @@ func (p) Manifest() (plugin.Manifest, error) {
 
 func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
-	fmt.Printf("Hello I'm the cosmwasm-plugin\n")
+	fmt.Printf("Hello I'm the cosmwasm plugin\n")
 
 	// According to the number of declared commands, you may need a switch:
 
@@ -282,7 +282,7 @@ func main() {
 	pluginInstance := NewPlugin(chainName)
 
 	pluginMap := map[string]hplugin.Plugin{
-		"cosmwasm-plugin": &plugin.InterfacePlugin{Impl: pluginInstance},
+		"cosmwasm": &plugin.InterfacePlugin{Impl: pluginInstance},
 	}
 
 	hplugin.Serve(&hplugin.ServeConfig{
