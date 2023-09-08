@@ -76,8 +76,6 @@ func (p) Manifest() (plugin.Manifest, error) {
 
 func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
-	fmt.Printf("Hello I'm the cosmwasm plugin\n")
-
 	// According to the number of declared commands, you may need a switch:
 
 	switch cmd.Use {
