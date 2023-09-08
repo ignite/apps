@@ -39,6 +39,7 @@ const (
 	flagChainATrustingPeriod            = "chain-a-trusting-period"
 	flagChainATrustThresholdNumerator   = "chain-a-trust-threshold-numerator"
 	flagChainATrustThresholdDenominator = "chain-a-trust-threshold-denominator"
+	flagChainAFaucet                    = "chain-a-faucet"
 
 	flagChainBPortID                    = "chain-b-port-id"
 	flagChainBEventSourceMode           = "chain-b-event-source-mode"
@@ -59,6 +60,7 @@ const (
 	flagChainBTrustingPeriod            = "chain-b-trusting-period"
 	flagChainBTrustThresholdNumerator   = "chain-b-trust-threshold-numerator"
 	flagChainBTrustThresholdDenominator = "chain-b-trust-threshold-denominator"
+	flagChainBFaucet                    = "chain-b-faucet"
 
 	flagTelemetryEnabled          = "telemetry_enabled"
 	flagTelemetryHost             = "telemetry_host"
@@ -485,7 +487,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 		optChainA = append(optChainA, hermes.WithChainTrustingPeriod(chainATrustingPeriod))
 	}
 
-	err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
+	_, err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
 	if err != nil {
 		return err
 	}
@@ -574,7 +576,8 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 		optChainB = append(optChainB, hermes.WithChainTrustingPeriod(chainBTrustingPeriod))
 	}
 
-	if err := c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...); err != nil {
+	_, err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
+	if err != nil {
 		return err
 	}
 

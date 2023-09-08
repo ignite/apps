@@ -460,10 +460,10 @@ func WithChainAddressPrefix(derivation string) ChainOption {
 }
 
 // AddChain adds a new chain into the Hermes config.
-func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOption) error {
+func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOption) (Chain, error) {
 	rpcURL, err := url.Parse(rpcAddr)
 	if err != nil {
-		return err
+		return Chain{}, err
 	}
 
 	chain := Chain{
@@ -504,7 +504,7 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 	}
 
 	c.Chains = append(c.Chains, chain)
-	return nil
+	return chain, nil
 }
 
 // Balance returns the total account balance.
