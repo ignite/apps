@@ -102,17 +102,14 @@ func handleAddCommand(p *p) error {
 }
 
 func (p) ExecuteHookPre(hook plugin.ExecutedHook) error {
-	fmt.Printf("Executing hook pre %q\n", hook.Name)
 	return nil
 }
 
 func (p) ExecuteHookPost(hook plugin.ExecutedHook) error {
-	fmt.Printf("Executing hook post %q\n", hook.Name)
 	return nil
 }
 
 func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
-	fmt.Printf("Executing hook cleanup %q\n", hook.Name)
 	return nil
 }
 
