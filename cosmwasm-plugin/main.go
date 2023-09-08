@@ -14,7 +14,6 @@ import (
 
 	hplugin "github.com/hashicorp/go-plugin"
 
-	"github.com/ignite/cli/ignite/services/chain"
 	"github.com/ignite/cli/ignite/services/plugin"
 )
 
@@ -82,9 +81,6 @@ func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
 	fmt.Printf("Hello I'm the cosmwasm-plugin\n")
 
-	// This is how the plugin can access the chain:
-	// c, err := getChain(cmd)
-
 	// According to the number of declared commands, you may need a switch:
 
 	switch cmd.Use {
@@ -127,22 +123,6 @@ func (p) ExecuteHookPost(hook plugin.ExecutedHook) error {
 func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
 	fmt.Printf("Executing hook cleanup %q\n", hook.Name)
 	return nil
-}
-
-// For future use ..
-func getChain(cmd plugin.ExecutedCommand, chainOption ...chain.Option) (*chain.Chain, error) {
-	var (
-		home, _ = cmd.Flags().GetString("home")
-		path, _ = cmd.Flags().GetString("path")
-	)
-	if home != "" {
-		chainOption = append(chainOption, chain.HomePath(home))
-	}
-	absPath, err := filepath.Abs(path)
-	if err != nil {
-		return nil, err
-	}
-	return chain.New(absPath, chainOption...)
 }
 
 func installDependencies() error {
