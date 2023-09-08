@@ -19,11 +19,8 @@ import (
 )
 
 var (
-	chainName  string
-	chainNamed string
 	//go:embed wasm-wiring/*
 	templates embed.FS // Embedded template files
-
 )
 
 func init() {
@@ -32,8 +29,26 @@ func init() {
 	gob.Register(plugin.ExecutedHook{})
 }
 
-type p struct{}
+type p struct {
+	chainName string
+}
 
+// NewPlugin creates a new plugin instance with the given chainName and chainNamed values.
+func NewPlugin(chainName string) *p {
+	return &p{
+		chainName: chainName,
+	}
+}
+
+// ChainName returns the chainName of the plugin.
+func (p *p) ChainName() string {
+	return p.chainName
+}
+
+// ChainNamed derives and returns the chainNamed of the plugin.
+func (p *p) ChainNamed() string {
+	return p.chainName + "d"
+}
 func (p) Manifest() (plugin.Manifest, error) {
 	return plugin.Manifest{
 		Name: "cosmwasm-plugin",
@@ -65,7 +80,7 @@ func (p) Manifest() (plugin.Manifest, error) {
 	}, nil
 }
 
-func (p) Execute(cmd plugin.ExecutedCommand) error {
+func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
 	fmt.Printf("Hello I'm the cosmwasm-plugin\n")
 
@@ -76,13 +91,13 @@ func (p) Execute(cmd plugin.ExecutedCommand) error {
 
 	switch cmd.Use {
 	case "add":
-		return handleAddCommand()
+		return handleAddCommand(p)
 	default:
 		return fmt.Errorf("unknown command: %s", cmd.Use)
 	}
 }
 
-func handleAddCommand() error {
+func handleAddCommand(p *p) error {
 	fmt.Println("Adding stuff...")
 
 	err := installDependencies()
@@ -90,7 +105,7 @@ func handleAddCommand() error {
 		return err
 	}
 
-	err = createNewFiles()
+	err = createNewFiles(p)
 	if err != nil {
 		return err
 	}
@@ -164,7 +179,7 @@ func replaceWordsInFile(filePath, targetWord, replacement string) error {
 	return nil
 }
 
-func createFile(inputFilename, outputDir, outputFilename string) error {
+func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
 
 	// Load the embedded template files
 	templatesFS, err := fs.Sub(templates, "wasm-wiring")
@@ -197,7 +212,7 @@ func createFile(inputFilename, outputDir, outputFilename string) error {
 	}
 
 	// Replace chainName in the output file
-	err = replaceWordsInFile(outputPath, "planet", chainName)
+	err = replaceWordsInFile(outputPath, "planet", p.ChainName())
 	if err != nil {
 		return err
 	}
@@ -206,42 +221,42 @@ func createFile(inputFilename, outputDir, outputFilename string) error {
 	return nil
 }
 
-func createNewFiles() error {
+func createNewFiles(p *p) error {
 	// Call createFile for each template file
 
 	// Create ante.go based on ante.txt content
-	err := createFile("ante.txt", "app", "ante.go")
+	err := createFile("ante.txt", "app", "ante.go", p)
 	if err != nil {
 		return err
 	}
 
 	// Create ante2.go based on wasm.txt content
-	err = createFile("wasm.txt", "app", "wasm.go")
+	err = createFile("wasm.txt", "app", "wasm.go", p)
 	if err != nil {
 		return err
 	}
 
 	// Create network.go based on network.txt content
-	err = createFile("app.txt", "app", "app.go")
+	err = createFile("app.txt", "app", "app.go", p)
 	if err != nil {
 		return err
 	}
 
 	// Create network.go based on network.txt content
-	err = createFile("simulation_test.txt", "app", "simulation_test.go")
+	err = createFile("simulation_test.txt", "app", "simulation_test.go", p)
 	if err != nil {
 		return err
 	}
 
 	// Create network.go based on network.txt content
-	err = createFile("network.txt", "testutil/network", "network.go")
+	err = createFile("network.txt", "testutil/network", "network.go", p)
 	if err != nil {
 		return err
 	}
 
 	// Create network.go based on network.txt content
-	filePath := filepath.Join("cmd", chainNamed, "cmd")
-	err = createFile("root.txt", filePath, "root.go")
+	filePath := filepath.Join("cmd", p.ChainNamed(), "cmd")
+	err = createFile("root.txt", filePath, "root.go", p)
 	if err != nil {
 		return err
 	}
@@ -276,17 +291,16 @@ func main() {
 	}
 
 	// Extract the chain name from the current directory
-	chainName = filepath.Base(currentDir)
+	chainName := filepath.Base(currentDir)
 
 	// Handle potential cases where the chain name contains dashes or underscores
 	chainName = strings.ReplaceAll(chainName, "-", "")
 	chainName = strings.ReplaceAll(chainName, "_", "")
-	chainNamed = chainName + "d"
 
-	//fmt.Println("User's chain name:", chainName)
+	pluginInstance := NewPlugin(chainName)
 
 	pluginMap := map[string]hplugin.Plugin{
-		"cosmwasm-plugin": &plugin.InterfacePlugin{Impl: &p{}},
+		"cosmwasm-plugin": &plugin.InterfacePlugin{Impl: pluginInstance},
 	}
 
 	hplugin.Serve(&hplugin.ServeConfig{
