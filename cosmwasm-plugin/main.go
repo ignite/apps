@@ -18,10 +18,8 @@ import (
 	"github.com/ignite/cli/ignite/services/plugin"
 )
 
-var (
-	//go:embed wasm-wiring/*
-	templates embed.FS // Embedded template files
-)
+//go:embed wasm-wiring/*
+var templates embed.FS // Embedded template files
 
 func init() {
 	gob.Register(plugin.Manifest{})
@@ -222,43 +220,47 @@ func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
 }
 
 func createNewFiles(p *p) error {
-	// Call createFile for each template file
-
-	// Create ante.go based on ante.txt content
-	err := createFile("ante.txt", "app", "ante.go", p)
-	if err != nil {
-		return err
+	files := []struct {
+		template, outDir, outFile string
+	}{
+		{
+			template: "ante.txt",
+			outDir:   "app",
+			outFile:  "ante.go",
+		},
+		{
+			template: "wasm.txt",
+			outDir:   "app",
+			outFile:  "wasm.go",
+		},
+		{
+			template: "app.txt",
+			outDir:   "app",
+			outFile:  "app.go",
+		},
+		{
+			template: "simulation_test.txt",
+			outDir:   "app",
+			outFile:  "simulation_test.go",
+		},
+		{
+			template: "network.txt",
+			outDir:   "testutil/network",
+			outFile:  "network.go",
+		},
+		{
+			template: "root.txt",
+			outDir:   filepath.Join("cmd", p.ChainNamed(), "cmd"),
+			outFile:  "root.go",
+		},
+		// TODO: Add any other templates as needed
 	}
 
-	// Create ante2.go based on wasm.txt content
-	err = createFile("wasm.txt", "app", "wasm.go", p)
-	if err != nil {
-		return err
-	}
-
-	// Create network.go based on network.txt content
-	err = createFile("app.txt", "app", "app.go", p)
-	if err != nil {
-		return err
-	}
-
-	// Create network.go based on network.txt content
-	err = createFile("simulation_test.txt", "app", "simulation_test.go", p)
-	if err != nil {
-		return err
-	}
-
-	// Create network.go based on network.txt content
-	err = createFile("network.txt", "testutil/network", "network.go", p)
-	if err != nil {
-		return err
-	}
-
-	// Create network.go based on network.txt content
-	filePath := filepath.Join("cmd", p.ChainNamed(), "cmd")
-	err = createFile("root.txt", filePath, "root.go", p)
-	if err != nil {
-		return err
+	for _, f := range files {
+		err := createFile(f.template, f.outDir, f.outFile, p)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil
