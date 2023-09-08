@@ -53,12 +53,8 @@ func (p) Manifest() (plugin.Manifest, error) {
 		Commands: []plugin.Command{
 			// Example of a command
 			{
-				Use:   "cosmwasm",
-				Short: "Explain what the command is doing...",
-				Long:  "Long description goes here...",
-				Flags: []plugin.Flag{
-					{Name: "my-flag", Type: plugin.FlagTypeString, Usage: "my flag description"},
-				},
+				Use:               "cosmwasm",
+				Short:             "The cosmwasm command is used for adding cosmwasm support for apps scaffolded with Ignite CLI",
 				PlaceCommandUnder: "ignite",
 				// Examples of adding subcommands:
 				Commands: []plugin.Command{
