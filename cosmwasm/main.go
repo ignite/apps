@@ -71,9 +71,6 @@ func (p) Manifest() (plugin.Manifest, error) {
 				},
 			},
 		},
-		// Add hooks here
-		Hooks:      []plugin.Hook{},
-		SharedHost: false,
 	}, nil
 }
 
