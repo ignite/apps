@@ -1,6 +1,7 @@
 package hermes
 
 import (
+	"context"
 	"errors"
 	"fmt"
 	"math/big"
@@ -11,6 +12,9 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/ignite/cli/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/ignite/pkg/cosmosfaucet"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -501,4 +505,27 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 
 	c.Chains = append(c.Chains, chain)
 	return nil
+}
+
+func (c *Chain) balance(ctx context.Context, rpcAddress, addr string) (sdk.Coins, error) {
+	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(rpcAddress))
+	if err != nil {
+		return nil, err
+	}
+
+	queryClient := banktypes.NewQueryClient(client.Context())
+	res, err := queryClient.AllBalances(ctx, &banktypes.QueryAllBalancesRequest{Address: addr})
+	if err != nil {
+		return nil, err
+	}
+
+	return res.Balances, nil
+}
+
+// TryRetrieve tries to receive some coins to the account and returns the total balance.
+func (c *Chain) TryRetrieve(ctx context.Context, addr, faucetAddr string) (sdk.Coins, error) {
+	if err := cosmosfaucet.TryRetrieve(ctx, c.ID, c.RPCAddr, faucetAddr, addr); err != nil {
+		return nil, err
+	}
+	return c.balance(ctx, c.RPCAddr, addr)
 }

@@ -50,5 +50,6 @@ func hermesStartHandler(cmd *cobra.Command, args []string) (err error) {
 		cmd.Context(),
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(os.Stdout),
+		hermes.WithStdErr(os.Stderr),
 	)
 }
