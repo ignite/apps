@@ -12,7 +12,7 @@ import (
 func NewHermesKeys() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "keys",
-		Short: "manage the Hermes keys",
+		Short: "Manage the Hermes keys",
 	}
 	c.AddCommand(
 		NewHermesKeyAddMnemonic(),
@@ -25,7 +25,7 @@ func NewHermesKeys() *cobra.Command {
 func NewHermesKeyAddMnemonic() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "add [chain-id] [mnemonic]",
-		Short: "add a new key from mnemonic to Hermes relayer",
+		Short: "Add a new key from mnemonic to Hermes relayer",
 		Args:  cobra.ExactArgs(2),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			h, err := hermes.New()
