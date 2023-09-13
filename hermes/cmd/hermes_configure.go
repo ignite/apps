@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"math/big"
 	"os"
+	"relayer/pkg/hermes"
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -15,8 +16,6 @@ import (
 	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-
-	"relayer/pkg/hermes"
 )
 
 const (
