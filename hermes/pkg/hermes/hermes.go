@@ -381,11 +381,10 @@ func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config strin
 	// to also read the output from the configured stdout writer later on.
 	var out bytes.Buffer
 	stdOut = io.MultiWriter(stdOut, &out)
-
 	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
 	if err != nil {
 		// Try to parse stdout as a Hermes formatted error
-		if err := ValidateResult(out.Bytes()); errors.Is(err, ErrResult) {
+		if err := parseErrFromOutput(out.Bytes()); err != nil {
 			return err
 		}
 		// Otherwise return the execution error
@@ -414,6 +413,22 @@ func ValidateResult(data []byte) error {
 	}
 	if r.Status != ResultSuccess {
 		return fmt.Errorf("%w: %v", ErrResult, string(r.Result))
+	}
+	return nil
+}
+
+// parseErrFromOutput parses any error found in the Hermes output.
+// Error are sent to stdout as JSON lines where the last line might
+// contain the final error message returned by Hermes. Previous lines
+// might contain standard logging entries.
+func parseErrFromOutput(out []byte) error {
+	out = bytes.TrimSpace(out)
+	if len(out) > 0 {
+		lines := bytes.Split(out, []byte("\n"))
+		err := ValidateResult(lines[len(lines)-1])
+		if errors.Is(err, ErrResult) {
+			return err
+		}
 	}
 	return nil
 }
