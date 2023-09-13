@@ -1,4 +1,4 @@
-module relayer
+module github.com/ignite/plugins/relayer
 
 go 1.21.1
 
