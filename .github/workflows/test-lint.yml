@@ -22,7 +22,7 @@ jobs:
       - id: set-matrix
         run: |
           PATHS=$(find . -maxdepth 2 -type f -name go.mod -printf '"%h",')
-          echo "matrix=$([${PATHS%?}])" >> $GITHUB_OUTPUT
+          echo "matrix=[${PATHS%?}]" >> $GITHUB_OUTPUT
 
   lint:
     name: 'Lint Go Code: ${{ matrix.package-directory }}'
