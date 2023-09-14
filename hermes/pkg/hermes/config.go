@@ -392,7 +392,7 @@ func WithChainMaxGas(maxGas uint64) ChainOption {
 // WithChainGasPrice set the chain gas price into the Hermes config.
 func WithChainGasPrice(price sdk.Coin) ChainOption {
 	return func(c *Chain) {
-		f, _ := price.Amount.BigInt().Float64() //nolint:typecheck
+		f, _ := price.Amount.BigInt().Float64()
 		c.GasPrice = GasPrice{
 			Denom: price.Denom,
 			Price: f,
