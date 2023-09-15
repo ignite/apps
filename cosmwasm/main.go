@@ -173,7 +173,7 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 		return err
 	}
 
-	fmt.Printf("Created %s in %s\n", outputFilename, outputDir)
+	fmt.Println("Created", filepath.Join(outputDir, outputFilename))
 	return nil
 }
 
