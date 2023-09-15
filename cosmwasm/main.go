@@ -125,7 +125,7 @@ func replaceWordsInFile(filePath, targetWord, replacement string) error {
 	modifiedContent := strings.ReplaceAll(string(content), targetWord, replacement)
 
 	// Write the modified content back to the file
-	err = os.WriteFile(filePath, []byte(modifiedContent), 0644)
+	err = os.WriteFile(filePath, []byte(modifiedContent), 0o644)
 	if err != nil {
 		return err
 	}
@@ -162,7 +162,7 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 	outputPath := filepath.Join(outputDir, outputFilename)
 
 	// Write the embedded content to the output file
-	err = os.WriteFile(outputPath, sourceContent, 0644)
+	err = os.WriteFile(outputPath, sourceContent, 0o644)
 	if err != nil {
 		return err
 	}
@@ -220,24 +220,6 @@ func createNewFiles(chainName string) error {
 			return err
 		}
 	}
-
-	return nil
-}
-
-// For future versions..
-func modifyExistingFiles() error {
-	// Modify existingFile1.go
-	content, err := os.ReadFile("existingFile1.go")
-	if err != nil {
-		return err
-	}
-	modifiedContent := string(content) + "\n// Additional content for existingFile1.go"
-	err = os.WriteFile("existingFile1.go", []byte(modifiedContent), 0644)
-	if err != nil {
-		return err
-	}
-
-	// Similarly, modify other existing files...
 
 	return nil
 }
