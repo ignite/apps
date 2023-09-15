@@ -66,14 +66,14 @@ func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
 	switch cmd.Use {
 	case "add":
-		return handleAddCommand(p)
+		return p.handleAddCommand()
 	default:
 		return fmt.Errorf("unknown command: %s", cmd.Use)
 	}
 }
 
-func handleAddCommand(p *p) error {
-	fmt.Println("Adding stuff...")
+func (p *p) handleAddCommand() error {
+	fmt.Println("Updating app files...")
 
 	err := installDependencies()
 	if err != nil {
