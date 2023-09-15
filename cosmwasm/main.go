@@ -36,15 +36,6 @@ func NewPlugin(chainName string) *p {
 	}
 }
 
-// ChainName returns the chainName of the plugin.
-func (p *p) ChainName() string {
-	return p.chainName
-}
-
-// ChainNamed derives and returns the chainNamed of the plugin.
-func (p *p) ChainNamed() string {
-	return p.chainName + "d"
-}
 func (p) Manifest() (plugin.Manifest, error) {
 	return plugin.Manifest{
 		Name: "cosmwasm",
@@ -89,7 +80,7 @@ func handleAddCommand(p *p) error {
 		return err
 	}
 
-	err = createNewFiles(p)
+	err = createNewFiles(p.chainName)
 	if err != nil {
 		return err
 	}
@@ -144,7 +135,7 @@ func replaceWordsInFile(filePath, targetWord, replacement string) error {
 	return nil
 }
 
-func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
+func createFile(inputFilename, outputDir, outputFilename string, chainName string) error {
 
 	// Load the embedded template files
 	templatesFS, err := fs.Sub(templates, "wasm-wiring")
@@ -177,7 +168,7 @@ func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
 	}
 
 	// Replace chainName in the output file
-	err = replaceWordsInFile(outputPath, "planet", p.ChainName())
+	err = replaceWordsInFile(outputPath, "planet", chainName)
 	if err != nil {
 		return err
 	}
@@ -186,7 +177,7 @@ func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
 	return nil
 }
 
-func createNewFiles(p *p) error {
+func createNewFiles(chainName string) error {
 	files := []struct {
 		template, outDir, outFile string
 	}{
@@ -217,14 +208,14 @@ func createNewFiles(p *p) error {
 		},
 		{
 			template: "root.txt",
-			outDir:   filepath.Join("cmd", p.ChainNamed(), "cmd"),
+			outDir:   filepath.Join("cmd", chainName+"d", "cmd"),
 			outFile:  "root.go",
 		},
 		// TODO: Add any other templates as needed
 	}
 
 	for _, f := range files {
-		err := createFile(f.template, f.outDir, f.outFile, p)
+		err := createFile(f.template, f.outDir, f.outFile, chainName)
 		if err != nil {
 			return err
 		}
