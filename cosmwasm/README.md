@@ -21,18 +21,18 @@ $ cd planet
 
 4. Add cosmwasm plugin within your project directory:
 ```
-ignite plugin add /absolute/path/to/plugin/cosmwasm-plugin
+ignite plugin add github.com/ignite/plugins/cosmwasm
 ```
 
 or globally
 
 ```
-ignite plugin add -g /absolute/path/to/plugin/osmwasm-plugin
+ignite plugin add -g github.com/ignite/plugins/cosmwasm
 ```
 
 5. Run command
 ```
-$ ignite cosmwasm-plugin add
+$ ignite cosmwasm add
 ```
 
 6. Launch your chain with CosmWasm support

@@ -1,4 +1,4 @@
-module cosmwasm-plugin
+module github.com/ignite/plugins/cosmwasm
 
 go 1.19
 
