@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -126,7 +125,7 @@ func installDependencies() error {
 
 func replaceWordsInFile(filePath, targetWord, replacement string) error {
 	// Read content from the file
-	content, err := ioutil.ReadFile(filePath)
+	content, err := os.ReadFile(filePath)
 	if err != nil {
 		return err
 	}
@@ -135,7 +134,7 @@ func replaceWordsInFile(filePath, targetWord, replacement string) error {
 	modifiedContent := strings.ReplaceAll(string(content), targetWord, replacement)
 
 	// Write the modified content back to the file
-	err = ioutil.WriteFile(filePath, []byte(modifiedContent), 0644)
+	err = os.WriteFile(filePath, []byte(modifiedContent), 0644)
 	if err != nil {
 		return err
 	}
@@ -172,7 +171,7 @@ func createFile(inputFilename, outputDir, outputFilename string, p *p) error {
 	outputPath := filepath.Join(outputDir, outputFilename)
 
 	// Write the embedded content to the output file
-	err = ioutil.WriteFile(outputPath, sourceContent, 0644)
+	err = os.WriteFile(outputPath, sourceContent, 0644)
 	if err != nil {
 		return err
 	}
