@@ -22,7 +22,11 @@ func (p) Manifest() (plugin.Manifest, error) {
 	m := plugin.Manifest{
 		Name: "hermes",
 	}
-	m.ImportCobraCommand(cmd.NewRelayer(), "ignite")
+	cobraCmd, err := cmd.NewRelayer()
+	if err != nil {
+		return m, err
+	}
+	m.ImportCobraCommand(cobraCmd, "ignite")
 	return m, nil
 }
 
@@ -33,7 +37,11 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	// Remove the first arg "ignite" from OSArgs because our network
 	// command root is "network" not "ignite".
 	os.Args = c.OSArgs[1:]
-	return cmd.NewRelayer().Execute()
+	cobraCmd, err := cmd.NewRelayer()
+	if err != nil {
+		return err
+	}
+	return cobraCmd.Execute()
 }
 
 func (p) ExecuteHookPre(plugin.ExecutedHook) error {

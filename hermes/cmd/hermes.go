@@ -12,7 +12,7 @@ const (
 
 // NewRelayer creates a new relayer command that holds
 // some other sub commands related to hermes relayer.
-func NewRelayer() *cobra.Command {
+func NewRelayer() (*cobra.Command, error) {
 	c := &cobra.Command{
 		Use:           "hermes [command]",
 		Aliases:       []string{"h"},
@@ -22,7 +22,11 @@ func NewRelayer() *cobra.Command {
 	}
 
 	// configure flags.
-	c.PersistentFlags().StringP(flagConfig, "c", hermes.DefaultConfigPath(), "path to Hermes config file")
+	defaultPath, err := hermes.DefaultConfigPath()
+	if err != nil {
+		return nil, err
+	}
+	c.PersistentFlags().StringP(flagConfig, "c", defaultPath, "path to Hermes config file")
 
 	// add sub commands.
 	c.AddCommand(
@@ -32,7 +36,7 @@ func NewRelayer() *cobra.Command {
 		NewHermesExecute(),
 	)
 
-	return c
+	return c, nil
 }
 
 func getConfig(cmd *cobra.Command) string {

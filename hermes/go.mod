@@ -1,6 +1,6 @@
 module github.com/ignite/apps/hermes
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/cosmos/cosmos-sdk v0.47.5
