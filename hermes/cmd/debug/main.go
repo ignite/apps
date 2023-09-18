@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"relayer/cmd"
+	"github.com/ignite/plugins/relayer/cmd"
 )
 
 func main() {

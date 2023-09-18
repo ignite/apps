@@ -6,6 +6,7 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"io"
 	"os"
@@ -71,6 +72,9 @@ const (
 	// ResultError is the api result status error.
 	ResultError = "error"
 )
+
+// ErrResult indicates that Hermes binary returned an error.
+var ErrResult = errors.New("result error")
 
 type (
 	// Flags represents the Hermes run flags.
@@ -372,7 +376,21 @@ func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config strin
 
 	cmd = append(cmd, args...)
 
-	return exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
+	// Hermes returns JSON formatted errors to stdout when something fails during execution.
+	// A secondary buffer is used to be able to read the error output and to allow the caller
+	// to also read the output from the configured stdout writer later on.
+	var out bytes.Buffer
+	stdOut = io.MultiWriter(stdOut, &out)
+	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
+	if err != nil {
+		// Try to parse stdout as a Hermes formatted error
+		if err := parseErrFromOutput(out.Bytes()); err != nil {
+			return err
+		}
+		// Otherwise return the execution error
+		return err
+	}
+	return nil
 }
 
 // UnmarshalResult unmarshal the command result into a interface.
@@ -394,7 +412,23 @@ func ValidateResult(data []byte) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("result error: %v", string(r.Result))
+		return fmt.Errorf("%w: %v", ErrResult, string(r.Result))
+	}
+	return nil
+}
+
+// parseErrFromOutput parses any error found in the Hermes output.
+// Error are sent to stdout as JSON lines where the last line might
+// contain the final error message returned by Hermes. Previous lines
+// might contain standard logging entries.
+func parseErrFromOutput(out []byte) error {
+	out = bytes.TrimSpace(out)
+	if len(out) > 0 {
+		lines := bytes.Split(out, []byte("\n"))
+		err := ValidateResult(lines[len(lines)-1])
+		if errors.Is(err, ErrResult) {
+			return err
+		}
 	}
 	return nil
 }

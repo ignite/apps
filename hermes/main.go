@@ -7,7 +7,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/ignite/services/plugin"
 
-	"relayer/cmd"
+	"github.com/ignite/plugins/relayer/cmd"
 )
 
 func init() {

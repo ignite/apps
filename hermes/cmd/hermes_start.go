@@ -7,7 +7,7 @@ import (
 
 	"github.com/spf13/cobra"
 
-	"relayer/pkg/hermes"
+	"github.com/ignite/plugins/relayer/pkg/hermes"
 )
 
 // NewHermesStart start the hermes relayer.
