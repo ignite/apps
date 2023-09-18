@@ -87,7 +87,6 @@ type (
 	// Hermes represents the hermes binary structure.
 	Hermes struct {
 		path    string
-		binary  []byte
 		cleanup func()
 	}
 
@@ -98,8 +97,8 @@ type (
 	configs struct {
 		flags  Flags
 		config string
-		stdOut io.Writer
-		stdErr io.Writer
+		stdout io.Writer
+		stderr io.Writer
 	}
 )
 
@@ -194,14 +193,14 @@ func WithConfigFile(config string) Option {
 // WithStdOut add a std output.
 func WithStdOut(stdOut io.Writer) Option {
 	return func(c *configs) {
-		c.stdOut = stdOut
+		c.stdout = stdOut
 	}
 }
 
 // WithStdErr add a std error output.
 func WithStdErr(stdErr io.Writer) Option {
 	return func(c *configs) {
-		c.stdErr = stdErr
+		c.stderr = stdErr
 	}
 }
 
@@ -232,7 +231,6 @@ func New() (*Hermes, error) {
 
 	return &Hermes{
 		path:    path,
-		binary:  binary,
 		cleanup: cleanup,
 	}, nil
 }
@@ -240,7 +238,6 @@ func New() (*Hermes, error) {
 // Cleanup clean the temporary Hermes binary.
 func (h *Hermes) Cleanup() error {
 	h.cleanup()
-	h.binary = nil
 	return os.RemoveAll(h.path)
 }
 
@@ -351,12 +348,12 @@ func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) e
 		}
 	}
 
-	stdOut := c.stdOut
+	stdOut := c.stdout
 	if stdOut == nil {
 		stdOut = os.Stdout
 	}
 
-	stderr := c.stdErr
+	stderr := c.stderr
 	if stderr == nil {
 		stderr = os.Stderr
 	}
