@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"explorer/pkg/gex"
 	"net/url"
 	"os"
 
+	"github.com/ignite/plugins/explorer/pkg/gex"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 )
