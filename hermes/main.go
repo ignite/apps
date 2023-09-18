@@ -34,8 +34,8 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.
-	// Remove the first arg "ignite" from OSArgs because our network
-	// command root is "network" not "ignite".
+	// Remove the first arg "ignite" from OSArgs because our relayer
+	// command root is "relayer" not "ignite".
 	os.Args = c.OSArgs[1:]
 	cobraCmd, err := cmd.NewRelayer()
 	if err != nil {
