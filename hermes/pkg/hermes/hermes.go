@@ -290,7 +290,7 @@ func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option
 	options = append(
 		options,
 		WithFlags(Flags{FlagChain: chainID}),
-		WithArgs(string(cmdCreate), string(cmdClient)),
+		WithArgs(string(cmdKeys), string(cmdKeysList)),
 	)
 	return h.Run(ctx, options...)
 }

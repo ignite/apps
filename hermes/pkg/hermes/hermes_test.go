@@ -2,7 +2,7 @@ package hermes
 
 import (
 	"encoding/json"
-	"fmt"
+	"errors"
 	"reflect"
 	"testing"
 
