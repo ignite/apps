@@ -26,7 +26,7 @@ func (p) Manifest() (plugin.Manifest, error) {
 	if err != nil {
 		return m, err
 	}
-	m.ImportCobraCommand(cobraCmd, "ignite")
+	m.ImportCobraCommand(cobraCmd, "relayer")
 	return m, nil
 }
 

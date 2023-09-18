@@ -97,6 +97,7 @@ type (
 	configs struct {
 		flags  Flags
 		config string
+		args   []string
 		stdout io.Writer
 		stderr io.Writer
 	}
@@ -176,6 +177,13 @@ type (
 	}
 )
 
+// WithArgs assigns the command args.
+func WithArgs(args ...string) Option {
+	return func(c *configs) {
+		c.args = args
+	}
+}
+
 // WithFlags assigns the command flags.
 func WithFlags(flags Flags) Option {
 	return func(c *configs) {
@@ -243,13 +251,15 @@ func (h *Hermes) Cleanup() error {
 
 // AddKey adds a new key file into the Hermes.
 func (h *Hermes) AddKey(ctx context.Context, chainID, keyfile string, options ...Option) error {
-	options = append(options, WithFlags(
-		Flags{
+	options = append(
+		options,
+		WithFlags(Flags{
 			FlagChain:        chainID,
 			FlagMnemonicFile: keyfile,
-		},
-	))
-	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
+		}),
+		WithArgs(string(cmdKeys), string(cmdKeysAdd)),
+	)
+	return h.Run(ctx, options...)
 }
 
 // AddMnemonic creates a new temporary key file based on the mnemonic and add into the Hermes.
@@ -264,19 +274,25 @@ func (h *Hermes) AddMnemonic(ctx context.Context, chainID, mnemonic string, opti
 		return err
 	}
 
-	options = append(options, WithFlags(
-		Flags{
+	options = append(
+		options,
+		WithFlags(Flags{
 			FlagChain:        chainID,
 			FlagMnemonicFile: f.Name(),
-		},
-	))
-	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysAdd)}, options...)
+		}),
+		WithArgs(string(cmdKeys), string(cmdKeysAdd)),
+	)
+	return h.Run(ctx, options...)
 }
 
 // KeysList list all available Hermes keys.
 func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option) error {
-	options = append(options, WithFlags(Flags{FlagChain: chainID}))
-	return h.RunCmd(ctx, []string{string(cmdKeys), string(cmdKeysList)}, options...)
+	options = append(
+		options,
+		WithFlags(Flags{FlagChain: chainID}),
+		WithArgs(string(cmdCreate), string(cmdClient)),
+	)
+	return h.Run(ctx, options...)
 }
 
 // CreateClient creates a new relayer client.
@@ -287,7 +303,8 @@ func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain str
 			FlagReferenceChain: referenceChain,
 		},
 	))
-	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdClient)}, options...)
+	options = append(options, WithArgs(string(cmdCreate), string(cmdClient)))
+	return h.Run(ctx, options...)
 }
 
 // CreateConnection creates a new relayer connection.
@@ -299,7 +316,8 @@ func (h *Hermes) CreateConnection(ctx context.Context, chainA, clientA, clientB 
 			FlagClientB: clientB,
 		},
 	))
-	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdConnection)}, options...)
+	options = append(options, WithArgs(string(cmdCreate), string(cmdConnection)))
+	return h.Run(ctx, options...)
 }
 
 // CreateChannel creates a new relayer channel.
@@ -312,7 +330,8 @@ func (h *Hermes) CreateChannel(ctx context.Context, chainA, connA, portA, portB 
 			FlagPortB:       portB,
 		},
 	))
-	return h.RunCmd(ctx, []string{string(cmdCreate), string(cmdChannel)}, options...)
+	options = append(options, WithArgs(string(cmdCreate), string(cmdChannel)))
+	return h.Run(ctx, options...)
 }
 
 // QueryChannels query all Hermes channels based in a chain id.
@@ -323,23 +342,37 @@ func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain
 	if showCounterparty {
 		flags[FlagShowCounterparty] = true
 	}
-	options = append(options, WithFlags(flags))
-	return h.RunCmd(ctx, []string{string(cmdQuery), string(cmdChannels)}, options...)
+	options = append(
+		options,
+		WithFlags(flags),
+		WithArgs(string(cmdQuery), string(cmdChannels)),
+	)
+	return h.Run(ctx, options...)
 }
 
 // Start starts the Hermes relayer.
 func (h *Hermes) Start(ctx context.Context, options ...Option) error {
-	return h.RunCmd(ctx, []string{string(cmdStart)}, options...)
+	options = append(options, WithArgs(string(cmdStart)))
+	return h.Run(ctx, options...)
 }
 
-// RunCmd runs a Hermes command using the options.
-func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) error {
+// Run runs a Hermes command using the options.
+func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	c := configs{}
 	for _, o := range options {
 		o(&c)
 	}
 
-	cmd := args
+	cmd := []string{h.path}
+
+	// the config and json flag should be added before the hermes subcommands
+	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
+	if c.config != "" {
+		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
+	}
+
+	cmd = append(cmd, c.args...)
+
 	for flag, value := range c.flags {
 		if v, ok := value.(bool); ok && v {
 			cmd = append(cmd, fmt.Sprintf("--%s", flag))
@@ -348,9 +381,9 @@ func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) e
 		}
 	}
 
-	stdOut := c.stdout
-	if stdOut == nil {
-		stdOut = os.Stdout
+	stdout := c.stdout
+	if stdout == nil {
+		stdout = os.Stdout
 	}
 
 	stderr := c.stderr
@@ -358,27 +391,12 @@ func (h *Hermes) RunCmd(ctx context.Context, args []string, options ...Option) e
 		stderr = os.Stderr
 	}
 
-	return h.Run(ctx, stdOut, stderr, c.config, cmd...)
-}
-
-// Run runs a Hermes command.
-func (h *Hermes) Run(ctx context.Context, stdOut, stdErr io.Writer, config string, args ...string) error {
-	cmd := []string{h.path}
-
-	// the config and json flag should be added before the hermes subcommands
-	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
-	if config != "" {
-		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, config))
-	}
-
-	cmd = append(cmd, args...)
-
 	// Hermes returns JSON formatted errors to stdout when something fails during execution.
 	// A secondary buffer is used to be able to read the error output and to allow the caller
 	// to also read the output from the configured stdout writer later on.
 	var out bytes.Buffer
-	stdOut = io.MultiWriter(stdOut, &out)
-	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdOut)), exec.StepOption(step.Stderr(stdErr)))
+	stdout = io.MultiWriter(stdout, &out)
+	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdout)), exec.StepOption(step.Stderr(stderr)))
 	if err != nil {
 		// Try to parse stdout as a Hermes formatted error
 		if err := parseErrFromOutput(out.Bytes()); err != nil {
