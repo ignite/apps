@@ -74,7 +74,7 @@ func TestValidateResult(t *testing.T) {
 		{
 			name: "error result",
 			data: []byte(`{"status": "error", "result": "error data"}`),
-			err:  fmt.Errorf(`result error: "error data"`),
+			err:  errors.New(`result error: "error data"`),
 		},
 	}
 	for _, tt := range tests {
