@@ -38,7 +38,7 @@ func TestUnmarshalResult(t *testing.T) {
 			name: "error result",
 			data: []byte(`{"status": "error", "result": {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}}`),
 			v:    &KeysListResult{},
-			err:  fmt.Errorf(`error result (*hermes.KeysListResult) error: {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}`),
+			err:  errors.New(`error result (*hermes.KeysListResult) error: {"wallet":{"account":"cosmos139asl6de8mzxedvvxatp2wdna2n6vy3af62srg","address_type":"Cosmos"}}`),
 		},
 		{
 			name: "unmarshal error",
