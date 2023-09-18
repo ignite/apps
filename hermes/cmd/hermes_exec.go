@@ -27,10 +27,10 @@ func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
 	}
 	defer h.Cleanup()
 
-	options := []hermes.Option{
+	return h.Run(
+		cmd.Context(),
 		hermes.WithArgs(args...),
 		hermes.WithStdOut(os.Stdout),
 		hermes.WithStdOut(os.Stderr),
-	}
-	return h.Run(cmd.Context(), options...)
+	)
 }
