@@ -2,6 +2,8 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 const (
@@ -20,7 +22,7 @@ func NewRelayer() *cobra.Command {
 	}
 
 	// configure flags.
-	c.PersistentFlags().StringP(flagConfig, "c", "", "Use a custom config instead create a new one")
+	c.PersistentFlags().StringP(flagConfig, "c", hermes.DefaultConfigPath(), "path to Hermes config file")
 
 	// add sub commands.
 	c.AddCommand(

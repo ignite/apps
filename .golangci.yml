@@ -1,7 +1,5 @@
 run:
   tests: false
-  skip-dirs:
-    - ignite/ui
   timeout: 5m
 
 linters:

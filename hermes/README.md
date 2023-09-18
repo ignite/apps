@@ -1,18 +1,18 @@
 # relayer
 
-`relayer` is a plugin developed for [Ignite CLI](https://github.com/ignite/cli).
+`relayer` is a app developed for [Ignite CLI](https://github.com/ignite/cli).
 
-The plugin adds `ignite relayer` commands that allow launching new Cosmos blockchains by interacting with the Ignite Chain to coordinate with validators.
+The app adds `ignite relayer` commands that allow launching new Cosmos blockchains by interacting with the Ignite Chain to coordinate with validators.
 
-The plugin is integrated into Ignite CLI by default.
+The app is integrated into Ignite CLI by default.
 
 ## Developer instruction
 
 - clone this repo locally
-- Run `ignite plugin add -g /absolute/path/to/plugin/relayer` to add the plugin to global config
-- `ignite relayer` command is now available with the local version of the plugin.
+- Run `ignite app add -g /absolute/path/to/app/relayer` to add the app to global config
+- `ignite relayer` command is now available with the local version of the app.
 
 Then repeat the following loop:
 
-- Hack on the plugin code
-- Rerun `ignite relayer` to recompile the plugin and test
+- Hack on the app code
+- Rerun `ignite relayer` to recompile the app and test

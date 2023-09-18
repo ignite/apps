@@ -16,7 +16,7 @@ import (
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/plugins/relayer/pkg/hermes"
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 const (

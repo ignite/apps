@@ -7,7 +7,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/ignite/services/plugin"
 
-	"github.com/ignite/plugins/relayer/cmd"
+	"github.com/ignite/apps/hermes/cmd"
 )
 
 func init() {
@@ -36,15 +36,15 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	return cmd.NewRelayer().Execute()
 }
 
-func (p) ExecuteHookPre(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookPre(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookPost(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookPost(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookCleanUp(_ plugin.ExecutedHook) error {
+func (p) ExecuteHookCleanUp(plugin.ExecutedHook) error {
 	return nil
 }
 

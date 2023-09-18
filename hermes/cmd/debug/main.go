@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ignite/plugins/relayer/cmd"
+	"github.com/ignite/apps/hermes/cmd"
 )
 
 func main() {
