@@ -2,4 +2,5 @@
 .idea
 .vscode
 *.test
-go.work
+
+explorer/explorer
