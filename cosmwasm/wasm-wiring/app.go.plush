@@ -111,9 +111,9 @@ import (
 	ibctm "github.com/cosmos/ibc-go/v7/modules/light-clients/07-tendermint"
 	"github.com/spf13/cast"
 
-	planetmodule "planet/x/planet"
-	planetmodulekeeper "planet/x/planet/keeper"
-	planetmoduletypes "planet/x/planet/types"
+	<%=planet%>module "<%=planet%>/x/<%=planet%>"
+	<%=planet%>modulekeeper "<%=planet%>/x/<%=planet%>/keeper"
+	<%=planet%>moduletypes "<%=planet%>/x/<%=planet%>/types"
 
 	// this line is used by starport scaffolding # stargate/app/moduleImport
 
@@ -128,13 +128,13 @@ import (
 	ibcfeekeeper "github.com/cosmos/ibc-go/v7/modules/apps/29-fee/keeper"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
 
-	appparams "planet/app/params"
-	"planet/docs"
+	appparams "<%=planet%>/app/params"
+	"<%=planet%>/docs"
 )
 
 const (
 	AccountAddressPrefix = "cosmos"
-	Name                 = "planet"
+	Name                 = "<%=planet%>"
 )
 
 // this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
@@ -157,7 +157,7 @@ var (
 // These are the ones we will want to use in the code, based on
 // any overrides above
 var (
-	// DefaultNodeHome default home directories for Planet3
+	// DefaultNodeHome default home directories for <%=planet%>3
 	DefaultNodeHome = os.ExpandEnv("$HOME/") + NodeDir
 
 	// Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
@@ -269,7 +269,7 @@ var (
 		ica.AppModuleBasic{},
 		vesting.AppModuleBasic{},
 		consensus.AppModuleBasic{},
-		planetmodule.AppModuleBasic{},
+		<%=planet%>module.AppModuleBasic{},
 		// this line is used by starport scaffolding # stargate/app/moduleBasic
 
 		wasm.AppModuleBasic{},
@@ -353,7 +353,7 @@ type App struct {
 	ScopedICAHostKeeper  capabilitykeeper.ScopedKeeper
 	ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
 
-	PlanetKeeper planetmodulekeeper.Keeper
+	<%=planet%>Keeper <%=planet%>modulekeeper.Keeper
 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
 
 	// mm is the module manager
@@ -402,7 +402,7 @@ func New(
 		govtypes.StoreKey, paramstypes.StoreKey, ibcexported.StoreKey, upgradetypes.StoreKey,
 		feegrant.StoreKey, evidencetypes.StoreKey, ibctransfertypes.StoreKey, icahosttypes.StoreKey,
 		capabilitytypes.StoreKey, group.StoreKey, icacontrollertypes.StoreKey, consensusparamtypes.StoreKey,
-		planetmoduletypes.StoreKey, wasmtypes.StoreKey,
+		<%=planet%>moduletypes.StoreKey, wasmtypes.StoreKey,
 		// this line is used by starport scaffolding # stargate/app/storeKey
 	)
 	tkeys := sdk.NewTransientStoreKeys(paramstypes.TStoreKey)
@@ -664,13 +664,13 @@ func New(
 		),
 	)
 
-	app.PlanetKeeper = *planetmodulekeeper.NewKeeper(
+	app.<%=planet%>Keeper = *<%=planet%>modulekeeper.NewKeeper(
 		appCodec,
-		keys[planetmoduletypes.StoreKey],
-		keys[planetmoduletypes.MemStoreKey],
-		app.GetSubspace(planetmoduletypes.ModuleName),
+		keys[<%=planet%>moduletypes.StoreKey],
+		keys[<%=planet%>moduletypes.MemStoreKey],
+		app.GetSubspace(<%=planet%>moduletypes.ModuleName),
 	)
-	planetModule := planetmodule.NewAppModule(appCodec, app.PlanetKeeper, app.AccountKeeper, app.BankKeeper)
+	<%=planet%>Module := <%=planet%>module.NewAppModule(appCodec, app.<%=planet%>Keeper, app.AccountKeeper, app.BankKeeper)
 
 	// this line is used by starport scaffolding # stargate/app/keeperDefinition
 
@@ -740,7 +740,7 @@ func New(
 		params.NewAppModule(app.ParamsKeeper),
 		transferModule,
 		icaModule,
-		planetModule,
+		<%=planet%>Module,
 		// this line is used by starport scaffolding # stargate/app/appModule
 
 		crisis.NewAppModule(app.CrisisKeeper, skipGenesisInvariants, app.GetSubspace(crisistypes.ModuleName)), // always be last to make sure that it checks for all invariants and not only part of them
@@ -773,7 +773,7 @@ func New(
 		paramstypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		planetmoduletypes.ModuleName,
+		<%=planet%>moduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/beginBlockers
 		wasmtypes.ModuleName,
 	)
@@ -800,7 +800,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		planetmoduletypes.ModuleName,
+		<%=planet%>moduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/endBlockers
 		wasmtypes.ModuleName,
 	)
@@ -832,7 +832,7 @@ func New(
 		upgradetypes.ModuleName,
 		vestingtypes.ModuleName,
 		consensusparamtypes.ModuleName,
-		planetmoduletypes.ModuleName,
+		<%=planet%>moduletypes.ModuleName,
 		// this line is used by starport scaffolding # stargate/app/initGenesis
 
 		wasmtypes.ModuleName,
@@ -1095,7 +1095,7 @@ func initParamsKeeper(appCodec codec.BinaryCodec, legacyAmino *codec.LegacyAmino
 	paramsKeeper.Subspace(ibcexported.ModuleName)
 	paramsKeeper.Subspace(icacontrollertypes.SubModuleName)
 	paramsKeeper.Subspace(icahosttypes.SubModuleName)
-	paramsKeeper.Subspace(planetmoduletypes.ModuleName)
+	paramsKeeper.Subspace(<%=planet%>moduletypes.ModuleName)
 	// this line is used by starport scaffolding # stargate/app/paramSubspace
 
 	return paramsKeeper

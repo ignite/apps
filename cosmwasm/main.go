@@ -11,6 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/gobuffalo/genny/v2"
+	"github.com/gobuffalo/plush/v4"
 	hplugin "github.com/hashicorp/go-plugin"
 
 	"github.com/ignite/cli/ignite/services/plugin"
@@ -63,7 +65,6 @@ func (p) Manifest() (plugin.Manifest, error) {
 func (p *p) Execute(cmd plugin.ExecutedCommand) error {
 
 	// According to the number of declared commands, you may need a switch:
-
 	switch cmd.Use {
 	case "add":
 		return p.handleAddCommand()
@@ -84,9 +85,6 @@ func (p *p) handleAddCommand() error {
 	if err != nil {
 		return err
 	}
-
-	//err = modifyExistingFiles()
-	//if err != nil {return err}
 
 	return nil
 }
@@ -114,27 +112,6 @@ func installDependencies() error {
 	return nil
 }
 
-func replaceWordsInFile(filePath, targetWord, replacement string) error {
-	// Read content from the file
-	content, err := os.ReadFile(filePath)
-	if err != nil {
-		return err
-	}
-
-	// Perform the replacement
-	modifiedContent := strings.ReplaceAll(string(content), targetWord, replacement)
-
-	// Write the modified content back to the file
-	err = os.WriteFile(filePath, []byte(modifiedContent), 0o644)
-	if err != nil {
-		return err
-	}
-
-	//fmt.Printf("Replaced planet with %s\n", replacement)
-
-	return nil
-}
-
 func createFile(inputFilename, outputDir, outputFilename string, chainName string) error {
 
 	// Load the embedded template files
@@ -146,11 +123,10 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 
 	// Open the embedded input file
 	inputFile, err := templatesFS.Open(inputFilename)
-
 	if err != nil {
 		return err
 	}
-	defer inputFile.Close() // This line schedules the file to be closed when the function returns
+	defer inputFile.Close()
 
 	// Read content from the embedded file
 	sourceContent, err := io.ReadAll(inputFile)
@@ -161,19 +137,28 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 	// Construct the output file path
 	outputPath := filepath.Join(outputDir, outputFilename)
 
-	// Write the embedded content to the output file
-	err = os.WriteFile(outputPath, sourceContent, 0o644)
+	// Create a Plush context and set variables
+	ctx := plush.NewContext()
+	ctx.Set("planet", chainName)
+
+	// Render the Plush template using the sourceContent as the template string
+	renderedContent, err := plush.Render(string(sourceContent), ctx)
 	if err != nil {
 		return err
 	}
 
-	// Replace chainName in the output file
-	err = replaceWordsInFile(outputPath, "planet", chainName)
+	// Create a new file with the rendered content
+	g := genny.New()
+	g.File(genny.NewFileS(outputPath, renderedContent))
+
+	// Write the embedded content to the output file
+	err = os.WriteFile(outputPath, []byte(renderedContent), 0o644)
 	if err != nil {
 		return err
 	}
 
 	fmt.Println("Created", filepath.Join(outputDir, outputFilename))
+
 	return nil
 }
 
@@ -182,36 +167,35 @@ func createNewFiles(chainName string) error {
 		template, outDir, outFile string
 	}{
 		{
-			template: "ante.txt",
+			template: "ante.go.plush",
 			outDir:   "app",
 			outFile:  "ante.go",
 		},
 		{
-			template: "wasm.txt",
-			outDir:   "app",
-			outFile:  "wasm.go",
-		},
-		{
-			template: "app.txt",
+			template: "app.go.plush",
 			outDir:   "app",
 			outFile:  "app.go",
 		},
 		{
-			template: "simulation_test.txt",
+			template: "wasm.go.plush",
+			outDir:   "app",
+			outFile:  "wasm.go",
+		},
+		{
+			template: "simulation_test.go.plush",
 			outDir:   "app",
 			outFile:  "simulation_test.go",
 		},
 		{
-			template: "network.txt",
+			template: "network.go.plush",
 			outDir:   "testutil/network",
 			outFile:  "network.go",
 		},
 		{
-			template: "root.txt",
+			template: "root.go.plush",
 			outDir:   filepath.Join("cmd", chainName+"d", "cmd"),
 			outFile:  "root.go",
 		},
-		// TODO: Add any other templates as needed
 	}
 
 	for _, f := range files {
