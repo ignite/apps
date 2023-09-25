@@ -3,6 +3,8 @@ module github.com/ignite/plugins/cosmwasm
 go 1.19
 
 require (
+	github.com/gobuffalo/genny/v2 v2.1.0
+	github.com/gobuffalo/plush/v4 v4.1.16
 	github.com/hashicorp/go-plugin v1.4.9
 	github.com/ignite/cli v0.26.2-0.20230504112712-4324e2ff958f
 )
@@ -22,12 +24,10 @@ require (
 	github.com/go-git/go-billy/v5 v5.4.0 // indirect
 	github.com/go-git/go-git/v5 v5.5.2 // indirect
 	github.com/gobuffalo/flect v0.3.0 // indirect
-	github.com/gobuffalo/genny/v2 v2.1.0 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.3 // indirect
 	github.com/gobuffalo/helpers v0.6.7 // indirect
 	github.com/gobuffalo/logger v1.0.7 // indirect
 	github.com/gobuffalo/packd v1.0.2 // indirect
-	github.com/gobuffalo/plush/v4 v4.1.16 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.4 // indirect
 	github.com/gobuffalo/validate/v3 v3.3.3 // indirect
 	github.com/gofrs/uuid v4.3.0+incompatible // indirect

@@ -1,0 +1,2 @@
+IBCFeeKeeper          ibcfeekeeper.Keeper
+WasmKeeper            wasmkeeper.Keeper

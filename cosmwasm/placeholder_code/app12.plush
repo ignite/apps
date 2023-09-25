@@ -1,0 +1,45 @@
+wasmDir := filepath.Join(homePath, "wasm")
+wasmConfig, err := wasm.ReadWasmConfig(appOpts)
+if err != nil {
+    panic(fmt.Sprintf("error while reading wasm config: %s", err))
+}
+
+// The last arguments can contain custom message handlers, and custom query handlers,
+// if we want to allow any custom callbacks
+availableCapabilities := strings.Join(AllCapabilities(), ",")
+app.WasmKeeper = wasmkeeper.NewKeeper(
+    appCodec,
+    keys[wasmtypes.StoreKey],
+    app.AccountKeeper,
+    app.BankKeeper,
+    app.StakingKeeper,
+    distrkeeper.NewQuerier(app.DistrKeeper),
+    app.IBCFeeKeeper, // ISC4 Wrapper: fee IBC middleware
+    app.IBCKeeper.ChannelKeeper,
+    &app.IBCKeeper.PortKeeper,
+    scopedWasmKeeper,
+    app.TransferKeeper,
+    app.MsgServiceRouter(),
+    app.GRPCQueryRouter(),
+    wasmDir,
+    wasmConfig,
+    availableCapabilities,
+    authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+    wasmOpts...,
+)
+
+// Register the proposal types
+// Deprecated: Avoid adding new handlers, instead use the new proposal flow
+// by granting the governance module the right to execute the message.
+// See: https://docs.cosmos.network/main/modules/gov#proposal-messages
+govRouter := govv1beta1.NewRouter()
+govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
+    AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)). // This should be removed. It is still in place to avoid failures of modules that have not yet been upgraded.
+    AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
+    AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
+
+// The gov proposal types can be individually enabled
+if len(enabledProposals) != 0 {
+    govRouter.AddRoute(wasmtypes.RouterKey, wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, enabledProposals)) //nolint:staticcheck // we still need this despite the deprecation of the gov handler
+}
+

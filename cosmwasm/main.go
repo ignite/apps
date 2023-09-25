@@ -4,6 +4,7 @@ import (
 	"embed"
 	"encoding/gob"
 	"fmt"
+	"html"
 	"io"
 	"io/fs"
 	"os"
@@ -19,6 +20,7 @@ import (
 )
 
 //go:embed wasm-wiring/*
+//go:embed placeholder_code/*
 var templates embed.FS // Embedded template files
 
 func init() {
@@ -117,7 +119,6 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 	// Load the embedded template files
 	templatesFS, err := fs.Sub(templates, "wasm-wiring")
 	if err != nil {
-		fmt.Println("Error:", err)
 		return err
 	}
 
@@ -141,11 +142,23 @@ func createFile(inputFilename, outputDir, outputFilename string, chainName strin
 	ctx := plush.NewContext()
 	ctx.Set("planet", chainName)
 
+	// Read the content of a placeholder code file
+	if inputFilename == "app.go.plush" {
+		for i := 1; i <= 23; i++ {
+			placeholderContent, err := templates.ReadFile(fmt.Sprintf("placeholder_code/app%d.plush", i))
+			if err != nil {
+				return err
+			}
+			ctx.Set(fmt.Sprintf("app%d", i), string(placeholderContent))
+		}
+	}
+
 	// Render the Plush template using the sourceContent as the template string
 	renderedContent, err := plush.Render(string(sourceContent), ctx)
 	if err != nil {
 		return err
 	}
+	renderedContent = html.UnescapeString(renderedContent) // this will do the job
 
 	// Create a new file with the rendered content
 	g := genny.New()
