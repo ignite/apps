@@ -206,14 +206,13 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		bufClientAResult = bytes.Buffer{}
 		clientAResult    = hermes.ClientResult{}
 	)
-	err = h.CreateClient(
+	if err := h.CreateClient(
 		cmd.Context(),
 		chainAID,
 		chainBID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufClientAResult),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 	if err := hermes.UnmarshalResult(bufClientAResult.Bytes(), &clientAResult); err != nil {
@@ -232,14 +231,13 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		bufClientBResult = bytes.Buffer{}
 		clientBResult    = hermes.ClientResult{}
 	)
-	err = h.CreateClient(
+	if err := h.CreateClient(
 		cmd.Context(),
 		chainBID,
 		chainAID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufClientBResult),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 	if err := hermes.UnmarshalResult(bufClientBResult.Bytes(), &clientBResult); err != nil {
@@ -259,15 +257,14 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		bufConnection = bytes.Buffer{}
 		connection    = hermes.ConnectionResult{}
 	)
-	err = h.CreateConnection(
+	if err := h.CreateConnection(
 		cmd.Context(),
 		chainAID,
 		clientAResult.CreateClient.ClientID,
 		clientBResult.CreateClient.ClientID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufConnection),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
 	if err := hermes.UnmarshalResult(bufConnection.Bytes(), &connection); err != nil {
@@ -288,7 +285,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		bufChannel = bytes.Buffer{}
 		channel    = hermes.ConnectionResult{}
 	)
-	err = h.CreateChannel(
+	if err := h.CreateChannel(
 		cmd.Context(),
 		chainAID,
 		connection.ASide.ConnectionID,
@@ -296,11 +293,9 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBPortID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufChannel),
-	)
-	if err != nil {
+	); err != nil {
 		return err
 	}
-
 	if err := hermes.UnmarshalResult(bufChannel.Bytes(), &channel); err != nil {
 		return err
 	}
