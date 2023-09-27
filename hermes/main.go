@@ -22,11 +22,7 @@ func (p) Manifest() (plugin.Manifest, error) {
 	m := plugin.Manifest{
 		Name: "hermes",
 	}
-	cobraCmd, err := cmd.NewRelayer()
-	if err != nil {
-		return m, err
-	}
-	m.ImportCobraCommand(cobraCmd, "relayer")
+	m.ImportCobraCommand(cmd.NewRelayer(), "relayer")
 	return m, nil
 }
 
@@ -37,11 +33,7 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	// Remove the first arg "ignite" from OSArgs because our relayer
 	// command root is "relayer" not "ignite".
 	os.Args = c.OSArgs[1:]
-	cobraCmd, err := cmd.NewRelayer()
-	if err != nil {
-		return err
-	}
-	return cobraCmd.Execute()
+	return cmd.NewRelayer().Execute()
 }
 
 func (p) ExecuteHookPre(plugin.ExecutedHook) error {

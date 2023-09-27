@@ -8,12 +8,7 @@ import (
 )
 
 func main() {
-	cobraCmd, err := cmd.NewRelayer()
-	if err != nil {
-		_, _ = fmt.Fprintln(os.Stderr, err)
-		os.Exit(1)
-	}
-	if err := cobraCmd.Execute(); err != nil {
+	if err := cmd.NewRelayer().Execute(); err != nil {
 		_, _ = fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
 	}

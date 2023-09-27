@@ -7,7 +7,6 @@ import (
 	"fmt"
 	"math/big"
 	"os"
-	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gookit/color"
@@ -123,6 +122,8 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Uint64(flagChainBTrustThresholdNumerator, 1, "trusting threshold numerator of the chain B")
 	c.Flags().Uint64(flagChainATrustThresholdDenominator, 3, "trusting threshold denominator of the chain A")
 	c.Flags().Uint64(flagChainBTrustThresholdDenominator, 3, "trusting threshold denominator of the chain B")
+	c.Flags().String(flagChainAFaucet, "", "faucet URL of the chain A")
+	c.Flags().String(flagChainBFaucet, "", "faucet URL of the chain B")
 
 	c.Flags().Bool(flagTelemetryEnabled, false, "enable hermes telemetry")
 	c.Flags().String(flagTelemetryHost, "127.0.0.1", "hermes telemetry host")
@@ -151,18 +152,34 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID = args[3]
 
 		chainAPortID, _ = cmd.Flags().GetString(flagChainAPortID)
+		chainAFaucet, _ = cmd.Flags().GetString(flagChainAFaucet)
 		chainBPortID, _ = cmd.Flags().GetString(flagChainBPortID)
+		chainBFaucet, _ = cmd.Flags().GetString(flagChainBFaucet)
 		customCfg       = getConfig(cmd)
 	)
 
-	cfgName := strings.Join([]string{args[0], args[3]}, hermes.ConfigNameSeparator)
-	cfgPath, err := hermes.ConfigPath(cfgName)
+	var (
+		hermesCfg *hermes.Config
+		err       error
+	)
+	if customCfg != "" {
+		hermesCfg, err = hermes.LoadConfig(customCfg)
+		if err != nil {
+			return err
+		}
+	} else {
+		hermesCfg, err = newHermesConfig(cmd, args, customCfg)
+		if err != nil {
+			return err
+		}
+	}
+	cfgPath, err := hermesCfg.ConfigPath()
 	if err != nil {
 		return err
 	}
 
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		if err := hermesCreateConfig(cmd, args, customCfg); err != nil {
+		if err := hermesCfg.Save(); err != nil {
 			return err
 		}
 	} else {
@@ -175,7 +192,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 			if !errors.Is(err, promptui.ErrAbort) {
 				return err
 			}
-			if err := hermesCreateConfig(cmd, args, customCfg); err != nil {
+			if err := hermesCfg.Save(); err != nil {
 				return err
 			}
 		}
@@ -191,11 +208,11 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 
 	session.StartSpinner("Verifying chain keys")
 
-	if err := verifyChainKeys(cmd.Context(), session, h, chainAID, cfgPath); err != nil {
+	if err := ensureAccount(cmd.Context(), session, hermesCfg, h, chainAID, chainAFaucet, cfgPath); err != nil {
 		return err
 	}
 
-	if err := verifyChainKeys(cmd.Context(), session, h, chainBID, cfgPath); err != nil {
+	if err := ensureAccount(cmd.Context(), session, hermesCfg, h, chainBID, chainBFaucet, cfgPath); err != nil {
 		return err
 	}
 
@@ -311,7 +328,43 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func verifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Hermes, chainID, cfgPath string) error {
+// ensureAccount ensures the account exists and get found if the faucet is set.
+func ensureAccount(
+	ctx context.Context,
+	session *cliui.Session,
+	hCfg *hermes.Config,
+	h *hermes.Hermes,
+	chainID,
+	faucetAddr,
+	cfgPath string,
+) error {
+	chainAAddr, err := verifyChainKeys(ctx, session, h, chainID, cfgPath)
+	if err != nil {
+		return err
+	}
+	chainA, err := hCfg.Chains.Get(chainID)
+	if err != nil {
+		return err
+	}
+	if faucetAddr != "" {
+		_, err := chainA.TryRetrieve(ctx, chainAAddr, faucetAddr)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// verifyChainKeys verifies if the Hermes has a key for the specific chain,
+// if not,  ask for the user to create one.
+func verifyChainKeys(
+	ctx context.Context,
+	session *cliui.Session,
+	h *hermes.Hermes,
+	chainID,
+	cfgPath string,
+) (string, error) {
+GetKey:
 	var (
 		bufKeysChain    = bytes.Buffer{}
 		keysChainResult = hermes.KeysListResult{}
@@ -322,10 +375,10 @@ func verifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Herm
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufKeysChain),
 	); err != nil {
-		return err
+		return "", err
 	}
 	if err := hermes.UnmarshalResult(bufKeysChain.Bytes(), &keysChainResult); err != nil {
-		return err
+		return "", err
 	}
 	if keysChainResult.Wallet.Account == "" {
 		var chainAMnemonic string
@@ -334,37 +387,39 @@ func verifyChainKeys(ctx context.Context, session *cliui.Session, h *hermes.Herm
 			&chainAMnemonic,
 			cliquiz.Required(),
 		)); err != nil {
-			return err
+			return "", err
 		}
 
 		bufKeysChainAdd := bytes.Buffer{}
-		err := h.AddMnemonic(
+		if err := h.AddMnemonic(
 			ctx,
 			chainID,
 			chainAMnemonic,
 			hermes.WithConfigFile(cfgPath),
 			hermes.WithStdOut(&bufKeysChainAdd),
-		)
-		if err != nil {
-			return err
+		); err != nil {
+			return "", err
 		}
 		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
-			return err
+			return "", err
 		}
+		_ = session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
 
-		return session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
+		goto GetKey
 	}
-	return nil
+	_ = session.Println(color.Green.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
+	return keysChainResult.Wallet.Account, nil
 }
 
-func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) error {
+// newHermesConfig create a new hermes config based in the cmd args.
+func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*hermes.Config, error) {
 	// if a custom config was set, save it in the ignite hermes folder
 	if customCfg != "" {
 		c, err := hermes.LoadConfig(customCfg)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		return c.Save()
+		return c, c.Save()
 	}
 
 	// Create the default hermes config
@@ -427,7 +482,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 	chainAGasMulti := new(big.Float)
 	chainAGasMulti, ok := chainAGasMulti.SetString(chainAGasMultiplier)
 	if !ok {
-		return fmt.Errorf("invalid chain A gas multiplier: %s", chainAGasMultiplier)
+		return nil, fmt.Errorf("invalid chain A gas multiplier: %s", chainAGasMultiplier)
 	}
 
 	optChainA := []hermes.ChainOption{
@@ -462,7 +517,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 	if chainAGasPrice != "" {
 		gasPrice, err := sdk.ParseCoinNormalized(chainAGasPrice)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		optChainA = append(optChainA, hermes.WithChainGasPrice(gasPrice))
 	}
@@ -484,7 +539,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 
 	_, err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	// Add chain B into the config
@@ -516,7 +571,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 	chainBGasMulti := new(big.Float)
 	chainBGasMulti, ok = chainBGasMulti.SetString(chainBGasMultiplier)
 	if !ok {
-		return fmt.Errorf("invalid chain B gas multiplier: %s", chainBGasMultiplier)
+		return nil, fmt.Errorf("invalid chain B gas multiplier: %s", chainBGasMultiplier)
 	}
 
 	optChainB := []hermes.ChainOption{
@@ -551,7 +606,7 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 	if chainBGasPrice != "" {
 		gasPrice, err := sdk.ParseCoinNormalized(chainBGasPrice)
 		if err != nil {
-			return err
+			return nil, err
 		}
 		optChainB = append(optChainB, hermes.WithChainGasPrice(gasPrice))
 	}
@@ -573,8 +628,8 @@ func hermesCreateConfig(cmd *cobra.Command, args []string, customCfg string) err
 
 	_, err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return c.Save()
+	return c, nil
 }

@@ -26,11 +26,14 @@ const (
 type (
 	// Config represents the Hermes config struct.
 	Config struct {
-		Chains    []Chain   `toml:"chains" json:"chains"`
+		Chains    Chains    `toml:"chains" json:"chains"`
 		Global    Global    `toml:"global" json:"global"`
 		Telemetry Telemetry `toml:"telemetry" json:"telemetry"`
 		Mode      Mode      `toml:"mode" json:"mode"`
 	}
+
+	// Chains represents a list of chains.
+	Chains []Chain
 
 	// Chain represents the chain into the Hermes config struct.
 	Chain struct {
@@ -130,6 +133,16 @@ type (
 	ConfigOption func(*Config)
 )
 
+// Get returns the chain by chain id.
+func (c Chains) Get(chainID string) (Chain, error) {
+	for _, chain := range c {
+		if chain.ID == chainID {
+			return chain, nil
+		}
+	}
+	return Chain{}, fmt.Errorf("chain %s not exist", chainID)
+}
+
 // Remove delete the Hermes config file.
 func (c *Config) Remove() error {
 	configPath, err := c.ConfigPath()
@@ -196,13 +209,13 @@ func ConfigPath(cfgName string) (string, error) {
 }
 
 // LoadConfig loads a config from the path.
-func LoadConfig(cfgPath string) (Config, error) {
+func LoadConfig(cfgPath string) (*Config, error) {
 	cfgBytes, err := os.ReadFile(cfgPath)
 	if err != nil {
-		return Config{}, err
+		return nil, err
 	}
-	var cfg Config
-	return cfg, toml.Unmarshal(cfgBytes, &cfg)
+	var cfg *Config
+	return cfg, toml.Unmarshal(cfgBytes, cfg)
 }
 
 // DefaultConfigPath returns the default Hermes config path.
