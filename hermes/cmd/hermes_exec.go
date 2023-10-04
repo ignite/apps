@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
@@ -30,7 +28,7 @@ func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
 	return h.Run(
 		cmd.Context(),
 		hermes.WithArgs(args...),
-		hermes.WithStdOut(os.Stdout),
-		hermes.WithStdOut(os.Stderr),
+		hermes.WithStdOut(cmd.OutOrStdout()),
+		hermes.WithStdOut(cmd.ErrOrStderr()),
 	)
 }

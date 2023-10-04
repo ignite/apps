@@ -1,8 +1,6 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
@@ -38,7 +36,7 @@ func NewHermesKeyAddMnemonic() *cobra.Command {
 				cmd.Context(),
 				args[0],
 				args[1],
-				hermes.WithStdOut(os.Stdout),
+				hermes.WithStdOut(cmd.OutOrStdout()),
 			)
 		},
 	}
@@ -62,7 +60,7 @@ func NewHermesKeyAddFile() *cobra.Command {
 				cmd.Context(),
 				args[0],
 				args[1],
-				hermes.WithStdOut(os.Stdout),
+				hermes.WithStdOut(cmd.OutOrStdout()),
 			)
 		},
 	}
