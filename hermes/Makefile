@@ -26,3 +26,10 @@ test-unit:
 govulncheck:
 	@echo Running govulncheck...
 	@go run golang.org/x/vuln/cmd/govulncheck ./...
+
+help: Makefile
+	@echo
+	@echo " Choose a command run in App's Project, or just run 'make' for install"
+	@echo
+	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
+	@echo
