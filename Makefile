@@ -44,7 +44,7 @@ test: govet govulncheck test-unit test-integration
 
 help: Makefile
 	@echo
-	@echo " Choose a command run in "$(PROJECT_NAME)", or just run 'make' for install"
+	@echo "\n Choose a command run in "$(PROJECT_NAME)", or just run 'make' for install\n"
 	@echo
 	@sed -n 's/^##//p' $< | column -t -s ':' |  sed -e 's/^/ /'
 	@echo
