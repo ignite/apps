@@ -1,4 +1,4 @@
-module github.com/ignite/plugins/explorer
+module github.com/ignite/apps/explorer
 
 go 1.21.0
 
