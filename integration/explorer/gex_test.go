@@ -18,7 +18,7 @@ func TestGexExplorer(t *testing.T) {
 		env     = envtest.New(t)
 		app     = env.Scaffold("github.com/test/explorer")
 
-		pluginRepo = "github.com/ignite/plugins/explorer"
+		pluginRepo = "github.com/ignite/apps/explorer"
 
 		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
 			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())
