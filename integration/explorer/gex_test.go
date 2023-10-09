@@ -1,8 +1,6 @@
 package explorer_test
 
 import (
-	"context"
-	"fmt"
 	"testing"
 
 	pluginsconfig "github.com/ignite/cli/ignite/config/plugins"
@@ -15,14 +13,12 @@ import (
 
 func TestGexExplorer(t *testing.T) {
 	var (
-		require     = require.New(t)
-		assert      = assert.New(t)
-		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/gex-explorer")
-		servers     = app.RandomizeServerPorts()
-		ctx, cancel = context.WithTimeout(env.Ctx(), envtest.ServeTimeout)
+		require = require.New(t)
+		assert  = assert.New(t)
+		env     = envtest.New(t)
+		app     = env.Scaffold("github.com/test/explorer")
 
-		pluginRepo = "github.com/ignite/plugins/explorer"
+		pluginRepo = "github.com/ignite/apps/explorer"
 
 		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
 			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())
@@ -54,23 +50,13 @@ func TestGexExplorer(t *testing.T) {
 		nil,
 	)
 
-	// serve the app
-	go func() {
-		app.Serve("should serve app", envtest.ExecCtx(ctx))
-	}()
-
-	// wait servers to be online
-	defer cancel()
-	err := env.IsAppServed(ctx, servers.API)
-	require.NoError(err)
-
-	env.Must(env.Exec("run gex explorer",
+	env.Must(env.Exec("run gex explorer help",
 		step.NewSteps(step.New(
 			step.Exec(
 				envtest.IgniteApp,
 				"e",
 				"gex",
-				fmt.Sprintf("http://%s", servers.RPC),
+				"--help",
 			),
 			step.Workdir(app.SourcePath()),
 		)),

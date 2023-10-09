@@ -4,9 +4,10 @@ import (
 	"net/url"
 	"os"
 
-	"github.com/ignite/plugins/explorer/pkg/gex"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
+
+	"github.com/ignite/apps/explorer/pkg/gex"
 )
 
 const (
