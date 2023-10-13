@@ -2,9 +2,7 @@
 
 `relayer` is a app developed for [Ignite CLI](https://github.com/ignite/cli).
 
-The app adds `ignite relayer` commands that allow launching new Cosmos blockchains by interacting with the Ignite Chain to coordinate with validators.
-
-The app is integrated into Ignite CLI by default.
+The app adds `ignite relayer hermes` commands to allow IBC communication between two different blockchain apps using [Hermes relayer](https://github.com/informalsystems/hermes).
 
 ## How to use
 
