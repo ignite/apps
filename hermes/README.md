@@ -6,7 +6,7 @@ The app adds `ignite relayer hermes` commands to allow IBC communication between
 
 ## How to use
 
-- run both chain to be relayed.
+- Run both chain to be relayed.
 
 - add the hermes relayer app:
 ```shell
