@@ -2,5 +2,7 @@
 .idea
 .vscode
 *.test
-
+*.app
+go.work
+hermes/hermes
 explorer/explorer
