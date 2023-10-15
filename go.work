@@ -4,6 +4,7 @@ toolchain go1.21.3
 
 use (
 	./explorer
+	./hermes
 	./integration
 	./network
 )

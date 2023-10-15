@@ -38,8 +38,8 @@ jobs:
         with:
           PATTERNS: |
             **/*.go
-            **/go.mod
-            **/go.sum
+            */go.mod
+            */go.sum
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
         with:
