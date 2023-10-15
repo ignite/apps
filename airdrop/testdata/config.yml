@@ -1,0 +1,13 @@
+airdrop_token: ufoo
+
+# balance as dust wallet for each eligible account to be able to perform first action
+dust_wallet: 1
+
+# list of snapshots
+snapshots:
+  - type: staking # Type of snapshot [ staking|liquidity ]
+    denom: uatom # Denom, related coin denom to stake for example, or pair for liquidity pool
+    formula: # TBD
+      type: quadratic
+      value: 2
+    excluded: [ ]     # list of excluded addresses
