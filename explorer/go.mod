@@ -1,6 +1,8 @@
 module github.com/ignite/apps/explorer
 
-go 1.21
+go 1.21.0
+
+toolchain go1.21.3
 
 require (
 	github.com/golangci/golangci-lint v1.54.2
