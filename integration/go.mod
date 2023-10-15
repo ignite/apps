@@ -1,6 +1,6 @@
 module github.com/ignite/apps/integration
 
-go 1.21.1
+go 1.21
 
 require (
 	github.com/ignite/cli v0.27.1
