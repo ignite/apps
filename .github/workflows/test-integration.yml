@@ -40,10 +40,11 @@ jobs:
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
-            **/*.go
-            go.mod
-            go.sum
-            **/testdata/**
+            ${{ matrix.test-path }}/**
+            !${{ matrix.test-path }}/README.md
+            integration/go.mod
+            integration/go.sum
+            integration/${{ matrix.test-path }}/**
 
       - uses: actions/cache@v3
         if: env.GIT_DIFF
