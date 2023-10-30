@@ -1,3 +1,5 @@
+package app
+
 // We pull these out so we can set them with LDFLAGS in the Makefile
 var (
 	NodeDir      = ".wasmd"
@@ -11,7 +13,6 @@ var (
 	// https://github.com/CosmWasm/wasmd/blob/02a54d33ff2c064f3539ae12d75d027d9c665f05/x/wasm/internal/types/proposal.go#L28-L34
 	EnableSpecificProposals = ""
 )
-
 // These constants are derived from the above variables.
 // These are the ones we will want to use in the code, based on
 // any overrides above
@@ -32,11 +33,9 @@ var (
 	// Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
 	Bech32PrefixConsPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
 )
-
 func init() {
 	SetAddressPrefixes()
 }
-
 // SetAddressPrefixes builds the Config with Bech32 addressPrefix and publKeyPrefix for accounts, validators, and consensus nodes and verifies that addreeses have correct format.
 func SetAddressPrefixes() {
 	config := sdk.GetConfig()
@@ -63,7 +62,6 @@ func SetAddressPrefixes() {
 		return nil
 	})
 }
-
 // GetEnabledProposals parses the ProposalsEnabled / EnableSpecificProposals values to
 // produce a list of enabled proposals to pass into wasmd app.
 func GetEnabledProposals() []wasmtypes.ProposalType {

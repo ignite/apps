@@ -1,4 +1,5 @@
-errorsmod "cosmossdk.io/errors"
+
+	errorsmod "cosmossdk.io/errors"
 	wasm "github.com/CosmWasm/wasmd/x/wasm"
 	wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
 	wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
@@ -8,3 +9,4 @@ errorsmod "cosmossdk.io/errors"
 	ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
 	ibcfeekeeper "github.com/cosmos/ibc-go/v7/modules/apps/29-fee/keeper"
 	porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+

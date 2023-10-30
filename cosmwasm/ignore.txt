@@ -1,0 +1,45 @@
+callExpr, ok := n.(*ast.CallExpr)
+		if !ok {
+			return true
+		}
+
+		selExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+		if !ok || selExpr.Sel.Name != "NewBasicManager" {
+			return true
+		}
+
+		modulesToInject, err := getModulesFromPlaceholder(fset, string(placeholderContents[3]))
+		fmt.Println("Modules to inject:", modulesToInject)
+		if err != nil {
+			fmt.Println("Error parsing modules:", err)
+			return false
+		}
+
+		positionToInject := -1
+		for i, arg := range callExpr.Args {
+			sel, ok := arg.(*ast.CompositeLit)
+			if !ok {
+				continue
+			}
+			fmt.Println("Found NewBasicManager call.")
+
+			xSel, ok := sel.Type.(*ast.SelectorExpr)
+			if !ok {
+				continue
+			}
+
+			if xSel.Sel.Name == "AppModuleBasic" {
+				positionToInject = i + 1
+				break
+			}
+			fmt.Println("Found injection position at:", positionToInject)
+
+		}
+
+		if positionToInject != -1 {
+			callExpr.Args = append(callExpr.Args[:positionToInject], append(modulesToInject, callExpr.Args[positionToInject:]...)...)
+		}
+		fmt.Println("Injected the modules.")
+
+		return true
+	})

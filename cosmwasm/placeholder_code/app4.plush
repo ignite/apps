@@ -1,2 +1,1 @@
-wasm.AppModuleBasic{},
-ibcfee.AppModuleBasic{},
+wasm.AppModuleBasic{}, ibcfee.AppModuleBasic{}
