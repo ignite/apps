@@ -51,12 +51,51 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 					}
 				}
 			}
+		case *ast.FuncDecl:
+			// Create a new slice for the updated list of statements
+			newList := []ast.Stmt{}
+			for _, stmt := range x.Body.List {
+				remove := false
+				// Check if it's an assignment statement (for anteHandler)
+				if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+					if len(assignStmt.Rhs) == 1 {
+						if callExpr, ok := assignStmt.Rhs[0].(*ast.CallExpr); ok {
+							if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+								if ident, ok := selExpr.X.(*ast.Ident); ok {
+									if ident.Name == "ante" && selExpr.Sel.Name == "NewAnteHandler" {
+										remove = true
+									}
+								}
+							}
+						}
+					}
+				}
+				// Check if it's an expression statement (for app.SetAnteHandler)
+				if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
+					if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
+						if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+							if ident, ok := selExpr.X.(*ast.Ident); ok {
+								if ident.Name == "app" && selExpr.Sel.Name == "SetAnteHandler" {
+									remove = true
+								}
+							}
+						}
+					}
+				}
+				if !remove {
+					// If the statement should not be removed, include it in the new list.
+					newList = append(newList, stmt)
+				}
+			}
+			// Set the updated list of statements to the function body.
+			x.Body.List = newList
+
 		}
 
 		return true
 	})
 
-	// Second ast.Inspect for inserting new lines and any other logic
+	// Second and other ast.Inspect for inserting new lines and any other logic
 	ast.Inspect(node, func(n ast.Node) bool {
 		//fmt.Printf("Node type: %T at position %v\n", n, fset.Position(n.Pos()))
 
@@ -600,6 +639,89 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 		return true
 	})
+
+	//appending app16-17 plush
+	// Define the new code to be injected
+	newCode = string(placeholderContents[15])
+
+	// Parse the new code to get an AST node
+	newExpr, err := parser.ParseExpr(newCode)
+	if err != nil {
+		fmt.Printf("Could not parse new code: %v\n", err)
+		return err
+	}
+
+	// Traverse the AST to find the SetOrderBeginBlockers call
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for a call expression
+		callExpr, ok := n.(*ast.CallExpr)
+		if !ok {
+			return true // continue searching
+		}
+
+		// Check if the function called is SetOrderBeginBlockers
+		if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+			if selExpr.Sel.Name == "SetOrderBeginBlockers" {
+				// Append the new module name to the end of the call's arguments
+				callExpr.Args = append(callExpr.Args, newExpr)
+
+				return false // stop searching
+			}
+		}
+		// Check if the function called is SetOrderBeginBlockers
+		if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+			if selExpr.Sel.Name == "SetOrderEndBlockers" {
+				// Append the new module name to the end of the call's arguments
+				callExpr.Args = append(callExpr.Args, newExpr)
+
+				return false // stop searching
+			}
+		}
+
+		return true
+	})
+
+	//appending app18 plush
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for Function Declarations
+		funcDecl, ok := n.(*ast.FuncDecl)
+		if !ok {
+			return true
+		}
+
+		// Check if the function name is New
+		if funcDecl.Name.Name != "New" {
+			return true
+		}
+
+		// Now we are inside the New function, look for the genesisModuleOrder variable
+		for _, stmt := range funcDecl.Body.List {
+			// Look for Assign Statements
+			assignStmt, ok := stmt.(*ast.AssignStmt)
+			if !ok {
+				continue
+			}
+
+			// Check if the LHS of the assignment has the identifier we are looking for
+			for _, lhs := range assignStmt.Lhs {
+				ident, ok := lhs.(*ast.Ident)
+				if !ok || ident.Name != "genesisModuleOrder" {
+					continue
+				}
+
+				// We found the genesisModuleOrder assignment, now add the new element
+				if compLit, ok := assignStmt.Rhs[0].(*ast.CompositeLit); ok {
+					compLit.Elts = append(compLit.Elts, newExpr)
+
+					return false // stop searching
+				}
+			}
+		}
+
+		return true
+	})
+
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
