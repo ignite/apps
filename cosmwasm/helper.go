@@ -722,6 +722,62 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return true
 	})
 
+	//injecting app19.plush
+	// Define the new code to be injected
+	newCode = string(placeholderContents[18])
+
+	// Parse the new code to get an AST node
+	newExpr, err = parser.ParseExpr(newCode)
+	if err != nil {
+		fmt.Printf("Could not parse new code: %v\n", err)
+		return err
+	}
+
+	// Convert the expression to a statement
+	newStmt1 := &ast.ExprStmt{X: newExpr}
+
+	// Traverse the AST to find the New function and then the SetInitChainer call
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for Function Declarations
+		funcDecl, ok := n.(*ast.FuncDecl)
+		if !ok {
+			return true
+		}
+
+		// Check if the function name is New
+		if funcDecl.Name.Name != "New" {
+			return true
+		}
+
+		// Now we are inside the New function, look for the SetInitChainer call
+		for i, stmt := range funcDecl.Body.List {
+			// Look for Expression Statements
+			exprStmt, ok := stmt.(*ast.ExprStmt)
+			if !ok {
+				continue
+			}
+
+			// Check if the expression is a call to SetInitChainer
+			callExpr, ok := exprStmt.X.(*ast.CallExpr)
+			if !ok {
+				continue
+			}
+
+			// Check if the function being called is SetInitChainer
+			if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "app" && selExpr.Sel.Name == "SetInitChainer" {
+					// We found the SetInitChainer call, now inject the new statement before it
+					funcDecl.Body.List = append(funcDecl.Body.List[:i], append([]ast.Stmt{newStmt1}, funcDecl.Body.List[i:]...)...)
+
+					return false // stop searching
+				}
+			}
+		}
+
+		return true
+	})
+
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
