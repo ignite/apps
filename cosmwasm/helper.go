@@ -551,6 +551,55 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		ibcRouterDecl.Rhs[0] = newCallExpr
 	}
 
+	//appending app15.plush
+	// Define the new code to be injected
+	newCode := string(placeholderContents[14])
+	// Parse the new code to get an AST node
+	newStmt, err := parser.ParseExpr(newCode)
+	if err != nil {
+		fmt.Printf("Could not parse new code: %v\n", err)
+		return err
+	}
+
+	// Traverse the AST to find the module manager initialization
+
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for an assignment statement (which could be setting up the module manager)
+		assignStmt, ok := n.(*ast.AssignStmt)
+		if !ok {
+			return true // continue searching
+		}
+
+		// Check if the right-hand side of the assignment is a call to module.NewManager
+		callExpr, ok := assignStmt.Rhs[0].(*ast.CallExpr)
+		if !ok {
+			return true // continue searching
+		}
+
+		selExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+		if !ok || selExpr.Sel.Name != "NewManager" {
+			return true // continue searching
+		}
+
+		// Now we have the call to module.NewManager, let's find ibc.NewAppModule
+		for i, arg := range callExpr.Args {
+			call, ok := arg.(*ast.CallExpr)
+			if !ok {
+				continue // not a call expression, skip
+			}
+
+			if sel, ok := call.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := sel.X.(*ast.Ident); ok && ident.Name == "ibc" && sel.Sel.Name == "NewAppModule" {
+					// Found ibc.NewAppModule, insert new module before it
+					callExpr.Args = append(callExpr.Args[:i], append([]ast.Expr{newStmt}, callExpr.Args[i:]...)...)
+
+					return false // stop searching
+				}
+			}
+		}
+
+		return true
+	})
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
@@ -584,6 +633,14 @@ func getModulesFromPlaceholder(fset *token.FileSet, content string) ([]ast.Expr,
 	}
 
 	return modules, nil
+}
+
+// isTargetModule checks if the selector expression matches the target package and method
+func isTargetModule(selExpr *ast.SelectorExpr, targetPkg, targetMethod string) bool {
+	if pkgIdent, ok := selExpr.X.(*ast.Ident); ok {
+		return pkgIdent.Name == targetPkg && selExpr.Sel.Name == targetMethod
+	}
+	return false
 }
 
 func exprToString(fset *token.FileSet, expr ast.Expr) string {
