@@ -1,3 +1,6 @@
+
+scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+
 wasmDir := filepath.Join(homePath, "wasm")
 wasmConfig, err := wasm.ReadWasmConfig(appOpts)
 if err != nil {
@@ -28,18 +31,6 @@ app.WasmKeeper = wasmkeeper.NewKeeper(
     wasmOpts...,
 )
 
-// Register the proposal types
-// Deprecated: Avoid adding new handlers, instead use the new proposal flow
-// by granting the governance module the right to execute the message.
-// See: https://docs.cosmos.network/main/modules/gov#proposal-messages
-govRouter := govv1beta1.NewRouter()
-govRouter.AddRoute(govtypes.RouterKey, govv1beta1.ProposalHandler).
-    AddRoute(paramproposal.RouterKey, params.NewParamChangeProposalHandler(app.ParamsKeeper)). // This should be removed. It is still in place to avoid failures of modules that have not yet been upgraded.
-    AddRoute(upgradetypes.RouterKey, upgrade.NewSoftwareUpgradeProposalHandler(app.UpgradeKeeper)).
-    AddRoute(ibcclienttypes.RouterKey, ibcclient.NewClientProposalHandler(app.IBCKeeper.ClientKeeper))
 
-// The gov proposal types can be individually enabled
-if len(enabledProposals) != 0 {
-    govRouter.AddRoute(wasmtypes.RouterKey, wasmkeeper.NewWasmProposalHandler(app.WasmKeeper, enabledProposals)) //nolint:staticcheck // we still need this despite the deprecation of the gov handler
-}
+
 

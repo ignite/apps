@@ -52,6 +52,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 				}
 			}
 		}
+
 		return true
 	})
 
@@ -311,7 +312,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 		return true
 	})
-	// appending app10.plush
+	// appending app10.plush ()
 	ast.Inspect(node, func(n ast.Node) bool {
 		assignStmt, ok := n.(*ast.AssignStmt)
 		if !ok {
@@ -357,6 +358,199 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return true
 	})
 
+	// appending app12.plush (+ content from app11.plush)
+	ast.Inspect(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.File:
+			// Debugging: Print number of declarations found.
+			fmt.Printf("Found %d declarations in the AST.\n", len(x.Decls))
+
+			// Parse the chunk string into its own AST as statements.
+			chunkAST, err := parser.ParseFile(fset, "", "package main\n func _(){"+string(placeholderContents[11])+"}", parser.ParseComments)
+			if err != nil {
+				fmt.Printf("Parse error: %v\n", err)
+				return false
+			}
+
+			// Debugging: Print the parsed statements.
+			fmt.Printf("Parsed the placeholder contents into %d declarations.\n", len(chunkAST.Decls))
+
+			// We're looking for the first function within the parsed AST since we used a dummy function to parse statements.
+			var chunkStmts []ast.Stmt
+			for _, decl := range chunkAST.Decls {
+				if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+					chunkStmts = funcDecl.Body.List // Extract the statements from the dummy function's body.
+					break
+				}
+			}
+
+			// Debugging: Print the number of statements extracted.
+			fmt.Printf("Extracted %d statements from the placeholder contents.\n", len(chunkStmts))
+
+			// Now we traverse the actual AST of our target file.
+			for i, decl := range x.Decls {
+				funcDecl, ok := decl.(*ast.FuncDecl)
+				if !ok || funcDecl.Name.Name != "New" {
+					continue
+				}
+				fmt.Println("Found 'New' function declaration")
+
+				for stmtIdx, stmt := range funcDecl.Body.List {
+					assignStmt, ok := stmt.(*ast.AssignStmt)
+					if !ok {
+						continue
+					}
+
+					// Check if this assignment statement is the one we're looking for.
+					if len(assignStmt.Lhs) == 1 {
+						if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok && ident.Name == "icaHostIBCModule" {
+							fmt.Printf("Found the 'icaHostIBCModule' assignment at statement index %d\n", stmtIdx)
+
+							// Insert our chunk statements after the identified statement.
+							funcDecl.Body.List = append(funcDecl.Body.List[:stmtIdx+1], append(chunkStmts, funcDecl.Body.List[stmtIdx+1:]...)...)
+
+							// Debugging: Indicate insertion point.
+							fmt.Printf("Inserted chunk statements after 'icaHostIBCModule' assignment.\n")
+
+							// Update the AST in the original file node.
+							x.Decls[i] = funcDecl
+							return false // Stop the inspection if insertion is done.
+						}
+
+					}
+
+				}
+
+			}
+
+		}
+		return true
+	})
+
+	// appending app13.plush
+	ast.Inspect(node, func(n ast.Node) bool {
+		switch x := n.(type) {
+		case *ast.File:
+			// Debugging: Print number of declarations found.
+			fmt.Printf("Found %d declarations in the AST.\n", len(x.Decls))
+
+			// Parse the chunk string into its own AST as statements.
+			chunkAST, err := parser.ParseFile(fset, "", "package main\n func _(){"+string(placeholderContents[12])+"}", parser.ParseComments)
+			if err != nil {
+				fmt.Printf("Parse error: %v\n", err)
+				return false
+			}
+
+			// Debugging: Print the parsed statements.
+			fmt.Printf("Parsed the placeholder contents into %d declarations.\n", len(chunkAST.Decls))
+
+			// We're looking for the first function within the parsed AST since we used a dummy function to parse statements.
+			var chunkStmts []ast.Stmt
+			for _, decl := range chunkAST.Decls {
+				if funcDecl, ok := decl.(*ast.FuncDecl); ok {
+					chunkStmts = funcDecl.Body.List // Extract the statements from the dummy function's body.
+					break
+				}
+			}
+
+			// Now we traverse the actual AST of our target file.
+			for i, decl := range x.Decls {
+				funcDecl, ok := decl.(*ast.FuncDecl)
+				if !ok || funcDecl.Name.Name != "New" {
+					continue
+				}
+				fmt.Println("Found 'New' function declaration")
+
+				for stmtIdx, stmt := range funcDecl.Body.List {
+					// Check if this statement is an expression statement.
+					exprStmt, ok := stmt.(*ast.ExprStmt)
+					if !ok {
+						continue
+					}
+
+					// Check if the expression is a call expression.
+					callExpr, ok := exprStmt.X.(*ast.CallExpr)
+					if !ok {
+						continue
+					}
+
+					// Now we need to determine if this call expression is `app.CapabilityKeeper.Seal()`
+					selectorExpr, ok := callExpr.Fun.(*ast.SelectorExpr)
+					if !ok {
+						continue
+					}
+
+					// Check if the selector expression matches our target method call.
+					if ident, ok := selectorExpr.X.(*ast.SelectorExpr); ok {
+						if xIdent, ok := ident.X.(*ast.Ident); ok && xIdent.Name == "app" &&
+							ident.Sel.Name == "CapabilityKeeper" && selectorExpr.Sel.Name == "Seal" {
+
+							fmt.Printf("Found the 'app.CapabilityKeeper.Seal()' call at statement index %d\n", stmtIdx)
+
+							// Insert our chunk statements after the identified statement.
+							funcDecl.Body.List = append(funcDecl.Body.List[:stmtIdx+1], append(chunkStmts, funcDecl.Body.List[stmtIdx+1:]...)...)
+
+							// Debugging: Indicate insertion point.
+							fmt.Printf("Inserted chunk statements after 'app.CapabilityKeeper.Seal()'.\n")
+
+							// Update the AST in the original file node.
+							x.Decls[i] = funcDecl
+							return false // Stop the inspection if insertion is done.
+						}
+					}
+				}
+			}
+		}
+		return true
+	})
+
+	// appending app14.plush
+	// Find the router config assignment
+	var ibcRouterDecl *ast.AssignStmt
+	ast.Inspect(node, func(n ast.Node) bool {
+		if assignStmt, ok := n.(*ast.AssignStmt); ok {
+			// Check that we are assigning to a variable named "ibcRouter"
+			if len(assignStmt.Lhs) > 0 {
+				if ident, ok := assignStmt.Lhs[0].(*ast.Ident); ok && ident.Name == "ibcRouter" {
+					ibcRouterDecl = assignStmt
+					return false // Stop inspecting further
+				}
+			}
+		}
+		return true // Continue inspecting
+	})
+
+	// Insert code after ica route
+	if ibcRouterDecl != nil {
+		// Code to insert
+		newCode := string(placeholderContents[13])
+
+		// Parse the insertion as an expression
+		newExpr, err := parser.ParseExpr(newCode)
+		if err != nil {
+			panic(err) // Handle the error appropriately
+		}
+
+		// Type assert the last argument of the router declaration to *ast.CallExpr
+		lastCallExpr, ok := ibcRouterDecl.Rhs[0].(*ast.CallExpr)
+		if !ok {
+			panic("right-hand side of assignment is not a call expression")
+		}
+
+		// Create a new call expression appending the new route
+		// Assuming that lastCallExpr is the end of the call chain where we want to add the new route
+		newCallExpr := &ast.CallExpr{
+			Fun: &ast.SelectorExpr{
+				X:   lastCallExpr,
+				Sel: newExpr.(*ast.CallExpr).Fun.(*ast.SelectorExpr).Sel,
+			},
+			Args: newExpr.(*ast.CallExpr).Args,
+		}
+
+		// Update the AST by setting the new call expression
+		ibcRouterDecl.Rhs[0] = newCallExpr
+	}
+
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
@@ -375,7 +569,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 }
 
-// helper for app4.plush injextions
+// helper for app4.plush injections
 func getModulesFromPlaceholder(fset *token.FileSet, content string) ([]ast.Expr, error) {
 	moduleStrings := strings.Split(content, ",")
 	var modules []ast.Expr

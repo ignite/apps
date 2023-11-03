@@ -1,1 +1,1 @@
-AddRoute(wasmtypes.ModuleName, wasmStack).
+ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
