@@ -778,6 +778,121 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return true
 	})
 
+	//injecting app20.plush
+	// Parse the new code to get an AST node
+	newStmts, err := parser.ParseFile(fset, "", "package main\nfunc _() {"+string(placeholderContents[19])+"}", parser.ParseComments)
+	if err != nil {
+		fmt.Printf("Could not parse new code: %v\n", err)
+		return err
+	}
+
+	// Extract the block statement from the parsed code
+	newBlockStmt := newStmts.Decls[0].(*ast.FuncDecl).Body
+
+	// Traverse the AST to find the New function and then the SetEndBlocker call
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for Function Declarations
+		funcDecl, ok := n.(*ast.FuncDecl)
+		if !ok {
+			return true
+		}
+
+		// Check if the function name is New
+		if funcDecl.Name.Name != "New" {
+			return true
+		}
+
+		// Now we are inside the New function, look for the SetEndBlocker call
+		for i, stmt := range funcDecl.Body.List {
+			// Look for Expression Statements
+			exprStmt, ok := stmt.(*ast.ExprStmt)
+			if !ok {
+				continue
+			}
+
+			// Check if the expression is a call to SetEndBlocker
+			callExpr, ok := exprStmt.X.(*ast.CallExpr)
+			if !ok {
+				continue
+			}
+
+			// Check if the function being called is SetEndBlocker
+			if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+				if ident, ok := selExpr.X.(*ast.Ident); ok && ident.Name == "app" && selExpr.Sel.Name == "SetEndBlocker" {
+					// We found the SetEndBlocker call, now inject the new block statement after it
+					funcDecl.Body.List = append(funcDecl.Body.List[:i+1], append(newBlockStmt.List, funcDecl.Body.List[i+1:]...)...)
+
+					return false // stop searching
+				}
+			}
+		}
+
+		return true
+	})
+
+	//injecting app21.plush
+
+	// Parse the new code to get an AST node
+	newStmts, err = parser.ParseFile(fset, "", "package main\nfunc _() {"+string(placeholderContents[20])+"}", parser.ParseComments)
+	if err != nil {
+		fmt.Printf("Could not parse new code: %v\n", err)
+		return err
+	}
+
+	// Extract the block statement from the parsed code
+	newBlockStmt = newStmts.Decls[0].(*ast.FuncDecl).Body
+
+	// Traverse the AST to find the if loadLatest statement
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Look for If Statements
+		ifStmt, ok := n.(*ast.IfStmt)
+		if !ok {
+			return true
+		}
+
+		// Check if the condition is a comparison with loadLatest
+		if ident, ok := ifStmt.Cond.(*ast.Ident); ok && ident.Name == "loadLatest" {
+			// We found the if loadLatest statement, now inject the new block statement inside it
+			ifStmt.Body.List = append(newBlockStmt.List, ifStmt.Body.List...)
+			return false // stop searching
+		}
+
+		return true
+	})
+
+	//injecting app22.plush
+	// Parse the code chunk as a statement by wrapping it in a function
+	wrappedCodeChunk := fmt.Sprintf("package main\nfunc _() {\n%s\n}", string(placeholderContents[21]))
+	tempFile, err := parser.ParseFile(fset, "", wrappedCodeChunk, parser.ParseComments)
+	if err != nil {
+		fmt.Printf("Could not parse wrapped code chunk: %v\n", err)
+		return err
+	}
+	injectStmt := tempFile.Decls[0].(*ast.FuncDecl).Body.List[0]
+
+	// Traverse the AST to find the New function
+	ast.Inspect(node, func(n ast.Node) bool {
+		// Check if this is a function declaration
+		funcDecl, ok := n.(*ast.FuncDecl)
+		if !ok || funcDecl.Name.Name != "New" {
+			return true // not the "New" function, skip to the next node
+		}
+
+		// Look for the specific assignment statement
+		for i, stmt := range funcDecl.Body.List {
+			if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+				if selectorExpr, ok := assignStmt.Lhs[0].(*ast.SelectorExpr); ok {
+					if ident, ok := selectorExpr.X.(*ast.Ident); ok && ident.Name == "app" && selectorExpr.Sel.Name == "ScopedTransferKeeper" {
+						// Found the assignment, now inject the new statement after it
+						funcDecl.Body.List = append(funcDecl.Body.List[:i+1], append([]ast.Stmt{injectStmt}, funcDecl.Body.List[i+1:]...)...)
+						return false // we've done our injection, no need to traverse further
+					}
+				}
+			}
+		}
+		return true
+	})
+
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
