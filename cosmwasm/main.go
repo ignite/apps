@@ -4,10 +4,7 @@ import (
 	"embed"
 	"encoding/gob"
 	"fmt"
-	"go/ast"
-	"go/format"
-	"go/parser"
-	"go/token"
+
 	"html"
 	"io"
 	"io/fs"
@@ -96,12 +93,6 @@ func (p *p) handleAddCommand() error {
 	if err != nil {
 		return err
 	}
-	/*
-		err = modifyAppGo(p.chainName)
-		if err != nil {
-			return err
-		}
-	*/
 
 	return nil
 }
@@ -120,13 +111,13 @@ func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
 
 func modifyFiles(chainName string) error {
 	files := []struct {
-		template, outDir, outFile string
+		outDir, outFile string
 	}{
 
 		{
-			template: "app_47_3.go.plush",
-			outDir:   "app",
-			outFile:  "app.go",
+
+			outDir:  "app",
+			outFile: "app.go",
 		},
 	}
 
@@ -247,183 +238,6 @@ func createNewFiles(chainName string) error {
 
 	for _, f := range files {
 		err := createFile(f.template, f.outDir, f.outFile, chainName)
-		if err != nil {
-			return err
-		}
-	}
-
-	return nil
-}
-
-func modifyAppGoHelper(inputFilename, outputDir, outputFilename string, chainName string) error {
-
-	// Load the embedded template files
-	templatesFS, err := fs.Sub(templates, "wasm-wiring")
-	if err != nil {
-		return err
-	}
-
-	// Open the embedded input file
-	inputFile, err := templatesFS.Open(inputFilename)
-	if err != nil {
-		return err
-	}
-	defer inputFile.Close()
-
-	// Read content from the embedded file
-	sourceContent, err := io.ReadAll(inputFile)
-	if err != nil {
-		return err
-	}
-
-	// Construct the output file path
-	outputPath := filepath.Join(outputDir, outputFilename)
-
-	// Create a Plush context and set variables
-	ctx := plush.NewContext()
-	ctx.Set("planet", chainName)
-	//ctx.Set("ModulePath", chainName)
-	//ctx.Set("BinaryNamePrefix", chainName)
-	//ctx.Set("AddressPrefix", "cosmos")
-
-	// Render the Plush template using the sourceContent as the template string
-	renderedContent, err := plush.Render(string(sourceContent), ctx)
-	if err != nil {
-		return err
-	}
-	renderedContent = html.UnescapeString(renderedContent)
-
-	// Create a new file with the rendered content
-	g := genny.New()
-	g.File(genny.NewFileS(outputPath, renderedContent))
-
-	// Write the embedded content to the output file
-	err = os.WriteFile(outputPath, []byte(renderedContent), 0o644)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Created", filepath.Join(outputDir, outputFilename))
-
-	// Parse the Go file to get the AST.
-	fset := token.NewFileSet()
-	node, err := parser.ParseFile(fset, filepath.Join(outputDir, outputFilename), nil, parser.ParseComments)
-	if err != nil {
-		return err
-	}
-
-	const maxFiles = 23
-	placeholderContents := make([][]byte, maxFiles)
-
-	for i := 1; i <= maxFiles; i++ {
-		content, err := templates.ReadFile(fmt.Sprintf("placeholder_code/app%d.plush", i))
-		if err != nil {
-			return err
-		}
-		placeholderContents[i-1] = content
-		fmt.Printf("Content of placeholder %d: %s\n", i, string(content))
-	}
-
-	// Traverse the AST and identify the places where you want to modify the code.
-	ast.Inspect(node, func(n ast.Node) bool {
-		switch x := n.(type) {
-		case *ast.File:
-			// Parse the chunk string into its own AST.
-			chunkAST, err := parser.ParseFile(fset, "", placeholderContents[2], parser.ParseComments)
-			if err != nil {
-				return false
-			}
-			// Extract the declarations from the chunk's AST.
-			chunkDecls := chunkAST.Decls
-			for i, decl := range x.Decls {
-				if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Name.Name == "getGovProposalHandlers" {
-					// Insert the chunkDecls before the current function declaration.
-					x.Decls = append(x.Decls[:i], append(chunkDecls, x.Decls[i:]...)...)
-					break
-				}
-			}
-
-		case *ast.GenDecl:
-			// For import block
-			if x.Tok == token.IMPORT {
-				// Insert placeholderContents[0] at the beginning of the import block
-				spec := &ast.ImportSpec{
-					Path: &ast.BasicLit{
-						Kind:  token.STRING,
-						Value: string(placeholderContents[0]),
-					},
-				}
-				// Insert the new spec at the beginning of the Specs slice
-				newSpecs := []ast.Spec{spec}
-				for _, s := range x.Specs {
-					newSpecs = append(newSpecs, s)
-				}
-				x.Specs = newSpecs
-
-				// Append placeholderContent2 at the end of the import block
-				spec2 := &ast.ImportSpec{
-					Path: &ast.BasicLit{
-						Kind:  token.STRING,
-						Value: string(placeholderContents[1]),
-					},
-				}
-				x.Specs = append(x.Specs, spec2)
-			}
-
-		}
-		return true
-	})
-
-	// Construct the output file path.
-	outputPath = filepath.Join(outputDir, outputFilename)
-
-	// Write the modified AST back to the file.
-	outputFile, err := os.Create(outputPath)
-	if err != nil {
-		return err
-	}
-	defer outputFile.Close()
-
-	err = format.Node(outputFile, fset, node)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println("Modified", outputPath)
-
-	return nil
-
-}
-
-func replaceInString(s, old, new string) string {
-	return string([]byte(s))
-}
-
-// Helper to find index of decl in slice
-func indexOfDecl(decls []ast.Decl, decl ast.Decl) int {
-	for i, d := range decls {
-		if d == decl {
-			return i
-		}
-	}
-	return -1
-}
-
-func modifyAppGo(chainName string) error {
-	files := []struct {
-		template, outDir, outFile string
-	}{
-
-		{
-			template: "app_47_3.go.plush",
-			outDir:   "app",
-			outFile:  "app.go",
-		},
-	}
-
-	for _, f := range files {
-
-		err := modifyAppGoHelper(f.template, f.outDir, f.outFile, chainName)
 		if err != nil {
 			return err
 		}
