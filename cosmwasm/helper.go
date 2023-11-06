@@ -893,6 +893,25 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return true
 	})
 
+	//injecting app23.plush
+	// Parse the function to inject as a declaration
+	wrappedFunctionToInject := fmt.Sprintf("package main\n%s", string(placeholderContents[22]))
+	tempFile, err = parser.ParseFile(fset, "", wrappedFunctionToInject, parser.ParseComments)
+	if err != nil {
+		fmt.Printf("Could not parse wrapped function to inject: %v\n", err)
+		return err
+	}
+	injectFuncDecl := tempFile.Decls[0].(*ast.FuncDecl)
+
+	// Find the end of the New function and inject the new function after it
+	for i, decl := range node.Decls {
+		if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Name.Name == "New" {
+			// Inject the new function declaration after the New function
+			node.Decls = append(node.Decls[:i+1], append([]ast.Decl{injectFuncDecl}, node.Decls[i+1:]...)...)
+			break
+		}
+	}
+
 	// Write the modified AST back to the file.
 	outputFile, err := os.Create(filepath.Join(outputDir, outputFilename))
 	if err != nil {
