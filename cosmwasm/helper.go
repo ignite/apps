@@ -52,50 +52,97 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 				}
 			}
 		case *ast.FuncDecl:
-			// Create a new slice for the updated list of statements
-			newList := []ast.Stmt{}
-			for _, stmt := range x.Body.List {
-				remove := false
-				// Check if it's an assignment statement (for anteHandler)
-				if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
-					if len(assignStmt.Rhs) == 1 {
-						if callExpr, ok := assignStmt.Rhs[0].(*ast.CallExpr); ok {
+			// New consolidated code handling multiple checks within FuncDecl nodes
+			if x.Name.Name == "New" || x.Name.Name == "main" { // Assuming main is also of interest
+				newList := []ast.Stmt{}
+				for _, stmt := range x.Body.List {
+					remove := false
+
+					// Check if it's an expression statement.
+					if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
+						if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
 							if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+								// Check if the function call is "SetLegacyRouter"
 								if ident, ok := selExpr.X.(*ast.Ident); ok {
-									if ident.Name == "ante" && selExpr.Sel.Name == "NewAnteHandler" {
-										remove = true
+									if ident.Name == "govKeeper" && selExpr.Sel.Name == "SetLegacyRouter" {
+										remove = true // Remove govKeeper.SetLegacyRouter
+									}
+									if ident.Name == "app" && selExpr.Sel.Name == "SetAnteHandler" {
+										remove = true // Remove app.SetAnteHandler
 									}
 								}
 							}
 						}
 					}
-				}
-				// Check if it's an expression statement (for app.SetAnteHandler)
-				if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
-					if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
-						if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
-							if ident, ok := selExpr.X.(*ast.Ident); ok {
-								if ident.Name == "app" && selExpr.Sel.Name == "SetAnteHandler" {
-									remove = true
+
+					// Check for assignment statements, specifically the anteHandler creation
+					if assignStmt, ok := stmt.(*ast.AssignStmt); ok {
+						if len(assignStmt.Rhs) == 1 {
+							if callExpr, ok := assignStmt.Rhs[0].(*ast.CallExpr); ok {
+								if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+									if ident, ok := selExpr.X.(*ast.Ident); ok {
+										if ident.Name == "ante" && selExpr.Sel.Name == "NewAnteHandler" {
+											remove = true // Remove anteHandler assignment
+										}
+									}
 								}
 							}
 						}
 					}
+
+					if !remove {
+						newList = append(newList, stmt)
+					}
 				}
-				if !remove {
-					// If the statement should not be removed, include it in the new list.
-					newList = append(newList, stmt)
-				}
+				x.Body.List = newList
 			}
-			// Set the updated list of statements to the function body.
-			x.Body.List = newList
-
 		}
-
-		return true
+		return true // Continue traversing the AST
 	})
 
-	// Second and other ast.Inspect for inserting new lines and any other logic
+	// Traverse the AST to find the New() function.
+	ast.Inspect(node, func(n ast.Node) bool {
+		funcDecl, ok := n.(*ast.FuncDecl)
+		if !ok {
+			return true // Not a FuncDecl, skip to next node
+		}
+
+		// Check if the function name is "New"
+		if funcDecl.Name.Name != "New" {
+			return true // Not the "New" function, skip to next node
+		}
+
+		// We are in the right function, now look for the specific line to remove.
+		newList := []ast.Stmt{}
+		for _, stmt := range funcDecl.Body.List {
+			remove := false
+
+			// Check if it's an expression statement.
+			if exprStmt, ok := stmt.(*ast.ExprStmt); ok {
+				if callExpr, ok := exprStmt.X.(*ast.CallExpr); ok {
+					if selExpr, ok := callExpr.Fun.(*ast.SelectorExpr); ok {
+						// Check if the function call is "SetLegacyRouter"
+						if ident, ok := selExpr.X.(*ast.Ident); ok {
+							if ident.Name == "govKeeper" && selExpr.Sel.Name == "SetLegacyRouter" {
+								remove = true // This is the line we want to remove.
+							}
+						}
+					}
+				}
+			}
+
+			if !remove {
+				// If the statement should not be removed, include it in the new list.
+				newList = append(newList, stmt)
+			}
+		}
+
+		// Replace the function's statements with the new list.
+		funcDecl.Body.List = newList
+		return false // We found what we were looking for; no need to continue.
+	})
+
+	// From this ast.Inspect we inject logic
 	ast.Inspect(node, func(n ast.Node) bool {
 		//fmt.Printf("Node type: %T at position %v\n", n, fset.Position(n.Pos()))
 
@@ -106,7 +153,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 			if x.Tok == token.IMPORT {
 				fmt.Println("Inside the import block.")
 
-				// Insert placeholderContents[0] at the beginning of the import block
+				// Insert app1.plush at the beginning of the import block
 				spec := &ast.ImportSpec{
 					Path: &ast.BasicLit{
 						Kind:  token.STRING,
@@ -120,17 +167,33 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 				}
 				x.Specs = newSpecs
 
-				// Append placeholderContent2 at the end of the import block
-				spec2 := &ast.ImportSpec{
-					Path: &ast.BasicLit{
-						Kind:  token.STRING,
-						Value: string(placeholderContents[1]),
-					},
+				// Append  app2.plush  at the end of the import block
+				var insertAfterIndex int = -1
+				for i, spec := range x.Specs {
+					if importSpec, ok := spec.(*ast.ImportSpec); ok {
+						// Check if the import path matches the one we want to insert after
+						if importSpec.Path.Value == `"planet6/x/planet6/types"` {
+							insertAfterIndex = i
+							break
+						}
+					}
 				}
-				x.Specs = append(x.Specs, spec2)
+
+				// If the specific import is found, insert the new import after it
+				if insertAfterIndex != -1 {
+					specToInsert := &ast.ImportSpec{
+						Path: &ast.BasicLit{
+							Kind:  token.STRING,
+							Value: string(placeholderContents[1]),
+						},
+					}
+					// Insert the new spec after the found import
+					x.Specs = append(x.Specs[:insertAfterIndex+1], append([]ast.Spec{specToInsert}, x.Specs[insertAfterIndex+1:]...)...)
+				}
 			}
 
 		case *ast.File:
+			//injecting app3.plush
 			// Parse the chunk string into its own AST.
 			chunkAST, err := parser.ParseFile(fset, "", placeholderContents[2], parser.ParseComments)
 			if err != nil {
@@ -148,7 +211,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 		}
 
-		//append app4.plush
+		//injecting app4.plush
 		callExpr, ok := n.(*ast.CallExpr)
 		if !ok {
 			return true
@@ -852,8 +915,8 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 		// Check if the condition is a comparison with loadLatest
 		if ident, ok := ifStmt.Cond.(*ast.Ident); ok && ident.Name == "loadLatest" {
-			// We found the if loadLatest statement, now inject the new block statement inside it
-			ifStmt.Body.List = append(newBlockStmt.List, ifStmt.Body.List...)
+			// We found the if loadLatest statement, now inject the new block statement at the end of it
+			ifStmt.Body.List = append(ifStmt.Body.List, newBlockStmt.List...)
 			return false // stop searching
 		}
 
