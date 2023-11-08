@@ -8,7 +8,7 @@ require (
 	github.com/ignite/cli v0.27.1
 	github.com/ignite/ignite-files/gex v0.0.1
 	github.com/pkg/errors v0.9.1
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	golang.org/x/tools v0.13.0
 	golang.org/x/vuln v1.0.1
 	mvdan.cc/gofumpt v0.5.0

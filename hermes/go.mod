@@ -11,7 +11,7 @@ require (
 	github.com/ignite/ignite-files/hermes v0.0.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.1.0
-	github.com/spf13/cobra v1.7.0
+	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/tools v0.13.0
 	golang.org/x/vuln v1.0.1
