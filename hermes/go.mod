@@ -1,13 +1,13 @@
 module github.com/ignite/apps/hermes
 
-go 1.21
+go 1.21.1
 
 require (
 	github.com/cosmos/cosmos-sdk v0.47.5
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.5.1
-	github.com/ignite/cli v0.27.2
+	github.com/ignite/cli v0.27.2-0.20231110144902-718f27cb581d
 	github.com/ignite/ignite-files/hermes v0.0.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.1.0
@@ -315,7 +315,7 @@ require (
 	google.golang.org/genproto v0.0.0-20230706204954-ccb25ca9f130 // indirect
 	google.golang.org/genproto/googleapis/api v0.0.0-20230629202037-9506855d4529 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
-	google.golang.org/grpc v1.56.2 // indirect
+	google.golang.org/grpc v1.56.3 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect

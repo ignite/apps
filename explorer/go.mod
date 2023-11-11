@@ -1,11 +1,11 @@
 module github.com/ignite/apps/explorer
 
-go 1.21.0
+go 1.21.1
 
 require (
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/hashicorp/go-plugin v1.5.1
-	github.com/ignite/cli v0.27.2
+	github.com/ignite/cli v0.27.2-0.20231110144902-718f27cb581d
 	github.com/ignite/ignite-files/gex v0.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0
@@ -229,7 +229,7 @@ require (
 	golang.org/x/term v0.13.0 // indirect
 	golang.org/x/text v0.13.0 // indirect
 	google.golang.org/genproto/googleapis/rpc v0.0.0-20230711160842-782d3b101e98 // indirect
-	google.golang.org/grpc v1.56.2 // indirect
+	google.golang.org/grpc v1.56.3 // indirect
 	google.golang.org/protobuf v1.31.0 // indirect
 	gopkg.in/ini.v1 v1.67.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
