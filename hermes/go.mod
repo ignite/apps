@@ -7,7 +7,7 @@ require (
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.5.1
-	github.com/ignite/cli v0.27.1
+	github.com/ignite/cli v0.27.2
 	github.com/ignite/ignite-files/hermes v0.0.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.1.0
