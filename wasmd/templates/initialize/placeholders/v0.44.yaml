@@ -1,0 +1,159 @@
+changes: 
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/moduleImport
+    text: |  
+      "strings"
+      wasm "github.com/CosmWasm/wasmd/x/wasm"
+      wasmkeeper "github.com/CosmWasm/wasmd/x/wasm/keeper"
+      wasmtypes "github.com/CosmWasm/wasmd/x/wasm/types"
+      tmproto "github.com/cometbft/cometbft/proto/tendermint/types"
+      ibcfee "github.com/cosmos/ibc-go/v7/modules/apps/29-fee"
+      ibcfeekeeper "github.com/cosmos/ibc-go/v7/modules/apps/29-fee/keeper"
+      porttypes "github.com/cosmos/ibc-go/v7/modules/core/05-port/types"
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/wasm/app/enabledProposals
+    text: |  
+      // We pull these out so we can set them with LDFLAGS in the Makefile
+      var (
+        NodeDir      = ".wasmd"
+        Bech32Prefix = "wasm"
+
+        // If EnabledSpecificProposals is "", and this is "true", then enable all x/wasm proposals.
+        // If EnabledSpecificProposals is "", and this is not "true", then disable all x/wasm proposals.
+        ProposalsEnabled = "false"
+        // If set to non-empty string it must be comma-separated list of values that are all a subset
+        // of "EnableAllProposals" (takes precedence over ProposalsEnabled)
+        // https://github.com/CosmWasm/wasmd/blob/02a54d33ff2c064f3539ae12d75d027d9c665f05/x/wasm/internal/types/proposal.go#L28-L34
+        EnableSpecificProposals = ""
+      )
+      // These constants are derived from the above variables.
+      // These are the ones we will want to use in the code, based on
+      // any overrides above
+      var (
+        // Bech32PrefixAccAddr defines the Bech32 prefix of an account's address
+        Bech32PrefixAccAddr = Bech32Prefix
+        // Bech32PrefixAccPub defines the Bech32 prefix of an account's public key
+        Bech32PrefixAccPub = Bech32Prefix + sdk.PrefixPublic
+        // Bech32PrefixValAddr defines the Bech32 prefix of a validator's operator address
+        Bech32PrefixValAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator
+        // Bech32PrefixValPub defines the Bech32 prefix of a validator's operator public key
+        Bech32PrefixValPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixOperator + sdk.PrefixPublic
+        // Bech32PrefixConsAddr defines the Bech32 prefix of a consensus node address
+        Bech32PrefixConsAddr = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus
+        // Bech32PrefixConsPub defines the Bech32 prefix of a consensus node public key
+        Bech32PrefixConsPub = Bech32Prefix + sdk.PrefixValidator + sdk.PrefixConsensus + sdk.PrefixPublic
+      )
+     
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/moduleBasic
+    text: |  
+      wasm.AppModuleBasic{},
+      ibcfee.AppModuleBasic{},
+
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/maccPerms
+    text: |
+      wasmtypes.ModuleName: {authtypes.Burner},
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/keeperDeclaration
+    text: |
+      IBCFeeKeeper ibcfeekeeper.Keeper 
+      WasmKeeper wasmkeeper.Keeper
+      ScopedWasmKeeper     capabilitykeeper.ScopedKeeper
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/storeKey
+    text: |
+      wasmtypes.StoreKey,
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/scopedKeeper
+    text: |
+      scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+      wasmOpts := app.fetchWasmOptionFromAppAOpts(appOpts)
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/keeperDefinition
+    text: |
+      wasmDir := filepath.Join(homePath, "wasm")
+      wasmConfig, err := wasm.ReadWasmConfig(appOpts)
+        if err != nil {
+          panic(fmt.Sprintf("error while reading wasm config: %s", err))
+        }
+
+      // The last arguments can contain custom message handlers, and custom query handlers,
+      // if we want to allow any custom callbacks
+      availableCapabilities := strings.Join(AllCapabilities(), ",")
+      app.WasmKeeper = wasmkeeper.NewKeeper(
+          appCodec,
+          keys[wasmtypes.StoreKey],
+          app.AccountKeeper,
+          app.BankKeeper,
+          app.StakingKeeper,
+          distrkeeper.NewQuerier(app.DistrKeeper),
+          app.IBCFeeKeeper, // ISC4 Wrapper: fee IBC middleware
+          app.IBCKeeper.ChannelKeeper,
+          &app.IBCKeeper.PortKeeper,
+          scopedWasmKeeper,
+          app.TransferKeeper,
+          app.MsgServiceRouter(),
+          app.GRPCQueryRouter(),
+          wasmDir,
+          wasmConfig,
+          availableCapabilities,
+          authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+          wasmOpts...,
+      )
+  - placeholder: |-
+      // this line is used by starport scaffolding # ibc/app/router
+    text: |
+      var wasmStack porttypes.IBCModule
+      wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCFeeKeeper)
+      wasmStack = ibcfee.NewIBCMiddleware(wasmStack, app.IBCFeeKeeper)
+      ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/appModule
+    text: |
+      wasm.NewAppModule(appCodec, &app.WasmKeeper, app.StakingKeeper, app.AccountKeeper, app.BankKeeper, app.MsgServiceRouter(), app.GetSubspace(wasmtypes.ModuleName)),
+
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/beginBlockers
+    text: | 
+      wasmtypes.ModuleName,
+    
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/endBlockers
+    text: |
+      wasmtypes.ModuleName,
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/initGenesis
+    text: | 
+      wasmtypes.ModuleName,
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/beforeInitReturn
+    text: |
+      app.ScopedWasmKeeper = scopedWasmKeeper
+      app.setAnteHandler(encodingConfig.TxConfig, wasmConfig, keys[wasmtypes.StoreKey])
+      
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/paramSubspace
+    text: |
+      paramsKeeper.Subspace(wasmtypes.ModuleName)
+  - placeholder: |-
+      // this line is used by starport scaffolding # stargate/app/beforeInitReturn
+    text: |
+      app.setPostHandler()
+
+        if loadLatest {
+          ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
+
+          // Initialize pinned codes in wasmvm as they are not persisted there
+          if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
+            tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
+          }
+        }
+  
+replace:
+  - 
+    before: |-
+      app.SetAnteHandler(anteHandler)
+    after: |- 
+      _ = anteHandler
+      app.setAnteHandler(encodingConfig.TxConfig, wasmConfig, keys[wasmtypes.StoreKey])
