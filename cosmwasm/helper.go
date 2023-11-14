@@ -172,7 +172,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 				for i, spec := range x.Specs {
 					if importSpec, ok := spec.(*ast.ImportSpec); ok {
 						// Check if the import path matches the one we want to insert after
-						if importSpec.Path.Value == `"planet6/x/planet6/types"` {
+						if importSpec.Path.Value == fmt.Sprintf("\"%s/x/%s/types\"", chainName, chainName) {
 							insertAfterIndex = i
 							break
 						}
