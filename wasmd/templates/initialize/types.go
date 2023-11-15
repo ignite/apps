@@ -1,8 +1,6 @@
 package initialize
 
 import (
-	"fmt"
-
 	"gopkg.in/yaml.v2"
 )
 
@@ -26,12 +24,9 @@ type ReplaceItem struct {
 func parsePlaceHoldersFromYaml(path string) (Changes, error) {
 	changes := Changes{}
 	source, err := placeholders.ReadFile(path)
-	fmt.Println(path)
 	if err != nil {
 		return Changes{}, err
 	}
-	fmt.Println(string(source))
-
 	if err := yaml.Unmarshal(source, &changes); err != nil {
 		return Changes{}, err
 	}
