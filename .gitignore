@@ -6,3 +6,4 @@
 go.work
 hermes/hermes
 explorer/explorer
+wasmd/wasmd
