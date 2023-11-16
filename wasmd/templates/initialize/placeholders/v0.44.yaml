@@ -142,18 +142,36 @@ changes:
       app.setPostHandler()
 
         if loadLatest {
+          if err := app.LoadLatestVersion(); err != nil {
+            logger.Error("error on loading last version", "err", err)
+            os.Exit(1)
+          }
           ctx := app.BaseApp.NewUncachedContext(true, tmproto.Header{})
 
-          // Initialize pinned codes in wasmvm as they are not persisted there
-          if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
-            tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
-          }
+        // Initialize pinned codes in wasmvm as they are not persisted there
+        if err := app.WasmKeeper.InitializePinnedCodes(ctx); err != nil {
+          tmos.Exit(fmt.Sprintf("failed initialize pinned codes %s", err))
         }
+      }
   
 replace:
   - 
     before: |-
-      app.SetAnteHandler(anteHandler)
+      app.SetAnteHandler\(anteHandler\)
     after: |- 
       _ = anteHandler
       app.setAnteHandler(encodingConfig.TxConfig, wasmConfig, keys[wasmtypes.StoreKey])
+
+  -
+    before: |-
+      \t+if loadLatest \{\n\t+if err := app.LoadLatestVersion\(\); err != nil \{\n\t+tmos.Exit\(err.Error\(\)\)\n\t+\}\n\t+\}
+    after: |- 
+      // This lines below commented by wasmd plugin 
+      // if loadLatest {
+      // 	if err := app.LoadLatestVersion(); err != nil {
+      // 		tmos.Exit(err.Error())
+      // 	}
+      // }
+  
+
+

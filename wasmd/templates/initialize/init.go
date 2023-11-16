@@ -3,6 +3,7 @@ package initialize
 import (
 	"embed"
 	"path/filepath"
+	"regexp"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
@@ -87,9 +88,12 @@ func appModify(replacer placeholder.Replacer, opts *InitOptions) genny.RunFn {
 			return err
 		}
 		for before, after := range rp {
-			content = replacer.Replace(content, string(before), string(after))
+			reg, err := regexp.Compile(string(before))
+			if err != nil {
+				return err
+			}
+			content = reg.ReplaceAllString(content, string(after))
 		}
-
 		newFile := genny.NewFileS(path, content)
 
 		return r.File(newFile)
