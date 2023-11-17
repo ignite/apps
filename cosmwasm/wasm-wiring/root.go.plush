@@ -283,7 +283,6 @@ func (a appCreator) newApp(
 		db,
 		traceStore,
 		true,
-		wasmtypes.EnableAllProposals,
 		skipUpgradeHeights,
 		cast.ToString(appOpts.Get(flags.FlagHome)),
 		cast.ToUint(appOpts.Get(server.FlagInvCheckPeriod)),
@@ -326,7 +325,6 @@ func (a appCreator) appExport(
 		db,
 		traceStore,
 		height == -1, // -1: no height provided
-		wasmtypes.EnableAllProposals,
 		map[int64]bool{},
 		homePath,
 		uint(1),

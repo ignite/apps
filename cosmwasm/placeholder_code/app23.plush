@@ -11,6 +11,7 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, wasmConfig wasmtypes.Wa
 			IBCKeeper:         app.IBCKeeper,
 			WasmConfig:        &wasmConfig,
 			TXCounterStoreKey: txCounterStoreKey,
+			WasmKeeper:        &app.WasmKeeper,
 		},
 	)
 	if err != nil {
@@ -18,4 +19,3 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, wasmConfig wasmtypes.Wa
 	}
 	app.SetAnteHandler(anteHandler)
 }
-

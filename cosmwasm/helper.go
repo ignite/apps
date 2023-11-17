@@ -20,7 +20,7 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return err
 	}
 
-	const maxFiles = 23
+	const maxFiles = 24
 	placeholderContents := make([][]byte, maxFiles)
 
 	for i := 1; i <= maxFiles; i++ {
@@ -368,52 +368,55 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 
 		return false
 	})
+	/*
+		// appending app8.plush andd app9.plush
+		ast.Inspect(node, func(n ast.Node) bool {
+			fs := token.NewFileSet()
 
-	// appending app8.plush andd app9.plush
-	ast.Inspect(node, func(n ast.Node) bool {
-		fs := token.NewFileSet()
+			// Parse the placeholder content into AST
+			placeholderAST, err := parser.ParseFile(fs, "", "package main; func _dummyFunc("+string(placeholderContents[7])+") {}", 0)
+			if err != nil {
+				panic(err)
+			}
 
-		// Parse the placeholder content into AST
-		placeholderAST, err := parser.ParseFile(fs, "", "package main; func _dummyFunc("+string(placeholderContents[7])+") {}", 0)
-		if err != nil {
-			panic(err)
-		}
+			// Check if the current node is a function declaration
+			funcDecl, ok := n.(*ast.FuncDecl)
+			if !ok || funcDecl.Name.Name != "New" {
+				return true
+			}
 
-		// Check if the current node is a function declaration
-		funcDecl, ok := n.(*ast.FuncDecl)
-		if !ok || funcDecl.Name.Name != "New" {
+				// Find the parameter 'loadLatest bool' and insert after it
+				for i, param := range funcDecl.Type.Params.List {
+					if len(param.Names) > 0 && param.Names[0].Name == "loadLatest" {
+						// Insert new parameter after it
+						funcDecl.Type.Params.List = append(funcDecl.Type.Params.List, nil)
+						copy(funcDecl.Type.Params.List[i+2:], funcDecl.Type.Params.List[i+1:])
+						funcDecl.Type.Params.List[i+1] = placeholderAST.Decls[0].(*ast.FuncDecl).Type.Params.List[0]
+						break
+					}
+
+				}
+
+
+			placeholderAST, err = parser.ParseFile(fs, "", "package main; func _dummyFunc("+string(placeholderContents[8])+") {}", 0)
+			if err != nil {
+				panic(err)
+			}
+			// Find the parameter 'appOpts servertypes.AppOptions,' and insert after it
+			for i, param := range funcDecl.Type.Params.List {
+				if len(param.Names) > 0 && param.Names[0].Name == "appOpts" {
+					// Insert new parameter after it
+					funcDecl.Type.Params.List = append(funcDecl.Type.Params.List, nil)
+					copy(funcDecl.Type.Params.List[i+2:], funcDecl.Type.Params.List[i+1:])
+					funcDecl.Type.Params.List[i+1] = placeholderAST.Decls[0].(*ast.FuncDecl).Type.Params.List[0]
+					break
+				}
+			}
+
 			return true
-		}
+		})
 
-		// Find the parameter 'loadLatest bool' and insert after it
-		for i, param := range funcDecl.Type.Params.List {
-			if len(param.Names) > 0 && param.Names[0].Name == "loadLatest" {
-				// Insert new parameter after it
-				funcDecl.Type.Params.List = append(funcDecl.Type.Params.List, nil)
-				copy(funcDecl.Type.Params.List[i+2:], funcDecl.Type.Params.List[i+1:])
-				funcDecl.Type.Params.List[i+1] = placeholderAST.Decls[0].(*ast.FuncDecl).Type.Params.List[0]
-				break
-			}
-
-		}
-
-		placeholderAST, err = parser.ParseFile(fs, "", "package main; func _dummyFunc("+string(placeholderContents[8])+") {}", 0)
-		if err != nil {
-			panic(err)
-		}
-		// Find the parameter 'appOpts servertypes.AppOptions,' and insert after it
-		for i, param := range funcDecl.Type.Params.List {
-			if len(param.Names) > 0 && param.Names[0].Name == "appOpts" {
-				// Insert new parameter after it
-				funcDecl.Type.Params.List = append(funcDecl.Type.Params.List, nil)
-				copy(funcDecl.Type.Params.List[i+2:], funcDecl.Type.Params.List[i+1:])
-				funcDecl.Type.Params.List[i+1] = placeholderAST.Decls[0].(*ast.FuncDecl).Type.Params.List[0]
-				break
-			}
-		}
-
-		return true
-	})
+	*/
 	// appending app10.plush ()
 	ast.Inspect(node, func(n ast.Node) bool {
 		assignStmt, ok := n.(*ast.AssignStmt)
@@ -965,6 +968,25 @@ func modifyFilesHelper(outputDir, outputFilename string, chainName string) error
 		return err
 	}
 	injectFuncDecl := tempFile.Decls[0].(*ast.FuncDecl)
+
+	// Find the end of the New function and inject the new function after it
+	for i, decl := range node.Decls {
+		if funcDecl, ok := decl.(*ast.FuncDecl); ok && funcDecl.Name.Name == "New" {
+			// Inject the new function declaration after the New function
+			node.Decls = append(node.Decls[:i+1], append([]ast.Decl{injectFuncDecl}, node.Decls[i+1:]...)...)
+			break
+		}
+	}
+
+	//injecting app24.plush
+	// Parse the function to inject as a declaration
+	wrappedFunctionToInject = fmt.Sprintf("package main\n%s", string(placeholderContents[23]))
+	tempFile, err = parser.ParseFile(fset, "", wrappedFunctionToInject, parser.ParseComments)
+	if err != nil {
+		fmt.Printf("Could not parse wrapped function to inject: %v\n", err)
+		return err
+	}
+	injectFuncDecl = tempFile.Decls[0].(*ast.FuncDecl)
 
 	// Find the end of the New function and inject the new function after it
 	for i, decl := range node.Decls {

@@ -1,5 +1,5 @@
-
 scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+wasmOpts := app.fetchWasmOptionFromAppAOpts(appOpts)
 
 wasmDir := filepath.Join(homePath, "wasm")
 wasmConfig, err := wasm.ReadWasmConfig(appOpts)

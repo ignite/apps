@@ -68,7 +68,6 @@ func DefaultConfig() network.Config {
 				tmdb.NewMemDB(),
 				nil,
 				true,
-				wasmtypes.EnableAllProposals,
 				map[int64]bool{},
 				val.GetCtx().Config.RootDir,
 				0,

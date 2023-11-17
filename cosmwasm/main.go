@@ -134,7 +134,7 @@ func modifyFiles(chainName string) error {
 
 // Install dependencies
 func installDependencies() error {
-	cmd := exec.Command("go", "get", "github.com/CosmWasm/wasmd/x/wasm@v0.41.0")
+	cmd := exec.Command("go", "get", "github.com/CosmWasm/wasmd/x/wasm@v0.44.0")
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -219,21 +219,22 @@ func createNewFiles(chainName string) error {
 			outDir:   "app",
 			outFile:  "wasm.go",
 		},
-		{
-			template: "simulation_test.go.plush",
-			outDir:   "app",
-			outFile:  "simulation_test.go",
-		},
-		{
-			template: "network.go.plush",
-			outDir:   "testutil/network",
-			outFile:  "network.go",
-		},
-		{
-			template: "root.go.plush",
-			outDir:   filepath.Join("cmd", chainName+"d", "cmd"),
-			outFile:  "root.go",
-		},
+		/*
+			{
+				template: "simulation_test.go.plush",
+				outDir:   "app",
+				outFile:  "simulation_test.go",
+			},
+			{
+				template: "network.go.plush",
+				outDir:   "testutil/network",
+				outFile:  "network.go",
+			},
+			{
+				template: "root.go.plush",
+				outDir:   filepath.Join("cmd", chainName+"d", "cmd"),
+				outFile:  "root.go",
+			},*/
 	}
 
 	for _, f := range files {
