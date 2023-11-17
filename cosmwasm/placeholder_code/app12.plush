@@ -1,0 +1,36 @@
+scopedWasmKeeper := app.CapabilityKeeper.ScopeToModule(wasmtypes.ModuleName)
+wasmOpts := app.fetchWasmOptionFromAppAOpts(appOpts)
+
+wasmDir := filepath.Join(homePath, "wasm")
+wasmConfig, err := wasm.ReadWasmConfig(appOpts)
+if err != nil {
+    panic(fmt.Sprintf("error while reading wasm config: %s", err))
+}
+
+// The last arguments can contain custom message handlers, and custom query handlers,
+// if we want to allow any custom callbacks
+availableCapabilities := strings.Join(AllCapabilities(), ",")
+app.WasmKeeper = wasmkeeper.NewKeeper(
+    appCodec,
+    keys[wasmtypes.StoreKey],
+    app.AccountKeeper,
+    app.BankKeeper,
+    app.StakingKeeper,
+    distrkeeper.NewQuerier(app.DistrKeeper),
+    app.IBCFeeKeeper, // ISC4 Wrapper: fee IBC middleware
+    app.IBCKeeper.ChannelKeeper,
+    &app.IBCKeeper.PortKeeper,
+    scopedWasmKeeper,
+    app.TransferKeeper,
+    app.MsgServiceRouter(),
+    app.GRPCQueryRouter(),
+    wasmDir,
+    wasmConfig,
+    availableCapabilities,
+    authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+    wasmOpts...,
+)
+
+
+
+

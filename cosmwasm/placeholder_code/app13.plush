@@ -1,0 +1,3 @@
+var wasmStack porttypes.IBCModule
+wasmStack = wasm.NewIBCHandler(app.WasmKeeper, app.IBCKeeper.ChannelKeeper, app.IBCFeeKeeper)
+wasmStack = ibcfee.NewIBCMiddleware(wasmStack, app.IBCFeeKeeper)
