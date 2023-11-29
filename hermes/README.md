@@ -24,7 +24,7 @@ ignite relayer hermes configure "mars-1" "http://localhost:26649" "http://localh
 
 - start the relayer
 ```shell
-ignite relayer hermes start [chain-a-id] [chain-a-rpc] [flags]
+ignite relayer hermes start [chain-a-id] [chain-b-id] [flags]
 ```
 e.g.:
 ```shell
