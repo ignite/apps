@@ -31,6 +31,7 @@ const (
 	FlagShowCounterparty = "show-counterparty"
 	FlagChain            = "chain"
 	FlagMnemonicFile     = "mnemonic-file"
+	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
 	FlagJSON             = "json"
 )
@@ -65,6 +66,9 @@ const (
 
 	// cmdKeysList is the Hermes keys list command.
 	cmdKeysList subCmd = "list"
+
+	// cmdKeysDelete is the Hermes keys delete command.
+	cmdKeysDelete subCmd = "delete"
 
 	// ResultSuccess is the api result status success.
 	ResultSuccess = "success"
@@ -291,6 +295,19 @@ func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option
 		options,
 		WithFlags(Flags{FlagChain: chainID}),
 		WithArgs(string(cmdKeys), string(cmdKeysList)),
+	)
+	return h.Run(ctx, options...)
+}
+
+// DeleteKey deletes a key from Hermes keys.
+func (h *Hermes) DeleteKey(ctx context.Context, chainID, keyName string, options ...Option) error {
+	options = append(
+		options,
+		WithFlags(Flags{
+			FlagChain:   chainID,
+			FlagKeyName: keyName,
+		}),
+		WithArgs(string(cmdKeys), string(cmdKeysDelete)),
 	)
 	return h.Run(ctx, options...)
 }
