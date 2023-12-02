@@ -33,7 +33,6 @@ const (
 	FlagMnemonicFile     = "mnemonic-file"
 	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
-	FlagJSON             = "json"
 )
 
 const (
@@ -383,7 +382,6 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	cmd := []string{h.path}
 
 	// the config and json flag should be added before the hermes subcommands
-	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
 	if c.config != "" {
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
 	}
