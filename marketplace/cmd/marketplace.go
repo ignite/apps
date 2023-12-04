@@ -6,8 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const appsSearchQuery = "topic:ignite-cli-app language:go stars:>10"
-
 var githubAccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
 
 // NewMarketplace creates a new marketplace command that holds

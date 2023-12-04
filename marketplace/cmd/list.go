@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/dustin/go-humanize"
 	"github.com/google/go-github/v56/github"
@@ -10,16 +11,21 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const descLimit = 50
+const (
+	minStarsFlag     = "min-stars"
+	igniteAppTopic   = "ignite-cli-app"
+	descriptionLimit = 50
+)
 
 // NewList creates a new list command that searches all the ignite apps in GitHub.
 func NewList() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:   "list [query]",
 		Short: "List all the ignite apps",
 		Args:  cobra.MaximumNArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			query := appsSearchQuery
+			minStars, _ := cmd.Flags().GetUint(minStarsFlag)
+			query := fmt.Sprintf("topic:%s language:go stars:>=%d", igniteAppTopic, minStars)
 			if len(args) > 0 {
 				query = args[0] + " " + query
 			}
@@ -44,6 +50,10 @@ func NewList() *cobra.Command {
 			return nil
 		},
 	}
+
+	c.LocalFlags().Uint(minStarsFlag, 10, "Minimum number of stars to search for")
+
+	return c
 }
 
 func searchIgniteApps(ctx context.Context, query, accToken string) ([]*github.Repository, int, error) {
@@ -61,7 +71,7 @@ func printRepoList(sess *cliui.Session, repos []*github.Repository) {
 	for _, repo := range repos {
 		rows = append(rows, []string{
 			repo.GetFullName(),
-			limitTextlength(repo.GetDescription(), descLimit),
+			limitTextlength(repo.GetDescription(), descriptionLimit),
 			humanize.SIWithDigits(float64(repo.GetStargazersCount()), 1, ""),
 			humanize.Time(repo.GetPushedAt().Time),
 		})
