@@ -55,7 +55,7 @@ func NewList() *cobra.Command {
 	return c
 }
 
-func searchIgniteApps(ctx context.Context, query string, minStar uint) ([]*github.Repository, int, error) {
+func searchIgniteApps(ctx context.Context, query string, minStars uint) ([]*github.Repository, int, error) {
 	client := xgithub.NewClient(githubToken)
 
 	opts := &github.SearchOptions{
@@ -66,7 +66,7 @@ func searchIgniteApps(ctx context.Context, query string, minStar uint) ([]*githu
 		xgithub.StringQuery(query),
 		xgithub.LanguageQuery("go"),
 		xgithub.TopicQuery(igniteAppTopic),
-		xgithub.MinStarsQuery(int(10)))
+		xgithub.MinStarsQuery(int(minStars)))
 	if err != nil {
 		return nil, 0, err
 	}
