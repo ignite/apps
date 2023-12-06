@@ -1,0 +1,73 @@
+package explorer_test
+
+import (
+	"bytes"
+	"os"
+	"path/filepath"
+	"regexp"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
+
+	pluginsconfig "github.com/ignite/cli/ignite/config/plugins"
+	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/ignite/services/plugin"
+	envtest "github.com/ignite/cli/integration"
+)
+
+func TestMarketplace(t *testing.T) {
+	var (
+		require = require.New(t)
+		assert  = assert.New(t)
+		env     = envtest.New(t)
+		app     = env.Scaffold("github.com/test/mp")
+
+		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
+			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())
+			require.NoError(err)
+			assert.ElementsMatch(expectedLocalPlugins, localCfg.Apps, "unexpected local apps")
+
+			globalCfgPath, err := plugin.PluginsPath()
+			require.NoError(err)
+			globalCfg, err := pluginsconfig.ParseDir(globalCfgPath)
+			require.NoError(err)
+			assert.ElementsMatch(expectedGlobalPlugins, globalCfg.Apps, "unexpected global apps")
+		}
+	)
+
+	dir, err := os.Getwd()
+	require.NoError(err)
+	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "marketplace")
+
+	env.Must(env.Exec("add marketplace plugin",
+		step.NewSteps(step.New(
+			step.Exec(envtest.IgniteApp, "app", "install", "-g", pluginPath),
+			step.Workdir(app.SourcePath()),
+		)),
+	))
+
+	// one local plugin expected
+	assertPlugins(
+		nil,
+		[]pluginsconfig.Plugin{
+			{
+				Path: pluginPath,
+			},
+		},
+	)
+
+	buf := &bytes.Buffer{}
+	env.Must(env.Exec("run marketplace list",
+		step.NewSteps(step.New(
+			step.Exec(
+				envtest.IgniteApp,
+				"marketplace",
+				"list",
+			),
+			step.Workdir(app.SourcePath()),
+			step.Stdout(buf),
+		)),
+	))
+	assert.Regexp(regexp.MustCompile("🎉 Found [0-9]+ results"), buf.String())
+}

@@ -10,6 +10,7 @@ require (
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/ignite/cli v0.27.1
 	github.com/spf13/cobra v1.8.0
+	github.com/stretchr/testify v1.8.4
 	golang.org/x/tools v0.16.0
 	golang.org/x/vuln v1.0.1
 	mvdan.cc/gofumpt v0.5.0
@@ -208,7 +209,6 @@ require (
 	github.com/ssgreg/nlreturn/v2 v2.2.1 // indirect
 	github.com/stbenjam/no-sprintf-host-port v0.1.1 // indirect
 	github.com/stretchr/objx v0.5.0 // indirect
-	github.com/stretchr/testify v1.8.4 // indirect
 	github.com/subosito/gotenv v1.4.2 // indirect
 	github.com/t-yuki/gocover-cobertura v0.0.0-20180217150009-aaee18c8195c // indirect
 	github.com/tdakkota/asciicheck v0.2.0 // indirect

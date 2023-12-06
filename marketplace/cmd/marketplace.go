@@ -6,7 +6,7 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var githubAccessToken = os.Getenv("GITHUB_ACCESS_TOKEN")
+var githubToken = os.Getenv("GITHUB_TOKEN")
 
 // NewMarketplace creates a new marketplace command that holds
 // some other sub commands related to running marketplace like
@@ -19,7 +19,7 @@ func NewMarketplace() *cobra.Command {
 		Long: `Marketplace is a command line tool that helps you to search for ignite apps
 			using GitHub search API. It also helps you to get more information about an app.
 			Please note that Github API has a very limited rate limit for unauthenticated requests
-			so it's recommended to set GITHUB_ACCESS_TOKEN environment variable to your GitHub access token
+			so it's recommended to set GITHUB_TOKEN environment variable to your GitHub access token
 			if you want to use marketplace commands frequently.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
