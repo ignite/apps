@@ -8,7 +8,7 @@ require (
 	github.com/google/go-github/v56 v56.0.0
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/ignite/cli v0.27.1
+	github.com/ignite/cli v0.27.2-0.20231110144902-718f27cb581d
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 	golang.org/x/tools v0.16.0
