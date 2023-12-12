@@ -4,6 +4,7 @@ go 1.21.1
 
 require (
 	github.com/cosmos/cosmos-sdk v0.47.5
+	github.com/cosmos/go-bip39 v1.0.0
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.5.1
@@ -82,7 +83,6 @@ require (
 	github.com/confio/ics23/go v0.9.0 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.2 // indirect
-	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogoproto v1.4.10 // indirect
 	github.com/cosmos/iavl v0.20.0 // indirect
 	github.com/cosmos/ibc-go/v7 v7.1.0 // indirect

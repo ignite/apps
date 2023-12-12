@@ -11,21 +11,20 @@ import (
 	"io"
 	"os"
 
+	"github.com/ignite/ignite-files/hermes"
+
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/ignite/pkg/localfs"
-	"github.com/ignite/ignite-files/hermes"
 )
 
 const (
 	FlagHostChain        = "host-chain"
 	FlagReferenceChain   = "reference-chain"
 	FlagChainA           = "a-chain"
-	FlagChainB           = "b-chain"
 	FlagClientA          = "a-client"
 	FlagClientB          = "b-client"
 	FlagConnectionA      = "a-connection"
-	FlagConnectionB      = "b-connection"
 	FlagPortA            = "a-port"
 	FlagPortB            = "b-port"
 	FlagShowCounterparty = "show-counterparty"
@@ -385,7 +384,7 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	if c.config != "" {
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
 	}
-
+	cmd = append(cmd, "--json")
 	cmd = append(cmd, c.args...)
 
 	for flag, value := range c.flags {

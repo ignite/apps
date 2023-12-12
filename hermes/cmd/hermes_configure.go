@@ -9,13 +9,14 @@ import (
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/cosmos/go-bip39"
 	"github.com/gookit/color"
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
+	"github.com/ignite/apps/hermes/pkg/hermes"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/hermes/pkg/hermes"
+	"github.com/ignite/cli/ignite/pkg/cliui"
+	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
 )
 
 const (
@@ -61,18 +62,21 @@ const (
 	flagChainBTrustThresholdDenominator = "chain-b-trust-threshold-denominator"
 	flagChainBFaucet                    = "chain-b-faucet"
 
-	flagTelemetryEnabled          = "telemetry_enabled"
-	flagTelemetryHost             = "telemetry_host"
-	flagTelemetryPort             = "telemetry_port"
-	flagModeChannelsEnabled       = "mode_channels_enabled"
-	flagModeClientsEnabled        = "mode_clients_enabled"
-	flagModeClientsMisbehaviour   = "mode_clients_misbehaviour"
-	flagModeClientsRefresh        = "mode_clients_refresh"
-	flagModeConnectionsEnabled    = "mode_connections_enabled"
-	flagModePacketsEnabled        = "mode_packets_enabled"
-	flagModePacketsClearInterval  = "mode_packets_clear_interval"
-	flagModePacketsClearOnStart   = "mode_packets_clear_on_start"
-	flagModePacketsTxConfirmation = "mode_packets_tx_confirmation"
+	flagTelemetryEnabled          = "telemetry-enabled"
+	flagTelemetryHost             = "telemetry-host"
+	flagTelemetryPort             = "telemetry-port"
+	flagModeChannelsEnabled       = "mode-channels-enabled"
+	flagModeClientsEnabled        = "mode-clients-enabled"
+	flagModeClientsMisbehaviour   = "mode-clients-misbehaviour"
+	flagModeClientsRefresh        = "mode-clients-refresh"
+	flagModeConnectionsEnabled    = "mode-connections-enabled"
+	flagModePacketsEnabled        = "mode-packets-enabled"
+	flagModePacketsClearInterval  = "mode-packets-clear-interval"
+	flagModePacketsClearOnStart   = "mode-packets-clear-on-start"
+	flagModePacketsTxConfirmation = "mode-packets-tx-confirmation"
+	flagGenerateWallets           = "generate-wallets"
+
+	mnemonicEntropySize = 256
 )
 
 // NewHermesConfigure configure the hermes relayer and create the config file.
@@ -137,6 +141,7 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Uint64(flagModePacketsClearInterval, 100, "hermes packet clear interval")
 	c.Flags().Bool(flagModePacketsClearOnStart, true, "enable hermes packets clear on start")
 	c.Flags().Bool(flagModePacketsTxConfirmation, true, "hermes packet transaction confirmation")
+	c.Flags().Bool(flagGenerateWallets, false, "automatically generate wallets if they do not exist")
 
 	return c
 }
@@ -151,11 +156,12 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainAID = args[0]
 		chainBID = args[3]
 
-		chainAPortID, _ = cmd.Flags().GetString(flagChainAPortID)
-		chainAFaucet, _ = cmd.Flags().GetString(flagChainAFaucet)
-		chainBPortID, _ = cmd.Flags().GetString(flagChainBPortID)
-		chainBFaucet, _ = cmd.Flags().GetString(flagChainBFaucet)
-		customCfg       = getConfig(cmd)
+		generateWallets, _ = cmd.Flags().GetBool(flagGenerateWallets)
+		chainAPortID, _    = cmd.Flags().GetString(flagChainAPortID)
+		chainAFaucet, _    = cmd.Flags().GetString(flagChainAFaucet)
+		chainBPortID, _    = cmd.Flags().GetString(flagChainBPortID)
+		chainBFaucet, _    = cmd.Flags().GetString(flagChainBFaucet)
+		customCfg          = getConfig(cmd)
 	)
 
 	var (
@@ -184,7 +190,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		}
 	} else {
 		if err := session.AskConfirm(fmt.Sprintf(
-			"Hermes %s <-> %s config already exist at %s. Do you want to reuse this config file?",
+			"Hermes %s <-> %s config already exist at %s. Do you want to reuse this config file",
 			chainAID,
 			chainBID,
 			cfgPath,
@@ -208,11 +214,29 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 
 	session.StartSpinner("Verifying chain keys")
 
-	if err := ensureAccount(cmd.Context(), session, hermesCfg, h, chainAID, chainAFaucet, cfgPath); err != nil {
+	if err := ensureAccount(
+		cmd.Context(),
+		session,
+		hermesCfg,
+		h,
+		chainAID,
+		chainAFaucet,
+		cfgPath,
+		generateWallets,
+	); err != nil {
 		return err
 	}
 
-	if err := ensureAccount(cmd.Context(), session, hermesCfg, h, chainBID, chainBFaucet, cfgPath); err != nil {
+	if err := ensureAccount(
+		cmd.Context(),
+		session,
+		hermesCfg,
+		h,
+		chainBID,
+		chainBFaucet,
+		cfgPath,
+		generateWallets,
+	); err != nil {
 		return err
 	}
 
@@ -337,8 +361,9 @@ func ensureAccount(
 	chainID,
 	faucetAddr,
 	cfgPath string,
+	generateWallets bool,
 ) error {
-	chainAAddr, err := verifyChainKeys(ctx, session, h, chainID, cfgPath)
+	chainAAddr, err := verifyChainKeys(ctx, session, h, chainID, cfgPath, generateWallets)
 	if err != nil {
 		return err
 	}
@@ -363,6 +388,7 @@ func verifyChainKeys(
 	h *hermes.Hermes,
 	chainID,
 	cfgPath string,
+	generateWallets bool,
 ) (string, error) {
 GetKey:
 	var (
@@ -381,20 +407,37 @@ GetKey:
 		return "", err
 	}
 	if keysChainResult.Wallet.Account == "" {
-		var chainAMnemonic string
-		if err := session.Ask(cliquiz.NewQuestion(
-			fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue:", chainID),
-			&chainAMnemonic,
-			cliquiz.Required(),
-		)); err != nil {
-			return "", err
+		var mnemonic string
+		if !generateWallets {
+			if err := session.Ask(cliquiz.NewQuestion(
+				fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or enter to generate a new one:", chainID),
+				&mnemonic,
+				cliquiz.Required(),
+			)); err != nil {
+				return "", err
+			}
+		}
+
+		if mnemonic == "" {
+			entropySeed, err := bip39.NewEntropy(mnemonicEntropySize)
+			if err != nil {
+				return "", err
+			}
+			mnemonic, err = bip39.NewMnemonic(entropySeed)
+			if err != nil {
+				return "", err
+			}
+		}
+
+		if !bip39.IsMnemonicValid(mnemonic) {
+			return "", fmt.Errorf("invalid mnemonic: %s", mnemonic)
 		}
 
 		bufKeysChainAdd := bytes.Buffer{}
 		if err := h.AddMnemonic(
 			ctx,
 			chainID,
-			chainAMnemonic,
+			mnemonic,
 			hermes.WithConfigFile(cfgPath),
 			hermes.WithStdOut(&bufKeysChainAdd),
 		); err != nil {

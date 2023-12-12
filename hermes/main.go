@@ -5,9 +5,9 @@ import (
 	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
-	"github.com/ignite/cli/ignite/services/plugin"
-
 	"github.com/ignite/apps/hermes/cmd"
+
+	"github.com/ignite/cli/ignite/services/plugin"
 )
 
 type app struct{}

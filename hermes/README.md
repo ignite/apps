@@ -10,7 +10,9 @@ The app adds `ignite relayer hermes` commands to allow IBC communication between
 
 - add the hermes relayer app:
 ```shell
-ignite app install -g ($GOPATH)/src/github.com/ignite/apps/hermes
+ignite app install -g $GOPATH/src/github.com/ignite/apps/hermes
+// or
+ignite app install -g github.com/ignite/apps/hermes
 ```
 
 - configure the relayer:
