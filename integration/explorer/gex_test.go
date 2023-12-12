@@ -5,13 +5,12 @@ import (
 	"path/filepath"
 	"testing"
 
+	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v28/integration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
-
-	pluginsconfig "github.com/ignite/cli/ignite/config/plugins"
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/ignite/services/plugin"
-	envtest "github.com/ignite/cli/integration"
 )
 
 func TestGexExplorer(t *testing.T) {
