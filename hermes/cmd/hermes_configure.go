@@ -410,9 +410,11 @@ GetKey:
 		var mnemonic string
 		if !generateWallets {
 			if err := session.Ask(cliquiz.NewQuestion(
-				fmt.Sprintf("Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or enter to generate a new one:", chainID),
+				fmt.Sprintf(
+					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one:",
+					chainID,
+				),
 				&mnemonic,
-				cliquiz.Required(),
 			)); err != nil {
 				return "", err
 			}
@@ -427,6 +429,11 @@ GetKey:
 			if err != nil {
 				return "", err
 			}
+			_ = session.Printf(
+				"%s %s",
+				color.Yellow.Sprint("New mnemonic generated:"),
+				color.Blue.Sprint(mnemonic),
+			)
 		}
 
 		if !bip39.IsMnemonicValid(mnemonic) {
