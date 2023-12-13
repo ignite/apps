@@ -11,12 +11,10 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
 	"github.com/gookit/color"
-	"github.com/ignite/apps/hermes/pkg/hermes"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
-
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/cliquiz"
 )
 
 const (
