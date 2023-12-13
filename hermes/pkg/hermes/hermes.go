@@ -99,6 +99,7 @@ type (
 		flags  Flags
 		config string
 		args   []string
+		stdin  io.Reader
 		stdout io.Writer
 		stderr io.Writer
 	}
@@ -199,17 +200,24 @@ func WithConfigFile(config string) Option {
 	}
 }
 
-// WithStdOut add a std output.
-func WithStdOut(stdOut io.Writer) Option {
+// WithStdIn add a std input.
+func WithStdIn(stdin io.Reader) Option {
 	return func(c *configs) {
-		c.stdout = stdOut
+		c.stdin = stdin
+	}
+}
+
+// WithStdOut add a std output.
+func WithStdOut(stdout io.Writer) Option {
+	return func(c *configs) {
+		c.stdout = stdout
 	}
 }
 
 // WithStdErr add a std error output.
-func WithStdErr(stdErr io.Writer) Option {
+func WithStdErr(stderr io.Writer) Option {
 	return func(c *configs) {
-		c.stderr = stdErr
+		c.stderr = stderr
 	}
 }
 
@@ -394,6 +402,11 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 		}
 	}
 
+	stdin := c.stdin
+	if stdin == nil {
+		stdin = os.Stdin
+	}
+
 	stdout := c.stdout
 	if stdout == nil {
 		stdout = os.Stdout
@@ -409,8 +422,12 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	// to also read the output from the configured stdout writer later on.
 	var out bytes.Buffer
 	stdout = io.MultiWriter(stdout, &out)
-	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdout)), exec.StepOption(step.Stderr(stderr)))
-	if err != nil {
+
+	if err := exec.Exec(ctx, cmd,
+		exec.StepOption(step.Stdin(stdin)),
+		exec.StepOption(step.Stdout(stdout)),
+		exec.StepOption(step.Stderr(stderr)),
+	); err != nil {
 		// Try to parse stdout as a Hermes formatted error
 		if err := parseErrFromOutput(out.Bytes()); err != nil {
 			return err
