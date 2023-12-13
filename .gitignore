@@ -3,6 +3,6 @@
 .vscode
 *.test
 *.app
-go.work
+go.work.sum
 hermes/hermes
 explorer/explorer
