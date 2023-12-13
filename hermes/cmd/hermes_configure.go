@@ -433,7 +433,7 @@ GetKey:
 				return "", err
 			}
 			_ = session.Printf(
-				"%s %s",
+				"%s %s\n",
 				color.Yellow.Sprint("New mnemonic generated:"),
 				color.Blue.Sprint(mnemonic),
 			)
