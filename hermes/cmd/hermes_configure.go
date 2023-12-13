@@ -76,9 +76,6 @@ const (
 	flagRestEnabled                   = "rest-enabled"
 	flagRestHost                      = "rest-host"
 	flagRestPort                      = "rest-port"
-	flagTracingServerEnabled          = "tracing-server-enabled"
-	flagTracingServerHost             = "tracing-server-host"
-	flagTracingServerPort             = "tracing-server-port"
 	flagModeChannelsEnabled           = "mode-channels-enabled"
 	flagModeClientsEnabled            = "mode-clients-enabled"
 	flagModeClientsMisbehaviour       = "mode-clients-misbehaviour"
@@ -106,28 +103,32 @@ func NewHermesConfigure() *cobra.Command {
 
 	c.Flags().String(flagChainAPortID, "transfer", "Port ID of the chain A")
 	c.Flags().String(flagChainBPortID, "transfer", "Port ID of the chain B")
+	c.Flags().Bool(flagChainACCVConsumerChain, false, "only specify true if the chain A is a CCV consumer")
+	c.Flags().Bool(flagChainBCCVConsumerChain, false, "only specify true if the chain B is a CCV consumer")
 	c.Flags().String(flagChainAEventSourceURL, "", "WS event source url of the chain A")
 	c.Flags().String(flagChainBEventSourceURL, "", "WS event source url of the chain B")
 	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A (event source url should be set to use this flag)")
 	c.Flags().String(flagChainBEventSourceMode, "push", "WS event source mode of the chain B (event source url should be set to use this flag)")
 	c.Flags().String(flagChainAEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain A (event source url should be set to use this flag)")
 	c.Flags().String(flagChainBEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain B (event source url should be set to use this flag)")
-	c.Flags().String(flagChainARPCTimeout, "15s", "RPC timeout of the chain A")
-	c.Flags().String(flagChainBRPCTimeout, "15s", "RPC timeout of the chain B")
-	c.Flags().String(flagChainAAddressType, "cosmos", "address type of the chain A")
-	c.Flags().String(flagChainBAddressType, "cosmos", "address type of the chain B")
+	c.Flags().String(flagChainARPCTimeout, "10s", "RPC timeout of the chain A")
+	c.Flags().String(flagChainBRPCTimeout, "10s", "RPC timeout of the chain B")
+	c.Flags().Bool(flagChainATrustedNode, false, "enable trusted node on the chain A")
+	c.Flags().Bool(flagChainBTrustedNode, false, "enable trusted node on the chain B")
 	c.Flags().String(flagChainAAccountPrefix, "cosmos", "account prefix of the chain A")
 	c.Flags().String(flagChainBAccountPrefix, "cosmos", "account prefix of the chain B")
 	c.Flags().String(flagChainAKeyName, "wallet", "hermes account name of the chain A")
 	c.Flags().String(flagChainBKeyName, "wallet", "hermes account name of the chain B")
+	c.Flags().String(flagChainAAddressType, "cosmos", "address type of the chain A")
+	c.Flags().String(flagChainBAddressType, "cosmos", "address type of the chain B")
 	c.Flags().String(flagChainAStorePrefix, "ibc", "store prefix of the chain A")
 	c.Flags().String(flagChainBStorePrefix, "ibc", "store prefix of the chain B")
 	c.Flags().Uint64(flagChainADefaultGas, 100000, "default gas used for transactions on chain A")
 	c.Flags().Uint64(flagChainBDefaultGas, 100000, "default gas used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxGas, 400000, "max gas used for transactions on chain A")
 	c.Flags().Uint64(flagChainBMaxGas, 400000, "max gas used for transactions on chain B")
-	c.Flags().String(flagChainAGasPrice, "1stake", "gas price used for transactions on chain A")
-	c.Flags().String(flagChainBGasPrice, "1stake", "gas price used for transactions on chain B")
+	c.Flags().String(flagChainAGasPrice, "0.025stake", "gas price used for transactions on chain A")
+	c.Flags().String(flagChainBGasPrice, "0.025stake", "gas price used for transactions on chain B")
 	c.Flags().String(flagChainAGasMultiplier, "1.1", "gas multiplier used for transactions on chain A")
 	c.Flags().String(flagChainBGasMultiplier, "1.1", "gas multiplier used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxMsgNum, 30, "max message number used for transactions on chain A")
@@ -136,22 +137,18 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Uint64(flagChainBMaxTxSize, 2097152, "max transaction size on chain B")
 	c.Flags().String(flagChainAClockDrift, "5s", "clock drift of the chain A")
 	c.Flags().String(flagChainBClockDrift, "5s", "clock drift of the chain B")
-	c.Flags().String(flagChainAMaxBlockTime, "10s", "maximum block time of the chain A")
-	c.Flags().String(flagChainBMaxBlockTime, "10s", "maximum block time of the chain B")
+	c.Flags().String(flagChainAMaxBlockTime, "30s", "maximum block time of the chain A")
+	c.Flags().String(flagChainBMaxBlockTime, "30s", "maximum block time of the chain B")
 	c.Flags().String(flagChainATrustingPeriod, "14days", "trusting period of the chain A")
 	c.Flags().String(flagChainBTrustingPeriod, "14days", "trusting period of the chain B")
-	c.Flags().Uint64(flagChainATrustThresholdNumerator, 1, "trusting threshold numerator of the chain A")
-	c.Flags().Uint64(flagChainBTrustThresholdNumerator, 1, "trusting threshold numerator of the chain B")
+	c.Flags().Uint64(flagChainATrustThresholdNumerator, 2, "trusting threshold numerator of the chain A")
+	c.Flags().Uint64(flagChainBTrustThresholdNumerator, 2, "trusting threshold numerator of the chain B")
 	c.Flags().Uint64(flagChainATrustThresholdDenominator, 3, "trusting threshold denominator of the chain A")
 	c.Flags().Uint64(flagChainBTrustThresholdDenominator, 3, "trusting threshold denominator of the chain B")
-	c.Flags().String(flagChainAFaucet, "", "faucet URL of the chain A")
-	c.Flags().String(flagChainBFaucet, "", "faucet URL of the chain B")
-	c.Flags().Bool(flagChainACCVConsumerChain, false, "only specify true if the chain A is a CCV consumer")
-	c.Flags().Bool(flagChainBCCVConsumerChain, false, "only specify true if the chain B is a CCV consumer")
-	c.Flags().Bool(flagChainATrustedNode, false, "enable trusted node on the chain A")
-	c.Flags().Bool(flagChainBTrustedNode, false, "enable trusted node on the chain B")
 	c.Flags().String(flagChainAMemoPrefix, "", "memo prefix of the chain A")
 	c.Flags().String(flagChainBMemoPrefix, "", "memo prefix of the chain B")
+	c.Flags().String(flagChainAFaucet, "", "faucet URL of the chain A")
+	c.Flags().String(flagChainBFaucet, "", "faucet URL of the chain B")
 
 	c.Flags().Bool(flagTelemetryEnabled, false, "enable hermes telemetry")
 	c.Flags().String(flagTelemetryHost, "127.0.0.1", "hermes telemetry host")
@@ -159,9 +156,6 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Bool(flagRestEnabled, false, "enable hermes rest")
 	c.Flags().String(flagRestHost, "127.0.0.1", "hermes rest host")
 	c.Flags().Uint64(flagRestPort, 3000, "hermes rest port")
-	c.Flags().Bool(flagTracingServerEnabled, false, "enable hermes tracing server")
-	c.Flags().String(flagTracingServerHost, "127.0.0.1", "hermes tracing server host")
-	c.Flags().Uint64(flagTracingServerPort, 5555, "hermes tracing server port")
 	c.Flags().Bool(flagModeChannelsEnabled, true, "enable hermes channels")
 	c.Flags().Bool(flagModeClientsEnabled, true, "enable hermes clients")
 	c.Flags().Bool(flagModeClientsMisbehaviour, true, "enable hermes clients misbehaviour")
@@ -513,9 +507,6 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		restEnabled, _                              = cmd.Flags().GetBool(flagRestEnabled)
 		restHost, _                                 = cmd.Flags().GetString(flagRestHost)
 		restPort, _                                 = cmd.Flags().GetUint64(flagRestPort)
-		tracingServerEnabled, _                     = cmd.Flags().GetBool(flagTracingServerEnabled)
-		tracingServerHost, _                        = cmd.Flags().GetString(flagTracingServerHost)
-		tracingServerPort, _                        = cmd.Flags().GetUint64(flagTracingServerPort)
 		modeChannelsEnabled, _                      = cmd.Flags().GetBool(flagModeChannelsEnabled)
 		modeClientsEnabled, _                       = cmd.Flags().GetBool(flagModeClientsEnabled)
 		modeClientsMisbehaviour, _                  = cmd.Flags().GetBool(flagModeClientsMisbehaviour)
@@ -535,9 +526,6 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		hermes.WithRestEnabled(restEnabled),
 		hermes.WithRestHost(restHost),
 		hermes.WithRestPort(restPort),
-		hermes.WithTracingServerEnabled(tracingServerEnabled),
-		hermes.WithTracingServerHost(tracingServerHost),
-		hermes.WithTracingServerPort(tracingServerPort),
 		hermes.WithModeChannelsEnabled(modeChannelsEnabled),
 		hermes.WithModeClientsEnabled(modeClientsEnabled),
 		hermes.WithModeClientsMisbehaviour(modeClientsMisbehaviour),

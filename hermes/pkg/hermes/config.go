@@ -26,12 +26,11 @@ const (
 type (
 	// Config represents the Hermes config struct.
 	Config struct {
-		Global        Global        `toml:"global" json:"global"`
-		Mode          Mode          `toml:"mode" json:"mode"`
-		Rest          Rest          `toml:"rest" json:"rest"`
-		Telemetry     Telemetry     `toml:"telemetry" json:"telemetry"`
-		TracingServer TracingServer `toml:"tracing_server" json:"tracing_server"`
-		Chains        Chains        `toml:"chains" json:"chains"`
+		Global    Global    `toml:"global" json:"global"`
+		Mode      Mode      `toml:"mode" json:"mode"`
+		Rest      Rest      `toml:"rest" json:"rest"`
+		Telemetry Telemetry `toml:"telemetry" json:"telemetry"`
+		Chains    Chains    `toml:"chains" json:"chains"`
 	}
 
 	// Global represents the global values into the Hermes config struct.
@@ -90,7 +89,6 @@ type (
 	// TracingServer represents the tracing server into the Hermes config struct.
 	TracingServer struct {
 		Enabled bool   `toml:"enabled" json:"enabled"`
-		Host    string `toml:"host" json:"host"`
 		Port    uint64 `toml:"port" json:"port"`
 	}
 
@@ -289,27 +287,6 @@ func WithRestPort(port uint64) ConfigOption {
 	}
 }
 
-// WithTracingServerEnabled set TracingServer enable into the Hermes config.
-func WithTracingServerEnabled(enabled bool) ConfigOption {
-	return func(c *Config) {
-		c.TracingServer.Enabled = enabled
-	}
-}
-
-// WithTracingServerHost set TracingServer host into the Hermes config.
-func WithTracingServerHost(host string) ConfigOption {
-	return func(c *Config) {
-		c.TracingServer.Host = host
-	}
-}
-
-// WithTracingServerPort set TracingServer port into the Hermes config.
-func WithTracingServerPort(port uint64) ConfigOption {
-	return func(c *Config) {
-		c.TracingServer.Port = port
-	}
-}
-
 // WithModeChannelsEnabled set ModeChannelsEnabled into the Hermes config.
 func WithModeChannelsEnabled(enabled bool) ConfigOption {
 	return func(c *Config) {
@@ -415,11 +392,6 @@ func DefaultConfig(options ...ConfigOption) *Config {
 			Enabled: false,
 			Host:    "127.0.0.1",
 			Port:    3001,
-		},
-		TracingServer: TracingServer{
-			Enabled: false,
-			Host:    "127.0.0.1",
-			Port:    5555,
 		},
 	}
 	for _, o := range options {
