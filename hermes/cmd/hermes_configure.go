@@ -15,6 +15,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
+
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 const (
