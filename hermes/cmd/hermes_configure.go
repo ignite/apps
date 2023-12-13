@@ -87,7 +87,7 @@ const (
 	flagModePacketsTxConfirmation     = "mode-packets-tx-confirmation"
 	flagAutoRegisterCounterpartyPayee = "auto_register_counterparty_payee"
 	flagGenerateWallets               = "generate-wallets"
-	flagGenerateConfig                = "generate-config"
+	flagOverwriteConfig               = "overwrite-config"
 
 	mnemonicEntropySize = 256
 )
@@ -167,7 +167,7 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Bool(flagModePacketsTxConfirmation, true, "hermes packet transaction confirmation")
 	c.Flags().Bool(flagAutoRegisterCounterpartyPayee, false, "auto register the counterparty payee on a destination chain to the relayer's address on the source chain")
 	c.Flags().Bool(flagGenerateWallets, false, "automatically generate wallets if they do not exist")
-	c.Flags().Bool(flagGenerateConfig, false, "always generate a new config file, and not reuse the existing one")
+	c.Flags().Bool(flagOverwriteConfig, false, "overwrite the current config if it already exists")
 
 	return c
 }
@@ -183,7 +183,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID = args[3]
 
 		generateWallets, _ = cmd.Flags().GetBool(flagGenerateWallets)
-		generateConfig, _  = cmd.Flags().GetBool(flagGenerateConfig)
+		overwriteConfig, _ = cmd.Flags().GetBool(flagOverwriteConfig)
 		chainAPortID, _    = cmd.Flags().GetString(flagChainAPortID)
 		chainAFaucet, _    = cmd.Flags().GetString(flagChainAFaucet)
 		chainBPortID, _    = cmd.Flags().GetString(flagChainBPortID)
@@ -211,7 +211,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if _, err := os.Stat(cfgPath); generateConfig || os.IsNotExist(err) {
+	if _, err := os.Stat(cfgPath); overwriteConfig || os.IsNotExist(err) {
 		if err := hermesCfg.Save(); err != nil {
 			return err
 		}
