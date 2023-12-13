@@ -492,8 +492,8 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 		AccountPrefix: "cosmos",
 		KeyName:       "wallet",
 		StorePrefix:   "ibc",
-		DefaultGas:    100000,
-		MaxGas:        10000000,
+		DefaultGas:    1000,
+		MaxGas:        100000,
 		GasPrice: GasPrice{
 			Denom: "stake",
 			Price: 0.01,
