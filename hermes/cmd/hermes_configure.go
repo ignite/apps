@@ -75,6 +75,7 @@ const (
 	flagModePacketsClearOnStart   = "mode-packets-clear-on-start"
 	flagModePacketsTxConfirmation = "mode-packets-tx-confirmation"
 	flagGenerateWallets           = "generate-wallets"
+	flagGenerateConfig            = "generate-config"
 
 	mnemonicEntropySize = 256
 )
@@ -142,6 +143,7 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Bool(flagModePacketsClearOnStart, true, "enable hermes packets clear on start")
 	c.Flags().Bool(flagModePacketsTxConfirmation, true, "hermes packet transaction confirmation")
 	c.Flags().Bool(flagGenerateWallets, false, "automatically generate wallets if they do not exist")
+	c.Flags().Bool(flagGenerateConfig, false, "always generate a new config file, and not reuse the existing one")
 
 	return c
 }
@@ -157,6 +159,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID = args[3]
 
 		generateWallets, _ = cmd.Flags().GetBool(flagGenerateWallets)
+		generateConfig, _  = cmd.Flags().GetBool(flagGenerateConfig)
 		chainAPortID, _    = cmd.Flags().GetString(flagChainAPortID)
 		chainAFaucet, _    = cmd.Flags().GetString(flagChainAFaucet)
 		chainBPortID, _    = cmd.Flags().GetString(flagChainBPortID)
@@ -184,7 +187,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
+	if _, err := os.Stat(cfgPath); generateConfig || os.IsNotExist(err) {
 		if err := hermesCfg.Save(); err != nil {
 			return err
 		}
