@@ -607,7 +607,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		optChainA = append(optChainA, hermes.WithChainMaxGas(chainAMaxGas))
 	}
 	if chainAGasPrice != "" {
-		gasPrice, err := sdk.ParseCoinNormalized(chainAGasPrice)
+		gasPrice, err := sdk.ParseDecCoin(chainAGasPrice)
 		if err != nil {
 			return nil, err
 		}
@@ -712,7 +712,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		optChainB = append(optChainB, hermes.WithChainMaxGas(chainBMaxGas))
 	}
 	if chainBGasPrice != "" {
-		gasPrice, err := sdk.ParseCoinNormalized(chainBGasPrice)
+		gasPrice, err := sdk.ParseDecCoin(chainBGasPrice)
 		if err != nil {
 			return nil, err
 		}
