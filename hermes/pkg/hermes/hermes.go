@@ -201,17 +201,17 @@ func WithConfigFile(config string) Option {
 	}
 }
 
-// WithStdIn add a std input.
-func WithStdIn(stdin io.Reader) Option {
-	return func(c *configs) {
-		c.stdin = stdin
-	}
-}
-
 // WithJSONOutput add a json output.
 func WithJSONOutput() Option {
 	return func(c *configs) {
 		c.jsonOutput = true
+	}
+}
+
+// WithStdIn add a std input.
+func WithStdIn(stdin io.Reader) Option {
+	return func(c *configs) {
+		c.stdin = stdin
 	}
 }
 
