@@ -96,12 +96,13 @@ type (
 
 	// configs holds Generate configs.
 	configs struct {
-		flags  Flags
-		config string
-		args   []string
-		stdin  io.Reader
-		stdout io.Writer
-		stderr io.Writer
+		flags      Flags
+		config     string
+		args       []string
+		stdin      io.Reader
+		stdout     io.Writer
+		stderr     io.Writer
+		jsonOutput bool
 	}
 )
 
@@ -204,6 +205,13 @@ func WithConfigFile(config string) Option {
 func WithStdIn(stdin io.Reader) Option {
 	return func(c *configs) {
 		c.stdin = stdin
+	}
+}
+
+// WithJSONOutput add a json output.
+func WithJSONOutput() Option {
+	return func(c *configs) {
+		c.jsonOutput = true
 	}
 }
 
@@ -391,7 +399,9 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	if c.config != "" {
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
 	}
-	cmd = append(cmd, "--json")
+	if c.jsonOutput {
+		cmd = append(cmd, "--json")
+	}
 	cmd = append(cmd, c.args...)
 
 	for flag, value := range c.flags {

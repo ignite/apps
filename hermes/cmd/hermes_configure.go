@@ -280,6 +280,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufClientAResult),
+		hermes.WithJSONOutput(),
 	); err != nil {
 		return err
 	}
@@ -305,6 +306,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainAID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufClientBResult),
+		hermes.WithJSONOutput(),
 	); err != nil {
 		return err
 	}
@@ -332,6 +334,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		clientBResult.CreateClient.ClientID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufConnection),
+		hermes.WithJSONOutput(),
 	); err != nil {
 		return err
 	}
@@ -361,6 +364,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBPortID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufChannel),
+		hermes.WithJSONOutput(),
 	); err != nil {
 		return err
 	}
@@ -427,6 +431,7 @@ GetKey:
 		chainID,
 		hermes.WithConfigFile(cfgPath),
 		hermes.WithStdOut(&bufKeysChain),
+		hermes.WithJSONOutput(),
 	); err != nil {
 		return "", err
 	}
@@ -474,6 +479,7 @@ GetKey:
 			mnemonic,
 			hermes.WithConfigFile(cfgPath),
 			hermes.WithStdOut(&bufKeysChainAdd),
+			hermes.WithJSONOutput(),
 		); err != nil {
 			return "", err
 		}
