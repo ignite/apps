@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"os"
-
 	"github.com/spf13/cobra"
 )
 
-var githubToken = os.Getenv("GITHUB_TOKEN")
+const (
+	githubTokenFlag = "github-token"
+)
 
 // NewMarketplace creates a new marketplace command that holds
 // some other sub commands related to running marketplace like
@@ -30,6 +30,8 @@ func NewMarketplace() *cobra.Command {
 		NewList(),
 		NewInfo(),
 	)
+
+	c.Flags().String(githubTokenFlag, "", "GitHub access token")
 
 	return c
 }

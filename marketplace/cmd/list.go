@@ -1,10 +1,12 @@
 package cmd
 
 import (
-	"context"
+	"fmt"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
-	"github.com/google/go-github/v56/github"
+	"github.com/ignite/apps/marketplace/pkg/apps"
+	"github.com/ignite/apps/marketplace/pkg/tree"
 	"github.com/ignite/apps/marketplace/pkg/xgithub"
 	"github.com/ignite/cli/ignite/pkg/cliui"
 	"github.com/spf13/cobra"
@@ -12,86 +14,86 @@ import (
 
 const (
 	minStarsFlag     = "min-stars"
-	igniteAppTopic   = "ignite-cli-app"
-	descriptionLimit = 50
+	queryFlag        = "query"
+	descriptionLimit = 75
+)
+
+var (
+	starsCountStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("3"))
+	updatedAtStyle  = lipgloss.NewStyle().Foreground(lipgloss.Color("12"))
 )
 
 // NewList creates a new list command that searches all the ignite apps in GitHub.
 func NewList() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "list [query]",
+		Use:   "list",
 		Short: "List all the ignite apps",
-		Args:  cobra.MaximumNArgs(1),
+		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, args []string) error {
-			query := ""
-			if len(args) > 0 {
-				query = args[0]
-			}
+			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
+			query, _ := cmd.Flags().GetString(queryFlag)
 			minStars, _ := cmd.Flags().GetUint(minStarsFlag)
 
 			session := cliui.New(cliui.StartSpinner())
 			defer session.End()
 
 			session.StartSpinner("🔎 Searching for ignite apps on GitHub...")
-			repos, total, err := searchIgniteApps(cmd.Context(), query, minStars)
+			client := xgithub.NewClient(githubToken)
+			repos, err := apps.Search(cmd.Context(), client, query, minStars)
 			if err != nil {
 				return err
 			}
 			session.StopSpinner()
 
-			session.Printf("🎉 Found %d results\n", total)
-
-			if total > 0 {
-				session.Println()
-				printRepoList(session, repos)
+			if len(repos) < 1 {
+				session.Println("❌ No ignite application were found")
+				return nil
 			}
+
+			printRepoTree(session, repos)
 
 			return nil
 		},
 	}
 
+	c.Flags().StringP(queryFlag, "q", "", "Query string to search for")
 	c.Flags().Uint(minStarsFlag, 10, "Minimum number of stars to search for")
 
 	return c
 }
 
-func searchIgniteApps(ctx context.Context, query string, minStars uint) ([]*github.Repository, int, error) {
-	client := xgithub.NewClient(githubToken)
+func printRepoTree(sess *cliui.Session, repos []apps.AppRepository) {
+	for i, repo := range repos {
+		node := tree.NewNode(fmt.Sprintf(
+			"📦 %-50s %s %s",
+			repo.PackageURL,
+			starsCountStyle.Render(humanizeInt(repo.Stars, "⭐️")),
+			updatedAtStyle.Render("("+humanize.Time(repo.UpdatedAt)+")"),
+		))
+		node.AddChild(nil)
+		for _, app := range repo.Apps {
+			node.AddChild(tree.NewNode(fmt.Sprintf(
+				"🔥 %s\t%s",
+				app.Name,
+				limitTextlength(app.Description, descriptionLimit),
+			)))
+		}
+		sess.Print(node)
 
-	opts := &github.SearchOptions{
-		Sort:  "stars",
-		Order: "desc",
+		if i < len(repos)-1 {
+			sess.Println()
+		}
 	}
-	repos, total, err := client.SearchRepositories(ctx, opts,
-		xgithub.StringQuery(query),
-		xgithub.LanguageQuery("go"),
-		xgithub.TopicQuery(igniteAppTopic),
-		xgithub.MinStarsQuery(int(minStars)))
-	if err != nil {
-		return nil, 0, err
-	}
-
-	return repos, total, nil
 }
 
-func printRepoList(sess *cliui.Session, repos []*github.Repository) {
-	header := []string{"Name", "Description", "Stars ⭐️", "Updated At"}
-	rows := make([][]string, 0, len(repos))
-	for _, repo := range repos {
-		rows = append(rows, []string{
-			repo.GetFullName(),
-			limitTextlength(repo.GetDescription(), descriptionLimit),
-			humanize.SIWithDigits(float64(repo.GetStargazersCount()), 1, ""),
-			humanize.Time(repo.GetPushedAt().Time),
-		})
-	}
-
-	sess.PrintTable(header, rows...)
+func humanizeInt(n int, unit string) string {
+	value, suffix := humanize.ComputeSI(float64(n))
+	return humanize.FtoaWithDigits(value, 1) + suffix + " " + unit
 }
 
 func limitTextlength(text string, limit int) string {
 	if len(text) > limit {
-		return text[:limit] + "..."
+		return text[:limit-3] + "..."
 	}
 
 	return text

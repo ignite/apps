@@ -5,6 +5,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-github/v56/github"
+	"github.com/pkg/errors"
 )
 
 // Client is a wrapper around the GitHub client so that it can be used as
@@ -86,4 +87,19 @@ func (c *Client) GetRepository(ctx context.Context, owner, name string) (*github
 	}
 
 	return repo, nil
+}
+
+// GetFileContent gets the content of the file from GitHub given the repository name and the file path.
+func (c *Client) GetFileContent(ctx context.Context, owner, repo, path string) ([]byte, error) {
+	file, _, _, err := c.gc.Repositories.GetContents(ctx, owner, repo, path, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	s, err := file.GetContent()
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to get file content")
+	}
+
+	return []byte(s), nil
 }

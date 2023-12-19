@@ -1,45 +1,56 @@
 package cmd
 
 import (
-	"context"
 	"fmt"
-	"strings"
+	"hash/fnv"
+	"path"
+	"strconv"
 	"time"
 
+	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
-	"github.com/google/go-github/v56/github"
-	"github.com/gookit/color"
+	"github.com/ignite/apps/marketplace/pkg/apps"
 	"github.com/ignite/apps/marketplace/pkg/xgithub"
 	"github.com/ignite/cli/ignite/pkg/cliui"
 	"github.com/spf13/cobra"
 )
 
-// NewInfo creates a new info command that shows the details of an ignite app.
+const igniteCLIPackage = "github.com/ignite/cli"
+
+var (
+	linkStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("10")).
+			Underline(true)
+	installaitonStyle = lipgloss.NewStyle().
+				Border(lipgloss.NormalBorder()).
+				BorderForeground(lipgloss.Color("9")).
+				MarginLeft(7)
+	commandStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("2")).
+			Bold(true)
+)
+
+// NewInfo creates a new info command that shows the details of an ignite application repository.
 func NewInfo() *cobra.Command {
 	return &cobra.Command{
-		Use:   "info [app-name]",
-		Short: "Show the details of an ignite app",
+		Use:   "info [package-url]",
+		Short: "Show the details of an ignite application repository",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			appName := args[0]
-			repoOwner, repoName, err := validateAppName(appName)
-			if err != nil {
-				return err
-			}
+			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
 
 			session := cliui.New(cliui.StartSpinner())
 			defer session.End()
 
-			session.StartSpinner("Fetching app details from GitHub...")
-			repo, err := getRepo(cmd.Context(), repoOwner, repoName)
+			session.StartSpinner("🔎 Fetching repository details from GitHub...")
+
+			client := xgithub.NewClient(githubToken)
+			repo, err := apps.GetRepositoryDetails(cmd.Context(), client, args[0])
 			if err != nil {
 				return err
 			}
-			session.StopSpinner()
 
-			if !isIgniteApp(repo) {
-				return fmt.Errorf("the repository is not an ignite app")
-			}
+			session.StopSpinner()
 
 			printRepoDetails(session, repo)
 
@@ -48,41 +59,41 @@ func NewInfo() *cobra.Command {
 	}
 }
 
-func validateAppName(appName string) (owner, name string, err error) {
-	appName = strings.TrimPrefix(appName, "github.com/")
-	appNameParts := strings.Split(appName, "/")
-	if len(appNameParts) != 2 {
-		return "", "", fmt.Errorf("invalid app name: %s", appName)
+func printRepoDetails(sess *cliui.Session, repo *apps.AppRepositoryDetails) {
+	sess.Println("Description:", repo.Description)
+	sess.Print("Tags:")
+	for _, tag := range repo.Tags {
+		sess.Print(lipgloss.NewStyle().Background(colorFromText(tag)).Render(tag), " ")
 	}
-	owner = appNameParts[0]
-	name = appNameParts[1]
-
-	return owner, name, nil
+	sess.Println()
+	sess.Println("Stars ⭐️:", repo.Stars)
+	sess.Println("License ⚖️ :", repo.License)
+	sess.Printf("Updated At 🕒: %s %s\n", repo.UpdatedAt.Format(time.DateTime), updatedAtStyle.Render("("+humanize.Time(repo.UpdatedAt)+")"))
+	sess.Println("URL 🌎: ", linkStyle.Render(repo.URL))
+	sess.Println("Apps 🔥:")
+	printAppsTable(sess, repo)
 }
 
-func getRepo(ctx context.Context, owner, name string) (*github.Repository, error) {
-	client := xgithub.NewClient(githubToken)
-	return client.GetRepository(ctx, owner, name)
+func colorFromText(text string) lipgloss.Color {
+	h := fnv.New64a()
+	h.Write([]byte(text))
+	return lipgloss.Color(strconv.FormatUint(h.Sum64()%16, 10))
 }
 
-func isIgniteApp(repo *github.Repository) bool {
-	for _, topic := range repo.Topics {
-		if topic == "ignite-app" {
-			return true
+func printAppsTable(sess *cliui.Session, repo *apps.AppRepositoryDetails) {
+	for i, app := range repo.Apps {
+		sess.Println("\tName:", app.Name)
+		sess.Println("\tDescription:", app.Description)
+		sess.Println("\tPath:", app.Path)
+		sess.Println("\tGo Version:", app.GoVersion)
+		sess.Println("\tIgnite Version:", app.IgniteVersion)
+		sess.Println(installaitonStyle.Render(fmt.Sprintf(
+			"🚀 Install via: %s",
+			commandStyle.Render(fmt.Sprintf("ignite app -g install %s", path.Join(repo.PackageURL, app.Path))),
+		)))
+
+		if i < len(repo.Apps)-1 {
+			sess.Println()
 		}
 	}
-
-	return false
-}
-
-func printRepoDetails(sess *cliui.Session, repo *github.Repository) {
-	sess.Println("Name: ", repo.GetName())
-	sess.Println("Owner: ", repo.GetOwner().GetLogin())
-	sess.Println("Description: ", repo.GetDescription())
-	sess.Println("Stars ⭐️: ", repo.GetStargazersCount())
-	sess.Println("License: ", repo.GetLicense().GetName())
-	sess.Printf("Updated At: %s (%s)\n", repo.GetUpdatedAt().Format(time.DateTime), humanize.Time(repo.GetUpdatedAt().Time))
-	sess.Println("URL: ", repo.GetHTMLURL())
-	sess.Println()
-	sess.Printf("🚀 Install via: %s\n", color.Green.Sprintf("ignite app install github.com/%s", repo.GetFullName()))
 }
