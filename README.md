@@ -48,7 +48,7 @@ Afterwards, install using:
 ignite app install -g path/to/your/app
 ```
 
-For more information, refer to [Creating Ignite Apps](https//docs.ignite.com/apps/developing-apps).
+For more information, refer to [Creating Ignite Apps](https://docs.ignite.com/apps/developing-apps).
 
 ## **Contributing**
 
