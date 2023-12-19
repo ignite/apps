@@ -44,7 +44,7 @@ git clone https://github.com/ignite/apps.git && cd apps
 # Scaffold a template for your own app
 ignite scaffold app <name> && cd <name>
 # Install your app
-ignite app install -g $pwd
+ignite app install -g $(pwd)
 ```
 
 ### **Contribution Prerequisites**
