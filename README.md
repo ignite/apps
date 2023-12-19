@@ -73,3 +73,8 @@ For support, questions, or feedback, please open an issue in this repository.
 ## **License**
 
 This project is licensed under the [Copyright License](LICENSE) - see the [LICENSE.md](LICENSE.md) file for details.
+
+## **Community**
+
+- Join the community conversations on [Discord](https://discord.com/invite/ignite) or [X/Twitter](https://twitter.com/ignite).
+- Follow the project's progress and updates.
