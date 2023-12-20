@@ -58,11 +58,11 @@ func Search(ctx context.Context, client *xgithub.Client, query string, minStars 
 
 		result = append(result, AppRepository{
 			PackageURL: fmt.Sprintf("github.com/%s/%s", repo.GetOwner().GetLogin(), repo.GetName()),
-			Name:      repo.GetName(),
-			Owner:     repo.GetOwner().GetLogin(),
-			Stars:     repo.GetStargazersCount(),
-			UpdatedAt: repo.GetPushedAt().Time,
-			Apps:      apps,
+			Name:       repo.GetName(),
+			Owner:      repo.GetOwner().GetLogin(),
+			Stars:      repo.GetStargazersCount(),
+			UpdatedAt:  repo.GetPushedAt().Time,
+			Apps:       apps,
 		})
 	}
 

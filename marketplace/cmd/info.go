@@ -15,8 +15,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const igniteCLIPackage = "github.com/ignite/cli"
-
 var (
 	linkStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("10")).

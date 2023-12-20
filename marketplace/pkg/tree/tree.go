@@ -25,11 +25,11 @@ func (n *Node) AddChild(child *Node) {
 }
 
 // Format implements fmt.Formatter.
-func (n *Node) Format(f fmt.State, verb rune) {
-	fprintNode(f, verb, "", n)
+func (n *Node) Format(f fmt.State, _ rune) {
+	fprintNode(f, "", n)
 }
 
-func fprintNode(f fmt.State, verb rune, prefix string, n *Node) {
+func fprintNode(f fmt.State, prefix string, n *Node) {
 	fmt.Fprintln(f, n.Text)
 
 	width := 2
@@ -47,10 +47,10 @@ func fprintNode(f fmt.State, verb rune, prefix string, n *Node) {
 		}
 		if i < len(n.Children)-1 {
 			fmt.Fprintf(f, "%s├%s ", prefix, strings.Repeat("─", width))
-			fprintNode(f, verb, prefix+"│"+strings.Repeat(" ", width+1), child)
+			fprintNode(f, prefix+"│"+strings.Repeat(" ", width+1), child)
 		} else {
 			fmt.Fprintf(f, "%s└%s ", prefix, strings.Repeat("─", width))
-			fprintNode(f, verb, prefix+strings.Repeat(" ", width+2), child)
+			fprintNode(f, prefix+strings.Repeat(" ", width+2), child)
 		}
 	}
 }

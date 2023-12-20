@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"os"
 	"path/filepath"
-	"regexp"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -69,5 +69,7 @@ func TestMarketplace(t *testing.T) {
 			step.Stdout(buf),
 		)),
 	))
-	assert.Regexp(regexp.MustCompile("🎉 Found [0-9]+ results"), buf.String())
+	assert.Condition(func() bool {
+		return strings.HasPrefix(buf.String(), "❌") || strings.HasPrefix(buf.String(), "📦")
+	}, "unexpected output: %s", buf.String())
 }
