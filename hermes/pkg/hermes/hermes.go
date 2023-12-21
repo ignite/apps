@@ -11,9 +11,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/ignite/pkg/localfs"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/localfs"
 	"github.com/ignite/ignite-files/hermes"
 )
 
@@ -31,8 +31,8 @@ const (
 	FlagShowCounterparty = "show-counterparty"
 	FlagChain            = "chain"
 	FlagMnemonicFile     = "mnemonic-file"
+	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
-	FlagJSON             = "json"
 )
 
 const (
@@ -65,6 +65,9 @@ const (
 
 	// cmdKeysList is the Hermes keys list command.
 	cmdKeysList subCmd = "list"
+
+	// cmdKeysDelete is the Hermes keys delete command.
+	cmdKeysDelete subCmd = "delete"
 
 	// ResultSuccess is the api result status success.
 	ResultSuccess = "success"
@@ -295,6 +298,19 @@ func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option
 	return h.Run(ctx, options...)
 }
 
+// DeleteKey deletes a key from Hermes keys.
+func (h *Hermes) DeleteKey(ctx context.Context, chainID, keyName string, options ...Option) error {
+	options = append(
+		options,
+		WithFlags(Flags{
+			FlagChain:   chainID,
+			FlagKeyName: keyName,
+		}),
+		WithArgs(string(cmdKeys), string(cmdKeysDelete)),
+	)
+	return h.Run(ctx, options...)
+}
+
 // CreateClient creates a new relayer client.
 func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain string, options ...Option) error {
 	options = append(options, WithFlags(
@@ -366,7 +382,6 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	cmd := []string{h.path}
 
 	// the config and json flag should be added before the hermes subcommands
-	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
 	if c.config != "" {
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
 	}
