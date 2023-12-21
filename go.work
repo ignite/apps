@@ -3,5 +3,6 @@ go 1.21.1
 use (
 	./explorer
 	./hermes
-	./integration
+	./test/debug
+	./test/integration
 )
