@@ -553,8 +553,8 @@ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ignite/cli/v28 v28.0.0 h1:f9TTOEgO463PI8eyeMEhsWszQmxNjoqpS15dpRAh/z0=
 github.com/ignite/cli/v28 v28.0.0/go.mod h1:e6WsdlAhZzduD5f8ZuR86pi7Hu+8xgIsDVJ4HTQYdD4=
-github.com/ignite/ignite-files/hermes v0.0.1 h1:iOJSVg/JPLAdTC1GXDl/OoHwWcDPvZmGMxmK3mSRPMQ=
-github.com/ignite/ignite-files/hermes v0.0.1/go.mod h1:kPjepcAop4Wet3TaFai2MXQBAPq3U1j8/kZL5mmVC0o=
+github.com/ignite/ignite-files/hermes v0.0.3 h1:Mki12RE2bfhWumNGIeQFkqkdXTlxmVmcXwZDKSGxFOE=
+github.com/ignite/ignite-files/hermes v0.0.3/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
 github.com/improbable-eng/grpc-web v0.15.0 h1:BN+7z6uNXZ1tQGcNAuaU1YjsLTApzkjt2tzCixLaUPQ=
 github.com/improbable-eng/grpc-web v0.15.0/go.mod h1:1sy9HKV4Jt9aEs9JSnkWlRJPuPtwNr0l57L4f878wP8=
 github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
