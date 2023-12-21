@@ -5,25 +5,26 @@ This package is a helper for you can debug your app outside the Ignite using dev
 ## How to use
 
 ```shell
-go run debug/main.go <COMMAND>
+go run test/debug/main.go <COMMAND>
 ```
 
 e.g:
 ```shell
-go run debug/main.go explorer <ARGS>
+go run test/debug/main.go explorer <ARGS>
 ```
 
 ```shell
-go run debug/main.go hermes <ARGS>
+go run test/debug/main.go hermes <ARGS>
 ```
 
 ## Developer instruction
 
-- Replace the app repo for a local folder into the `debug/go.mod`.
+- Replace the app repo for a local folder into the `test/debug/go.mod`.
 ```go.mod
 replace (
-	github.com/ignite/apps/explorer => ../explorer
-	github.com/ignite/apps/hermes => ../hermes
+	github.com/ignite/apps/explorer => ../../explorer
+	github.com/ignite/apps/hermes => ../../hermes
+	github.com/ignite/apps/<MY-APP> => ../../<MY-APP> 
 )
 ```
 
@@ -31,7 +32,7 @@ replace (
 ```go
 rootCmd.AddCommand(
     explorer.NewExplorer(),
-    hermes.NewRelayer(),
+    hermes.NewHermes(),
     myapp.NewCommand() // <--- Add the new command
 )
 ```
