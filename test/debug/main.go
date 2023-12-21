@@ -18,7 +18,7 @@ var rootCmd = &cobra.Command{
 func main() {
 	rootCmd.AddCommand(
 		explorer.NewExplorer(),
-		hermes.NewRelayer(),
+		hermes.NewHermes(),
 		// Add commands for debugging here.
 	)
 	if err := rootCmd.Execute(); err != nil {
