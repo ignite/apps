@@ -17,13 +17,12 @@ govulncheck:
 format:
 	@echo Formatting...
 	@go run mvdan.cc/gofumpt -w .
-	@go run golang.org/x/tools/cmd/goimports -w -local github.com/ignite/cli .
-	@go run github.com/tbruyelle/mdgofmt/cmd/mdgofmt -w docs
+	@go run golang.org/x/tools/cmd/goimports -w -local github.com/ignite/apps .
 
 ## lint: Run Golang CI Lint.
 lint:
 	@echo Running golangci-lint...
-	@go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab --issues-exit-code=0
+	@go list -f '{{.Dir}}/...' -m | xargs go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab --issues-exit-code=0
 
 .PHONY: govet format lint
 

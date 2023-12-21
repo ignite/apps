@@ -1,12 +1,14 @@
 package explorer_test
 
 import (
+	"os"
+	"path/filepath"
 	"testing"
 
-	pluginsconfig "github.com/ignite/cli/ignite/config/plugins"
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/ignite/services/plugin"
-	envtest "github.com/ignite/cli/integration"
+	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v28/integration"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
@@ -18,24 +20,26 @@ func TestGexExplorer(t *testing.T) {
 		env     = envtest.New(t)
 		app     = env.Scaffold("github.com/test/explorer")
 
-		pluginRepo = "github.com/ignite/apps/explorer"
-
 		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
 			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())
 			require.NoError(err)
-			assert.ElementsMatch(expectedLocalPlugins, localCfg.Plugins, "unexpected local plugins")
+			assert.ElementsMatch(expectedLocalPlugins, localCfg.Apps, "unexpected local apps")
 
 			globalCfgPath, err := plugin.PluginsPath()
 			require.NoError(err)
 			globalCfg, err := pluginsconfig.ParseDir(globalCfgPath)
 			require.NoError(err)
-			assert.ElementsMatch(expectedGlobalPlugins, globalCfg.Plugins, "unexpected global plugins")
+			assert.ElementsMatch(expectedGlobalPlugins, globalCfg.Apps, "unexpected global apps")
 		}
 	)
 
+	dir, err := os.Getwd()
+	require.NoError(err)
+	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "explorer")
+
 	env.Must(env.Exec("add explorer plugin",
 		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "plugin", "add", pluginRepo),
+			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
 			step.Workdir(app.SourcePath()),
 		)),
 	))
@@ -44,7 +48,7 @@ func TestGexExplorer(t *testing.T) {
 	assertPlugins(
 		[]pluginsconfig.Plugin{
 			{
-				Path: pluginRepo,
+				Path: pluginPath,
 			},
 		},
 		nil,

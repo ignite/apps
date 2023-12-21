@@ -8,9 +8,14 @@ The app adds `ignite relayer hermes` commands to allow IBC communication between
 
 - Run both chain to be relayed.
 
-- add the hermes relayer app:
+- add the hermes relayer app from remote:
 ```shell
-ignite app add -g ($GOPATH)/src/github.com/ignite/apps/hermes
+ignite app install -g github.com/ignite/apps/hermes
+```
+
+- or clone the repo and add the hermes relayer app local:
+```shell
+ignite app install -g $GOPATH/src/github.com/ignite/apps/hermes
 ```
 
 - configure the relayer:
@@ -24,7 +29,7 @@ ignite relayer hermes configure "mars-1" "http://localhost:26649" "http://localh
 
 - start the relayer
 ```shell
-ignite relayer hermes start [chain-a-id] [chain-a-rpc] [flags]
+ignite relayer hermes start [chain-a-id] [chain-b-id] [flags]
 ```
 e.g.:
 ```shell
