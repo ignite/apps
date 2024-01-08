@@ -1,0 +1,5 @@
+version: '1.0.0'
+apps:
+  hooks:
+    description: hooks is an awesome Ignite application!
+    path: ./

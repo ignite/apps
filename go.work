@@ -1,7 +1,9 @@
 go 1.21.1
 
 use (
-	./explorer
-	./hermes
-	./integration
+	./official/explorer
+	./official/hermes
+	./official/marketplace
+	./examples/hello-world
+	./examples/hooks
 )
