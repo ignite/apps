@@ -67,5 +67,5 @@ func TestHooks(t *testing.T) {
 			step.Stdout(buf),
 		)),
 	))
-	assert.Equal("Hello, world!\n", buf.String())
+	assert.Equal("To use either run \"ignite scaffold chain\" or \"ignite chain serve\" and see the output.\n", buf.String())
 }

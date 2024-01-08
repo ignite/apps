@@ -10,7 +10,7 @@ import (
 func NewHooks() *cobra.Command {
 	c := &cobra.Command{
 		Use:           "hooks",
-		Short:         "This is a example Ignite App that demonstrates hooks",
+		Short:         "This is an example Ignite App that demonstrates usage of hooks",
 		Long:          "To use either run \"ignite scaffold chain\" or \"ignite chain serve\" and see the output.",
 		SilenceUsage:  true,
 		SilenceErrors: true,
