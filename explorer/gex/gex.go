@@ -15,13 +15,13 @@ import (
 	"github.com/pkg/errors"
 )
 
-// Gex represents the gex binary structure.
+// Gex represents the Gex binary structure.
 type Gex struct {
 	path    string
 	cleanup func()
 }
 
-// New returns the hermes binary executable.
+// New returns the Gex binary executable.
 func New() (*Gex, error) {
 	// untar the binary.
 	gzr, err := gzip.NewReader(bytes.NewReader(gex.Binary()))
