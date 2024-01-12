@@ -15,7 +15,7 @@ type app struct{}
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
 		Name:     "explorer",
-		Commands: cmd.Commands,
+		Commands: cmd.GetCommands(),
 	}, nil
 }
 
