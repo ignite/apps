@@ -1,57 +1,51 @@
 package cmd
 
 import (
+	"context"
+	"fmt"
 	"net/url"
 	"os"
 
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/explorer/pkg/gex"
+	"github.com/ignite/apps/explorer/gex"
 )
 
-const (
-	defaultHost = "localhost"
-	defaultPort = "26657"
-)
+const maxNumArgs = 1
 
-func NewGex() *cobra.Command {
-	c := &cobra.Command{
-		Use:     "gex [rpc_url]",
-		Aliases: []string{"g"},
-		Short:   "Run gex",
-		Args:    cobra.MaximumNArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			host := defaultHost
-			port := defaultPort
-			ssl := false
-
-			if len(args) == 1 {
-				rpcURL, err := url.Parse(args[0])
-				if err != nil {
-					return errors.Wrapf(err, "failed to parse rpc url %s", args[0])
-				}
-
-				host = rpcURL.Hostname()
-				port = rpcURL.Port()
-				ssl = rpcURL.Scheme == "https"
-				if port == "" {
-					if ssl {
-						port = "443"
-					} else {
-						port = "80"
-					}
-				}
-			}
-
-			g, err := gex.New()
-			if err != nil {
-				return errors.Wrap(err, "failed to initialize gex")
-			}
-
-			return g.Run(cmd.Context(), os.Stdout, os.Stderr, host, port, ssl)
-		},
+// ExecuteGex executes explorer gex subcommand.
+func ExecuteGex(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+	argc := len(cmd.Args)
+	if argc > maxNumArgs {
+		return fmt.Errorf("accepts at most %d arg(s), received %d", maxNumArgs, argc)
 	}
 
-	return c
+	ssl := false
+	host := "localhost"
+	port := "26657"
+
+	if argc == 1 {
+		rpcURL, err := url.Parse(cmd.Args[0])
+		if err != nil {
+			return errors.Wrapf(err, "failed to parse RPC URL %s", cmd.Args[0])
+		}
+
+		ssl = rpcURL.Scheme == "https"
+		host = rpcURL.Hostname()
+		port = rpcURL.Port()
+		if port == "" {
+			if ssl {
+				port = "443"
+			} else {
+				port = "80"
+			}
+		}
+	}
+
+	g, err := gex.New()
+	if err != nil {
+		return errors.Wrap(err, "failed to initialize Gex")
+	}
+	return g.Run(ctx, os.Stdout, os.Stderr, host, port, ssl)
 }
