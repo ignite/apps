@@ -394,16 +394,27 @@ func ensureAccount(
 	cfgPath string,
 	generateWallets bool,
 ) error {
-	chainAAddr, err := verifyChainKeys(ctx, session, h, chainID, cfgPath, generateWallets)
+	chainAddr, err := verifyChainKeys(ctx, session, h, chainID, cfgPath, generateWallets)
 	if err != nil {
 		return err
 	}
-	chainA, err := hCfg.Chains.Get(chainID)
+	chain, err := hCfg.Chains.Get(chainID)
 	if err != nil {
 		return err
+	}
+	balance, err := chain.Balance(ctx, chainAddr)
+	if err != nil {
+		return err
+	}
+	if balance.Empty() && faucetAddr == "" {
+		return fmt.Errorf(
+			"wallet %s balance is empty, please add funds or provide the faucet address flag (--%s or --%s)",
+			chainAddr,
+			flagChainAFaucet,
+			flagChainBFaucet)
 	}
 	if faucetAddr != "" {
-		_, err := chainA.TryRetrieve(ctx, chainAAddr, faucetAddr)
+		_, err := chain.TryRetrieve(ctx, chainAddr, faucetAddr)
 		if err != nil {
 			return err
 		}
