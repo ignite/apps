@@ -4,4 +4,5 @@ use (
 	./explorer
 	./hermes
 	./integration
+	./official/marketplace
 )
