@@ -70,7 +70,7 @@ func printRepoTree(sess *cliui.Session, repos []apps.AppRepository) {
 			starsCountStyle.Render(humanizeInt(repo.Stars, "⭐️")),
 			updatedAtStyle.Render("("+humanize.Time(repo.UpdatedAt)+")"),
 		))
-		node.AddChild(nil)
+		node.AddChild(nil) // Add a nil child to add a line break.
 		for _, app := range repo.Apps {
 			node.AddChild(tree.NewNode(fmt.Sprintf(
 				"🔥 %-20s %s",
