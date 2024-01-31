@@ -8,6 +8,7 @@ import (
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
 	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/pkg/errors"
 )
 
@@ -70,13 +71,13 @@ func Search(ctx context.Context, client *xgithub.Client, query string, minStars 
 }
 
 func listApps(ctx context.Context, client *xgithub.Client, repo *github.Repository) ([]App, error) {
-	appYML, err := getAppYML(ctx, client, repo)
+	conf, err := getAppsConfig(ctx, client, repo)
 	if err != nil {
 		return nil, err
 	}
 
 	var apps []App
-	for name, info := range appYML.Apps {
+	for name, info := range conf.Apps {
 		apps = append(apps, App{
 			Name:        name,
 			Description: info.Description,
@@ -86,17 +87,17 @@ func listApps(ctx context.Context, client *xgithub.Client, repo *github.Reposito
 	return apps, nil
 }
 
-func getAppYML(ctx context.Context, client *xgithub.Client, repo *github.Repository) (*AppYML, error) {
+func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Repository) (*plugin.AppsConfig, error) {
 	data, err := client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
 	}
 
-	var appYML AppYML
-	yaml.UnmarshalContext(ctx, data, &appYML)
+	var conf plugin.AppsConfig
+	yaml.UnmarshalContext(ctx, data, &conf)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", appYMLFileName)
 	}
 
-	return &appYML, nil
+	return &conf, nil
 }

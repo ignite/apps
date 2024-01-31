@@ -50,7 +50,7 @@ func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL st
 		return nil, err
 	}
 
-	appYML, err := getAppYML(ctx, client, repo)
+	appYML, err := getAppsConfig(ctx, client, repo)
 	if err != nil {
 		return nil, err
 	}
