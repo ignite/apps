@@ -1,4 +1,4 @@
-package explorer_test
+package integration_test
 
 import (
 	"bytes"
@@ -7,7 +7,6 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
@@ -19,21 +18,8 @@ import (
 func TestMarketplace(t *testing.T) {
 	var (
 		require = require.New(t)
-		assert  = assert.New(t)
 		env     = envtest.New(t)
 		app     = env.Scaffold("github.com/test/mp")
-
-		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
-			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())
-			require.NoError(err)
-			assert.ElementsMatch(expectedLocalPlugins, localCfg.Apps, "unexpected local apps")
-
-			globalCfgPath, err := plugin.PluginsPath()
-			require.NoError(err)
-			globalCfg, err := pluginsconfig.ParseDir(globalCfgPath)
-			require.NoError(err)
-			assert.ElementsMatch(expectedGlobalPlugins, globalCfg.Apps, "unexpected global apps")
-		}
 	)
 
 	dir, err := os.Getwd()
@@ -42,20 +28,18 @@ func TestMarketplace(t *testing.T) {
 
 	env.Must(env.Exec("add marketplace plugin",
 		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "app", "install", "-g", pluginPath),
+			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
 			step.Workdir(app.SourcePath()),
 		)),
 	))
 
-	// one local plugin expected
-	assertPlugins(
-		nil,
-		[]pluginsconfig.Plugin{
-			{
-				Path: pluginPath,
-			},
+	// One local plugin expected
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
+		{
+			Path: pluginPath,
 		},
-	)
+	})
+	assertGlobalPlugins(t, app, nil)
 
 	buf := &bytes.Buffer{}
 	env.Must(env.Exec("run marketplace list",
@@ -69,7 +53,23 @@ func TestMarketplace(t *testing.T) {
 			step.Stdout(buf),
 		)),
 	))
-	assert.Condition(func() bool {
+	require.Condition(func() bool {
 		return strings.HasPrefix(buf.String(), "❌") || strings.HasPrefix(buf.String(), "📦")
 	}, "unexpected output: %s", buf.String())
+}
+
+func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+	t.Helper()
+	cfg, err := pluginsconfig.ParseDir(app.SourcePath())
+	require.NoError(t, err)
+	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
+}
+
+func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+	t.Helper()
+	cfgPath, err := plugin.PluginsPath()
+	require.NoError(t, err)
+	cfg, err := pluginsconfig.ParseDir(cfgPath)
+	require.NoError(t, err)
+	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected global apps")
 }
