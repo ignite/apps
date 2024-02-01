@@ -2,7 +2,6 @@
 .idea
 .vscode
 *.test
-*.app
+*.ign
+go.work
 go.work.sum
-hermes/hermes
-explorer/explorer

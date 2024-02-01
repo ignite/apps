@@ -2,33 +2,32 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"github.com/ignite/apps/explorer/cmd"
+	"github.com/ignite/apps/official/marketplace/cmd"
 )
 
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	return &plugin.Manifest{
-		Name:     "explorer",
-		Commands: cmd.GetCommands(),
-	}, nil
+	m := &plugin.Manifest{
+		Name: "marketplace",
+	}
+	m.ImportCobraCommand(cmd.NewMarketplace(), "ignite")
+	return m, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	args := c.OsArgs
-	name := args[len(args)-1]
-
-	switch name {
-	case "gex":
-		return cmd.ExecuteGex(ctx, c)
-	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
-	}
+func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+	// Instead of a switch on c.Use, we run the root command like if
+	// we were in a command line context. This implies to set os.Args
+	// correctly.
+	// Remove the first arg "ignite" from OSArgs because our marketplace
+	// command root is "marketplace" not "ignite".
+	os.Args = c.OsArgs[1:]
+	return cmd.NewMarketplace().Execute()
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
@@ -47,7 +46,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"explorer": plugin.NewGRPC(&app{}),
+			"marketplace": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})
