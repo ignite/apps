@@ -3,5 +3,4 @@
 .vscode
 *.test
 *.ign
-go.work
 go.work.sum
