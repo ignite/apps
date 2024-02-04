@@ -248,16 +248,16 @@ github.com/gobuffalo/flect v0.3.0 h1:erfPWM+K1rFNIQeRPdeEXxo8yFr/PO17lhRnS8FUrtk
 github.com/gobuffalo/flect v0.3.0/go.mod h1:5pf3aGnsvqvCj50AVni7mJJF8ICxGZ8HomberC3pXLE=
 github.com/gobuffalo/genny/v2 v2.1.0 h1:cCRBbqzo3GfNvj3UetD16zRgUvWFEyyl0qTqquuIqOM=
 github.com/gobuffalo/genny/v2 v2.1.0/go.mod h1:4yoTNk4bYuP3BMM6uQKYPvtP6WsXFGm2w2EFYZdRls8=
-github.com/gobuffalo/github_flavored_markdown v1.1.3 h1:rSMPtx9ePkFB22vJ+dH+m/EUBS8doQ3S8LeEXcdwZHk=
 github.com/gobuffalo/github_flavored_markdown v1.1.3/go.mod h1:IzgO5xS6hqkDmUh91BW/+Qxo/qYnvfzoz3A7uLkg77I=
+github.com/gobuffalo/github_flavored_markdown v1.1.4 h1:WacrEGPXUDX+BpU1GM/Y0ADgMzESKNWls9hOTG1MHVs=
 github.com/gobuffalo/helpers v0.6.7 h1:C9CedoRSfgWg2ZoIkVXgjI5kgmSpL34Z3qdnzpfNVd8=
 github.com/gobuffalo/helpers v0.6.7/go.mod h1:j0u1iC1VqlCaJEEVkZN8Ia3TEzfj/zoXANqyJExTMTA=
 github.com/gobuffalo/logger v1.0.7 h1:LTLwWelETXDYyqF/ASf0nxaIcdEOIJNxRokPcfI/xbU=
 github.com/gobuffalo/logger v1.0.7/go.mod h1:u40u6Bq3VVvaMcy5sRBclD8SXhBYPS0Qk95ubt+1xJM=
 github.com/gobuffalo/packd v1.0.2 h1:Yg523YqnOxGIWCp69W12yYBKsoChwI7mtu6ceM9Bwfw=
 github.com/gobuffalo/packd v1.0.2/go.mod h1:sUc61tDqGMXON80zpKGp92lDb86Km28jfvX7IAyxFT8=
-github.com/gobuffalo/plush/v4 v4.1.16 h1:Y6jVVTLdg1BxRXDIbTJz+J8QRzEAtv5ZwYpGdIFR7VU=
 github.com/gobuffalo/plush/v4 v4.1.16/go.mod h1:6t7swVsarJ8qSLw1qyAH/KbrcSTwdun2ASEQkOznakg=
+github.com/gobuffalo/plush/v4 v4.1.19 h1:o0E5gEJw+ozkAwQoCeiaWC6VOU2lEmX+GhtGkwpqZ8o=
 github.com/gobuffalo/tags/v3 v3.1.4 h1:X/ydLLPhgXV4h04Hp2xlbI2oc5MDaa7eub6zw8oHjsM=
 github.com/gobuffalo/tags/v3 v3.1.4/go.mod h1:ArRNo3ErlHO8BtdA0REaZxijuWnWzF6PUXngmMXd2I0=
 github.com/gobuffalo/validate/v3 v3.3.3 h1:o7wkIGSvZBYBd6ChQoLxkz2y1pfmhbI4jNJYh6PuNJ4=
@@ -377,7 +377,7 @@ github.com/hashicorp/go-hclog v1.2.0/go.mod h1:whpDNt7SSdeAju8AWKIWsul05p54N/39E
 github.com/hashicorp/go-immutable-radix v1.0.0/go.mod h1:0y9vanUI8NX6FsYoO3zeMjhV/C5i9g4Q3DwcSNZ4P60=
 github.com/hashicorp/go-immutable-radix v1.3.1 h1:DKHmCUm2hRBK510BaiZlwvpD40f8bJFeZnpfm2KLowc=
 github.com/hashicorp/go-immutable-radix v1.3.1/go.mod h1:0y9vanUI8NX6FsYoO3zeMjhV/C5i9g4Q3DwcSNZ4P60=
-github.com/hashicorp/go-plugin v1.5.1 h1:oGm7cWBaYIp3lJpx1RUEfLWophprE2EV/KUeqBYo+6k=
+github.com/hashicorp/go-plugin v1.5.2 h1:aWv8eimFqWlsEiMrYZdPYl+FdHaBJSN4AWwGWfT1G2Y=
 github.com/hashicorp/go-retryablehttp v0.5.3/go.mod h1:9B5zBasrRhHXnJnui7y6sL7es7NDiJgTc6Er0maI1Xs=
 github.com/hashicorp/go-uuid v1.0.0/go.mod h1:6SBZvOh/SIDV7/2o3Jml5SYk/TvGqwFJ/bN7x4byOro=
 github.com/hashicorp/go-uuid v1.0.2 h1:cfejS+Tpcp13yd5nYHWDI6qVCny6wyX2Mt5SGur2IGE=

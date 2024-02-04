@@ -11,10 +11,26 @@ import (
 
 const (
 	statusWasmInit = "Adding Wasm to your chain..."
+
+	flagPath = "path"
+	flagYes  = "yes"
+
+	msgCommitPrefix = "Your saved project changes have not been committed.\nTo enable reverting to your current state, commit your saved changes."
+	msgCommitPrompt = "Do you want to proceed without committing your saved changes"
 )
 
+func getYes(cmd *cobra.Command) (ok bool) {
+	ok, _ = cmd.Flags().GetBool(flagYes)
+	return
+}
+
+func flagGetPath(cmd *cobra.Command) (path string) {
+	path, _ = cmd.Flags().GetString(flagPath)
+	return
+}
+
 // NewWasmd creates a new wasmd command that holds
-// some other sub commands related to running chain wasmds like gex and etc.
+// some other sub commands related to cosmwasm.
 func NewWasmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:           "wasmd [command]",
@@ -26,15 +42,6 @@ func NewWasmd() *cobra.Command {
 
 	// add sub commands.
 	c.AddCommand(NewWasmdInit())
-	// c.AddCommand(NewWasmdSC())
-
-	/*
-
-		ignite wasmd init
-		ignite wasmd sc(smart contract) new/test/deploy
-
-	*/
-
 	return c
 }
 

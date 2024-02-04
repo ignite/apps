@@ -1,10 +1,13 @@
 package cmd
 
 import (
-	"github.com/ignite/apps/wasmd/services/scaffolder"
+	flag "github.com/spf13/pflag"
+
 	"github.com/ignite/cli/ignite/pkg/cliui"
 	"github.com/ignite/cli/ignite/pkg/placeholder"
 	"github.com/spf13/cobra"
+
+	"github.com/ignite/apps/wasmd/services/scaffolder"
 )
 
 func NewWasmdInit() *cobra.Command {
@@ -17,26 +20,25 @@ func NewWasmdInit() *cobra.Command {
 		RunE:    scaffoldWasmHandler,
 	}
 
+	c.Flags().AddFlagSet(flagSetAppPath())
 	return c
+}
+
+func flagSetAppPath() *flag.FlagSet {
+	fs := flag.NewFlagSet("", flag.ContinueOnError)
+	fs.StringP(flagPath, "p", ".", "directory where the blockchain node is initialized")
+	return fs
 }
 
 func scaffoldWasmHandler(cmd *cobra.Command, _ []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusWasmInit))
 	defer session.End()
 
-	var (
-		appPath = "."
-	)
-
 	options := []scaffolder.WasmdOption{}
-	sc, err := scaffolder.New(appPath)
+	sc, err := scaffolder.New(flagGetPath(cmd))
 	if err != nil {
 		return err
 	}
-	if _, err = sc.InitWasmd(cmd.Context(), placeholder.New(), options...); err != nil {
-		return err
-	}
-	return nil
+	_, err = sc.InitWasmd(cmd.Context(), placeholder.New(), options...)
+	return err
 }
-
-//todo:: IBC checking need more investigation

@@ -22,4 +22,6 @@ here are already used placeholders in ignite that you can find in yaml file unde
 
 ### TODO:
 - [ ] add version compatibility checking for cosmos and wasmd
-- [ ] add smart contract features
+- [ ] add smart contract features (new/test/deploy)
+- [ ] IBC options and other parameters
+

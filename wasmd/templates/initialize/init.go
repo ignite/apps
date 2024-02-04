@@ -1,6 +1,7 @@
 package initialize
 
 import (
+	"context"
 	"embed"
 	"path/filepath"
 	"regexp"
@@ -17,24 +18,32 @@ const (
 	PathAppGo     = "app/app.go"
 )
 
-type PlaceHolder string
-type Change string
-type AppDynamicChanges map[PlaceHolder]Change
+type (
+	PlaceHolder        string
+	Change             string
+	AppDynamicChanges  map[PlaceHolder]Change
+	After              string
+	Before             string
+	AppDynamicReplaces map[Before]After
+)
 
-type After string
-type Before string
-type AppDynamicReplaces map[Before]After
+// InitOptions ...
+type InitOptions struct {
+	AppName string
+	AppPath string
+	Version string
+}
 
 // files/**/* maybe don't needed
 
-//go:embed files/* files/**/*
+//go:embed files/**/*
 var files embed.FS
 
 //go:embed placeholders/*
 var placeholders embed.FS
 
 // NewGenerator returns the generator to scaffold code to import wasm module inside an app.
-func NewGenerator(opts *InitOptions) (*genny.Generator, error) {
+func NewGenerator(ctx context.Context, opts InitOptions) (*genny.Generator, error) {
 	g := genny.New()
 
 	filePathVersion := "files/" + opts.Version
@@ -48,15 +57,15 @@ func NewGenerator(opts *InitOptions) (*genny.Generator, error) {
 		return g, err
 	}
 
-	ctx := plush.NewContext()
+	plushCtx := plush.NewContextWithContext(ctx)
 
-	g.Transformer(xgenny.Transformer(ctx))
+	g.Transformer(xgenny.Transformer(plushCtx))
 
 	return g, nil
 }
 
 // NewAppModify returns generator with modifications required to register wasmd in the app.
-func NewAppModify(replacer placeholder.Replacer, opts *InitOptions) *genny.Generator {
+func NewAppModify(replacer placeholder.Replacer, opts InitOptions) *genny.Generator {
 	g := genny.New()
 
 	// g.File(placeholders)
@@ -66,7 +75,7 @@ func NewAppModify(replacer placeholder.Replacer, opts *InitOptions) *genny.Gener
 }
 
 // app.go modification when importing wasm.
-func appModify(replacer placeholder.Replacer, opts *InitOptions) genny.RunFn {
+func appModify(replacer placeholder.Replacer, opts InitOptions) genny.RunFn {
 	return func(r *genny.Runner) error {
 
 		path := filepath.Join(opts.AppPath, module.PathAppGo)
@@ -74,7 +83,7 @@ func appModify(replacer placeholder.Replacer, opts *InitOptions) genny.RunFn {
 		if err != nil {
 			return err
 		}
-		dc, err := newAppDynamicChange("v0.44")
+		dc, err := newAppDynamicChange(opts.Version)
 		if err != nil {
 			return err
 		}
@@ -83,7 +92,7 @@ func appModify(replacer placeholder.Replacer, opts *InitOptions) genny.RunFn {
 			replacementImport := string(text) + string(placeholder)
 			content = replacer.Replace(content, string(placeholder), replacementImport)
 		}
-		rp, err := newAppDynamicReplaces("v0.44")
+		rp, err := newAppDynamicReplaces(opts.Version)
 		if err != nil {
 			return err
 		}

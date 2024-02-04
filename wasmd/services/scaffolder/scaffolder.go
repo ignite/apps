@@ -57,13 +57,11 @@ func New(appPath string) (Scaffolder, error) {
 		return Scaffolder{}, err
 	}
 
-	s := Scaffolder{
+	return Scaffolder{
 		Version: ver,
 		path:    path,
 		modpath: modpath,
-	}
-
-	return s, nil
+	}, nil
 }
 
 func finish(ctx context.Context, path, gomodPath string) error {
@@ -73,15 +71,11 @@ func finish(ctx context.Context, path, gomodPath string) error {
 	return gocmd.Fmt(ctx, path)
 }
 
-func (s Scaffolder) installWasm(version string) error {
-
+func (s Scaffolder) installWasm(ctx context.Context, version string) error {
 	return cmdrunner.
 		New().
-		Run(context.Background(),
+		Run(
+			ctx,
 			step.New(step.Exec(gocmd.Name(), "get", gocmd.PackageLiteral(wasmImport, version))),
 		)
-
 }
-
-//Todo:: I was thinking on having a map between cosmos versions that are compatible with wasmd versions so we could
-//find out which version is suitable based on current cosmos version. But now we just passed hardcoded values.

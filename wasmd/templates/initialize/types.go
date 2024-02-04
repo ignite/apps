@@ -22,7 +22,7 @@ type ReplaceItem struct {
 }
 
 func parsePlaceHoldersFromYaml(path string) (Changes, error) {
-	changes := Changes{}
+	var changes Changes
 	source, err := placeholders.ReadFile(path)
 	if err != nil {
 		return Changes{}, err
@@ -34,7 +34,7 @@ func parsePlaceHoldersFromYaml(path string) (Changes, error) {
 }
 
 func parseReplacerFromYaml(path string) (Replaces, error) {
-	replaces := Replaces{}
+	var replaces Replaces
 
 	source, err := placeholders.ReadFile(path)
 	if err != nil {

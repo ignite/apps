@@ -4,11 +4,11 @@ import (
 	"context"
 	"errors"
 
-	"github.com/gobuffalo/genny/v2"
-	"github.com/ignite/apps/wasmd/templates/initialize"
 	"github.com/ignite/cli/ignite/pkg/placeholder"
 	"github.com/ignite/cli/ignite/pkg/validation"
 	"github.com/ignite/cli/ignite/pkg/xgenny"
+
+	"github.com/ignite/apps/wasmd/templates/initialize"
 )
 
 // wasmdOptions holds options for creating a new module.
@@ -50,22 +50,20 @@ func (s Scaffolder) InitWasmd(
 		apply(&wasmdOpts)
 	}
 
-	opts := &initialize.InitOptions{
+	opts := initialize.InitOptions{
 		AppName: s.modpath.Package,
 		AppPath: s.path,
-		Version: "v0.44",
+		Version: "v0.44.0", // TODO: Allow users to specify a version
 	}
 
-	g, err := initialize.NewGenerator(opts)
+	g, err := initialize.NewGenerator(ctx, opts)
 	if err != nil {
-		return sm, err
+		return xgenny.SourceModification{}, err
 	}
 
-	gens := []*genny.Generator{g}
-
-	sm, err = xgenny.RunWithValidation(tracer, gens...)
+	sm, err = xgenny.RunWithValidation(tracer, g)
 	if err != nil {
-		return sm, err
+		return xgenny.SourceModification{}, err
 	}
 
 	// Modify app.go to register the module
@@ -73,10 +71,10 @@ func (s Scaffolder) InitWasmd(
 	sm.Merge(newSourceModification)
 	var validationErr validation.Error
 	if runErr != nil && !errors.As(runErr, &validationErr) {
-		return sm, runErr
+		return xgenny.SourceModification{}, runErr
 	}
-	if err := s.installWasm("v0.44.0"); err != nil {
-		return sm, err
+	if err := s.installWasm(ctx, opts.Version); err != nil {
+		return xgenny.SourceModification{}, err
 	}
 	return sm, finish(ctx, opts.AppPath, s.modpath.RawPath)
 }
