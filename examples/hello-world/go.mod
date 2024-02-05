@@ -6,7 +6,7 @@ toolchain go1.21.3
 
 require (
 	github.com/hashicorp/go-plugin v1.5.2
-	github.com/ignite/cli/v28 v28.0.0
+	github.com/ignite/cli/v28 v28.1.1
 	github.com/stretchr/testify v1.8.4
 )
 
