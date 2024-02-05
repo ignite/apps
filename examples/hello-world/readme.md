@@ -51,5 +51,5 @@ The integration test for the "hello-world" Ignite App ensures that the app works
 To run the integration test, execute the following command:
 
 ```bash
-go test -v ./integration_test
+go test -v ./integration
 ```
