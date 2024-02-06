@@ -16,8 +16,6 @@ import (
 )
 
 func TestMarketplace(t *testing.T) {
-	t.SkipNow()
-
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
@@ -53,6 +51,7 @@ func TestMarketplace(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Condition(func() bool {
