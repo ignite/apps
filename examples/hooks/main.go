@@ -5,10 +5,9 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"hooks/cmd"
-
-	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
 type app struct{}
