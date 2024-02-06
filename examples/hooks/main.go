@@ -46,7 +46,7 @@ func (app) ExecuteHookPre(ctx context.Context, hook *plugin.ExecutedHook, api pl
 			return err
 		}
 
-		fmt.Printf("Chain with chain-id \"%s\" running at rpc address \"%s\"\n", chainInfo.ChainId, chainInfo.RpcAddress)
+		fmt.Printf(`Chain with chain-id "%s" running at rpc address "%s"\n`, chainInfo.ChainId, chainInfo.RpcAddress)
 	}
 	return nil
 }
