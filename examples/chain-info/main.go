@@ -5,11 +5,10 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
-
-	"chain-info/cmd"
-
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
+
+	"chain-info/cmd"
 )
 
 type app struct{}
