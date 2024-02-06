@@ -1,6 +1,6 @@
 module github.com/ignite/apps/wasmd
 
-go 1.21.3
+go 1.21.1
 
 require (
 	github.com/gobuffalo/genny/v2 v2.1.0
