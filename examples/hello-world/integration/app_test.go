@@ -49,7 +49,6 @@ func TestHelloWorld(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
-			step.Stderr(buf),
 		)),
 	))
 	require.Equal("Hello, world!\n", buf.String())
