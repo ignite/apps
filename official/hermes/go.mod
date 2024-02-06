@@ -1,4 +1,4 @@
-module github.com/ignite/apps/hermes
+module github.com/ignite/apps/official/hermes
 
 go 1.21.1
 

@@ -3,7 +3,7 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/hermes/pkg/hermes"
+	"github.com/ignite/apps/official/hermes/pkg/hermes"
 )
 
 // NewHermesExecute execute hermes relayer commands.

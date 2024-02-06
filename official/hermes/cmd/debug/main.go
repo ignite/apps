@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ignite/apps/hermes/cmd"
+	"github.com/ignite/apps/official/hermes/cmd"
 )
 
 func main() {

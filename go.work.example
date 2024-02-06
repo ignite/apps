@@ -2,6 +2,6 @@ go 1.21.1
 
 use (
 	./official/explorer
-	./hermes
+	./official/hermes
 	./official/marketplace
 )
