@@ -30,7 +30,7 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 }
 
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	fmt.Println("To use either run \"ignite chain build\" or \"ignite chain serve\" and see the output.")
+	fmt.Println(`To use either run "ignite chain build" or "ignite chain serve" and see the output.`)
 	return nil
 }
 
