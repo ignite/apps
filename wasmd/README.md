@@ -20,8 +20,18 @@ In this regard, we have used a combination of placeholders and replacements.
 
 here are already used placeholders in ignite that you can find in yaml file under changes section. and there were few places that we couldn't find any placeholder to fit and we used replacement for those parts and you can find it under replace section in yaml file.
 
+## Compatibility
+
+|Cosmos Version| wasmd Version|
+|--------------|--------------|
+|    V0.47.3   |    v0.44.0   |
+
+This table will be updated with wasmd available tags (rc0, rc1, ...) during time and also we need to examine each version to be sure about the copatibility.
+                
+
 ### TODO:
 - [ ] add version compatibility checking for cosmos and wasmd
 - [ ] add smart contract features (new/test/deploy)
 - [ ] IBC options and other parameters
+- [ ] Examine compatibility version and complete the table
 

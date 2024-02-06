@@ -49,11 +49,10 @@ func (s Scaffolder) InitWasmd(
 	for _, apply := range options {
 		apply(&wasmdOpts)
 	}
-
 	opts := initialize.InitOptions{
 		AppName: s.modpath.Package,
 		AppPath: s.path,
-		Version: "v0.44.0", // TODO: Allow users to specify a version
+		Version: compatility[cosmosVersion(s.Version.String())][0],
 	}
 
 	g, err := initialize.NewGenerator(ctx, opts)
