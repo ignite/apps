@@ -3,7 +3,7 @@
 
 # Ignite App: Flags Example
 
-The "flags" Ignite App is a simple example demonstrating how to use command-line flags and arguments in Ignite applications.
+The `flags` Ignite App is a simple example demonstrating how to use command-line flags and arguments in Ignite applications.
   
 
 ## Installation
@@ -14,7 +14,7 @@ The "flags" Ignite App is a simple example demonstrating how to use command-line
 
   
 
-To use the "flags" app within your project, execute the following command inside the project directory:
+To use the `flags` app within your project, execute the following command inside the project directory:
 
   
 
@@ -34,7 +34,7 @@ The app will be available only when running `ignite` inside the project director
 
   
 
-To use the "flags" app globally, execute the following command:
+To use the `flags` app globally, execute the following command:
 
   
 
@@ -64,12 +64,12 @@ This command will compile the app and make it immediately available to the `igni
 
   
 
-The "flags" Ignite App demonstrates the use of command-line flags and arguments in Ignite applications. It consists of several files:
+The `flags` Ignite App demonstrates the use of command-line flags and arguments in Ignite applications. It consists of several files:
 -   `main.go`: Contains the main code for the app, including the implementation of the `Manifest` method, which defines the app's name and commands, and the `Execute` method, which handles the execution of subcommands based on the provided arguments and flags.
     
 -   `cmd/cmd.go`: Contains the definition of the main command and its subcommands, including their names, descriptions, and flags.
     
--   `cmd/hello.go` and `cmd/cowsay.go`: Contains the execution logic for the "hello" and "cowsay" subcommands, respectively. These files demonstrate how to access and use flags passed to the subcommands.
+-   `cmd/hello.go` and `cmd/cowsay.go`: Contains the execution logic for the `hello` and `cowsay` subcommands, respectively. These files demonstrate how to access and use flags passed to the subcommands.
   
 
 The `hello` subcommand simply prints a greeting message to the console, including the name specified by the `--name` flag. For example:
@@ -80,7 +80,7 @@ The `hello` subcommand simply prints a greeting message to the console, includin
 
   
 
-The integration test for the "flags" Ignite App ensures that the app works correctly with the Ignite CLI. The test performs the following steps:
+The integration test for the `flags` Ignite App ensures that the app works correctly with the Ignite CLI. The test performs the following steps:
 
   
 
