@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/golangci/golangci-lint v1.54.2
 	github.com/hashicorp/go-plugin v1.5.2
-	github.com/ignite/cli v0.27.2
+	github.com/ignite/cli v0.27.1
 	github.com/ignite/ignite-files/gex v0.0.1
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.7.0

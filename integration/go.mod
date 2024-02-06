@@ -3,7 +3,7 @@ module github.com/ignite/apps/integration
 go 1.21.1
 
 require (
-	github.com/ignite/cli v0.27.2
+	github.com/ignite/cli v0.27.1
 	github.com/stretchr/testify v1.8.4
 )
 

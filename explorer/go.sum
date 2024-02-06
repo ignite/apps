@@ -374,8 +374,7 @@ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUq
 github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
 github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
-github.com/ignite/cli v0.27.2 h1:NFzZqQrt8vhRQeStSvAMhpq65ag+lEAVP5ulw7cu3Y4=
-github.com/ignite/cli v0.27.2/go.mod h1:7uaYQQ07tyOBiVAlRYAcZk2g/Y1vtgU0J09oPNntR4E=
+github.com/ignite/cli v0.27.1 h1:CNMY0XIMICzfMqZ6yZC4qQNP/r3Ar0Ssh86u84HV1so=
 github.com/ignite/ignite-files/gex v0.0.1 h1:lt6vlUG+xMGEb9bhQtKfw4S8RCEgQ5lqU3D1wwwxotQ=
 github.com/ignite/ignite-files/gex v0.0.1/go.mod h1:qhiUnrhQ9jjBtlrOiSzjZc1g9+dlp2lPCyG9Oy6zJ3U=
 github.com/imdario/mergo v0.3.13/go.mod h1:4lJ1jqUDcsbIECGy0RUJAXNIhg+6ocWgb1ALK2O4oXg=
