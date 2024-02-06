@@ -54,7 +54,7 @@ This command will compile the app and make it immediately available to the `igni
 
   
 
-- Go (version 1.16 or higher)
+- Go (version 1.21 or higher)
 
 - Ignite CLI (version 28.1.1 or higher)
 
