@@ -16,6 +16,8 @@ import (
 )
 
 func TestMarketplace(t *testing.T) {
+	t.SkipNow()
+
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)

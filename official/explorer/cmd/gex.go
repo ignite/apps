@@ -9,7 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/pkg/errors"
 
-	"github.com/ignite/apps/explorer/gex"
+	"github.com/ignite/apps/official/explorer/gex"
 )
 
 const maxNumArgs = 1

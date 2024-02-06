@@ -7,7 +7,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"github.com/ignite/apps/explorer/cmd"
+	"github.com/ignite/apps/official/explorer/cmd"
 )
 
 type app struct{}

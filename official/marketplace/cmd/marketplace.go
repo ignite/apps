@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"github.com/charmbracelet/lipgloss"
+	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
 )
 
@@ -33,4 +35,8 @@ func NewMarketplace() *cobra.Command {
 	c.PersistentFlags().String(githubTokenFlag, "", "GitHub access token")
 
 	return c
+}
+
+func init() {
+	lipgloss.SetColorProfile(termenv.TrueColor)
 }
