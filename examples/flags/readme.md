@@ -84,13 +84,13 @@ The integration test for the "flags" Ignite App ensures that the app works corre
 
   
 
-1.  Installs the "flags" app locally.
+1.  Installs the `flags` app locally.
 
-2.  Runs the "hello" subcommand with a custom name flag.
+2.  Runs the `hello` subcommand with a custom `name` flag.
 
-3.  Runs the "cowsay" subcommand with a custom name flag.
+3.  Runs the `cowsay` subcommand with a custom `name` flag.
 
-5.  Verifies the output of the "hello" and "cowsay" subcommands.
+5.  Verifies the output of the `hello` and `cowsay` subcommands.
 
   
 
