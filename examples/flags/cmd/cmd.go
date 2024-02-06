@@ -12,7 +12,7 @@ func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
 			Use:   "flags [command]",
-			Short: "flsgs is a simple application that demonstrates use of cli flags and args in Ignite applications",
+			Short: "flags is a simple application that demonstrates use of cli flags and args in Ignite applications",
 			Commands: []*plugin.Command{
 				{
 					Use:   "hello",
