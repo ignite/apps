@@ -52,7 +52,8 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: go test -v -timeout 120m ./${{ matrix.test-path }}
+        working-directory: ${{ matrix.test-path }}
+        run: go test -v -timeout 120m
 
   status:
     runs-on: ubuntu-latest
