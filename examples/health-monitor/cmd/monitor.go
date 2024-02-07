@@ -8,7 +8,7 @@ import (
 
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
 	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/ignite/cli/ignite/pkg/xurl"
+	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/inancgumus/screen"
 	"github.com/spf13/pflag"
