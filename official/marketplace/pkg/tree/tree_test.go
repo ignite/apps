@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/ignite/apps/official/marketplace/pkg/tree"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ignite/apps/official/marketplace/pkg/tree"
 )
 
 func TestTree(t *testing.T) {

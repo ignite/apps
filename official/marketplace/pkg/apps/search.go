@@ -7,9 +7,10 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
-	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/pkg/errors"
+
+	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
 )
 
 const (
