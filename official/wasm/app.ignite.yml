@@ -1,0 +1,6 @@
+version: 1
+apps:
+  wasm:
+    description: wasm is an awesome Ignite application!
+    path: ./
+    
