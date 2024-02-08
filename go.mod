@@ -1,6 +1,6 @@
 module github.com/ignite/apps
 
-go 1.21.6
+go 1.21.1
 
 require (
 	github.com/golangci/golangci-lint v1.55.2
