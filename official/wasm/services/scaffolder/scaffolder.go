@@ -1,5 +1,3 @@
-// Package scaffolder initializes Ignite CLI apps and modifies existing ones
-// to add more features in a later time.
 package scaffolder
 
 import (
@@ -75,6 +73,15 @@ func AssertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 }
 
 func finish(ctx context.Context, path string) error {
+	// Add wasmd to the go.mod
+	if err := gocmd.Get(ctx, path, []string{wasmRepo}); err != nil {
+		return err
+	}
+
+	if err := gocmd.ModTidy(ctx, path); err != nil {
+		return err
+	}
+
 	if err := gocmd.Fmt(ctx, path); err != nil {
 		return err
 	}

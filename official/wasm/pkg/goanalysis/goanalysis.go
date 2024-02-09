@@ -6,11 +6,12 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-// AppendImports inserts import statements into Go source code content.
+// AppendImports appends import statements to the existing import block in Go source code content.
 func AppendImports(fileContent string, importStatements ...string) (modifiedContent string, err error) {
 	fileSet := token.NewFileSet()
 
@@ -20,56 +21,65 @@ func AppendImports(fileContent string, importStatements ...string) (modifiedCont
 		return "", err
 	}
 
-	// Check if the import already exists.
-	existImports := make(map[string]struct{})
+	// Find the existing import declaration.
+	var importDecl *ast.GenDecl
 	for _, decl := range f.Decls {
 		genDecl, ok := decl.(*ast.GenDecl)
 		if !ok || genDecl.Tok != token.IMPORT || len(genDecl.Specs) == 0 {
 			continue
 		}
-
-		for _, spec := range genDecl.Specs {
-			importSpec, ok := spec.(*ast.ImportSpec)
-			if !ok {
-				continue
-			}
-			existImports[importSpec.Path.Value] = struct{}{}
-		}
+		importDecl = genDecl
+		break
 	}
 
-	newSpecs := make([]ast.Spec, 0)
+	if importDecl == nil {
+		// If no existing import declaration found, create a new one.
+		importDecl = &ast.GenDecl{
+			Tok:   token.IMPORT,
+			Specs: make([]ast.Spec, 0),
+		}
+		f.Decls = append([]ast.Decl{importDecl}, f.Decls...)
+	}
+
+	// Check existing imports to avoid duplicates.
+	existImports := make(map[string]struct{})
+	for _, spec := range importDecl.Specs {
+		importSpec, ok := spec.(*ast.ImportSpec)
+		if !ok {
+			continue
+		}
+		existImports[importSpec.Path.Value] = struct{}{}
+	}
+
+	// Add new import statements.
 	for _, importStatement := range importStatements {
+		impSplit := strings.Split(importStatement, " ")
+		var (
+			importRepo = impSplit[len(impSplit)-1]
+			importname = ""
+		)
+		if len(impSplit) > 1 {
+			importname = impSplit[0]
+		}
+
 		// Check if the import already exists.
-		if _, ok := existImports[`"`+importStatement+`"`]; ok {
+		if _, ok := existImports[`"`+importRepo+`"`]; ok {
 			continue
 		}
 		// Create a new import spec.
-		newSpecs = append(newSpecs, &ast.ImportSpec{
+		spec := &ast.ImportSpec{
+			Name: &ast.Ident{
+				Name: importname,
+			},
 			Path: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: `"` + importStatement + `"`,
+				Value: `"` + importRepo + `"`,
 			},
-		})
+		}
+		importDecl.Specs = append(importDecl.Specs, spec)
 	}
 
-	if len(newSpecs) == 0 {
-		// No new imports to add.
-		return fileContent, nil
-	}
-
-	// Create a new import declaration.
-	newImportDecl := &ast.GenDecl{
-		Tok:   token.IMPORT,
-		Specs: newSpecs,
-	}
-
-	// Insert the new import declaration at the beginning of the file.
-	newDecls := append([]ast.Decl{newImportDecl}, f.Decls...)
-
-	// Update the file's declarations.
-	f.Decls = newDecls
-
-	// Write the modified AST to a buffer.
+	// Format the modified AST.
 	var buf bytes.Buffer
 	if err := format.Node(&buf, fileSet, f); err != nil {
 		return "", err
@@ -134,13 +144,23 @@ func AppendCode(fileContent, functionName, codeToInsert string) (modifiedContent
 }
 
 // ReplaceReturn replaces return statements in a Go function with a new return statement.
-func ReplaceReturn(fileContent, functionName, newReturnStatement string) (modifiedContent string, err error) {
+func ReplaceReturn(fileContent, functionName string, returnVars ...string) (string, error) {
 	fileSet := token.NewFileSet()
 
 	// Parse the Go source code content.
 	f, err := parser.ParseFile(fileSet, "", fileContent, parser.ParseComments)
 	if err != nil {
 		return "", err
+	}
+
+	returnStmts := make([]ast.Expr, 0)
+	for _, returnVar := range returnVars {
+		// Parse the new return var to expression.
+		newRetExpr, err := parser.ParseExpr(returnVar)
+		if err != nil {
+			return "", err
+		}
+		returnStmts = append(returnStmts, newRetExpr)
 	}
 
 	found := false
@@ -153,18 +173,8 @@ func ReplaceReturn(fileContent, functionName, newReturnStatement string) (modifi
 					if retStmt, ok := stmt.(*ast.ReturnStmt); ok {
 						// Remove existing return statements.
 						retStmt.Results = nil
-
-						// Parse the new return statement.
-						var buf bytes.Buffer
-						buf.WriteString(newReturnStatement)
-						returnExpr, err := parser.ParseExpr(buf.String())
-						if err != nil {
-							return false
-						}
 						// Add the new return statement.
-						retStmt.Results = []ast.Expr{returnExpr}
-
-						//retStmt.Results = append(retStmt.Results, newRetExpr)
+						retStmt.Results = append(retStmt.Results, returnStmts...)
 					}
 				}
 				found = true

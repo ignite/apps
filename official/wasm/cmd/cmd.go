@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/spf13/cobra"
 	"os"
 	"path/filepath"
 	"sort"
 	"strings"
+
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
+	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/spf13/cobra"
 )
 
 const (
