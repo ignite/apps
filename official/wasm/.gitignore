@@ -19,5 +19,3 @@
 go.work
 go.work.sum
 
-# App
-wasm*
