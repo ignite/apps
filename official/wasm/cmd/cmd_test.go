@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"path/filepath"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -11,18 +12,33 @@ func Test_relativePath(t *testing.T) {
 		name    string
 		appPath string
 		want    string
-		err     error
 	}{
-		// TODO: Add test cases.
+		{
+			name:    "Relative path within current directory",
+			appPath: "subdir/file.txt",
+			want:    "subdir/file.txt",
+		},
+		{
+			name:    "Relative path outside current directory",
+			appPath: "/path/file.txt",
+			want:    "../../../../../../../../../../../path/file.txt",
+		},
+		{
+			name:    "App path is current directory",
+			appPath: ".",
+			want:    ".",
+		},
+		{
+			name:    "App path is parent directory",
+			appPath: "..",
+			want:    "..",
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := relativePath(tt.appPath)
-			if tt.err != nil {
-				require.Error(t, err)
-				require.ErrorIs(t, err, tt.err)
-				return
-			}
+			absPath, err := filepath.Abs(tt.appPath)
+			require.NoError(t, err)
+			got, err := relativePath(absPath)
 			require.NoError(t, err)
 			require.Equal(t, tt.want, got)
 		})
