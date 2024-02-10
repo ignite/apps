@@ -9,6 +9,7 @@ require (
 	github.com/gobuffalo/plush/v4 v4.1.19
 	github.com/hashicorp/go-plugin v1.5.2
 	github.com/ignite/cli/v28 v28.1.1
+	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4
 )
@@ -53,6 +54,7 @@ require (
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
 	github.com/cometbft/cometbft v0.38.2 // indirect
 	github.com/cometbft/cometbft-db v0.9.1 // indirect
+	github.com/containerd/containerd v1.7.11 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.0.0 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.3 // indirect
@@ -71,6 +73,7 @@ require (
 	github.com/dgraph-io/badger/v2 v2.2007.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
+	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.5.0 // indirect
 	github.com/emicklei/dot v1.6.0 // indirect
@@ -124,6 +127,9 @@ require (
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
 	github.com/huandu/skiplist v1.2.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
+	github.com/ignite/ignite-files/nodetime v0.0.4 // indirect
+	github.com/ignite/ignite-files/protoc v0.0.1 // indirect
+	github.com/ignite/web v0.6.1 // indirect
 	github.com/imdario/mergo v0.3.13 // indirect
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
@@ -147,20 +153,27 @@ require (
 	github.com/microcosm-cc/bluemonday v1.0.23 // indirect
 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
 	github.com/mitchellh/mapstructure v1.5.0 // indirect
+	github.com/moby/moby v24.0.7+incompatible // indirect
+	github.com/moby/patternmatcher v0.6.0 // indirect
+	github.com/moby/sys/sequential v0.5.0 // indirect
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.14.0 // indirect
+	github.com/nqd/flat v0.2.0 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20230904125328-1f23a7beb09a // indirect
 	github.com/oklog/run v1.1.0 // indirect
+	github.com/opencontainers/runc v1.1.7 // indirect
+	github.com/otiai10/copy v1.14.0 // indirect
+	github.com/pelletier/go-toml v1.9.5 // indirect
 	github.com/pelletier/go-toml/v2 v2.1.0 // indirect
 	github.com/petermattis/goid v0.0.0-20230904192822-1876fd5063bc // indirect
 	github.com/pjbgf/sha1cd v0.3.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
 	github.com/pmezard/go-difflib v1.0.1-0.20181226105442-5d4384ee4fb2 // indirect
 	github.com/prometheus/client_golang v1.17.0 // indirect
 	github.com/prometheus/client_model v0.5.0 // indirect
 	github.com/prometheus/common v0.45.0 // indirect
 	github.com/prometheus/procfs v0.12.0 // indirect
+	github.com/radovskyb/watcher v1.0.7 // indirect
 	github.com/rcrowley/go-metrics v0.0.0-20201227073835-cf1acfcdf475 // indirect
 	github.com/rivo/uniseg v0.2.0 // indirect
 	github.com/rogpeppe/go-internal v1.11.0 // indirect

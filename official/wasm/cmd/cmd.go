@@ -8,11 +8,13 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/spf13/cobra"
 )
 
 const (
 	flagPath = "path"
+	flagHome = "home"
 
 	statusScaffolding = "Scaffolding..."
 )
@@ -25,13 +27,37 @@ var (
 	}
 )
 
-func flagGetPath(cmd *cobra.Command) (path string) {
-	path, _ = cmd.Flags().GetString(flagPath)
-	return
-}
-
 func flagSetPath(cmd *cobra.Command) {
 	cmd.PersistentFlags().StringP(flagPath, "p", ".", "path of the app")
+}
+
+func flagSetHome(cmd *cobra.Command) {
+	cmd.PersistentFlags().String(flagHome, "", "directory where the blockchain node is initialized")
+}
+
+func getPath(cmd *cobra.Command) string {
+	path, _ := cmd.Flags().GetString(flagPath)
+	return path
+}
+
+func getHome(cmd *cobra.Command) string {
+	home, _ := cmd.Flags().GetString(flagHome)
+	return home
+}
+
+func newChainWithHomeFlags(cmd *cobra.Command, chainOption ...chain.Option) (*chain.Chain, error) {
+	// Check if custom home is provided
+	if home := getHome(cmd); home != "" {
+		chainOption = append(chainOption, chain.HomePath(home))
+	}
+
+	appPath := getPath(cmd)
+	absPath, err := filepath.Abs(appPath)
+	if err != nil {
+		return nil, err
+	}
+
+	return chain.New(absPath, chainOption...)
 }
 
 func sourceModificationToString(sm xgenny.SourceModification) (string, error) {

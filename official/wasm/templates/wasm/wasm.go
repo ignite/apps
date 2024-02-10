@@ -22,6 +22,7 @@ var fsAppWasm embed.FS
 type Options struct {
 	AppName string
 	AppPath string
+	Home    string
 }
 
 // Validate that options are usable.
@@ -152,6 +153,7 @@ if err != nil {
 	return err
 }
 ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
+
 %[1]v`
 		replacementIBCModule := fmt.Sprintf(
 			templateIBCModule,

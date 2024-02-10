@@ -7,6 +7,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -16,7 +17,7 @@ const (
 type (
 	// wasmOptions represents configuration for the message scaffolding.
 	wasmOptions struct {
-		description string
+		home string
 	}
 	// WasmOption configures the message scaffolding.
 	WasmOption func(*wasmOptions)
@@ -24,15 +25,13 @@ type (
 
 // newWasmOptions returns a wasmOptions with default options.
 func newWasmOptions() wasmOptions {
-	return wasmOptions{
-		description: "test",
-	}
+	return wasmOptions{}
 }
 
-// WithDescription provides a custom description for the message CLI command.
-func WithDescription(desc string) WasmOption {
+// WithHome provides a custom chain home path.
+func WithHome(home string) WasmOption {
 	return func(m *wasmOptions) {
-		m.description = desc
+		m.home = home
 	}
 }
 
@@ -41,24 +40,34 @@ func (s Scaffolder) AddWasm(
 	ctx context.Context,
 	tracer *placeholder.Tracer,
 	options ...WasmOption,
-) (sm xgenny.SourceModification, err error) {
+) (xgenny.SourceModification, error) {
+	path := s.chain.AppPath()
+	if hasWasm(path) {
+		return xgenny.SourceModification{}, errors.Errorf("wasm integration already exist for path %s", path)
+	}
+
+	home, err := s.chain.Home()
+	if err != nil {
+		return xgenny.SourceModification{}, err
+	}
+
 	// Create the options
 	scaffoldingOpts := newWasmOptions()
 	for _, apply := range options {
 		apply(&scaffoldingOpts)
 	}
-
 	opts := &wasm.Options{
-		AppName: s.modpath.Package,
-		AppPath: s.path,
+		AppName: s.chain.Name(),
+		AppPath: path,
+		Home:    home,
 	}
 
 	// Scaffold
 	g, err := wasm.NewWasmGenerator(tracer, opts)
 	if err != nil {
-		return sm, err
+		return xgenny.SourceModification{}, err
 	}
-	sm, err = xgenny.RunWithValidation(tracer, g)
+	sm, err := xgenny.RunWithValidation(tracer, g)
 	if err != nil {
 		return sm, err
 	}

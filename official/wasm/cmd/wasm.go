@@ -1,11 +1,12 @@
 package cmd
 
 import (
-	"wasm/services/scaffolder"
-
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/spf13/cobra"
+
+	"wasm/services/scaffolder"
 )
 
 // NewWasm creates a new wasm command that holds
@@ -36,6 +37,7 @@ func NewWasmAdd() *cobra.Command {
 	}
 
 	flagSetPath(c)
+	flagSetHome(c)
 
 	return c
 }
@@ -44,8 +46,12 @@ func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()
 
-	appPath := flagGetPath(cmd)
-	sc, err := scaffolder.New(appPath)
+	c, err := newChainWithHomeFlags(cmd, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
+	if err != nil {
+		return err
+	}
+
+	sc, err := scaffolder.New(c)
 	if err != nil {
 		return err
 	}
@@ -61,7 +67,7 @@ func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	session.Println(modificationsStr)
-	session.Printf("\n🎉 CosmWasm added (`%[1]v`).\n\n", appPath)
+	session.Printf("\n🎉 CosmWasm added (`%[1]v`).\n\n", c.AppPath())
 
 	return nil
 }

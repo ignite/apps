@@ -2,13 +2,14 @@ package scaffolder
 
 import (
 	"context"
+	"os"
 	"path/filepath"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosanalysis"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
-	"github.com/ignite/cli/v28/ignite/pkg/gomodulepath"
+	"github.com/ignite/cli/v28/ignite/services/chain"
 )
 
 const (
@@ -17,55 +18,31 @@ const (
 Please, follow the migration guide to upgrade your chain to the latest version at https://docs.ignite.com/migration`
 )
 
-// Scaffolder is Ignite CLI app scaffolder.
+// Scaffolder is Wasm app scaffolder.
 type Scaffolder struct {
-	// Version of the chain
-	Version cosmosver.Version
-
-	// path of the app.
-	path string
-
-	// modpath represents the go module path of the app.
-	modpath gomodulepath.Path
+	chain *chain.Chain
 }
 
 // New creates a new scaffold app.
-func New(appPath string) (Scaffolder, error) {
-	path, err := filepath.Abs(appPath)
-	if err != nil {
+func New(c *chain.Chain) (Scaffolder, error) {
+	if err := cosmosanalysis.IsChainPath(c.AppPath()); err != nil {
 		return Scaffolder{}, err
 	}
-
-	modpath, path, err := gomodulepath.Find(path)
-	if err != nil {
+	if err := assertSupportedCosmosSDKVersion(c.Version); err != nil {
 		return Scaffolder{}, err
 	}
-
-	ver, err := cosmosver.Detect(path)
-	if err != nil {
-		return Scaffolder{}, err
-	}
-
-	// Make sure that the app was scaffolded with a supported Cosmos SDK version
-	if err := AssertSupportedCosmosSDKVersion(ver); err != nil {
-		return Scaffolder{}, err
-	}
-
-	if err := cosmosanalysis.IsChainPath(path); err != nil {
-		return Scaffolder{}, err
-	}
-
-	s := Scaffolder{
-		Version: ver,
-		path:    path,
-		modpath: modpath,
-	}
-
-	return s, nil
+	return Scaffolder{chain: c}, nil
 }
 
-// AssertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by Ignite CLI.
-func AssertSupportedCosmosSDKVersion(v cosmosver.Version) error {
+func hasWasm(appPath string) bool {
+	if _, err := os.Stat(filepath.Join(appPath, "app/wasm.go")); err == nil {
+		return true
+	}
+	return false
+}
+
+// assertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by Ignite CLI.
+func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 	if v.LT(cosmosver.StargateFiftyVersion) {
 		return errors.Errorf(errOldCosmosSDKVersionStr, v)
 	}
