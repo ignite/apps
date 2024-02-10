@@ -15,6 +15,28 @@ import (
 	"wasm/pkg/goanalysis"
 )
 
+const funcRegisterIBCWasm = `
+	modules := map[string]appmodule.AppModule{
+		ibcexported.ModuleName:      ibc.AppModule{},
+		ibctransfertypes.ModuleName: ibctransfer.AppModule{},
+		ibcfeetypes.ModuleName:      ibcfee.AppModule{},
+		icatypes.ModuleName:         icamodule.AppModule{},
+		capabilitytypes.ModuleName:  capability.AppModule{},
+		ibctm.ModuleName:            ibctm.AppModule{},
+		solomachine.ModuleName:      solomachine.AppModule{},
+		wasmtypes.ModuleName:        wasm.AppModule{},
+	}
+
+	for _, module := range modules {
+		if mod, ok := module.(interface {
+			RegisterInterfaces(registry cdctypes.InterfaceRegistry)
+		}); ok {
+			mod.RegisterInterfaces(registry)
+		}
+	}
+
+	return modules`
+
 //go:embed files/* files/**/*
 var fsAppWasm embed.FS
 
@@ -160,6 +182,15 @@ ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
 			module.PlaceholderIBCNewModule,
 		)
 		content = replacer.Replace(content, module.PlaceholderIBCNewModule, replacementIBCModule)
+
+		content, err = goanalysis.ReplaceCode(
+			content,
+			"RegisterIBC",
+			funcRegisterIBCWasm,
+		)
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(ibcPath, content))
 	}

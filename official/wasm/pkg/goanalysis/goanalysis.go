@@ -2,6 +2,7 @@ package goanalysis
 
 import (
 	"bytes"
+	"fmt"
 	"go/ast"
 	"go/format"
 	"go/parser"
@@ -186,6 +187,51 @@ func ReplaceReturn(fileContent, functionName string, returnVars ...string) (stri
 
 	if !found {
 		return "", errors.Errorf("function %s not found", functionName)
+	}
+
+	// Write the modified AST to a buffer.
+	var buf bytes.Buffer
+	if err := format.Node(&buf, fileSet, f); err != nil {
+		return "", err
+	}
+
+	return buf.String(), nil
+}
+
+// ReplaceCode replaces a function implementation in Go source code content.
+func ReplaceCode(fileContent, oldFunctionName, newFunction string) (modifiedContent string, err error) {
+	fileSet := token.NewFileSet()
+
+	// Parse the Go source code content.
+	f, err := parser.ParseFile(fileSet, "", fileContent, parser.ParseComments)
+	if err != nil {
+		return "", err
+	}
+
+	found := false
+	ast.Inspect(f, func(n ast.Node) bool {
+		if funcDecl, ok := n.(*ast.FuncDecl); ok {
+			// Check if the function has the name you want to replace.
+			if funcDecl.Name.Name == oldFunctionName {
+				// Parse the content of the new function into an ast.File.
+				newFuncContent := fmt.Sprintf("package p; func _() { %s }", strings.TrimSpace(newFunction))
+				newFile, err := parser.ParseFile(fileSet, "", newFuncContent, parser.ParseComments)
+				if err != nil {
+					return false
+				}
+				// Take the body of the new function from the parsed file.
+				newFunctionBody := newFile.Decls[0].(*ast.FuncDecl).Body
+				// Replace the function body with the body of the new function.
+				funcDecl.Body = newFunctionBody
+				found = true
+				return false
+			}
+		}
+		return true
+	})
+
+	if !found {
+		return "", fmt.Errorf("function %s not found in file content", oldFunctionName)
 	}
 
 	// Write the modified AST to a buffer.
