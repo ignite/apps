@@ -177,17 +177,10 @@ if err != nil {
 ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
 
 %[1]v`
-		replacementIBCModule := fmt.Sprintf(
-			templateIBCModule,
-			module.PlaceholderIBCNewModule,
-		)
+		replacementIBCModule := fmt.Sprintf(templateIBCModule, module.PlaceholderIBCNewModule)
 		content = replacer.Replace(content, module.PlaceholderIBCNewModule, replacementIBCModule)
 
-		content, err = goanalysis.ReplaceCode(
-			content,
-			"RegisterIBC",
-			funcRegisterIBCWasm,
-		)
+		content, err = goanalysis.ReplaceCode(content, "RegisterIBC", funcRegisterIBCWasm)
 		if err != nil {
 			return err
 		}
