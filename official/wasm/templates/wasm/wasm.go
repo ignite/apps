@@ -4,6 +4,7 @@ import (
 	"embed"
 	"fmt"
 	"path/filepath"
+	"strings"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
@@ -160,6 +161,10 @@ func ibcModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		f, err := r.Disk.Find(ibcPath)
 		if err != nil {
 			return err
+		}
+
+		if !strings.Contains(f.String(), "registerIBCModules(appOpts servertypes.AppOptions) error") {
+			return fmt.Errorf("chain does not support wasm integration. See the ignite migration guide")
 		}
 
 		// Import
