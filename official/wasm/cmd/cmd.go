@@ -65,6 +65,7 @@ func getHome(cmd *cobra.Command) string {
 	return home
 }
 
+// newChainWithHomeFlags create new *chain.Chain with home and path flags.
 func newChainWithHomeFlags(cmd *cobra.Command, chainOption ...chain.Option) (*chain.Chain, error) {
 	// Check if custom home is provided
 	if home := getHome(cmd); home != "" {
@@ -80,6 +81,7 @@ func newChainWithHomeFlags(cmd *cobra.Command, chainOption ...chain.Option) (*ch
 	return chain.New(absPath, chainOption...)
 }
 
+// sourceModificationToString output the modifications into a readable text.
 func sourceModificationToString(sm xgenny.SourceModification) (string, error) {
 	// get file names and add prefix
 	var files []string

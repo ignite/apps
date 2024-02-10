@@ -36,6 +36,7 @@ func New(c *chain.Chain, session *cliui.Session) (Scaffolder, error) {
 	return Scaffolder{chain: c, session: session}, nil
 }
 
+// hasWasm check if the app already have the wasm integration verifying if the app/wasm.go file exist.
 func hasWasm(appPath string) bool {
 	if _, err := os.Stat(filepath.Join(appPath, "app/wasm.go")); err == nil {
 		return true
@@ -51,6 +52,7 @@ func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 	return nil
 }
 
+// finish finalize the scaffolded coded downloading the wasm and formatting the code.
 func finish(ctx context.Context, session *cliui.Session, path string) error {
 	// Add wasmd to the go.mod
 	session.StartSpinner("Downloading wasmd module...")
