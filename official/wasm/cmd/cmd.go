@@ -12,11 +12,31 @@ import (
 	"github.com/spf13/cobra"
 )
 
+// NewWasm creates a new wasm command that holds
+// some other sub commands related to CosmWasm.
+func NewWasm() *cobra.Command {
+	c := &cobra.Command{
+		Use:           "wasm [command]",
+		Short:         "Ignite wasm integration",
+		Aliases:       []string{"w"},
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
+
+	// add sub commands.
+	c.AddCommand(
+		NewWasmAdd(),
+		NewWasmConfig(),
+	)
+	return c
+}
+
 const (
 	flagPath = "path"
 	flagHome = "home"
 
-	statusScaffolding = "Scaffolding..."
+	statusScaffolding  = "Scaffolding..."
+	statusAddingConfig = "Adding config..."
 )
 
 var (

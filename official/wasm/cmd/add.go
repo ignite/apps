@@ -1,31 +1,13 @@
 package cmd
 
 import (
+	"wasm/services/scaffolder"
+
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/spf13/cobra"
-
-	"wasm/services/scaffolder"
 )
-
-// NewWasm creates a new wasm command that holds
-// some other sub commands related to CosmWasm.
-func NewWasm() *cobra.Command {
-	c := &cobra.Command{
-		Use:           "wasm [command]",
-		Short:         "Ignite wasm integration",
-		Aliases:       []string{"w"},
-		SilenceUsage:  true,
-		SilenceErrors: true,
-	}
-
-	// add sub commands.
-	c.AddCommand(
-		NewWasmAdd(),
-	)
-	return c
-}
 
 // NewWasmAdd add wasm integration to a chain.
 func NewWasmAdd() *cobra.Command {
@@ -38,6 +20,9 @@ func NewWasmAdd() *cobra.Command {
 
 	flagSetPath(c)
 	flagSetHome(c)
+	c.Flags().Uint64(flagSimulationGasLimit, 0, "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead")
+	c.Flags().Uint64(flagSmartQueryGasLimit, 3_000_000, "the max gas to be used in a smart query contract call")
+	c.Flags().Uint32(flagMemoryCacheSize, 100, "memory cache size in MiB not bytes")
 
 	return c
 }
@@ -46,17 +31,29 @@ func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()
 
+	var (
+		simulationGasLimit, _ = cmd.Flags().GetUint64(flagSimulationGasLimit)
+		smartQueryGasLimit, _ = cmd.Flags().GetUint64(flagSmartQueryGasLimit)
+		memoryCacheSize, _    = cmd.Flags().GetUint32(flagMemoryCacheSize)
+	)
+
 	c, err := newChainWithHomeFlags(cmd, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
 	}
 
-	sc, err := scaffolder.New(c)
+	sc, err := scaffolder.New(c, session)
 	if err != nil {
 		return err
 	}
 
-	sm, err := sc.AddWasm(cmd.Context(), placeholder.New())
+	sm, err := sc.AddWasm(
+		cmd.Context(),
+		placeholder.New(),
+		scaffolder.WithSimulationGasLimit(simulationGasLimit),
+		scaffolder.WithSmartQueryGasLimit(smartQueryGasLimit),
+		scaffolder.WithMemoryCacheSize(memoryCacheSize),
+	)
 	if err != nil {
 		return err
 	}
