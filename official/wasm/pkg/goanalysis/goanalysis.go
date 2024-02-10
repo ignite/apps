@@ -99,16 +99,17 @@ func AppendCode(fileContent, functionName, codeToInsert string) (modifiedContent
 		return "", err
 	}
 
+	// Parse the Go code to insert.
+	insertionExpr, err := parser.ParseExpr(codeToInsert)
+	if err != nil {
+		return "", err
+	}
+
 	found := false
 	ast.Inspect(f, func(n ast.Node) bool {
 		if funcDecl, ok := n.(*ast.FuncDecl); ok {
 			// Check if the function has the name you want to replace.
 			if funcDecl.Name.Name == functionName {
-				// Insert the code before the end or return of the function.
-				insertionExpr, err := parser.ParseExpr(codeToInsert)
-				if err != nil {
-					return false
-				}
 				// Check if there is a return statement in the function.
 				if len(funcDecl.Body.List) > 0 {
 					lastStmt := funcDecl.Body.List[len(funcDecl.Body.List)-1]
@@ -208,17 +209,18 @@ func ReplaceCode(fileContent, oldFunctionName, newFunction string) (modifiedCont
 		return "", err
 	}
 
+	// Parse the content of the new function into an ast.File.
+	newFuncContent := fmt.Sprintf("package p; func _() { %s }", strings.TrimSpace(newFunction))
+	newFile, err := parser.ParseFile(fileSet, "", newFuncContent, parser.ParseComments)
+	if err != nil {
+		return "", err
+	}
+
 	found := false
 	ast.Inspect(f, func(n ast.Node) bool {
 		if funcDecl, ok := n.(*ast.FuncDecl); ok {
 			// Check if the function has the name you want to replace.
 			if funcDecl.Name.Name == oldFunctionName {
-				// Parse the content of the new function into an ast.File.
-				newFuncContent := fmt.Sprintf("package p; func _() { %s }", strings.TrimSpace(newFunction))
-				newFile, err := parser.ParseFile(fileSet, "", newFuncContent, parser.ParseComments)
-				if err != nil {
-					return false
-				}
 				// Take the body of the new function from the parsed file.
 				newFunctionBody := newFile.Decls[0].(*ast.FuncDecl).Body
 				// Replace the function body with the body of the new function.
