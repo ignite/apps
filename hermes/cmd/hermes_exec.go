@@ -28,7 +28,8 @@ func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
 	return h.Run(
 		cmd.Context(),
 		hermes.WithArgs(args...),
+		hermes.WithStdIn(cmd.InOrStdin()),
 		hermes.WithStdOut(cmd.OutOrStdout()),
-		hermes.WithStdOut(cmd.ErrOrStderr()),
+		hermes.WithStdErr(cmd.ErrOrStderr()),
 	)
 }

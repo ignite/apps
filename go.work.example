@@ -7,4 +7,5 @@ use (
 	./hermes
 	./integration
 	./network
+	./official/marketplace
 )

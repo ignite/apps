@@ -8,20 +8,20 @@ import (
 	"io"
 	"os"
 
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/ignite/pkg/localfs"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/localfs"
 	"github.com/ignite/ignite-files/gex"
 	"github.com/pkg/errors"
 )
 
-// Gex represents the gex binary structure.
+// Gex represents the Gex binary structure.
 type Gex struct {
 	path    string
 	cleanup func()
 }
 
-// New returns the hermes binary executable.
+// New returns the Gex binary executable.
 func New() (*Gex, error) {
 	// untar the binary.
 	gzr, err := gzip.NewReader(bytes.NewReader(gex.Binary()))

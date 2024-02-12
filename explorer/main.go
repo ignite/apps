@@ -1,60 +1,54 @@
 package main
 
 import (
-	"encoding/gob"
-	"os"
+	"context"
+	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
-	"github.com/ignite/cli/ignite/services/plugin"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/explorer/cmd"
 )
 
-func init() {
-	gob.Register(plugin.Manifest{})
-	gob.Register(plugin.ExecutedCommand{})
-	gob.Register(plugin.ExecutedHook{})
+type app struct{}
+
+func (app) Manifest(context.Context) (*plugin.Manifest, error) {
+	return &plugin.Manifest{
+		Name:     "explorer",
+		Commands: cmd.GetCommands(),
+	}, nil
 }
 
-type p struct{}
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+	args := c.OsArgs
+	name := args[len(args)-1]
 
-func (p) Manifest() (plugin.Manifest, error) {
-	m := plugin.Manifest{
-		Name: "explorer",
+	switch name {
+	case "gex":
+		return cmd.ExecuteGex(ctx, c)
+	default:
+		return fmt.Errorf("unknown command: %s", c.Path)
 	}
-	m.ImportCobraCommand(cmd.NewExplorer(), "ignite")
-	return m, nil
 }
 
-func (p) Execute(c plugin.ExecutedCommand) error {
-	// Instead of a switch on c.Use, we run the root command like if
-	// we were in a command line context. This implies to set os.Args
-	// correctly.
-	// Remove the first arg "ignite" from OSArgs because our explorer
-	// command root is "explorer" not "ignite".
-	os.Args = c.OSArgs[1:]
-	return cmd.NewExplorer().Execute()
-}
-
-func (p) ExecuteHookPre(plugin.ExecutedHook) error {
+func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
-func (p) ExecuteHookPost(plugin.ExecutedHook) error {
+func (app) ExecuteHookPost(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
-func (p) ExecuteHookCleanUp(plugin.ExecutedHook) error {
+func (app) ExecuteHookCleanUp(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
 func main() {
-	pluginMap := map[string]hplugin.Plugin{
-		"explorer": &plugin.InterfacePlugin{Impl: &p{}},
-	}
-
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
-		Plugins:         pluginMap,
+		Plugins: map[string]hplugin.Plugin{
+			"explorer": plugin.NewGRPC(&app{}),
+		},
+		GRPCServer: hplugin.DefaultGRPCServer,
 	})
 }

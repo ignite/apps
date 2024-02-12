@@ -11,9 +11,9 @@ import (
 	"io"
 	"os"
 
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/exec"
-	"github.com/ignite/cli/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/ignite/pkg/localfs"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
+	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/localfs"
 	"github.com/ignite/ignite-files/hermes"
 )
 
@@ -21,18 +21,16 @@ const (
 	FlagHostChain        = "host-chain"
 	FlagReferenceChain   = "reference-chain"
 	FlagChainA           = "a-chain"
-	FlagChainB           = "b-chain"
 	FlagClientA          = "a-client"
 	FlagClientB          = "b-client"
 	FlagConnectionA      = "a-connection"
-	FlagConnectionB      = "b-connection"
 	FlagPortA            = "a-port"
 	FlagPortB            = "b-port"
 	FlagShowCounterparty = "show-counterparty"
 	FlagChain            = "chain"
 	FlagMnemonicFile     = "mnemonic-file"
+	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
-	FlagJSON             = "json"
 )
 
 const (
@@ -66,6 +64,9 @@ const (
 	// cmdKeysList is the Hermes keys list command.
 	cmdKeysList subCmd = "list"
 
+	// cmdKeysDelete is the Hermes keys delete command.
+	cmdKeysDelete subCmd = "delete"
+
 	// ResultSuccess is the api result status success.
 	ResultSuccess = "success"
 
@@ -95,11 +96,13 @@ type (
 
 	// configs holds Generate configs.
 	configs struct {
-		flags  Flags
-		config string
-		args   []string
-		stdout io.Writer
-		stderr io.Writer
+		flags      Flags
+		config     string
+		args       []string
+		stdin      io.Reader
+		stdout     io.Writer
+		stderr     io.Writer
+		jsonOutput bool
 	}
 )
 
@@ -198,17 +201,31 @@ func WithConfigFile(config string) Option {
 	}
 }
 
-// WithStdOut add a std output.
-func WithStdOut(stdOut io.Writer) Option {
+// WithJSONOutput add a json output.
+func WithJSONOutput() Option {
 	return func(c *configs) {
-		c.stdout = stdOut
+		c.jsonOutput = true
+	}
+}
+
+// WithStdIn add a std input.
+func WithStdIn(stdin io.Reader) Option {
+	return func(c *configs) {
+		c.stdin = stdin
+	}
+}
+
+// WithStdOut add a std output.
+func WithStdOut(stdout io.Writer) Option {
+	return func(c *configs) {
+		c.stdout = stdout
 	}
 }
 
 // WithStdErr add a std error output.
-func WithStdErr(stdErr io.Writer) Option {
+func WithStdErr(stderr io.Writer) Option {
 	return func(c *configs) {
-		c.stderr = stdErr
+		c.stderr = stderr
 	}
 }
 
@@ -295,6 +312,19 @@ func (h *Hermes) KeysList(ctx context.Context, chainID string, options ...Option
 	return h.Run(ctx, options...)
 }
 
+// DeleteKey deletes a key from Hermes keys.
+func (h *Hermes) DeleteKey(ctx context.Context, chainID, keyName string, options ...Option) error {
+	options = append(
+		options,
+		WithFlags(Flags{
+			FlagChain:   chainID,
+			FlagKeyName: keyName,
+		}),
+		WithArgs(string(cmdKeys), string(cmdKeysDelete)),
+	)
+	return h.Run(ctx, options...)
+}
+
 // CreateClient creates a new relayer client.
 func (h *Hermes) CreateClient(ctx context.Context, hostChain, referenceChain string, options ...Option) error {
 	options = append(options, WithFlags(
@@ -366,11 +396,12 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	cmd := []string{h.path}
 
 	// the config and json flag should be added before the hermes subcommands
-	cmd = append(cmd, fmt.Sprintf("--%s", FlagJSON))
 	if c.config != "" {
 		cmd = append(cmd, fmt.Sprintf("--%s=%s", FlagConfig, c.config))
 	}
-
+	if c.jsonOutput {
+		cmd = append(cmd, "--json")
+	}
 	cmd = append(cmd, c.args...)
 
 	for flag, value := range c.flags {
@@ -379,6 +410,11 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 		} else {
 			cmd = append(cmd, fmt.Sprintf("--%s=%s", flag, value))
 		}
+	}
+
+	stdin := c.stdin
+	if stdin == nil {
+		stdin = os.Stdin
 	}
 
 	stdout := c.stdout
@@ -396,8 +432,12 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	// to also read the output from the configured stdout writer later on.
 	var out bytes.Buffer
 	stdout = io.MultiWriter(stdout, &out)
-	err := exec.Exec(ctx, cmd, exec.StepOption(step.Stdout(stdout)), exec.StepOption(step.Stderr(stderr)))
-	if err != nil {
+
+	if err := exec.Exec(ctx, cmd,
+		exec.StepOption(step.Stdin(stdin)),
+		exec.StepOption(step.Stdout(stdout)),
+		exec.StepOption(step.Stderr(stderr)),
+	); err != nil {
 		// Try to parse stdout as a Hermes formatted error
 		if err := parseErrFromOutput(out.Bytes()); err != nil {
 			return err

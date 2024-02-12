@@ -13,8 +13,8 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/ignite/cli/ignite/pkg/cosmosclient"
-	"github.com/ignite/cli/ignite/pkg/cosmosfaucet"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosfaucet"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -26,10 +26,70 @@ const (
 type (
 	// Config represents the Hermes config struct.
 	Config struct {
-		Chains    Chains    `toml:"chains" json:"chains"`
 		Global    Global    `toml:"global" json:"global"`
-		Telemetry Telemetry `toml:"telemetry" json:"telemetry"`
 		Mode      Mode      `toml:"mode" json:"mode"`
+		Rest      Rest      `toml:"rest" json:"rest"`
+		Telemetry Telemetry `toml:"telemetry" json:"telemetry"`
+		Chains    Chains    `toml:"chains" json:"chains"`
+	}
+
+	// Global represents the global values into the Hermes config struct.
+	Global struct {
+		LogLevel string `toml:"log_level" json:"log_level"`
+	}
+
+	// Mode represents the mode into the Hermes config struct.
+	Mode struct {
+		Clients     Clients     `toml:"clients" json:"clients"`
+		Connections Connections `toml:"connections" json:"connections"`
+		Channels    Channels    `toml:"channels" json:"channels"`
+		Packets     Packets     `toml:"packets" json:"packets"`
+	}
+
+	// Clients represents the mode clients into the Hermes config struct.
+	Clients struct {
+		Enabled      bool `toml:"enabled" json:"enabled"`
+		Refresh      bool `toml:"refresh" json:"refresh"`
+		Misbehaviour bool `toml:"misbehaviour" json:"misbehaviour"`
+	}
+
+	// Connections represents the mode connections into the Hermes config struct.
+	Connections struct {
+		Enabled bool `toml:"enabled" json:"enabled"`
+	}
+
+	// Channels represents the mode channels into the Hermes config struct.
+	Channels struct {
+		Enabled bool `toml:"enabled" json:"enabled"`
+	}
+
+	// Packets represents the mode packets into the Hermes config struct.
+	Packets struct {
+		Enabled                       bool   `toml:"enabled" json:"enabled"`
+		ClearInterval                 uint64 `toml:"clear_interval" json:"clear_interval"`
+		ClearOnStart                  bool   `toml:"clear_on_start" json:"clear_on_start"`
+		TxConfirmation                bool   `toml:"tx_confirmation" json:"tx_confirmation"`
+		AutoRegisterCounterpartyPayee bool   `toml:"auto_register_counterparty_payee" json:"auto_register_counterparty_payee"`
+	}
+
+	// Rest represents the rest into the Hermes config struct.
+	Rest struct {
+		Enabled bool   `toml:"enabled" json:"enabled"`
+		Host    string `toml:"host" json:"host"`
+		Port    uint64 `toml:"port" json:"port"`
+	}
+
+	// Telemetry represents the telemetry into the Hermes config struct.
+	Telemetry struct {
+		Enabled bool   `toml:"enabled" json:"enabled"`
+		Host    string `toml:"host" json:"host"`
+		Port    uint64 `toml:"port" json:"port"`
+	}
+
+	// TracingServer represents the tracing server into the Hermes config struct.
+	TracingServer struct {
+		Enabled bool   `toml:"enabled" json:"enabled"`
+		Port    uint64 `toml:"port" json:"port"`
 	}
 
 	// Chains represents a list of chains.
@@ -37,25 +97,28 @@ type (
 
 	// Chain represents the chain into the Hermes config struct.
 	Chain struct {
-		ID             string         `toml:"id" json:"id"`
-		RPCAddr        string         `toml:"rpc_addr" json:"rpc_addr"`
-		GRPCAddr       string         `toml:"grpc_addr" json:"grpc_addr"`
-		EventSource    EventSource    `toml:"event_source,inline" json:"event_source"`
-		RPCTimeout     string         `toml:"rpc_timeout" json:"rpc_timeout"`
-		AccountPrefix  string         `toml:"account_prefix" json:"account_prefix"`
-		KeyName        string         `toml:"key_name" json:"key_name"`
-		StorePrefix    string         `toml:"store_prefix" json:"store_prefix"`
-		DefaultGas     uint64         `toml:"default_gas" json:"default_gas"`
-		MaxGas         uint64         `toml:"max_gas" json:"max_gas"`
-		GasPrice       GasPrice       `toml:"gas_price,inline" json:"gas_price"`
-		GasMultiplier  float64        `toml:"gas_multiplier" json:"gas_multiplier"`
-		MaxMsgNum      uint64         `toml:"max_msg_num" json:"max_msg_num"`
-		MaxTxSize      uint64         `toml:"max_tx_size" json:"max_tx_size"`
-		ClockDrift     string         `toml:"clock_drift" json:"clock_drift"`
-		MaxBlockTime   string         `toml:"max_block_time" json:"max_block_time"`
-		TrustingPeriod string         `toml:"trusting_period" json:"trusting_period"`
-		TrustThreshold TrustThreshold `toml:"trust_threshold,inline" json:"trust_threshold"`
-		AddressType    AddressType    `toml:"address_type,inline" json:"address_type"`
+		ID               string         `toml:"id" json:"id"`
+		CCVConsumerChain bool           `toml:"ccv_consumer_chain" json:"ccv_consumer_chain"`
+		RPCAddr          string         `toml:"rpc_addr" json:"rpc_addr"`
+		GRPCAddr         string         `toml:"grpc_addr" json:"grpc_addr"`
+		EventSource      EventSource    `toml:"event_source,inline" json:"event_source"`
+		RPCTimeout       string         `toml:"rpc_timeout" json:"rpc_timeout"`
+		TrustedNode      bool           `toml:"trusted_node" json:"trusted_node"`
+		AccountPrefix    string         `toml:"account_prefix" json:"account_prefix"`
+		KeyName          string         `toml:"key_name" json:"key_name"`
+		AddressType      AddressType    `toml:"address_type,inline" json:"address_type"`
+		StorePrefix      string         `toml:"store_prefix" json:"store_prefix"`
+		DefaultGas       uint64         `toml:"default_gas" json:"default_gas"`
+		MaxGas           uint64         `toml:"max_gas" json:"max_gas"`
+		GasPrice         GasPrice       `toml:"gas_price,inline" json:"gas_price"`
+		GasMultiplier    float64        `toml:"gas_multiplier" json:"gas_multiplier"`
+		MaxMsgNum        uint64         `toml:"max_msg_num" json:"max_msg_num"`
+		MaxTxSize        uint64         `toml:"max_tx_size" json:"max_tx_size"`
+		ClockDrift       string         `toml:"clock_drift" json:"clock_drift"`
+		MaxBlockTime     string         `toml:"max_block_time" json:"max_block_time"`
+		TrustingPeriod   string         `toml:"trusting_period" json:"trusting_period"`
+		TrustThreshold   TrustThreshold `toml:"trust_threshold,inline" json:"trust_threshold"`
+		MemoPrefix       string         `toml:"memo_prefix" json:"memo_prefix"`
 	}
 
 	// EventSource represents the chain event source into the Hermes config struct.
@@ -80,51 +143,6 @@ type (
 	// AddressType represents the chain address type into the Hermes config struct.
 	AddressType struct {
 		Derivation string `toml:"derivation" json:"derivation"`
-	}
-
-	// Global represents the global values into the Hermes config struct.
-	Global struct {
-		LogLevel string `toml:"log_level" json:"log_level"`
-	}
-
-	// Telemetry represents the telemetry into the Hermes config struct.
-	Telemetry struct {
-		Enabled bool   `toml:"enabled" json:"enabled"`
-		Host    string `toml:"host" json:"host"`
-		Port    uint64 `toml:"port" json:"port"`
-	}
-
-	// Mode represents the mode into the Hermes config struct.
-	Mode struct {
-		Channels    Channels    `toml:"channels" json:"channels"`
-		Clients     Clients     `toml:"clients" json:"clients"`
-		Connections Connections `toml:"connections" json:"connections"`
-		Packets     Packets     `toml:"packets" json:"packets"`
-	}
-
-	// Channels represents the mode channels into the Hermes config struct.
-	Channels struct {
-		Enabled bool `toml:"enabled" json:"enabled"`
-	}
-
-	// Clients represents the mode clients into the Hermes config struct.
-	Clients struct {
-		Enabled      bool `toml:"enabled" json:"enabled"`
-		Misbehaviour bool `toml:"misbehaviour" json:"misbehaviour"`
-		Refresh      bool `toml:"refresh" json:"refresh"`
-	}
-
-	// Connections represents the mode connections into the Hermes config struct.
-	Connections struct {
-		Enabled bool `toml:"enabled" json:"enabled"`
-	}
-
-	// Packets represents the mode packets into the Hermes config struct.
-	Packets struct {
-		ClearInterval  uint64 `toml:"clear_interval" json:"clear_interval"`
-		ClearOnStart   bool   `toml:"clear_on_start" json:"clear_on_start"`
-		Enabled        bool   `toml:"enabled" json:"enabled"`
-		TxConfirmation bool   `toml:"tx_confirmation" json:"tx_confirmation"`
 	}
 
 	// ChainOption configures chain hermes configs.
@@ -234,17 +252,38 @@ func WithTelemetryEnabled(enabled bool) ConfigOption {
 	}
 }
 
-// WithTelemetryHost set TelemetryHost into the Hermes config.
+// WithTelemetryHost set Telemetry host into the Hermes config.
 func WithTelemetryHost(host string) ConfigOption {
 	return func(c *Config) {
 		c.Telemetry.Host = host
 	}
 }
 
-// WithTelemetryPort set TelemetryPort into the Hermes config.
+// WithTelemetryPort set Telemetry port into the Hermes config.
 func WithTelemetryPort(port uint64) ConfigOption {
 	return func(c *Config) {
 		c.Telemetry.Port = port
+	}
+}
+
+// WithRestEnabled set Rest enable into the Hermes config.
+func WithRestEnabled(enabled bool) ConfigOption {
+	return func(c *Config) {
+		c.Rest.Enabled = enabled
+	}
+}
+
+// WithRestHost set Rest host into the Hermes config.
+func WithRestHost(host string) ConfigOption {
+	return func(c *Config) {
+		c.Rest.Host = host
+	}
+}
+
+// WithRestPort set Rest port into the Hermes config.
+func WithRestPort(port uint64) ConfigOption {
+	return func(c *Config) {
+		c.Rest.Port = port
 	}
 }
 
@@ -311,31 +350,43 @@ func WithModePacketsTxConfirmation(txConfirmation bool) ConfigOption {
 	}
 }
 
+// WithAutoRegisterCounterpartyPayee set AutoRegisterCounterpartyPayee into the Hermes config.
+func WithAutoRegisterCounterpartyPayee(autoRegisterCounterpartyPayee bool) ConfigOption {
+	return func(c *Config) {
+		c.Mode.Packets.AutoRegisterCounterpartyPayee = autoRegisterCounterpartyPayee
+	}
+}
+
 // DefaultConfig returns a default configuration struct for Hermes.
 func DefaultConfig(options ...ConfigOption) *Config {
 	cfg := &Config{
-		Chains: []Chain{},
 		Global: Global{
 			LogLevel: "error",
 		},
 		Mode: Mode{
-			Channels: Channels{
-				Enabled: true,
-			},
 			Clients: Clients{
 				Enabled:      true,
-				Misbehaviour: true,
 				Refresh:      true,
+				Misbehaviour: true,
 			},
 			Connections: Connections{
 				Enabled: true,
 			},
-			Packets: Packets{
-				ClearInterval:  100,
-				ClearOnStart:   true,
-				Enabled:        true,
-				TxConfirmation: true,
+			Channels: Channels{
+				Enabled: true,
 			},
+			Packets: Packets{
+				Enabled:                       true,
+				ClearInterval:                 100,
+				ClearOnStart:                  true,
+				TxConfirmation:                false,
+				AutoRegisterCounterpartyPayee: false,
+			},
+		},
+		Rest: Rest{
+			Enabled: false,
+			Host:    "127.0.0.1",
+			Port:    3000,
 		},
 		Telemetry: Telemetry{
 			Enabled: false,
@@ -374,6 +425,27 @@ func WithChainAccountPrefix(prefix string) ChainOption {
 	}
 }
 
+// WithChainCCVConsumerChain set the chain CCVConsumerChain into the Hermes config.
+func WithChainCCVConsumerChain(ccvConsumerChain bool) ChainOption {
+	return func(c *Chain) {
+		c.CCVConsumerChain = ccvConsumerChain
+	}
+}
+
+// WithChainTrustedNode set the chain TrustedNode into the Hermes config.
+func WithChainTrustedNode(trustedNode bool) ChainOption {
+	return func(c *Chain) {
+		c.TrustedNode = trustedNode
+	}
+}
+
+// WithChainMemoPrefix set the chain memo prefix name into the Hermes config.
+func WithChainMemoPrefix(memoPrefix string) ChainOption {
+	return func(c *Chain) {
+		c.MemoPrefix = memoPrefix
+	}
+}
+
 // WithChainKeyName set the chain key name into the Hermes config.
 func WithChainKeyName(key string) ChainOption {
 	return func(c *Chain) {
@@ -403,12 +475,11 @@ func WithChainMaxGas(maxGas uint64) ChainOption {
 }
 
 // WithChainGasPrice set the chain gas price into the Hermes config.
-func WithChainGasPrice(price sdk.Coin) ChainOption {
+func WithChainGasPrice(price sdk.DecCoin) ChainOption {
 	return func(c *Chain) {
-		f, _ := price.Amount.BigInt().Float64()
 		c.GasPrice = GasPrice{
 			Denom: price.Denom,
-			Price: f,
+			Price: price.Amount.MustFloat64(),
 		}
 	}
 }
@@ -465,8 +536,8 @@ func WithChainTrustThreshold(numerator, denominator uint64) ChainOption {
 	}
 }
 
-// WithChainAddressPrefix set the chain address prefix into the Hermes config.
-func WithChainAddressPrefix(derivation string) ChainOption {
+// WithChainAddressType set the chain address prefix into the Hermes config.
+func WithChainAddressType(derivation string) ChainOption {
 	return func(c *Chain) {
 		c.AddressType = AddressType{Derivation: derivation}
 	}
@@ -492,8 +563,8 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 		AccountPrefix: "cosmos",
 		KeyName:       "wallet",
 		StorePrefix:   "ibc",
-		DefaultGas:    100000,
-		MaxGas:        10000000,
+		DefaultGas:    1000,
+		MaxGas:        100000,
 		GasPrice: GasPrice{
 			Denom: "stake",
 			Price: 0.01,
@@ -521,8 +592,8 @@ func (c *Config) AddChain(chainID, rpcAddr, grpcAddr string, options ...ChainOpt
 }
 
 // Balance returns the total account balance.
-func (c *Chain) Balance(ctx context.Context, rpcAddress, addr string) (sdk.Coins, error) {
-	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(rpcAddress))
+func (c *Chain) Balance(ctx context.Context, addr string) (sdk.Coins, error) {
+	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(c.RPCAddr))
 	if err != nil {
 		return nil, err
 	}
@@ -541,5 +612,5 @@ func (c *Chain) TryRetrieve(ctx context.Context, addr, faucetAddr string) (sdk.C
 	if err := cosmosfaucet.TryRetrieve(ctx, c.ID, c.RPCAddr, faucetAddr, addr); err != nil {
 		return nil, err
 	}
-	return c.Balance(ctx, c.RPCAddr, addr)
+	return c.Balance(ctx, addr)
 }
