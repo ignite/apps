@@ -20,6 +20,12 @@ func GetCommands() []*plugin.Command {
 							Type:         plugin.FlagTypeBool,
 						},
 						{
+							Name:         "path",
+							Usage:        "path of the app",
+							DefaultValue: ".",
+							Type:         plugin.FlagTypeString,
+						},
+						{
 							Name:         "refresh-duration",
 							Shorthand:    "r",
 							Usage:        "refresh duration of the monitor",
