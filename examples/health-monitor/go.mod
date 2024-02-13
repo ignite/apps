@@ -2,8 +2,6 @@ module health-monitor
 
 go 1.21.1
 
-toolchain go1.21.6
-
 require (
 	github.com/cometbft/cometbft v0.38.5
 	github.com/cosmos/cosmos-sdk v0.50.3
