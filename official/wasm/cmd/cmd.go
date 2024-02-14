@@ -17,8 +17,8 @@ import (
 func NewWasm() *cobra.Command {
 	c := &cobra.Command{
 		Use:           "wasm [command]",
-		Short:         "Ignite wasm integration",
 		Aliases:       []string{"w"},
+		Short:         "Ignite wasm integration",
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
@@ -48,11 +48,11 @@ var (
 )
 
 func flagSetPath(cmd *cobra.Command) {
-	cmd.PersistentFlags().StringP(flagPath, "p", ".", "path of the app")
+	cmd.Flags().StringP(flagPath, "p", ".", "path of the app")
 }
 
 func flagSetHome(cmd *cobra.Command) {
-	cmd.PersistentFlags().String(flagHome, "", "directory where the blockchain node is initialized")
+	cmd.Flags().String(flagHome, "", "directory where the blockchain node is initialized")
 }
 
 func getPath(cmd *cobra.Command) string {

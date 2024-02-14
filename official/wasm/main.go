@@ -22,7 +22,7 @@ func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.Client
 	// Run the "hermes" command as if it were a root command. To do
 	// so remove the first two arguments which are "ignite relayer"
 	// from OSArgs to treat "hermes" as the root command.
-	os.Args = c.OsArgs[2:]
+	os.Args = c.OsArgs[1:]
 	return cmd.NewWasm().Execute()
 }
 

@@ -1,7 +1,7 @@
 package integration_test
 
 import (
-	"bytes"
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -14,11 +14,16 @@ import (
 )
 
 func TestWasm(t *testing.T) {
+	t.Skip("this tests will only work after we release a new ignite version")
+
 	var (
-		require = require.New(t)
-		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/test/test")
+		require     = require.New(t)
+		env         = envtest.New(t)
+		app         = env.Scaffold("github.com/apps/wasm-app")
+		servers     = app.RandomizeServerPorts()
+		ctx, cancel = context.WithCancel(env.Ctx())
 	)
+	defer cancel()
 
 	dir, err := os.Getwd()
 	require.NoError(err)
@@ -39,19 +44,55 @@ func TestWasm(t *testing.T) {
 	})
 	assertGlobalPlugins(t, app, nil)
 
-	buf := &bytes.Buffer{}
 	env.Must(env.Exec("run wasm",
 		step.NewSteps(step.New(
 			step.Exec(
 				envtest.IgniteApp,
 				"wasm",
-				"hello",
+				"add",
 			),
 			step.Workdir(app.SourcePath()),
-			step.Stdout(buf),
 		)),
 	))
-	require.Equal("Hello, world!\n", buf.String())
+
+	// sign tx to add an item to the list.
+	steps := step.NewSteps(
+		step.New(
+			step.Exec(
+				app.Binary(),
+				"config",
+				"output", "json",
+			),
+			step.Workdir(app.SourcePath()),
+			step.PreExec(func() error {
+				return env.IsAppServed(ctx, servers.API)
+			}),
+		),
+		step.New(
+			step.Workdir(app.SourcePath()),
+			step.PreExec(func() error {
+				err := env.IsAppServed(ctx, servers.API)
+				return err
+			}),
+			step.Exec(
+				envtest.IgniteApp,
+				"wasm",
+				"config",
+			),
+		),
+	)
+
+	isBodyRetrieved := false
+	go func() {
+		defer cancel()
+		isBodyRetrieved = env.Exec("add wasm to the config", steps, envtest.ExecRetry())
+	}()
+
+	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+
+	if !isBodyRetrieved {
+		t.FailNow()
+	}
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
