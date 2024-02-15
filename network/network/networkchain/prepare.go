@@ -79,11 +79,7 @@ func (c Chain) Prepare(
 	}
 
 	// reset the saved state in case the chain has been started before
-	if err := cmd.UnsafeReset(ctx); err != nil {
-		return err
-	}
-
-	return nil
+	return cmd.UnsafeReset(ctx)
 }
 
 // buildGenesis builds the genesis for the chain from the launch approved requests.

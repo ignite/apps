@@ -36,15 +36,15 @@ func (p) Execute(c plugin.ExecutedCommand) error {
 	return cmd.NewNetwork().Execute()
 }
 
-func (p) ExecuteHookPre(hook plugin.ExecutedHook) error {
+func (p) ExecuteHookPre(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookPost(hook plugin.ExecutedHook) error {
+func (p) ExecuteHookPost(plugin.ExecutedHook) error {
 	return nil
 }
 
-func (p) ExecuteHookCleanUp(hook plugin.ExecutedHook) error {
+func (p) ExecuteHookCleanUp(plugin.ExecutedHook) error {
 	return nil
 }
 

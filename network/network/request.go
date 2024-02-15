@@ -148,7 +148,7 @@ func (n Network) SendRequest(
 	return nil
 }
 
-// SendRequests creates and sends the Request message to SPN
+// SendRequests creates and sends the Request message to SPN.
 func (n Network) SendRequests(
 	ctx context.Context,
 	launchID uint64,

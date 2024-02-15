@@ -256,7 +256,7 @@ func TestRevertLaunch(t *testing.T) {
 			Return(testutil.NewResponse(&launchtypes.MsgRevertLaunchResponse{}), nil).
 			Once()
 
-		revertError := network.RevertLaunch(context.Background(), testutil.LaunchID, suite.ChainMock)
+		revertError := network.RevertLaunch(context.Background(), testutil.LaunchID)
 		require.NoError(t, revertError)
 		suite.AssertAllMocks(t)
 	})
@@ -285,7 +285,7 @@ func TestRevertLaunch(t *testing.T) {
 			).
 			Once()
 
-		revertError := network.RevertLaunch(context.Background(), testutil.LaunchID, suite.ChainMock)
+		revertError := network.RevertLaunch(context.Background(), testutil.LaunchID)
 		require.Error(t, revertError)
 		require.Equal(t, expectedError, revertError)
 		suite.AssertAllMocks(t)

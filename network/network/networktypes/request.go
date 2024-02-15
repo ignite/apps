@@ -9,7 +9,7 @@ import (
 	launchtypes "github.com/tendermint/spn/x/launch/types"
 )
 
-// Request action descriptions
+// Request action descriptions.
 const (
 	RequestActionAddAccount        = "add account to the network"
 	RequestActionAddValidator      = "join the network as a validator"
@@ -52,8 +52,8 @@ func ToRequest(request launchtypes.Request) Request {
 	}
 }
 
-// RequestsFromRequestContents creates a list of requests from a list request contents to simulate requests that have not been sent to request pool yet
-// The request ID is set to 0 for the first request and incremented for each request, other values are not set
+// RequestsFromRequestContents creates a list of requests from a list request contents to simulate requests that have not been sent to request pool yet.
+// The request ID is set to 0 for the first request and incremented for each request, other values are not set.
 func RequestsFromRequestContents(launchID uint64, contents []launchtypes.RequestContent) []Request {
 	requests := make([]Request, len(contents))
 	for i, content := range contents {
@@ -66,7 +66,7 @@ func RequestsFromRequestContents(launchID uint64, contents []launchtypes.Request
 	return requests
 }
 
-// RequestActionDescriptionFromContent describes the action of the request from its content
+// RequestActionDescriptionFromContent describes the action of the request from its content.
 func RequestActionDescriptionFromContent(content launchtypes.RequestContent) string {
 	switch content.Content.(type) {
 	case *launchtypes.RequestContent_GenesisAccount:
@@ -86,7 +86,7 @@ func RequestActionDescriptionFromContent(content launchtypes.RequestContent) str
 	}
 }
 
-// RequestActionResultDescriptionFromContent describe the result of the action of the request from its content
+// RequestActionResultDescriptionFromContent describe the result of the action of the request from its content.
 func RequestActionResultDescriptionFromContent(content launchtypes.RequestContent) string {
 	switch content.Content.(type) {
 	case *launchtypes.RequestContent_GenesisAccount:

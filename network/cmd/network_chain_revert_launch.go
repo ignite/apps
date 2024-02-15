@@ -5,7 +5,6 @@ import (
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
-	"github.com/ignite/apps/network/network/networkchain"
 )
 
 // NewNetworkChainRevertLaunch creates a new chain revert launch command
@@ -55,15 +54,5 @@ func networkChainRevertLaunchHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	chainLaunch, err := n.ChainLaunch(cmd.Context(), launchID)
-	if err != nil {
-		return err
-	}
-
-	c, err := nb.Chain(networkchain.SourceLaunch(chainLaunch))
-	if err != nil {
-		return err
-	}
-
-	return n.RevertLaunch(cmd.Context(), launchID, c)
+	return n.RevertLaunch(cmd.Context(), launchID)
 }

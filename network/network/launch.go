@@ -76,7 +76,7 @@ func (n Network) TriggerLaunch(ctx context.Context, launchID uint64, launchTime 
 }
 
 // RevertLaunch reverts a launched chain as a coordinator.
-func (n Network) RevertLaunch(ctx context.Context, launchID uint64, chain Chain) error {
+func (n Network) RevertLaunch(ctx context.Context, launchID uint64) error {
 	n.ev.Send(fmt.Sprintf("Reverting launched chain %d", launchID), events.ProgressStart())
 
 	address, err := n.account.Address(networktypes.SPN)

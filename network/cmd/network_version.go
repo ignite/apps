@@ -8,8 +8,8 @@ import (
 	"github.com/ignite/apps/network/network/networktypes"
 )
 
-// NewNetworkVersion creates a new version command to get the version of the plugin
-// The version of the plugin to use to interact with a chain might be specified by the coordinator
+// NewNetworkVersion creates a new version command to get the version of the plugin.
+// The version of the plugin to use to interact with a chain might be specified by the coordinator.
 func NewNetworkVersion() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "version",

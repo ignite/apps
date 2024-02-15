@@ -306,7 +306,7 @@ func (c Chain) CheckConfigVersion() error {
 func (c *Chain) Build(ctx context.Context, cacheStorage cache.Storage) (binaryName string, err error) {
 	// Check that the config version is the latest before building the binary
 	if err = c.CheckConfigVersion(); err != nil && !errors.Is(err, chainconfig.ErrConfigNotFound) {
-		return
+		return "", err
 	}
 
 	// if chain was already published and has launch id check binary cache

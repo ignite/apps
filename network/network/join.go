@@ -33,7 +33,7 @@ func WithPublicAddress(addr string) JoinOption {
 	}
 }
 
-// GetJoinRequestContents returns the request contents to join a chain as a validator
+// GetJoinRequestContents returns the request contents to join a chain as a validator.
 func (n Network) GetJoinRequestContents(
 	ctx context.Context,
 	c Chain,

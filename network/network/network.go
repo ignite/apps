@@ -152,7 +152,7 @@ func ParseID(id string) (uint64, error) {
 	return objID, nil
 }
 
-// AccountAddress returns the address of the account used by the network builder
+// AccountAddress returns the address of the account used by the network builder.
 func (n Network) AccountAddress() (string, error) {
 	return n.account.Address(networktypes.SPN)
 }

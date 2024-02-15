@@ -274,7 +274,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	return launchID, projectID, nil
 }
 
-// FillMetadata fills the metadata of the chain with the plugin version
+// FillMetadata fills the metadata of the chain with the plugin version.
 func FillMetadata(metadata []byte) ([]byte, error) {
 	cli := networktypes.Cli{
 		Version: networktypes.Version,
