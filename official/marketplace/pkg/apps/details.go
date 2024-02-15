@@ -8,9 +8,10 @@ import (
 	"time"
 
 	"github.com/google/go-github/v56/github"
-	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
+
+	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
 )
 
 const igniteCLIPackage = "github.com/ignite/cli"

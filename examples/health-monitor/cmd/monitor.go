@@ -37,7 +37,7 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	}
 	rpcURL, err := xurl.HTTP(rpcAddress)
 	if err != nil {
-		return fmt.Errorf("invalid rpc address %s: %w", &rpcAddress, err)
+		return fmt.Errorf("invalid rpc address %s: %w", rpcAddress, err)
 	}
 
 	httpClient, err := client.NewClientFromNode(rpcURL)

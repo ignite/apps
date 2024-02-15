@@ -72,7 +72,6 @@ func TestHealthMonitor(t *testing.T) {
 	require.Contains(buf.String(), "Version:")
 	require.Contains(buf.String(), "Height:")
 	require.Contains(buf.String(), "Latest Block Hash:")
-
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
