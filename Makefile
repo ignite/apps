@@ -71,9 +71,13 @@ test-unit:
 	@go list -f '{{.Dir}}/...' -m | xargs go test -race -failfast -v
 
 ## test-integration: Run the integration tests.
-test-integration: install
-	@echo Running integration tests...
-	@go test -race -failfast -v -timeout 60m ./integration/...
+test-integration:
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ] && [ -d "$$dir/integration" ]; then \
+			echo "Running integration tests in $$dir"; \
+			cd "$$dir" && go test -race -failfast -v -timeout 60m ./integration/...; \
+		fi \
+	done
 
 ## test: Run unit and integration tests.
 test: govet govulncheck test-unit test-integration
