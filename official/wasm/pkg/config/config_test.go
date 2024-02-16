@@ -34,11 +34,6 @@ func TestAddWasm(t *testing.T) {
 			name: "Config file already has wasm section",
 			args: args{
 				configPath: "testdata/config_with_wasm.toml",
-				options: []Option{
-					WithSmartQueryGasLimit(77),
-					WithMemoryCacheSize(888),
-					WithSimulationGasLimit(9999),
-				},
 			},
 			err: errors.New("config file already have wasm testdata/config_with_wasm.toml"),
 		},
