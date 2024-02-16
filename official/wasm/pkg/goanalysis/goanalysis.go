@@ -54,8 +54,8 @@ func AppendImports(fileContent string, importStatements ...string) (modifiedCont
 
 	// Add new import statements.
 	for _, importStatement := range importStatements {
-		impSplit := strings.Split(importStatement, " ")
 		var (
+			impSplit   = strings.Split(importStatement, " ")
 			importRepo = impSplit[len(impSplit)-1]
 			importname = ""
 		)
