@@ -1,0 +1,26 @@
+version: 1
+apps:
+  explorer:
+    description: Easy to use terminal chain explorer for testing your Ignite blockchains
+    path: ./explorer
+  hermes:
+    description: A wrapper around the hermes IBC relayer
+    path: ./hermes
+  marketplace:
+    description: Explore the world of Ignite applications and more!
+    path: ./marketplace
+  chain-info:
+    description: A simple chain information application
+    path: ./examples/chain-info
+  flags:
+    description: A simple flags usage application
+    path: ./examples/flags
+  health-monitor:
+    description: A simple health monitor application
+    path: ./examples/health-monitor
+  hello-world:
+    description: A simple hello world application
+    path: ./examples/hello-world
+  hooks:
+    description: A simple hooks application
+    path: ./examples/hooks

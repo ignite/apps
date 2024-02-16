@@ -11,7 +11,7 @@ import (
 	"github.com/pkg/errors"
 	"golang.org/x/mod/modfile"
 
-	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
 const igniteCLIPackage = "github.com/ignite/cli"

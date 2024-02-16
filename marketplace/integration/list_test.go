@@ -51,6 +51,7 @@ func TestMarketplace(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Condition(func() bool {

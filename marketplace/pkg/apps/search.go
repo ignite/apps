@@ -10,7 +10,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/pkg/errors"
 
-	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
 const (

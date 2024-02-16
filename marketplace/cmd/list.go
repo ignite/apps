@@ -8,9 +8,9 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/official/marketplace/pkg/apps"
-	"github.com/ignite/apps/official/marketplace/pkg/tree"
-	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/marketplace/pkg/apps"
+	"github.com/ignite/apps/marketplace/pkg/tree"
+	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
 const (
