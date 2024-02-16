@@ -5,11 +5,12 @@ import (
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/spf13/cobra"
+
 	"github.com/ignite/apps/official/marketplace/pkg/apps"
 	"github.com/ignite/apps/official/marketplace/pkg/tree"
 	"github.com/ignite/apps/official/marketplace/pkg/xgithub"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/spf13/cobra"
 )
 
 const (
@@ -29,7 +30,7 @@ func NewList() *cobra.Command {
 		Use:   "list",
 		Short: "List all the ignite apps",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
+		RunE: func(cmd *cobra.Command, _ []string) error {
 			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
 			query, _ := cmd.Flags().GetString(queryFlag)
 			minStars, _ := cmd.Flags().GetUint(minStarsFlag)
