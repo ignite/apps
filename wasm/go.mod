@@ -10,7 +10,6 @@ require (
 	github.com/ignite/cli/v28 v28.2.0
 	github.com/pkg/errors v0.9.1
 	github.com/spf13/cobra v1.8.0
-	github.com/spf13/flag v0.0.0-20140426202619-916eaf9e2dc5
 	github.com/stretchr/testify v1.8.4
 )
 
