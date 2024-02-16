@@ -13,7 +13,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
 	"github.com/ignite/cli/v28/ignite/templates/module"
 
-	"wasm/pkg/goanalysis"
+	"github.com/ignite/apps/wasm/pkg/goanalysis"
 )
 
 const funcRegisterIBCWasm = `

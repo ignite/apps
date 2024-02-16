@@ -8,8 +8,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/pkg/errors"
 
-	"wasm/pkg/config"
-	"wasm/templates/wasm"
+	"github.com/ignite/apps/wasm/pkg/config"
+	"github.com/ignite/apps/wasm/templates/wasm"
 )
 
 const (

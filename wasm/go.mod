@@ -1,4 +1,4 @@
-module wasm
+module github.com/ignite/apps/wasm
 
 go 1.21.1
 

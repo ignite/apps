@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"wasm/cmd"
+	"github.com/ignite/apps/wasm/cmd"
 )
 
 func main() {

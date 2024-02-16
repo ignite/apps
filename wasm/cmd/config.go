@@ -8,7 +8,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/spf13/cobra"
 
-	"wasm/pkg/config"
+	"github.com/ignite/apps/wasm/pkg/config"
 )
 
 const (

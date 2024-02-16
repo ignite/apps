@@ -1,12 +1,12 @@
 package cmd
 
 import (
-	"wasm/services/scaffolder"
-
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/spf13/cobra"
+
+	"github.com/ignite/apps/wasm/services/scaffolder"
 )
 
 // NewWasmAdd add wasm integration to a chain.
