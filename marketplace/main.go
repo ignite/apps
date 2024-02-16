@@ -7,7 +7,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"github.com/ignite/apps/official/marketplace/cmd"
+	"github.com/ignite/apps/marketplace/cmd"
 )
 
 type app struct{}
