@@ -8,7 +8,7 @@ import (
 )
 
 // ExecuteHello executes the hello subcommand.
-func ExecuteHello(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func ExecuteHello(_ context.Context, cmd *plugin.ExecutedCommand) error {
 	flags, err := cmd.NewFlags()
 	if err != nil {
 		return err

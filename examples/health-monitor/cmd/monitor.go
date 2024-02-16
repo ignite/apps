@@ -20,7 +20,7 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	if err != nil {
 		return fmt.Errorf("failed to parse flags: %w", err)
 	}
-	jsonFlag, err := getJsonFlag(flags)
+	jsonFlag, err := getJSONFlag(flags)
 	if err != nil {
 		return fmt.Errorf("failed to get json flag: %w", err)
 	}
@@ -28,7 +28,7 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	if err != nil {
 		return fmt.Errorf("failed to get refresh-duration flag: %w", err)
 	}
-	rpcAddress, err := getRpcAddressFlag(flags)
+	rpcAddress, err := getRPCAddressFlag(flags)
 	if err != nil {
 		return fmt.Errorf("failed to get rpc-address flag: %w", err)
 	}
@@ -56,7 +56,9 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 				return fmt.Errorf("failed to get status: %w", err)
 			}
 			if jsonFlag {
-				printJson(status)
+				if err := printJSON(status); err != nil {
+					return err
+				}
 			} else {
 				printUserFriendly(status)
 			}
@@ -66,7 +68,7 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	}
 }
 
-func getJsonFlag(flags *pflag.FlagSet) (bool, error) {
+func getJSONFlag(flags *pflag.FlagSet) (bool, error) {
 	j, err := flags.GetBool("json")
 	if err != nil {
 		return false, err
@@ -85,7 +87,7 @@ func getRefreshDurationFlag(flags *pflag.FlagSet) (time.Duration, error) {
 	return time.ParseDuration(r)
 }
 
-func getRpcAddressFlag(flags *pflag.FlagSet) (string, error) {
+func getRPCAddressFlag(flags *pflag.FlagSet) (string, error) {
 	return flags.GetString("rpc-address")
 }
 
@@ -97,7 +99,7 @@ type statusResponse struct {
 	LatestBlockHash string    `json:"latest_block_hash"`
 }
 
-func printJson(status *ctypes.ResultStatus) {
+func printJSON(status *ctypes.ResultStatus) error {
 	resp := statusResponse{
 		Time:            time.Now(),
 		ChainID:         status.NodeInfo.Network,
@@ -105,8 +107,12 @@ func printJson(status *ctypes.ResultStatus) {
 		Height:          status.SyncInfo.LatestBlockHeight,
 		LatestBlockHash: status.SyncInfo.LatestBlockHash.String(),
 	}
-	data, _ := json.Marshal(resp)
+	data, err := json.Marshal(resp)
+	if err != nil {
+		return err
+	}
 	fmt.Println(string(data))
+	return nil
 }
 
 func printUserFriendly(status *ctypes.ResultStatus) {

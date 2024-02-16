@@ -32,4 +32,4 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: make check
+        run: make ci

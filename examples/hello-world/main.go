@@ -19,7 +19,7 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	}, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+func (app) Execute(_ context.Context, _ *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
 	fmt.Println("Hello, world!")
 	return nil
 }

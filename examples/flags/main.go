@@ -4,10 +4,10 @@ import (
 	"context"
 	"fmt"
 
+	"flags/cmd"
+
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-
-	"flags/cmd"
 )
 
 type app struct{}

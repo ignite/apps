@@ -47,8 +47,22 @@ govulncheck:
     done
 	@echo Running govulncheck...
 
-## lint: Run Golang CI Lint for all apps.
+## lint: Run Golang Lint for all apps.
 lint:
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+        echo "Installing golangci-lint..."; \
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+    }
+	@echo Running golangci-lint...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running golangci-lint in $$dir"; \
+            cd "$$dir" && golangci-lint run; \
+        fi \
+    done
+
+## lint-ci: Run Golang CI Lint for all apps.
+lint-ci:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
         echo "Installing golangci-lint..."; \
         curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
@@ -61,8 +75,8 @@ lint:
         fi \
     done
 
-## check: Run govet, govulncheck and lint
-check: govet govulncheck lint
+## ci: Run CI pipeline govet, govulncheck and lint
+ci: govet govulncheck lint-ci
 
 ## format: Install and run goimports and gofumpt for all apps.
 format:
