@@ -1,8 +1,12 @@
 go 1.21.1
 
 use (
+	./examples/chain-info
+	./examples/flags
+	./examples/health-monitor
 	./examples/hello-world
-	./official/explorer
-	./official/hermes
-	./official/marketplace
+	./examples/hooks
+	./explorer
+	./hermes
+	./marketplace
 )
