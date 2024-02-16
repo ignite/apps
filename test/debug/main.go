@@ -35,7 +35,6 @@ func newCmdFromApp(name string, cmds []*plugin.Command) *cobra.Command {
 }
 
 func main() {
-
 	rootCmd.AddCommand(
 		marketplace.NewMarketplace(),
 		hermes.NewHermes(),
