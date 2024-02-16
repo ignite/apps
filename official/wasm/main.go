@@ -26,7 +26,7 @@ func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.Client
 	return cmd.NewWasm().Execute()
 }
 
-func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
