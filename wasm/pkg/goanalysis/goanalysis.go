@@ -7,6 +7,7 @@ import (
 	"go/format"
 	"go/parser"
 	"go/token"
+	"strconv"
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
@@ -64,7 +65,7 @@ func AppendImports(fileContent string, importStatements ...string) (modifiedCont
 		}
 
 		// Check if the import already exists.
-		if _, ok := existImports[`"`+importRepo+`"`]; ok {
+		if _, ok := existImports[strconv.Quote(importRepo)]; ok {
 			continue
 		}
 		// Create a new import spec.
@@ -74,7 +75,7 @@ func AppendImports(fileContent string, importStatements ...string) (modifiedCont
 			},
 			Path: &ast.BasicLit{
 				Kind:  token.STRING,
-				Value: `"` + importRepo + `"`,
+				Value: strconv.Quote(importRepo),
 			},
 		}
 		importDecl.Specs = append(importDecl.Specs, spec)

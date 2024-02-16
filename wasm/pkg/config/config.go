@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
@@ -14,7 +13,7 @@ type (
 	options struct {
 		simulationGasLimit uint64
 		smartQueryGasLimit uint64
-		memoryCacheSize    uint32
+		memoryCacheSize    uint64
 	}
 	// Option configures the message scaffolding.
 	Option func(*options)
@@ -44,7 +43,7 @@ func WithSmartQueryGasLimit(smartQueryGasLimit uint64) Option {
 }
 
 // WithMemoryCacheSize provides a memory cache size for the wasm config.
-func WithMemoryCacheSize(memoryCacheSize uint32) Option {
+func WithMemoryCacheSize(memoryCacheSize uint64) Option {
 	return func(m *options) {
 		m.memoryCacheSize = memoryCacheSize
 	}
@@ -75,11 +74,10 @@ func AddWasm(configPath string, options ...Option) error {
 		config.SimulationGasLimit = &opts.simulationGasLimit
 	}
 	config.SmartQueryGasLimit = opts.smartQueryGasLimit
-	config.MemoryCacheSize = opts.memoryCacheSize
+	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
 	// Save new configs to the TOML file.
-	wasmConfig := fmt.Sprintf("%s", wasmtypes.ConfigTemplate(config))
-	if _, err = f.WriteString(wasmConfig); err != nil {
+	if _, err = f.WriteString(wasmtypes.ConfigTemplate(config)); err != nil {
 		return err
 	}
 

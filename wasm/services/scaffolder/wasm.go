@@ -21,7 +21,7 @@ type (
 	wasmOptions struct {
 		simulationGasLimit uint64
 		smartQueryGasLimit uint64
-		memoryCacheSize    uint32
+		memoryCacheSize    uint64
 	}
 	// WasmOption configures the message scaffolding.
 	WasmOption func(*wasmOptions)
@@ -51,7 +51,7 @@ func WithSmartQueryGasLimit(smartQueryGasLimit uint64) WasmOption {
 }
 
 // WithMemoryCacheSize provides a memory cache size for the wasm config.
-func WithMemoryCacheSize(memoryCacheSize uint32) WasmOption {
+func WithMemoryCacheSize(memoryCacheSize uint64) WasmOption {
 	return func(m *wasmOptions) {
 		m.memoryCacheSize = memoryCacheSize
 	}

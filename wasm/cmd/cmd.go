@@ -55,6 +55,12 @@ func flagSetHome(cmd *cobra.Command) {
 	cmd.Flags().String(flagHome, "", "directory where the blockchain node is initialized")
 }
 
+func flagSetWasmConfigs(cmd *cobra.Command) {
+	cmd.Flags().Uint64(flagSimulationGasLimit, 0, "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead")
+	cmd.Flags().Uint64(flagSmartQueryGasLimit, 3_000_000, "the max gas to be used in a smart query contract call")
+	cmd.Flags().Uint64(flagMemoryCacheSize, 100, "memory cache size in MiB not bytes")
+}
+
 func getPath(cmd *cobra.Command) string {
 	path, _ := cmd.Flags().GetString(flagPath)
 	return path
@@ -63,6 +69,21 @@ func getPath(cmd *cobra.Command) string {
 func getHome(cmd *cobra.Command) string {
 	home, _ := cmd.Flags().GetString(flagHome)
 	return home
+}
+
+func getSimulationGasLimit(cmd *cobra.Command) uint64 {
+	simulationGasLimit, _ := cmd.Flags().GetUint64(flagSimulationGasLimit)
+	return simulationGasLimit
+}
+
+func getSmartQueryGasLimit(cmd *cobra.Command) uint64 {
+	smartQueryGasLimit, _ := cmd.Flags().GetUint64(flagSmartQueryGasLimit)
+	return smartQueryGasLimit
+}
+
+func getMemoryCacheSize(cmd *cobra.Command) uint64 {
+	memoryCacheSize, _ := cmd.Flags().GetUint64(flagMemoryCacheSize)
+	return memoryCacheSize
 }
 
 // newChainWithHomeFlags create new *chain.Chain with home and path flags.
