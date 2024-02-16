@@ -14,11 +14,11 @@ import (
 const (
 	// flagSimulationGasLimit is the max gas to be used in a tx simulation call.
 	// When not set the consensus max block gas is used instead
-	flagSimulationGasLimit = "simulation_gas_limit"
+	flagSimulationGasLimit = "simulation-gas-limit"
 	// flagSmartQueryGasLimit is the max gas to be used in a smart query contract call
-	flagSmartQueryGasLimit = "query_gas_limit"
+	flagSmartQueryGasLimit = "query-gas-limit"
 	// flagMemoryCacheSize in MiB not bytes
-	flagMemoryCacheSize = "memory_cache_size"
+	flagMemoryCacheSize = "memory-cache-size"
 )
 
 // NewWasmConfig add wasm config to a chain.
