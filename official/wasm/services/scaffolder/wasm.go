@@ -4,12 +4,12 @@ import (
 	"context"
 	"os"
 
-	"wasm/pkg/config"
-	"wasm/templates/wasm"
-
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/pkg/errors"
+
+	"wasm/pkg/config"
+	"wasm/templates/wasm"
 )
 
 const (
