@@ -2,8 +2,6 @@ module wasm
 
 go 1.21.1
 
-toolchain go1.21.6
-
 require (
 	github.com/CosmWasm/wasmd v0.50.0
 	github.com/gobuffalo/genny/v2 v2.1.0
