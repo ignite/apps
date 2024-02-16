@@ -23,7 +23,7 @@ jobs:
       - uses: actions/checkout@v3.4.0
       - name: Finding files and store to output
         id: set-matrix
-        run: echo "matrix=$({ cd test/integration && find . -type d ! -name testdata -maxdepth 1 -print; } | tail -n +2 | cut -c 3- | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(find . -type d -name "integration" -exec dirname {} \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
 
   integration:
     name: test ${{ matrix.test-path }}
@@ -40,11 +40,10 @@ jobs:
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
-            ${{ matrix.test-path }}/**
+            ${{ matrix.test-path }}/**/*.go
+            ${{ matrix.test-path }}/*/go.mod
+            ${{ matrix.test-path }}/*/go.sum
             !${{ matrix.test-path }}/README.md
-            test/integration/go.mod
-            test/integration/go.sum
-            test/integration/${{ matrix.test-path }}/**
 
       - uses: actions/setup-go@v4
         if: env.GIT_DIFF
@@ -56,7 +55,7 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: go test -v -timeout 120m ./test/integration/${{ matrix.test-path }}
+        run: go test -v -timeout 120m ${{ matrix.test-path }}/integration/...
 
   status:
     runs-on: ubuntu-latest

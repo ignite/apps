@@ -3,26 +3,85 @@
 # Project variables.
 PROJECT_NAME = 'ignite apps'
 
-## govet: Run go vet.
+## goget: Run go get for all apps.
+goget:
+	@echo Running go mod tidy...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go get $(REPO) in $$dir"; \
+            cd "$$dir" && go get $(REPO); \
+        fi \
+    done
+
+## modtidy: Run go mod tidy for all apps.
+modtidy:
+	@echo Running go mod tidy...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go mod tidy in $$dir"; \
+            cd "$$dir" && go mod tidy; \
+        fi \
+    done
+
+## govet: Run go vet for all apps.
 govet:
 	@echo Running go vet...
-	@go list -f '{{.Dir}}/...' -m | xargs go vet 
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go vet in $$dir"; \
+            cd "$$dir" && go vet ./...; \
+        fi \
+    done
 
-## govulncheck: Run govulncheck
+## govulncheck: Run govulncheck for all apps.
 govulncheck:
+	@command -v govulncheck >/dev/null 2>&1 || { \
+        echo "Installing govulncheck..."; \
+        go install golang.org/x/vuln/cmd/govulncheck@latest; \
+    }
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go vet in $$dir"; \
+            cd "$$dir" && govulncheck ./...; \
+        fi \
+    done
 	@echo Running govulncheck...
-	@go list -f '{{.Dir}}/...' -m | grep -v integration |xargs go run golang.org/x/vuln/cmd/govulncheck
 
-## format: Install and run goimports and gofumpt
+## lint: Run Golang CI Lint for all apps.
+lint:
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+        echo "Installing golangci-lint..."; \
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+    }
+	@echo Running golangci-lint...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running golangci-lint in $$dir"; \
+            cd "$$dir" && golangci-lint run --out-format=tab --issues-exit-code=0; \
+        fi \
+    done
+
+## check: Run govet, govulncheck and lint
+check: govet govulncheck lint
+
+## format: Install and run goimports and gofumpt for all apps.
 format:
 	@echo Formatting...
-	@go run mvdan.cc/gofumpt -w .
-	@go run golang.org/x/tools/cmd/goimports -w -local github.com/ignite/apps .
-
-## lint: Run Golang CI Lint.
-lint:
-	@echo Running golangci-lint...
-	@go list -f '{{.Dir}}/...' -m | xargs go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab --issues-exit-code=0
+	@command -v gofumpt >/dev/null 2>&1 || { \
+        echo "Installing gofumpt..."; \
+        go install mvdan.cc/gofumpt@latest; \
+    }
+	@command -v goimports >/dev/null 2>&1 || { \
+        echo "Installing goimports..."; \
+        go install golang.org/x/tools/cmd/goimports@latest; \
+    }
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+		if [ -e "$$dir/go.mod" ]; then \
+			echo "Running format in $$dir"; \
+			cd "$$dir" && gofumpt -w .; \
+			cd "$$dir" && goimports -w -local github.com/ignite/apps .; \
+		fi \
+	done
 
 .PHONY: govet format lint
 
@@ -32,9 +91,13 @@ test-unit:
 	@go list -f '{{.Dir}}/...' -m | xargs go test -race -failfast -v
 
 ## test-integration: Run the integration tests.
-test-integration: install
-	@echo Running integration tests...
-	@go test -race -failfast -v -timeout 60m ./integration/...
+test-integration:
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ] && [ -d "$$dir/integration" ]; then \
+			echo "Running integration tests in $$dir"; \
+			cd "$$dir" && go test -race -failfast -v -timeout 60m ./integration/...; \
+		fi \
+	done
 
 ## test: Run unit and integration tests.
 test: govet govulncheck test-unit test-integration

@@ -1,0 +1,12 @@
+go 1.21.1
+
+use (
+	./examples/chain-info
+	./examples/flags
+	./examples/health-monitor
+	./examples/hello-world
+	./examples/hooks
+	./explorer
+	./hermes
+	./marketplace
+)
