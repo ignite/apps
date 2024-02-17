@@ -23,7 +23,7 @@ var rootCmd = &cobra.Command{
 }
 
 func newCmdFromApp(name string, cmds []*plugin.Command) *cobra.Command {
-	newCmd := &cobra.Command{Use: fmt.Sprintf("%s [command]", name)}
+	newCmd := &cobra.Command{Use: fmt.Sprintf("%s [app]", name)}
 	for _, cmd := range cmds {
 		cobraCmd, err := cmd.ToCobraCommand()
 		if err != nil {
