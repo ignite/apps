@@ -1,6 +1,6 @@
 # debug
 
-This package is a helper for you can debug your app outside the Ignite using devel or another debuger.
+This package is a helper that you could use to debug your Ignite App by running it as a standalone binary independently of Ignite CLI.
 
 ## How to use
 
