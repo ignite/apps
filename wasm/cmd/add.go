@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -21,6 +22,7 @@ func NewWasmAdd() *cobra.Command {
 	flagSetPath(c)
 	flagSetHome(c)
 	flagSetWasmConfigs(c)
+	flagSetWasmVersion(c)
 
 	return c
 }
@@ -33,7 +35,13 @@ func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
 		simulationGasLimit = getSimulationGasLimit(cmd)
 		smartQueryGasLimit = getSmartQueryGasLimit(cmd)
 		memoryCacheSize    = getMemoryCacheSize(cmd)
+		wasmVersion        = getWasmVersion(cmd)
 	)
+
+	wasmSemVer, err := semver.Parse(wasmVersion)
+	if err != nil {
+		return err
+	}
 
 	c, err := newChainWithHomeFlags(cmd, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
@@ -48,6 +56,7 @@ func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
 	sm, err := sc.AddWasm(
 		cmd.Context(),
 		placeholder.New(),
+		scaffolder.WithWasmVersion(wasmSemVer),
 		scaffolder.WithSimulationGasLimit(simulationGasLimit),
 		scaffolder.WithSmartQueryGasLimit(smartQueryGasLimit),
 		scaffolder.WithMemoryCacheSize(memoryCacheSize),

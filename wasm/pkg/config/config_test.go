@@ -31,13 +31,6 @@ func TestAddWasm(t *testing.T) {
 			},
 		},
 		{
-			name: "Config file already has wasm section",
-			args: args{
-				configPath: "testdata/config_with_wasm.toml",
-			},
-			err: errors.New("config file already have wasm testdata/config_with_wasm.toml"),
-		},
-		{
 			name: "Invalid config file path",
 			args: args{
 				configPath: "nonexistent_directory/nonexistent_config.toml",

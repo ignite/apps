@@ -8,6 +8,7 @@ import (
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
@@ -164,7 +165,7 @@ func ibcModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		}
 
 		if !strings.Contains(f.String(), "registerIBCModules(appOpts servertypes.AppOptions) error") {
-			return fmt.Errorf("chain does not support wasm integration. See the ignite migration guide")
+			return errors.Errorf("chain does not support wasm integration (CLI >= v28 and Cosmos SDK >= v0.50). See the ignite migration guide")
 		}
 
 		// Import

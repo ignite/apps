@@ -234,7 +234,7 @@ func ReplaceCode(fileContent, oldFunctionName, newFunction string) (modifiedCont
 	})
 
 	if !found {
-		return "", fmt.Errorf("function %s not found in file content", oldFunctionName)
+		return "", errors.Errorf("function %s not found in file content", oldFunctionName)
 	}
 
 	// Write the modified AST to a buffer.

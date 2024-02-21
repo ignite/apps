@@ -2,23 +2,27 @@ package scaffolder
 
 import (
 	"context"
+	"fmt"
 	"os"
 
+	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/pkg/errors"
 
 	"github.com/ignite/apps/wasm/pkg/config"
+	"github.com/ignite/apps/wasm/pkg/xgit"
 	"github.com/ignite/apps/wasm/templates/wasm"
 )
 
 const (
-	wasmRepo = "github.com/CosmWasm/wasmd@v0.50.0"
+	wasmRepo = "github.com/CosmWasm/wasmd"
 )
 
 type (
 	// wasmOptions represents configuration for the message scaffolding.
 	wasmOptions struct {
+		version            semver.Version
 		simulationGasLimit uint64
 		smartQueryGasLimit uint64
 		memoryCacheSize    uint64
@@ -33,6 +37,13 @@ func newWasmOptions() wasmOptions {
 		simulationGasLimit: 0,
 		smartQueryGasLimit: 3_000_000,
 		memoryCacheSize:    100,
+	}
+}
+
+// WithWasmVersion set the wasm semantic version.
+func WithWasmVersion(version semver.Version) WasmOption {
+	return func(m *wasmOptions) {
+		m.version = version
 	}
 }
 
@@ -63,6 +74,21 @@ func (s Scaffolder) AddWasm(
 	tracer *placeholder.Tracer,
 	options ...WasmOption,
 ) (xgenny.SourceModification, error) {
+	scaffoldingOpts := newWasmOptions()
+	for _, apply := range options {
+		apply(&scaffoldingOpts)
+	}
+
+	// Check if the wasm version exist
+	versions, err := xgit.FetchGitTags(fmt.Sprintf("https://%s", wasmRepo))
+	if err != nil {
+		return xgenny.SourceModification{}, err
+	}
+	if !xgit.HasVersion(versions, scaffoldingOpts.version) {
+		return xgenny.SourceModification{},
+			errors.Errorf("semantic version vgo%s not exist in %s", scaffoldingOpts.version.String(), wasmRepo)
+	}
+
 	// Check if chain already have wasm integration.
 	path := s.chain.AppPath()
 	if hasWasm(path) {
@@ -73,11 +99,6 @@ func (s Scaffolder) AddWasm(
 	home, err := s.chain.Home()
 	if err != nil {
 		return xgenny.SourceModification{}, err
-	}
-
-	scaffoldingOpts := newWasmOptions()
-	for _, apply := range options {
-		apply(&scaffoldingOpts)
 	}
 
 	configTOML, err := s.chain.ConfigTOMLPath()
@@ -115,5 +136,5 @@ After, run the "ignite wasm config" command to add the wasm config
 		return sm, err
 	}
 
-	return sm, finish(ctx, s.session, opts.AppPath)
+	return sm, finish(ctx, s.session, opts.AppPath, scaffoldingOpts.version)
 }

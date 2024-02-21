@@ -2,9 +2,11 @@ package scaffolder
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 
+	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosanalysis"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
@@ -53,10 +55,12 @@ func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 }
 
 // finish finalize the scaffolded coded downloading the wasm and formatting the code.
-func finish(ctx context.Context, session *cliui.Session, path string) error {
+func finish(ctx context.Context, session *cliui.Session, path string, wasmVersion semver.Version) error {
 	// Add wasmd to the go.mod
 	session.StartSpinner("Downloading wasmd module...")
-	if err := gocmd.Get(ctx, path, []string{wasmRepo}); err != nil {
+
+	wasmURL := fmt.Sprintf("%s@v%s", wasmRepo, wasmVersion.String())
+	if err := gocmd.Get(ctx, path, []string{wasmURL}); err != nil {
 		return err
 	}
 

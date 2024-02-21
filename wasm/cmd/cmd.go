@@ -32,11 +32,14 @@ func NewWasm() *cobra.Command {
 }
 
 const (
-	flagPath = "path"
-	flagHome = "home"
+	flagPath    = "path"
+	flagHome    = "home"
+	flagVersion = "version"
 
 	statusScaffolding  = "Scaffolding..."
 	statusAddingConfig = "Adding config..."
+
+	defaultWasmVersion = "v0.50.0"
 )
 
 var (
@@ -55,6 +58,10 @@ func flagSetHome(cmd *cobra.Command) {
 	cmd.Flags().String(flagHome, "", "directory where the blockchain node is initialized")
 }
 
+func flagSetWasmVersion(cmd *cobra.Command) {
+	cmd.Flags().String(flagVersion, defaultWasmVersion, "wasmd semantic version")
+}
+
 func flagSetWasmConfigs(cmd *cobra.Command) {
 	cmd.Flags().Uint64(flagSimulationGasLimit, 0, "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead")
 	cmd.Flags().Uint64(flagSmartQueryGasLimit, 3_000_000, "the max gas to be used in a smart query contract call")
@@ -69,6 +76,12 @@ func getPath(cmd *cobra.Command) string {
 func getHome(cmd *cobra.Command) string {
 	home, _ := cmd.Flags().GetString(flagHome)
 	return home
+}
+
+func getWasmVersion(cmd *cobra.Command) string {
+	version, _ := cmd.Flags().GetString(flagVersion)
+	version = strings.Replace(version, "v", "", 1)
+	return version
 }
 
 func getSimulationGasLimit(cmd *cobra.Command) uint64 {
