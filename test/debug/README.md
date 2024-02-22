@@ -36,3 +36,8 @@ rootCmd.AddCommand(
     myapp.NewCommand() // <--- Add the new command
 )
 ```
+
+### Caveat
+
+The app doesn't support debugging interactions with the CLI. This method allows debugging running App commands independently of the CLI, which means that Ignite doesn't know the PID of the App, so it won't be able to attach to it, and because of that, debugged Apps won't be able to communicate with Ignite to for example use the Client API.
+We will soon support dynamic debugging in Ignite CLI.
