@@ -78,3 +78,12 @@ This project is licensed under the [Copyright License](LICENSE) - see the [LICEN
 
 - Join the community conversations on [Discord](https://discord.com/invite/ignite) or [X/Twitter](https://twitter.com/ignite).
 - Follow the project's progress and updates.
+
+## Developer instruction
+
+- Clone this repo locally.
+- Scaffold your app: `ignite app scaffold my-app`
+- Add the folder to the `go.work`.
+- Add your cobra commands into `debug/main.go` and the module replace to the `debug/go.mod` for a easy debug.
+- Add the plugin: `ignite app add -g ($GOPATH)/src/github.com/ignite/apps/my-app`
+- Test with Ignite.

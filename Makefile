@@ -3,7 +3,27 @@
 # Project variables.
 PROJECT_NAME = 'ignite apps'
 
-## govet: Run go vet.
+## goget: Run go get for all apps.
+goget:
+	@echo Running go mod tidy...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go get $(REPO) in $$dir"; \
+            cd "$$dir" && go get $(REPO); \
+        fi \
+    done
+
+## modtidy: Run go mod tidy for all apps.
+modtidy:
+	@echo Running go mod tidy...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go mod tidy in $$dir"; \
+            cd "$$dir" && go mod tidy; \
+        fi \
+    done
+
+## govet: Run go vet for all apps.
 govet:
 	@echo Running go vet...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
@@ -13,7 +33,7 @@ govet:
         fi \
     done
 
-## govulncheck: Run govulncheck
+## govulncheck: Run govulncheck for all apps.
 govulncheck:
 	@command -v govulncheck >/dev/null 2>&1 || { \
         echo "Installing govulncheck..."; \
@@ -27,8 +47,22 @@ govulncheck:
     done
 	@echo Running govulncheck...
 
-## lint: Run Golang CI Lint.
+## lint: Run Golang Lint for all apps.
 lint:
+	@command -v golangci-lint >/dev/null 2>&1 || { \
+        echo "Installing golangci-lint..."; \
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+    }
+	@echo Running golangci-lint...
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running golangci-lint in $$dir"; \
+            cd "$$dir" && golangci-lint run; \
+        fi \
+    done
+
+## lint-ci: Run Golang CI Lint for all apps.
+lint-ci:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
         echo "Installing golangci-lint..."; \
         curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
@@ -41,10 +75,10 @@ lint:
         fi \
     done
 
-## check: Run govet, govulncheck and lint
-check: govet govulncheck lint
+## ci: Run CI pipeline govet, govulncheck and lint
+ci: govet govulncheck lint-ci
 
-## format: Install and run goimports and gofumpt
+## format: Install and run goimports and gofumpt for all apps.
 format:
 	@echo Formatting...
 	@command -v gofumpt >/dev/null 2>&1 || { \

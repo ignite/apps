@@ -9,8 +9,8 @@ import (
 	"github.com/spf13/pflag"
 )
 
-// ExecuteHello executes the cowsay subcommand.
-func ExecuteCowsay(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+// ExecuteCowsay executes the cowsay subcommand.
+func ExecuteCowsay(_ context.Context, cmd *plugin.ExecutedCommand) error {
 	flags, err := cmd.NewFlags()
 	if err != nil {
 		return err
