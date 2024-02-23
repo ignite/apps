@@ -25,7 +25,6 @@ ignite wasm add
 
 _All commands should be run in the chain directory._
 
-
 ## Developer instruction
 
 - clone this repo locally
