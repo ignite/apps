@@ -71,7 +71,7 @@ The Ignite Apps ecosystem thrives on community contributions, offering a space f
 ### **Create Your Repository**
 
 1. **Setup Your Project:** Begin by creating a new repository for your project on GitHub. This repository will host your app's code, documentation, and other relevant materials.
-2. **Choose a License:** It's important to choose an appropriate license for your project. This ensures that others know how they can legally use, modify, and distribute your app. If you're unsure which license to use, GitHub's licensing guide can help you decide.
+2. **Choose a License:** Choosing an appropriate license for your project is essential. This ensures that others know how they can legally use, modify, and distribute your app. GitHub's licensing guide can help you decide which license to use if you're unsure.
 3. **Prepare Your Documentation:** Your repository should include clear and concise documentation that covers:
     - An overview of your app and its features.
     - Installation instructions, including any prerequisites or dependencies.
