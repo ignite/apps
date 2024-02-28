@@ -1,4 +1,4 @@
-module github.com/ignite/cli-app-consumer
+module github.com/ignite/apps/consumer
 
 go 1.21.1
 

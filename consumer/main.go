@@ -13,7 +13,7 @@ type app struct{}
 
 func (app) Manifest(ctx context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
-		Name: "cli-app-consumer",
+		Name: "consumer",
 	}, nil
 }
 
@@ -52,7 +52,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"cli-app-consumer": plugin.NewGRPC(&app{}),
+			"consumer": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})
