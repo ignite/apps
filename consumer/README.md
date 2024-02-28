@@ -1,6 +1,6 @@
 # Consumer app
 
-Consumer app an Ignite CLI app for ICS consumer chain.
+Consumer app is an Ignite CLI app for ICS consumer chain.
 
 It can be used to run 2 specific tasks, identified by 2 arguments passed to `ExecutedCommand.Args` field:
 - `writeGenesis`: write the consumer genesis 

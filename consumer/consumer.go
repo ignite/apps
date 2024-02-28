@@ -22,7 +22,7 @@ import (
 	ccvtypes "github.com/cosmos/interchain-security/v3/x/ccv/types"
 )
 
-// writeConsumerGenesis updates the consumer module genesis in genesisPath file.
+// writeConsumerGenesis writes the consumer module genesis in the genesis file.
 func writeConsumerGenesis(chain *pluginv1.ChainInfo) error {
 	var (
 		providerClientState = &ibctmtypes.ClientState{
@@ -90,10 +90,10 @@ func writeConsumerGenesis(chain *pluginv1.ChainInfo) error {
 	return genDoc.SaveAs(genPath)
 }
 
+// isInitialized returns true if the consumer chain `chain` is initizalied.
+// A consumer chain is considered initialized if its consumer genesis contains
+// at least one validator in the InitialValSet field.
 func isInitialized(chain *pluginv1.ChainInfo) (bool, error) {
-	// Consumer chain doesn't have necessarily gentxs, so we can't rely on that
-	// to determine if it's initialized. To perform that check, we need to
-	// ensure the consumer genesis has InitialValSet filled.
 	genPath := getGenesisPath(chain)
 	genState, _, err := genutiltypes.GenesisStateFromGenFile(genPath)
 	if err != nil {
