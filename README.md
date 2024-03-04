@@ -12,12 +12,6 @@ Ignite Apps aims to extend the functionality of Ignite CLI, offering both offici
 - Rigorously tested and fully supported.
 - To submit your community-built app for official inclusion, please follow our submission guidelines.
 
-### **Community Build Apps**
-
-- A space for developers to share their Ignite integrations.
-- Open for contributions via pull requests.
-- To have your app reviewed for inclusion in the official section, please indicate this in your submission.
-
 ## **Getting Started**
 
 ### **How to Install an App**
@@ -69,6 +63,38 @@ Each directory in the root of this repository is a Go module containing an Ignit
 ## **Support and Feedback**
 
 For support, questions, or feedback, please open an issue in this repository.
+
+### **Community Build Apps**
+
+The Ignite Apps ecosystem thrives on community contributions, offering a space for developers to share, showcase, and collaborate on Ignite integrations. If you've built an app that leverages Ignite CLI and wish to share it with the community, we encourage you to do so by following these guidelines:
+
+### **Create Your Repository**
+
+1. **Setup Your Project:** Begin by creating a new repository for your project on GitHub. This repository will host your app's code, documentation, and other relevant materials.
+2. **Choose a License:** Choosing an appropriate license for your project is essential. This ensures that others know how they can legally use, modify, and distribute your app. GitHub's licensing guide can help you decide which license to use if you're unsure.
+3. **Prepare Your Documentation:** Your repository should include clear and concise documentation that covers:
+    - An overview of your app and its features.
+    - Installation instructions, including any prerequisites or dependencies.
+    - Usage examples to help users get started quickly.
+    - Contribution guidelines if you're open to receiving contributions from others.
+
+### **Integrate with the Ignite App Registry**
+
+Once your repository is set up and ready to be shared, we invite you to add your app to the Ignite App Registry. This registry is a curated list of community-built apps, making it easier for users to discover and utilize your contributions.
+
+1. **Fork the App-Registry Repository:** Visit the Ignite App-Registry repository and fork it to your GitHub account.
+2. **Add Your App:** In your fork, add a new entry for your app in the registry. This should include the name of your app, a brief description, and a link to your app's repository.
+3. **Submit a Pull Request:** Once you've added your app to the registry, submit a pull request to the original App-Registry repository. Our team will review your submission and, if everything is in order, merge it into the registry.
+
+### **Engage with the Community**
+
+Sharing your app is just the beginning. Engage with the Ignite community by:
+
+- Responding to issues and pull requests in your repository.
+- Promoting your app on social media and Ignite community channels.
+- Keeping your app updated and improving it based on user feedback.
+
+We're excited to see your contributions and how they will enrich the Ignite Apps ecosystem. Together, we can build a diverse and vibrant community of blockchain application developers.
 
 ## **License**
 
