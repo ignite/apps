@@ -1,4 +1,4 @@
-name: Lint
+name: Test
 on:
   pull_request:
   push:
@@ -32,4 +32,4 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: make ci
+        run: make test
