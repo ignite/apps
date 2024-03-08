@@ -512,8 +512,7 @@ github.com/ignite/cli/v28 v28.2.0 h1:NpNbfAB3jsA8BaAf84g76y27wBDedIEgPs4PkopYxXM
 github.com/ignite/cli/v28 v28.2.0/go.mod h1:wn2cQmJdDZOAiMBlo/W6lCsOhkAiJmEVnsszn0Tk07c=
 github.com/ignite/ignite-files/gex v0.0.1 h1:lt6vlUG+xMGEb9bhQtKfw4S8RCEgQ5lqU3D1wwwxotQ=
 github.com/ignite/ignite-files/gex v0.0.1/go.mod h1:qhiUnrhQ9jjBtlrOiSzjZc1g9+dlp2lPCyG9Oy6zJ3U=
-github.com/ignite/ignite-files/hermes v0.0.3 h1:Mki12RE2bfhWumNGIeQFkqkdXTlxmVmcXwZDKSGxFOE=
-github.com/ignite/ignite-files/hermes v0.0.3/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
+github.com/ignite/ignite-files/hermes v1.8.1 h1:r0F/y/suYzJZNrkqseNBUITQLJX0AsvTVqNlCcl/Dpo=
 github.com/ignite/ignite-files/hermes v1.8.1/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
 github.com/ignite/ignite-files/nodetime v0.0.4 h1:4mA/lZTAWczsNBHZ543VSxpK+P6BAU0HsLglxUtRrMU=
 github.com/ignite/ignite-files/nodetime v0.0.4/go.mod h1:GKDsXdeazHyhSBPdVLp7mNIo/m9LmZ6/h8RmQ0/CoaM=

@@ -492,8 +492,6 @@ github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47
 github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
 github.com/ignite/cli/v28 v28.2.0 h1:NpNbfAB3jsA8BaAf84g76y27wBDedIEgPs4PkopYxXM=
 github.com/ignite/cli/v28 v28.2.0/go.mod h1:wn2cQmJdDZOAiMBlo/W6lCsOhkAiJmEVnsszn0Tk07c=
-github.com/ignite/ignite-files/hermes v0.0.3 h1:Mki12RE2bfhWumNGIeQFkqkdXTlxmVmcXwZDKSGxFOE=
-github.com/ignite/ignite-files/hermes v0.0.3/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
 github.com/ignite/ignite-files/hermes v1.8.1 h1:r0F/y/suYzJZNrkqseNBUITQLJX0AsvTVqNlCcl/Dpo=
 github.com/ignite/ignite-files/hermes v1.8.1/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
 github.com/imdario/mergo v0.3.13 h1:lFzP57bqS/wsqKssCGmtLAb8A0wKjLGrve2q3PPVcBk=
