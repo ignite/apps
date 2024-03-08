@@ -20,7 +20,7 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
     steps:
-      - uses: actions/checkout@v3.4.0
+      - uses: actions/checkout@v4
       - name: Finding files and store to output
         id: set-matrix
         run: echo "matrix=$(find . -type d -name "integration" -exec dirname {} \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
@@ -36,7 +36,7 @@ jobs:
       matrix:
         test-path: ${{fromJson(needs.pre-test.outputs.matrix)}}
     steps:
-      - uses: actions/checkout@v3.4.0
+      - uses: actions/checkout@v4
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
