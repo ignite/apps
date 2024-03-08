@@ -1,6 +1,11 @@
 name: Integration
 on:
   pull_request:
+    paths:
+      - '**.go'
+      - '**/go.mod'
+      - '**/go.sum'
+      - '**/testdata/**'
   push:
     paths:
       - '**.go'

@@ -1,6 +1,8 @@
-name: Test
+name: Test Unit
 on:
   pull_request:
+    paths-ignore:
+      - '**.md'
   push:
     paths-ignore:
       - '**.md'
@@ -32,4 +34,4 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: make test
+        run: make test-unit
