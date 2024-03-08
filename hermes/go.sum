@@ -494,6 +494,8 @@ github.com/ignite/cli/v28 v28.2.0 h1:NpNbfAB3jsA8BaAf84g76y27wBDedIEgPs4PkopYxXM
 github.com/ignite/cli/v28 v28.2.0/go.mod h1:wn2cQmJdDZOAiMBlo/W6lCsOhkAiJmEVnsszn0Tk07c=
 github.com/ignite/ignite-files/hermes v0.0.3 h1:Mki12RE2bfhWumNGIeQFkqkdXTlxmVmcXwZDKSGxFOE=
 github.com/ignite/ignite-files/hermes v0.0.3/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
+github.com/ignite/ignite-files/hermes v1.8.1 h1:r0F/y/suYzJZNrkqseNBUITQLJX0AsvTVqNlCcl/Dpo=
+github.com/ignite/ignite-files/hermes v1.8.1/go.mod h1:gEV6t8um6pTNR8A49C7gyXTUjQJdHx50AhpcSij9KN0=
 github.com/imdario/mergo v0.3.13 h1:lFzP57bqS/wsqKssCGmtLAb8A0wKjLGrve2q3PPVcBk=
 github.com/imdario/mergo v0.3.13/go.mod h1:4lJ1jqUDcsbIECGy0RUJAXNIhg+6ocWgb1ALK2O4oXg=
 github.com/improbable-eng/grpc-web v0.15.0 h1:BN+7z6uNXZ1tQGcNAuaU1YjsLTApzkjt2tzCixLaUPQ=
