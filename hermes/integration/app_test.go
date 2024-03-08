@@ -425,13 +425,6 @@ func TestHermes(t *testing.T) {
 		funcOnTimeoutIbcPostPacket,
 	))
 
-	env.Must(env.Exec("install hermes app locally",
-		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
-			step.Workdir(app.SourcePath()),
-		)),
-	))
-
 	// serve both chains.
 	ports, err := availableport.Find(
 		14,
