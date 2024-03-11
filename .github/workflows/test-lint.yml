@@ -39,7 +39,7 @@ jobs:
 
       - uses: technote-space/get-diff-action@v6.1.2
         with:
-          RELATIVE: '{{ matrix.test-path }}'
+          RELATIVE: {{ matrix.test-path }}
           PATTERNS: |
             **/*.go
             **/*.plush
