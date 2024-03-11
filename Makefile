@@ -51,7 +51,7 @@ govulncheck:
 lint:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
         echo "Installing golangci-lint..."; \
-        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin; \
     }
 	@echo Running golangci-lint...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
