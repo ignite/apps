@@ -21,7 +21,7 @@ jobs:
 
       - name: Finding files and store to output
         id: set-matrix
-        run: echo "matrix=$(find . -type d -name "integration" -exec sh -c 'dirname "{}" | cut -c 3-' \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(find . -type d -name "integration" -exec dirname {} \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
 
   lint:
     name: lint ${{ matrix.test-path }}
@@ -39,13 +39,14 @@ jobs:
 
       - uses: technote-space/get-diff-action@v6.1.2
         with:
+          RELATIVE: '{{ matrix.test-path }}'
           PATTERNS: |
-            {{ matrix.test-path }}/**/*.go
-            {{ matrix.test-path }}/**/*.plush
-            {{ matrix.test-path }}/**/*.tpl
-            {{ matrix.test-path }}/go.mod
-            {{ matrix.test-path }}/go.sum
-            {{ matrix.test-path }}/**/testdata/**
+            **/*.go
+            **/*.plush
+            **/*.tpl
+            go.mod
+            go.sum
+            **/testdata/**
 
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF

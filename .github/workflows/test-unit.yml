@@ -41,13 +41,14 @@ jobs:
 
       - uses: technote-space/get-diff-action@v6.1.2
         with:
+          RELATIVE: '{{ matrix.test-path }}'
           PATTERNS: |
-            {{ matrix.test-path }}/**/*.go
-            {{ matrix.test-path }}/**/*.plush
-            {{ matrix.test-path }}/**/*.tpl
-            {{ matrix.test-path }}/go.mod
-            {{ matrix.test-path }}/go.sum
-            {{ matrix.test-path }}/**/testdata/**
+            **/*.go
+            **/*.plush
+            **/*.tpl
+            go.mod
+            go.sum
+            **/testdata/**
 
       - uses: actions/setup-go@v5
         if: env.GIT_DIFF
