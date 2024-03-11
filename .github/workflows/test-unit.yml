@@ -23,7 +23,7 @@ jobs:
 
       - name: Finding files and store to output
         id: set-matrix
-        run: echo "matrix=$(find . -type d -name "integration" -exec dirname {} \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+        run: echo "matrix=$(find . -type d -name "integration" -exec sh -c 'dirname "{}" | cut -c 3-' \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
 
   unit:
     name: test unit ${{ matrix.test-path }}
