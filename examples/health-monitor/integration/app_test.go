@@ -64,6 +64,7 @@ func TestHealthMonitor(t *testing.T) {
 				),
 				step.Workdir(app.SourcePath()),
 				step.Stdout(buf),
+				step.Stderr(buf),
 			)),
 		))
 	}()

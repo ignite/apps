@@ -50,6 +50,7 @@ func TestChainInfo(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Contains(buf.String(), "Version:")
@@ -68,6 +69,7 @@ func TestChainInfo(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Equal("Chain built successfully at testd\n", buf.String())

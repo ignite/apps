@@ -52,6 +52,7 @@ func TestFlags(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Equal("Hello, Test!\n", buf.String())
@@ -68,6 +69,7 @@ func TestFlags(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Contains(buf.String(), "Hello, Test!")
