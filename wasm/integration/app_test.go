@@ -14,7 +14,7 @@ import (
 )
 
 func TestWasm(t *testing.T) {
-	t.Skip("this tests will only work after we release a new ignite version")
+	t.Skip("this tests will only work after we release a new ignite version (>= v29)")
 
 	var (
 		require     = require.New(t)
