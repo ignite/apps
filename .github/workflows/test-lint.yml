@@ -60,6 +60,6 @@ jobs:
           GOSUMDB: off
         run: |
           go vet ./... && \
-          go mod download github.com/golangci/golangci-lint && go mod tidy && \
-          go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab --issues-exit-code=0
+          curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin; && \
+          golangci-lint run --out-format=tab --issues-exit-code=0
         working-directory: ${{ matrix.test-path }}
