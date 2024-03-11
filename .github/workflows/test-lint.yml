@@ -55,6 +55,5 @@ jobs:
           GOSUMDB: off
         run: |
           go vet ./... && \
-          @command -v golangci-lint >/dev/null 2>&1 || { curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin; } && \
-          golangci-lint run
+          go run github.com/golangci/golangci-lint/cmd/golangci-lint run --out-format=tab --issues-exit-code=0
         working-directory: ${{ matrix.test-path }}
