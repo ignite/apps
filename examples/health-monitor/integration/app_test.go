@@ -69,7 +69,7 @@ func TestHealthMonitor(t *testing.T) {
 					return execErr
 				}
 				got = output.String()
-				if !strings.Contains(got, "Chain ID: test") {
+				if !strings.Contains(got, "Chain ID: health-monitor") {
 					return errors.Errorf("invalid output: %s", got)
 				}
 				return nil
@@ -88,7 +88,7 @@ func TestHealthMonitor(t *testing.T) {
 		t.FailNow()
 	}
 
-	require.Contains(got, "Chain ID: test")
+	require.Contains(got, "Chain ID: health-monitor")
 	require.Contains(got, "Version:")
 	require.Contains(got, "Height:")
 	require.Contains(got, "Latest Block Hash:")
