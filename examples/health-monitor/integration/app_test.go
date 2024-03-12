@@ -3,7 +3,6 @@ package integration_test
 import (
 	"bytes"
 	"context"
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -14,7 +13,6 @@ import (
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
 )
@@ -23,7 +21,7 @@ func TestHealthMonitor(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold(fmt.Sprintf("health-monitor-%s", randstr.Runes(3)))
+		app         = env.Scaffold("github.com/apps/health-monitor")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
