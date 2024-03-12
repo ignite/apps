@@ -27,7 +27,7 @@ func NewWasmAdd() *cobra.Command {
 	return c
 }
 
-func wasmAddExecuteHandler(cmd *cobra.Command, args []string) error {
+func wasmAddExecuteHandler(cmd *cobra.Command, _ []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()
 

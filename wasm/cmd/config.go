@@ -13,11 +13,11 @@ import (
 
 const (
 	// flagSimulationGasLimit is the max gas to be used in a tx simulation call.
-	// When not set the consensus max block gas is used instead
+	// When not set the consensus max block gas is used instead.
 	flagSimulationGasLimit = "simulation-gas-limit"
-	// flagSmartQueryGasLimit is the max gas to be used in a smart query contract call
+	// flagSmartQueryGasLimit is the max gas to be used in a smart query contract call.
 	flagSmartQueryGasLimit = "query-gas-limit"
-	// flagMemoryCacheSize in MiB not bytes
+	// flagMemoryCacheSize in MiB not bytes.
 	flagMemoryCacheSize = "memory-cache-size"
 )
 
@@ -37,7 +37,7 @@ func NewWasmConfig() *cobra.Command {
 	return c
 }
 
-func wasmConfigExecuteHandler(cmd *cobra.Command, args []string) error {
+func wasmConfigExecuteHandler(cmd *cobra.Command, _ []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusAddingConfig))
 	defer session.End()
 
@@ -53,6 +53,9 @@ func wasmConfigExecuteHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	configTOML, err := c.ConfigTOMLPath()
+	if err != nil {
+		return err
+	}
 	if _, err := os.Stat(configTOML); os.IsNotExist(err) {
 		return errors.Errorf("chain %s not initialized yet (%s)", c.Name(), c.AppPath())
 	}

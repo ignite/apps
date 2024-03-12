@@ -123,7 +123,7 @@ func getPubKey(chain *pluginv1.ChainInfo) (crypto.PubKey, error) {
 	var pvKey cmprivval.FilePVKey
 	err = cmtjson.Unmarshal(keyJSONBytes, &pvKey)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading PrivValidator key from %v: %w", keyFilePath, err)
+		return nil, fmt.Errorf("error reading PrivValidator key from %v: %w", keyFilePath, err)
 	}
 	return pvKey.PubKey, nil
 }
