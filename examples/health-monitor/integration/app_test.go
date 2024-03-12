@@ -51,8 +51,17 @@ func TestHealthMonitor(t *testing.T) {
 	)
 	steps := step.NewSteps(
 		step.New(
+			step.Exec(
+				app.Binary(),
+				"config",
+				"output", "json",
+			),
+			step.PreExec(func() error {
+				return env.IsAppServed(ctx, servers.API)
+			}),
+		),
+		step.New(
 			step.Stdout(output),
-			step.Stderr(output),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
