@@ -3,6 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -13,6 +14,7 @@ import (
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
 )
@@ -21,7 +23,7 @@ func TestHealthMonitor(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/test")
+		app         = env.Scaffold(fmt.Sprintf("health-monitor-%s", randstr.Runes(3)))
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -42,11 +44,7 @@ func TestHealthMonitor(t *testing.T) {
 			Path: pluginPath,
 		},
 	})
-	assertGlobalPlugins(t, app, nil)
-
-	go func() {
-		env.Must(app.Serve("serve example chain"))
-	}()
+	assertGlobalPlugins(t, nil)
 
 	var (
 		output      = &bytes.Buffer{}
@@ -105,7 +103,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)

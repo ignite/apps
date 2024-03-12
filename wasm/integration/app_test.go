@@ -42,7 +42,7 @@ func TestWasm(t *testing.T) {
 			Path: pluginPath,
 		},
 	})
-	assertGlobalPlugins(t, app, nil)
+	assertGlobalPlugins(t, nil)
 
 	env.Must(env.Exec("run wasm",
 		step.NewSteps(step.New(
@@ -102,7 +102,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)

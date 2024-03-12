@@ -38,7 +38,7 @@ func TestHelloWorld(t *testing.T) {
 			Path: pluginPath,
 		},
 	})
-	assertGlobalPlugins(t, app, nil)
+	assertGlobalPlugins(t, nil)
 
 	buf := &bytes.Buffer{}
 	env.Must(env.Exec("run hello-world",
@@ -62,7 +62,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)
