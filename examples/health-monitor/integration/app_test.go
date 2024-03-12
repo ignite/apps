@@ -5,24 +5,26 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/require"
 
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
 )
 
 func TestHealthMonitor(t *testing.T) {
 	var (
-		require = require.New(t)
-		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/test/test")
-		ports   = app.RandomizeServerPorts()
+		require     = require.New(t)
+		env         = envtest.New(t)
+		app         = env.Scaffold("github.com/test/test")
+		servers     = app.RandomizeServerPorts()
+		ctx, cancel = context.WithCancel(env.Ctx())
 	)
-
 	dir, err := os.Getwd()
 	require.NoError(err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "health-monitor")
@@ -46,27 +48,50 @@ func TestHealthMonitor(t *testing.T) {
 		env.Must(app.Serve("serve example chain"))
 	}()
 
-	// Wait for the chain to start
-	err = env.IsAppServed(context.Background(), ports.API)
-	require.NoError(err)
-
-	buf := &bytes.Buffer{}
-	env.Must(env.Exec("run health-monitor",
-		step.NewSteps(step.New(
+	var (
+		output      = &bytes.Buffer{}
+		isRetrieved bool
+		got         string
+	)
+	steps := step.NewSteps(
+		step.New(
+			step.Stdout(output),
+			step.Stderr(output),
+			step.PreExec(func() error {
+				return env.IsAppServed(ctx, servers.API)
+			}),
 			step.Exec(
 				envtest.IgniteApp,
 				"health-monitor",
 				"monitor",
-				"--rpc-address", ports.RPC,
+				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
 			),
 			step.Workdir(app.SourcePath()),
-			step.Stdout(buf),
-			step.Stderr(buf),
-		)),
-	))
+			step.PostExec(func(execErr error) error {
+				if execErr != nil {
+					return execErr
+				}
+				got = output.String()
+				if !strings.Contains(got, "Chain ID: test") {
+					return errors.Errorf("invalid output: %s", got)
+				}
+				return nil
+			}),
+		),
+	)
 
-	got := buf.String()
+	go func() {
+		defer cancel()
+		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry())
+	}()
+
+	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+
+	if !isRetrieved {
+		t.FailNow()
+	}
+
 	require.Contains(got, "Chain ID: test")
 	require.Contains(got, "Version:")
 	require.Contains(got, "Height:")
