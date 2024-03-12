@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
-	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -52,27 +51,26 @@ func TestHealthMonitor(t *testing.T) {
 	require.NoError(err)
 
 	buf := &bytes.Buffer{}
-	go func() {
-		env.Must(env.Exec("run health-monitor",
-			step.NewSteps(step.New(
-				step.Exec(
-					envtest.IgniteApp,
-					"health-monitor",
-					"monitor",
-					"--rpc-address", ports.RPC,
-					"--refresh-duration", "1s",
-				),
-				step.Workdir(app.SourcePath()),
-				step.Stdout(buf),
-				step.Stderr(buf),
-			)),
-		))
-	}()
-	time.Sleep(time.Second * 2)
-	require.Contains(buf.String(), "Chain ID: test")
-	require.Contains(buf.String(), "Version:")
-	require.Contains(buf.String(), "Height:")
-	require.Contains(buf.String(), "Latest Block Hash:")
+	env.Must(env.Exec("run health-monitor",
+		step.NewSteps(step.New(
+			step.Exec(
+				envtest.IgniteApp,
+				"health-monitor",
+				"monitor",
+				"--rpc-address", ports.RPC,
+				"--refresh-duration", "1s",
+			),
+			step.Workdir(app.SourcePath()),
+			step.Stdout(buf),
+			step.Stderr(buf),
+		)),
+	))
+
+	got := buf.String()
+	require.Contains(got, "Chain ID: test")
+	require.Contains(got, "Version:")
+	require.Contains(got, "Height:")
+	require.Contains(got, "Latest Block Hash:")
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
