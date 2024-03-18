@@ -68,10 +68,10 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 			}
 			status, err := client.Status(ctx)
 			if err != nil {
-				return errors.Errorf("failed to get status: %s\n", err)
+				return errors.Errorf("failed to get status: %s", err)
 			}
 			if err := printStatus(isJSON, status); err != nil {
-				return errors.Errorf("failed to print status: %s\n", err)
+				return errors.Errorf("failed to print status: %s", err)
 			}
 		}
 	}
