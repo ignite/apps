@@ -4,7 +4,7 @@ import (
 	"testing"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

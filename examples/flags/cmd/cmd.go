@@ -1,8 +1,7 @@
 package cmd
 
 import (
-	"fmt"
-
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/spf13/pflag"
 )
@@ -49,7 +48,7 @@ func GetCommands() []*plugin.Command {
 func getNameFlag(flags *pflag.FlagSet) (string, error) {
 	name, err := flags.GetString("name")
 	if err != nil {
-		return "", fmt.Errorf("could not get --name flag: %w", err)
+		return "", errors.Errorf("could not get --name flag: %w", err)
 	}
 
 	if name == "" {

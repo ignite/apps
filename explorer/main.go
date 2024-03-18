@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/explorer/cmd"
@@ -27,7 +27,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	case "gex":
 		return cmd.ExecuteGex(ctx, c)
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", c.Path)
 	}
 }
 

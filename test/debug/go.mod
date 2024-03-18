@@ -11,6 +11,7 @@ replace (
 	github.com/ignite/apps/explorer => ../../explorer
 	github.com/ignite/apps/hermes => ../../hermes
 	github.com/ignite/apps/marketplace => ../../marketplace
+	github.com/ignite/apps/wasm => ../../wasm
 )
 
 require (
@@ -22,6 +23,7 @@ require (
 	github.com/ignite/apps/explorer v0.0.0-00010101000000-000000000000
 	github.com/ignite/apps/hermes v0.0.0-00010101000000-000000000000
 	github.com/ignite/apps/marketplace v0.0.0-00010101000000-000000000000
+	github.com/ignite/apps/wasm v0.0.0-00010101000000-000000000000
 	github.com/ignite/cli/v28 v28.2.0
 	github.com/spf13/cobra v1.8.0
 )
@@ -36,6 +38,7 @@ require (
 	cosmossdk.io/math v1.2.0 // indirect
 	cosmossdk.io/store v1.0.2 // indirect
 	cosmossdk.io/x/tx v0.13.0 // indirect
+	cosmossdk.io/x/upgrade v0.1.0 // indirect
 	dario.cat/mergo v1.0.0 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
@@ -43,6 +46,8 @@ require (
 	github.com/AlecAivazis/survey/v2 v2.3.7 // indirect
 	github.com/Code-Hex/Neo-cowsay/v2 v2.0.4 // indirect
 	github.com/Code-Hex/go-wordwrap v1.0.0 // indirect
+	github.com/CosmWasm/wasmd v0.50.0 // indirect
+	github.com/CosmWasm/wasmvm v1.5.0 // indirect
 	github.com/DataDog/datadog-go v3.2.0+incompatible // indirect
 	github.com/DataDog/zstd v1.5.5 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
@@ -89,6 +94,7 @@ require (
 	github.com/dgraph-io/badger/v2 v2.2007.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
+	github.com/distribution/reference v0.5.0 // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
@@ -186,6 +192,7 @@ require (
 	github.com/nqd/flat v0.2.0 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20230904125328-1f23a7beb09a // indirect
 	github.com/oklog/run v1.1.0 // indirect
+	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/runc v1.1.12 // indirect
 	github.com/otiai10/copy v1.14.0 // indirect
 	github.com/pelletier/go-toml v1.9.5 // indirect
@@ -227,7 +234,7 @@ require (
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v0.14.3 // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
-	go.uber.org/multierr v1.10.0 // indirect
+	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.18.0 // indirect
 	golang.org/x/exp v0.0.0-20231108232855-2478ac86f678 // indirect
 	golang.org/x/mod v0.14.0 // indirect

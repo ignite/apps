@@ -2,10 +2,10 @@ package hermes
 
 import (
 	"encoding/json"
-	"errors"
 	"reflect"
 	"testing"
 
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

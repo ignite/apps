@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
-
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
@@ -19,7 +19,7 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 
 func (a app) Execute(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	if len(cmd.Args) == 0 {
-		return fmt.Errorf("missing argument")
+		return errors.Errorf("missing argument")
 	}
 	chain, err := api.GetChainInfo(ctx)
 	if err != nil {
@@ -33,7 +33,7 @@ func (a app) Execute(ctx context.Context, cmd *plugin.ExecutedCommand, api plugi
 		fmt.Printf("%t", isInit)
 		return err
 	}
-	return fmt.Errorf("invalid argument %q", cmd.Args[0])
+	return errors.Errorf("invalid argument %q", cmd.Args[0])
 }
 
 func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {

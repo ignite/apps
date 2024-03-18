@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"health-monitor/cmd"
@@ -25,14 +25,14 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 
 	chainInfo, err := api.GetChainInfo(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get chain info: %w", err)
+		return errors.Errorf("failed to get chain info: %w", err)
 	}
 
 	switch args[0] {
 	case "monitor":
 		return cmd.ExecuteMonitor(ctx, c, chainInfo)
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", c.Path)
 	}
 }
 

@@ -2,7 +2,6 @@ package hermes
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/big"
 	"net/url"
@@ -15,6 +14,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosfaucet"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -158,7 +158,7 @@ func (c Chains) Get(chainID string) (Chain, error) {
 			return chain, nil
 		}
 	}
-	return Chain{}, fmt.Errorf("chain %s not exist", chainID)
+	return Chain{}, errors.Errorf("chain %s not exist", chainID)
 }
 
 // Remove delete the Hermes config file.

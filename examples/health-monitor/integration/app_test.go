@@ -7,6 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 
@@ -19,12 +20,12 @@ import (
 
 func TestHealthMonitor(t *testing.T) {
 	var (
-		require     = require.New(t)
-		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/health-monitor")
-		servers     = app.RandomizeServerPorts()
-		ctx, cancel = context.WithCancel(env.Ctx())
+		require = require.New(t)
+		env     = envtest.New(t)
+		app     = env.Scaffold("github.com/apps/health-monitor")
+		servers = app.RandomizeServerPorts()
 	)
+
 	dir, err := os.Getwd()
 	require.NoError(err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "health-monitor")
@@ -45,10 +46,13 @@ func TestHealthMonitor(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	var (
-		output      = &bytes.Buffer{}
 		isRetrieved bool
 		got         string
+
+		output      = &bytes.Buffer{}
+		ctx, cancel = context.WithTimeout(env.Ctx(), 2*time.Minute)
 	)
+	defer cancel()
 	steps := step.NewSteps(
 		step.New(
 			step.Exec(
@@ -59,9 +63,11 @@ func TestHealthMonitor(t *testing.T) {
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
+			step.Workdir(app.SourcePath()),
 		),
 		step.New(
 			step.Stdout(output),
+			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
@@ -72,7 +78,6 @@ func TestHealthMonitor(t *testing.T) {
 				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
 			),
-			step.Workdir(app.SourcePath()),
 			step.PostExec(func(execErr error) error {
 				if execErr != nil {
 					return execErr

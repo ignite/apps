@@ -3,7 +3,6 @@ package cmd
 import (
 	"bytes"
 	"context"
-	"errors"
 	"fmt"
 	"math/big"
 	"os"
@@ -13,6 +12,7 @@ import (
 	"github.com/gookit/color"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
@@ -407,7 +407,7 @@ func ensureAccount(
 		return err
 	}
 	if balance.Empty() && faucetAddr == "" {
-		return fmt.Errorf(
+		return errors.Errorf(
 			"wallet %s balance is empty, please add funds or provide the faucet address flag (--%s or --%s)",
 			chainAddr,
 			flagChainAFaucet,
@@ -480,7 +480,7 @@ GetKey:
 		}
 
 		if !bip39.IsMnemonicValid(mnemonic) {
-			return "", fmt.Errorf("invalid mnemonic: %s", mnemonic)
+			return "", errors.Errorf("invalid mnemonic: %s", mnemonic)
 		}
 
 		bufKeysChainAdd := bytes.Buffer{}
@@ -588,7 +588,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 	chainAGasMulti := new(big.Float)
 	chainAGasMulti, ok := chainAGasMulti.SetString(chainAGasMultiplier)
 	if !ok {
-		return nil, fmt.Errorf("invalid chain A gas multiplier: %s", chainAGasMultiplier)
+		return nil, errors.Errorf("invalid chain A gas multiplier: %s", chainAGasMultiplier)
 	}
 
 	optChainA := []hermes.ChainOption{
@@ -693,7 +693,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 	chainBGasMulti := new(big.Float)
 	chainBGasMulti, ok = chainBGasMulti.SetString(chainBGasMultiplier)
 	if !ok {
-		return nil, fmt.Errorf("invalid chain B gas multiplier: %s", chainBGasMultiplier)
+		return nil, errors.Errorf("invalid chain B gas multiplier: %s", chainBGasMultiplier)
 	}
 
 	optChainB := []hermes.ChainOption{

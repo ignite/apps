@@ -10,9 +10,9 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/localfs"
 	"github.com/ignite/ignite-files/gex"
-	"github.com/pkg/errors"
 )
 
 // Gex represents the Gex binary structure.

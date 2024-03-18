@@ -8,7 +8,7 @@ import (
 	"time"
 
 	"github.com/google/go-github/v56/github"
-	"github.com/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"golang.org/x/mod/modfile"
 
 	"github.com/ignite/apps/marketplace/pkg/xgithub"
@@ -89,10 +89,10 @@ func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL st
 func validatePackageURL(pkgURL string) (owner, name string, err error) {
 	parts := strings.Split(pkgURL, "/")
 	if len(parts) != 3 {
-		return "", "", fmt.Errorf("package URL must be in github.com/{owner}/{repo} format")
+		return "", "", errors.Errorf("package URL must be in github.com/{owner}/{repo} format")
 	}
 	if parts[0] != "github.com" {
-		return "", "", fmt.Errorf("only GitHub packages are supported")
+		return "", "", errors.Errorf("only GitHub packages are supported")
 	}
 
 	return parts[1], parts[2], nil

@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
@@ -26,12 +26,12 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 
 	chainInfo, err := api.GetChainInfo(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get chain info: %w", err)
+		return errors.Errorf("failed to get chain info: %w", err)
 	}
 
 	ch, err := chain.New(chainInfo.AppPath)
 	if err != nil {
-		return fmt.Errorf("failed to create a new chain object from app path: %w", err)
+		return errors.Errorf("failed to create a new chain object from app path: %w", err)
 	}
 
 	switch args[0] {
@@ -40,7 +40,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	case "build":
 		return cmd.ExecuteBuild(ctx, c, ch)
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", c.Path)
 	}
 }
 

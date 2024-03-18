@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	cowsay "github.com/Code-Hex/Neo-cowsay/v2"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/spf13/pflag"
 )
@@ -30,7 +31,7 @@ func ExecuteCowsay(_ context.Context, cmd *plugin.ExecutedCommand) error {
 		cowsay.BallonWidth(40),
 	)
 	if err != nil {
-		return fmt.Errorf("internal error with cowsay: %w", err)
+		return errors.Errorf("internal error with cowsay: %w", err)
 	}
 	fmt.Println(say)
 	return nil
@@ -39,7 +40,7 @@ func ExecuteCowsay(_ context.Context, cmd *plugin.ExecutedCommand) error {
 func getTypeflag(flags *pflag.FlagSet) (string, error) {
 	typ, err := flags.GetString("type")
 	if err != nil {
-		return "", fmt.Errorf("could not get --type flag: %w", err)
+		return "", errors.Errorf("could not get --type flag: %w", err)
 	}
 
 	if typ == "" {
