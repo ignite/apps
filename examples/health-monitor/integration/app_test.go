@@ -47,7 +47,7 @@ func TestHealthMonitor(t *testing.T) {
 	)
 	steps := step.NewSteps(
 		step.New(
-			step.Stdout(output),
+			step.Stderr(output),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
@@ -58,14 +58,14 @@ func TestHealthMonitor(t *testing.T) {
 				"monitor",
 				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
-				"--close-after", "6s",
+				"--close-after", "2s",
 			),
 			step.PostExec(func(execErr error) error {
 				if execErr != nil {
 					return execErr
 				}
 				got = output.String()
-				if !strings.Contains(got, "Chain ID: health-monitor") {
+				if !strings.Contains(got, "Chain ID: healthmonitor") {
 					return errors.Errorf("invalid output: %s", got)
 				}
 				return nil
@@ -84,7 +84,7 @@ func TestHealthMonitor(t *testing.T) {
 		t.FailNow()
 	}
 
-	require.Contains(got, "Chain ID: health-monitor")
+	require.Contains(got, "Chain ID: healthmonitor")
 	require.Contains(got, "Version:")
 	require.Contains(got, "Height:")
 	require.Contains(got, "Latest Block Hash:")
