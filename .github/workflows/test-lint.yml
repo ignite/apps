@@ -1,4 +1,4 @@
-name: Lint
+name: Static Analysis
 on:
   pull_request:
   push:
@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   lint:
-    name: 'Lint Go Code'
+    name: "govet | govulncheck | lint"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
