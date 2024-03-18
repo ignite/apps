@@ -58,6 +58,7 @@ func TestHealthMonitor(t *testing.T) {
 				"monitor",
 				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
+				"--close-after", "6s",
 			),
 			step.PostExec(func(execErr error) error {
 				if execErr != nil {
