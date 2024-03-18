@@ -8,7 +8,6 @@ require (
 	github.com/hashicorp/go-plugin v1.5.2
 	github.com/ignite/cli/v28 v28.2.0
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
-	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.8.4
 )
 
@@ -169,6 +168,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/cobra v1.8.0 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
