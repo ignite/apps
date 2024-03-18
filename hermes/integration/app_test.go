@@ -216,7 +216,6 @@ func runChain(
 
 func TestHermes(t *testing.T) {
 	var (
-		require     = require.New(t)
 		env         = envtest.New(t)
 		app         = env.Scaffold("github.com/apps/hermes-app")
 		tmpDir      = t.TempDir()
@@ -225,11 +224,11 @@ func TestHermes(t *testing.T) {
 	t.Cleanup(func() {
 		cancel()
 		time.Sleep(5 * time.Second)
-		require.NoError(os.RemoveAll(tmpDir))
+		require.NoError(t, os.RemoveAll(tmpDir))
 	})
 
 	dir, err := os.Getwd()
-	require.NoError(err)
+	require.NoError(t, err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "hermes")
 
 	env.Must(env.Exec("install hermes app locally",
@@ -264,7 +263,7 @@ func TestHermes(t *testing.T) {
 		availableport.WithMinPort(4000),
 		availableport.WithMaxPort(5000),
 	)
-	require.NoError(err)
+	require.NoError(t, err)
 	earthAPI, earthRPC, earthGRPC, earthFaucet := runChain(t, ctx, env, app, earthConfig, tmpDir, ports[:7])
 	earthChainID := earthConfig.Genesis["chain_id"].(string)
 	earthHome := earthConfig.Validators[0].Home
@@ -345,7 +344,7 @@ func TestHermes(t *testing.T) {
 					return execErr
 				}
 				if err := json.Unmarshal(queryOutput.Bytes(), &queryResponse); err != nil {
-					return errors.Errorf("unmarshling tx response: %w", err)
+					return errors.Errorf("unmarshling tx response: %s", err)
 				}
 				if len(queryResponse.Channels) == 0 ||
 					len(queryResponse.Channels[0].ConnectionHops) == 0 {
@@ -431,7 +430,7 @@ func TestHermes(t *testing.T) {
 	if !env.Exec("send an IBC transfer", stepsTx, envtest.ExecRetry()) {
 		t.FailNow()
 	}
-	require.Equal(t, 0, txResponse.Code,
+	require.Equalf(t, 0, txResponse.Code,
 		"tx failed code=%d log=%s", txResponse.Code, txResponse.RawLog)
 
 	var (
