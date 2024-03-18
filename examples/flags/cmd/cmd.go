@@ -4,6 +4,11 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
+const (
+	flagName = "name"
+	flagType = "type"
+)
+
 // GetCommands returns the list of flags app commands.
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
@@ -20,7 +25,7 @@ func GetCommands() []*plugin.Command {
 					Short: "Cow says hello to the user!",
 					Flags: []*plugin.Flag{
 						{
-							Name:         "type",
+							Name:         flagType,
 							Shorthand:    "t",
 							Usage:        "Type of the cow! (Try cheese)",
 							DefaultValue: "default",
@@ -31,7 +36,7 @@ func GetCommands() []*plugin.Command {
 			},
 			Flags: []*plugin.Flag{
 				{
-					Name:         "name",
+					Name:         flagName,
 					Shorthand:    "n",
 					Usage:        "Name of the one you want to say hello to!",
 					DefaultValue: "Ignite",

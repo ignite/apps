@@ -17,8 +17,8 @@ func ExecuteCowsay(_ context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 
 	var (
-		name, _ = flags.GetString("name")
-		typ, _  = flags.GetString("type")
+		name, _ = flags.GetString(flagName)
+		typ, _  = flags.GetString(flagType)
 	)
 	say, err := cowsay.Say(
 		fmt.Sprintf("Hello, %s!", name),

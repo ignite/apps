@@ -33,11 +33,7 @@ func TestChainInfo(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
 	buf := &bytes.Buffer{}

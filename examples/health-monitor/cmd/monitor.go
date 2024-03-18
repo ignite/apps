@@ -7,7 +7,7 @@ import (
 	"time"
 
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
-	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
@@ -22,45 +22,63 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	}
 
 	var (
-		jsonFlag, _   = flags.GetBool("json")
-		refreshDur, _ = flags.GetDuration("refresh-duration")
-		rpcAddress, _ = flags.GetString("rpc-address")
+		isJSON, _          = flags.GetBool(flagJSON)
+		refreshDuration, _ = flags.GetString(flagRefreshDuration)
+		rpcAddress, _      = flags.GetString(flagRPCAddress)
 	)
 
 	if rpcAddress == "" {
 		rpcAddress = chainInfo.RpcAddress
 	}
-	rpcURL, err := xurl.TCP(rpcAddress)
+	rpcURL, err := xurl.HTTP(rpcAddress)
 	if err != nil {
 		return errors.Errorf("invalid rpc address %s: %s", rpcAddress, err)
 	}
 
-	httpClient, err := client.NewClientFromNode(rpcURL)
+	// Create a Cosmos client instance
+	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(rpcURL))
 	if err != nil {
 		return errors.Errorf("failed to create client: %s", err)
 	}
 
-	ticker := time.NewTicker(refreshDur)
+	refresh, err := time.ParseDuration(refreshDuration)
+	if err != nil {
+		return errors.Errorf("failed to parse %s flag: %s", err)
+	}
+
+	ticker := time.NewTicker(refresh)
 	defer ticker.Stop()
 
 	for {
 		select {
 		case <-ctx.Done():
-			return nil
+			break
 		case <-ticker.C:
-			status, err := httpClient.Status(ctx)
+			status, err := client.Status(ctx)
 			if err != nil {
-				return errors.Errorf("failed to get status: %s", err)
+				return errors.Errorf("failed to get status: %s\n", err)
 			}
-			if jsonFlag {
-				if err := printJSON(status); err != nil {
-					return err
-				}
-			} else {
-				printUserFriendly(status)
+			if err := printStatus(isJSON, status); err != nil {
+				return errors.Errorf("failed to print status: %s\n", err)
 			}
 		}
 	}
+}
+
+func printStatus(isJSON bool, status *ctypes.ResultStatus) error {
+	if isJSON {
+		return printJSON(status)
+	}
+
+	screen.Clear()
+	screen.MoveTopLeft()
+	fmt.Printf("Time: %s\n", time.Now().Format(time.DateTime))
+	fmt.Printf("Chain ID: %s\n", status.NodeInfo.Network)
+	fmt.Printf("Version: %s\n", status.NodeInfo.Version)
+	fmt.Printf("Height: %d\n", status.SyncInfo.LatestBlockHeight)
+	fmt.Printf("Latest Block Hash: %s\n", status.SyncInfo.LatestBlockHash.String())
+
+	return nil
 }
 
 type statusResponse struct {
@@ -85,14 +103,4 @@ func printJSON(status *ctypes.ResultStatus) error {
 	}
 	fmt.Println(string(data))
 	return nil
-}
-
-func printUserFriendly(status *ctypes.ResultStatus) {
-	screen.Clear()
-	screen.MoveTopLeft()
-	fmt.Printf("Time: %s\n", time.Now().Format(time.DateTime))
-	fmt.Printf("Chain ID: %s\n", status.NodeInfo.Network)
-	fmt.Printf("Version: %s\n", status.NodeInfo.Version)
-	fmt.Printf("Height: %d\n", status.SyncInfo.LatestBlockHeight)
-	fmt.Printf("Latest Block Hash: %s\n", status.SyncInfo.LatestBlockHash.String())
 }

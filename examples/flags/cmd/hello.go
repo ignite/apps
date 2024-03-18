@@ -14,7 +14,7 @@ func ExecuteHello(_ context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	name, err := flags.GetString("name")
+	name, err := flags.GetString(flagName)
 	if err != nil {
 		return err
 	}

@@ -2,6 +2,8 @@ package cmd
 
 import "github.com/ignite/cli/v28/ignite/services/plugin"
 
+const flagOutput = "output"
+
 // GetCommands returns the list of chain-info app commands.
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
@@ -18,7 +20,7 @@ func GetCommands() []*plugin.Command {
 					Short: "Builds the chain app in the current directory with help of ignite helper functions",
 					Flags: []*plugin.Flag{
 						{
-							Name:         "output",
+							Name:         flagOutput,
 							Shorthand:    "o",
 							Usage:        "The path to output binary file",
 							DefaultValue: ".",

@@ -7,23 +7,22 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
-	"time"
-
-	"github.com/stretchr/testify/require"
 
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHealthMonitor(t *testing.T) {
 	var (
-		require = require.New(t)
-		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/apps/health-monitor")
-		servers = app.RandomizeServerPorts()
+		require     = require.New(t)
+		env         = envtest.New(t)
+		app         = env.Scaffold("github.com/apps/health-monitor")
+		servers     = app.RandomizeServerPorts()
+		ctx, cancel = context.WithCancel(env.Ctx())
 	)
 
 	dir, err := os.Getwd()
@@ -38,19 +37,13 @@ func TestHealthMonitor(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
 	var (
 		isRetrieved bool
 		got         string
-
 		output      = &bytes.Buffer{}
-		ctx, cancel = context.WithTimeout(env.Ctx(), 6*time.Minute)
 	)
 	steps := step.NewSteps(
 		step.New(

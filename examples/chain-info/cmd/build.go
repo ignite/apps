@@ -19,7 +19,7 @@ func ExecuteBuild(ctx context.Context, cmd *plugin.ExecutedCommand, c *chain.Cha
 		return err
 	}
 
-	output, _ := flags.GetString("output")
+	output, _ := flags.GetString(flagOutput)
 	if err != nil {
 		return errors.Errorf("could not get --output flag: %s", err)
 	}
