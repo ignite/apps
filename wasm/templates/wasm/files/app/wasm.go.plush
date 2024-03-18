@@ -160,7 +160,7 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, wasmConfig wasmtypes.Wa
 		},
 	)
 	if err != nil {
-		return errors.Errorf("failed to create AnteHandler: %s", err)
+		return fmt.Errorf("failed to create AnteHandler: %s", err)
 	}
 
 	// Set the AnteHandler for the app
