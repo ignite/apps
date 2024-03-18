@@ -6,6 +6,8 @@ labels: bug
 assignees: ''
 ---
 
+**App**: Name of the app
+
 **Describe the bug**
 Tell us what you were doing and provide a clear and concise description of issue you encountered.
 
