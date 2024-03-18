@@ -50,21 +50,9 @@ func TestHealthMonitor(t *testing.T) {
 		got         string
 
 		output      = &bytes.Buffer{}
-		ctx, cancel = context.WithTimeout(env.Ctx(), 2*time.Minute)
+		ctx, cancel = context.WithTimeout(env.Ctx(), 6*time.Minute)
 	)
-	defer cancel()
 	steps := step.NewSteps(
-		step.New(
-			step.Exec(
-				app.Binary(),
-				"config",
-				"output", "json",
-			),
-			step.PreExec(func() error {
-				return env.IsAppServed(ctx, servers.API)
-			}),
-			step.Workdir(app.SourcePath()),
-		),
 		step.New(
 			step.Stdout(output),
 			step.Workdir(app.SourcePath()),

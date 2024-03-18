@@ -102,7 +102,7 @@ format:
 ## test-unit: Run unit tests for all apps.
 test-unit:
 	@echo Running unit tests...
-	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d -not -path '*/integration*'); do \
         if [ -e "$$dir/go.mod" ]; then \
             echo "Running unit tests in $$dir"; \
             cd "$$dir" && go test -race -failfast -v -coverpkg=./... $(go list ./... | grep -v integration); \
