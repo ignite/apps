@@ -25,7 +25,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 
 	chainInfo, err := api.GetChainInfo(ctx)
 	if err != nil {
-		return errors.Errorf("failed to get chain info: %w", err)
+		return errors.Errorf("failed to get chain info: %s", err)
 	}
 
 	switch args[0] {

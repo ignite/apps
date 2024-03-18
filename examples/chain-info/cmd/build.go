@@ -21,20 +21,20 @@ func ExecuteBuild(ctx context.Context, cmd *plugin.ExecutedCommand, c *chain.Cha
 
 	output, _ := flags.GetString("output")
 	if err != nil {
-		return errors.Errorf("could not get --output flag: %w", err)
+		return errors.Errorf("could not get --output flag: %s", err)
 	}
 
 	tempDir, err := os.MkdirTemp(os.TempDir(), "buildcache-*")
 	if err != nil {
-		return errors.Errorf("could not create a temp dir: %w", err)
+		return errors.Errorf("could not create a temp dir: %s", err)
 	}
 	cacheStorage, err := cache.NewStorage(path.Join(tempDir, "cacheStorage.db"))
 	if err != nil {
-		return errors.Errorf("could not prepare a cache storage for building chain: %w", err)
+		return errors.Errorf("could not prepare a cache storage for building chain: %s", err)
 	}
 	binaryName, err := c.Build(ctx, cacheStorage, nil, output, false, true)
 	if err != nil {
-		return errors.Errorf("building chain failed with error: %w", err)
+		return errors.Errorf("building chain failed with error: %s", err)
 	}
 	fmt.Printf("Chain built successfully at %s\n", binaryName)
 	return nil

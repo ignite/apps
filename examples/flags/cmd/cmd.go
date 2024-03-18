@@ -1,9 +1,7 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/spf13/pflag"
 )
 
 // GetCommands returns the list of flags app commands.
@@ -43,16 +41,4 @@ func GetCommands() []*plugin.Command {
 			},
 		},
 	}
-}
-
-func getNameFlag(flags *pflag.FlagSet) (string, error) {
-	name, err := flags.GetString("name")
-	if err != nil {
-		return "", errors.Errorf("could not get --name flag: %w", err)
-	}
-
-	if name == "" {
-		return "Ignite", nil
-	}
-	return name, nil
 }

@@ -32,12 +32,12 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	}
 	rpcURL, err := xurl.TCP(rpcAddress)
 	if err != nil {
-		return errors.Errorf("invalid rpc address %s: %w", rpcAddress, err)
+		return errors.Errorf("invalid rpc address %s: %s", rpcAddress, err)
 	}
 
 	httpClient, err := client.NewClientFromNode(rpcURL)
 	if err != nil {
-		return errors.Errorf("failed to create client: %w", err)
+		return errors.Errorf("failed to create client: %s", err)
 	}
 
 	ticker := time.NewTicker(refreshDur)
@@ -50,7 +50,7 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 		case <-ticker.C:
 			status, err := httpClient.Status(ctx)
 			if err != nil {
-				return errors.Errorf("failed to get status: %w", err)
+				return errors.Errorf("failed to get status: %s", err)
 			}
 			if jsonFlag {
 				if err := printJSON(status); err != nil {
