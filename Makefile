@@ -5,7 +5,7 @@ PROJECT_NAME = 'ignite apps'
 
 ## goget: Run go get for all apps.
 goget:
-	@echo Running go mod tidy...
+	@echo Running go get $(REPO)...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
         if [ -e "$$dir/go.mod" ]; then \
             echo "Running go get $(REPO) in $$dir"; \
