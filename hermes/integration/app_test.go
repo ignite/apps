@@ -240,12 +240,8 @@ func TestHermes(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
-	assertGlobalPlugins(t, app, nil)
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
+	assertGlobalPlugins(t, nil)
 
 	// prepare the chain
 	env.Must(env.Exec("create an IBC module",
@@ -290,6 +286,7 @@ func TestHermes(t *testing.T) {
 				}
 				return env.IsAppServed(ctx, marsAPI)
 			}),
+			step.Workdir(app.SourcePath()),
 		),
 	)
 	env.Exec("waiting the chain is up", stepsCheckChains, envtest.ExecRetry())
@@ -311,6 +308,7 @@ func TestHermes(t *testing.T) {
 				"--generate-wallets",
 				"--overwrite-config",
 			),
+			step.Workdir(app.SourcePath()),
 		)),
 	))
 
@@ -318,6 +316,7 @@ func TestHermes(t *testing.T) {
 		env.Must(env.Exec("run the hermes relayer",
 			step.NewSteps(step.New(
 				step.Exec(envtest.IgniteApp, "relayer", "hermes", "start", earthChainID, marsChainID),
+				step.Workdir(app.SourcePath()),
 			)),
 			envtest.ExecCtx(ctx),
 		))
@@ -479,7 +478,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)
