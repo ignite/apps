@@ -5,13 +5,13 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
-
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
 type app struct{}
 
-func (app) Manifest(ctx context.Context) (*plugin.Manifest, error) {
+func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
 		Name: "consumer",
 	}, nil
@@ -19,7 +19,7 @@ func (app) Manifest(ctx context.Context) (*plugin.Manifest, error) {
 
 func (a app) Execute(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	if len(cmd.Args) == 0 {
-		return fmt.Errorf("missing argument")
+		return errors.Errorf("missing argument")
 	}
 	chain, err := api.GetChainInfo(ctx)
 	if err != nil {
@@ -33,18 +33,18 @@ func (a app) Execute(ctx context.Context, cmd *plugin.ExecutedCommand, api plugi
 		fmt.Printf("%t", isInit)
 		return err
 	}
-	return fmt.Errorf("invalid argument %q", cmd.Args[0])
+	return errors.Errorf("invalid argument %q", cmd.Args[0])
 }
 
-func (app) ExecuteHookPre(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
+func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 
-func (app) ExecuteHookPost(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
+func (app) ExecuteHookPost(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 
-func (app) ExecuteHookCleanUp(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
+func (app) ExecuteHookCleanUp(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 

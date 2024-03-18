@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"fmt"
 	"os"
 	"strings"
 
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
@@ -37,7 +37,7 @@ func hermesStartHandler(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	if _, err := os.Stat(cfgPath); os.IsNotExist(err) {
-		return fmt.Errorf("config file (%s) not exist, try to configure you relayer first", cfgPath)
+		return errors.Errorf("config file (%s) not exist, try to configure you relayer first", cfgPath)
 	}
 
 	h, err := hermes.New()

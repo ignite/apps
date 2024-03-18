@@ -2,12 +2,9 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"os"
 	"path/filepath"
 	"time"
-
-	pluginv1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
 
 	cmtypes "github.com/cometbft/cometbft/abci/types"
 	"github.com/cometbft/cometbft/crypto"
@@ -20,6 +17,8 @@ import (
 	ibctmtypes "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ccvconsumertypes "github.com/cosmos/interchain-security/v3/x/ccv/consumer/types"
 	ccvtypes "github.com/cosmos/interchain-security/v3/x/ccv/types"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	pluginv1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
 )
 
 // writeConsumerGenesis writes the consumer module genesis in the genesis file.
@@ -123,7 +122,7 @@ func getPubKey(chain *pluginv1.ChainInfo) (crypto.PubKey, error) {
 	var pvKey cmprivval.FilePVKey
 	err = cmtjson.Unmarshal(keyJSONBytes, &pvKey)
 	if err != nil {
-		return nil, fmt.Errorf("Error reading PrivValidator key from %v: %w", keyFilePath, err)
+		return nil, errors.Errorf("error reading PrivValidator key from %v: %s", keyFilePath, err)
 	}
 	return pvKey.PubKey, nil
 }

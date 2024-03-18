@@ -8,13 +8,12 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
+	"github.com/stretchr/testify/require"
 )
 
 func TestHealthMonitor(t *testing.T) {
@@ -25,6 +24,7 @@ func TestHealthMonitor(t *testing.T) {
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
+
 	dir, err := os.Getwd()
 	require.NoError(err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "health-monitor")
@@ -37,22 +37,18 @@ func TestHealthMonitor(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
 	var (
-		output      = &bytes.Buffer{}
 		isRetrieved bool
 		got         string
+		output      = &bytes.Buffer{}
 	)
 	steps := step.NewSteps(
 		step.New(
-			step.Stdout(output),
 			step.Stderr(output),
+			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
@@ -62,14 +58,14 @@ func TestHealthMonitor(t *testing.T) {
 				"monitor",
 				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
+				"--close-after", "2s",
 			),
-			step.Workdir(app.SourcePath()),
 			step.PostExec(func(execErr error) error {
 				if execErr != nil {
 					return execErr
 				}
 				got = output.String()
-				if !strings.Contains(got, "Chain ID: test") {
+				if !strings.Contains(got, "Chain ID: healthmonitor") {
 					return errors.Errorf("invalid output: %s", got)
 				}
 				return nil
@@ -88,7 +84,7 @@ func TestHealthMonitor(t *testing.T) {
 		t.FailNow()
 	}
 
-	require.Contains(got, "Chain ID: test")
+	require.Contains(got, "Chain ID: healthmonitor")
 	require.Contains(got, "Version:")
 	require.Contains(got, "Height:")
 	require.Contains(got, "Latest Block Hash:")

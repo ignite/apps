@@ -37,11 +37,7 @@ func TestWasm(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
 	env.Must(env.Exec("run wasm",

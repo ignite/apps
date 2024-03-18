@@ -2,10 +2,10 @@ package hermes
 
 import (
 	"encoding/json"
-	"errors"
 	"reflect"
 	"testing"
 
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 
@@ -52,7 +52,7 @@ func TestUnmarshalResult(t *testing.T) {
 			err := UnmarshalResult(tt.data, tt.v)
 			if tt.err != nil {
 				require.Error(t, err)
-				require.Equal(t, tt.err, err)
+				require.Equal(t, tt.err.Error(), err.Error())
 				return
 			}
 			require.NoError(t, err)
@@ -82,7 +82,7 @@ func TestValidateResult(t *testing.T) {
 			err := ValidateResult(tt.data)
 			if tt.err != nil {
 				require.Error(t, err)
-				require.Equal(t, tt.err, err)
+				require.Equal(t, tt.err.Error(), err.Error())
 				return
 			}
 			require.NoError(t, err)

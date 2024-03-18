@@ -7,88 +7,90 @@ import (
 	"time"
 
 	ctypes "github.com/cometbft/cometbft/rpc/core/types"
-	"github.com/cosmos/cosmos-sdk/client"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/inancgumus/screen"
-	"github.com/spf13/pflag"
 )
 
 // ExecuteMonitor executes the monitor subcommand.
 func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo *plugin.ChainInfo) error {
 	flags, err := cmd.NewFlags()
 	if err != nil {
-		return fmt.Errorf("failed to parse flags: %w", err)
+		return errors.Errorf("failed to parse flags: %s", err)
 	}
-	jsonFlag, err := getJSONFlag(flags)
-	if err != nil {
-		return fmt.Errorf("failed to get json flag: %w", err)
-	}
-	refreshDur, err := getRefreshDurationFlag(flags)
-	if err != nil {
-		return fmt.Errorf("failed to get refresh-duration flag: %w", err)
-	}
-	rpcAddress, err := getRPCAddressFlag(flags)
-	if err != nil {
-		return fmt.Errorf("failed to get rpc-address flag: %w", err)
-	}
+
+	var (
+		isJSON, _          = flags.GetBool(flagJSON)
+		refreshDuration, _ = flags.GetString(flagRefreshDuration)
+		closeAfter, _      = flags.GetString(flagCloseAfter)
+		rpcAddress, _      = flags.GetString(flagRPCAddress)
+	)
+
 	if rpcAddress == "" {
 		rpcAddress = chainInfo.RpcAddress
 	}
 	rpcURL, err := xurl.HTTP(rpcAddress)
 	if err != nil {
-		return fmt.Errorf("invalid rpc address %s: %w", rpcAddress, err)
+		return errors.Errorf("invalid rpc address %s: %s", rpcAddress, err)
 	}
 
-	httpClient, err := client.NewClientFromNode(rpcURL)
+	// Create a Cosmos client instance
+	client, err := cosmosclient.New(ctx, cosmosclient.WithNodeAddress(rpcURL))
 	if err != nil {
-		return fmt.Errorf("failed to create client: %w", err)
+		return errors.Errorf("failed to create client: %s", err)
 	}
 
-	ticker := time.NewTicker(refreshDur)
+	refresh, err := time.ParseDuration(refreshDuration)
+	if err != nil {
+		return errors.Errorf("failed to parse %s flag: %s", flagRefreshDuration, err)
+	}
+	ticker := time.NewTicker(refresh)
 	defer ticker.Stop()
+
+	closeDuration := time.Duration(0)
+	if closeAfter != "" {
+		closeDuration, err = time.ParseDuration(closeAfter)
+		if err != nil {
+			return errors.Errorf("failed to parse %s flag: %s", flagCloseAfter, err)
+		}
+	}
+	closeTime := time.Now().Add(closeDuration)
 
 	for {
 		select {
-		case <-ticker.C:
-			status, err := httpClient.Status(ctx)
-			if err != nil {
-				return fmt.Errorf("failed to get status: %w", err)
-			}
-			if jsonFlag {
-				if err := printJSON(status); err != nil {
-					return err
-				}
-			} else {
-				printUserFriendly(status)
-			}
 		case <-ctx.Done():
-			return nil
+			break
+		case <-ticker.C:
+			if closeDuration > 0 && time.Now().After(closeTime) {
+				return nil
+			}
+			status, err := client.Status(ctx)
+			if err != nil {
+				return errors.Errorf("failed to get status: %s", err)
+			}
+			if err := printStatus(isJSON, status); err != nil {
+				return errors.Errorf("failed to print status: %s", err)
+			}
 		}
 	}
 }
 
-func getJSONFlag(flags *pflag.FlagSet) (bool, error) {
-	j, err := flags.GetBool("json")
-	if err != nil {
-		return false, err
+func printStatus(isJSON bool, status *ctypes.ResultStatus) error {
+	if isJSON {
+		return printJSON(status)
 	}
-	return j, nil
-}
 
-func getRefreshDurationFlag(flags *pflag.FlagSet) (time.Duration, error) {
-	r, err := flags.GetString("refresh-duration")
-	if err != nil {
-		return 0, err
-	}
-	if r == "" {
-		return time.Second * 5, nil
-	}
-	return time.ParseDuration(r)
-}
+	screen.Clear()
+	screen.MoveTopLeft()
+	fmt.Printf("Time: %s\n", time.Now().Format(time.DateTime))
+	fmt.Printf("Chain ID: %s\n", status.NodeInfo.Network)
+	fmt.Printf("Version: %s\n", status.NodeInfo.Version)
+	fmt.Printf("Height: %d\n", status.SyncInfo.LatestBlockHeight)
+	fmt.Printf("Latest Block Hash: %s\n", status.SyncInfo.LatestBlockHash.String())
 
-func getRPCAddressFlag(flags *pflag.FlagSet) (string, error) {
-	return flags.GetString("rpc-address")
+	return nil
 }
 
 type statusResponse struct {
@@ -113,14 +115,4 @@ func printJSON(status *ctypes.ResultStatus) error {
 	}
 	fmt.Println(string(data))
 	return nil
-}
-
-func printUserFriendly(status *ctypes.ResultStatus) {
-	screen.Clear()
-	screen.MoveTopLeft()
-	fmt.Printf("Time: %s\n", time.Now().Format(time.DateTime))
-	fmt.Printf("Chain ID: %s\n", status.NodeInfo.Network)
-	fmt.Printf("Version: %s\n", status.NodeInfo.Version)
-	fmt.Printf("Height: %d\n", status.SyncInfo.LatestBlockHeight)
-	fmt.Printf("Latest Block Hash: %s\n", status.SyncInfo.LatestBlockHash.String())
 }
