@@ -89,14 +89,15 @@ func listApps(ctx context.Context, client *xgithub.Client, repo *github.Reposito
 	return apps, nil
 }
 
-func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Repository) (conf *plugin.AppsConfig, err error) {
+func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Repository) (*plugin.AppsConfig, error) {
 	data, err := client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
 	}
 
-	if err := yaml.UnmarshalContext(ctx, data, conf); err != nil {
+	var conf plugin.AppsConfig
+	if err := yaml.UnmarshalContext(ctx, data, &conf); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", appYMLFileName)
 	}
-	return conf, nil
+	return &conf, nil
 }
