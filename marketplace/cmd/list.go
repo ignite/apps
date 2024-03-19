@@ -31,9 +31,11 @@ func NewList() *cobra.Command {
 		Short: "List all the ignite apps",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
-			query, _ := cmd.Flags().GetString(queryFlag)
-			minStars, _ := cmd.Flags().GetUint(minStarsFlag)
+			var (
+				githubToken, _ = cmd.Flags().GetString(githubTokenFlag)
+				query, _       = cmd.Flags().GetString(queryFlag)
+				minStars, _    = cmd.Flags().GetUint(minStarsFlag)
+			)
 
 			session := cliui.New(cliui.StartSpinner())
 			defer session.End()
@@ -58,7 +60,7 @@ func NewList() *cobra.Command {
 	}
 
 	c.Flags().StringP(queryFlag, "q", "", "Query string to search for")
-	c.Flags().Uint(minStarsFlag, 10, "Minimum number of stars to search for")
+	c.Flags().Uint(minStarsFlag, 0, "Minimum number of stars to search for")
 
 	return c
 }

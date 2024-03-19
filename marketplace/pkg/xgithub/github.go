@@ -8,11 +8,20 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-// Client is a wrapper around the GitHub client so that it can be used as
-// an implementation of interface later on.
-type Client struct {
-	gc *github.Client
-}
+type (
+	// Client is a wrapper around the GitHub client so that it can be used as
+	// an implementation of interface later on.
+	Client struct {
+		gc *github.Client
+	}
+
+	// Query is a wrapper around the GitHub query.
+	Query struct {
+		qualifier string
+		op        string
+		value     string
+	}
+)
 
 // NewClient returns a new GitHub client.
 func NewClient(accessToken string) *Client {
@@ -22,16 +31,6 @@ func NewClient(accessToken string) *Client {
 	}
 
 	return &Client{gc: gc}
-}
-
-type Query struct {
-	qualifier string
-	op        string
-	value     string
-}
-
-func (q Query) String() string {
-	return q.qualifier + q.op + q.value
 }
 
 // StringQuery returns a Query that matches the given string.
@@ -66,19 +65,6 @@ func (c *Client) SearchRepositories(ctx context.Context, opts *github.SearchOpti
 	return repos.Repositories, *repos.Total, nil
 }
 
-func joinQueries(queries ...Query) string {
-	var q string
-	for i, query := range queries {
-		q += query.String()
-
-		if i < len(queries)-1 {
-			q += " "
-		}
-	}
-
-	return q
-}
-
 // GetRepository gets the repository from GitHub given the repository name.
 func (c *Client) GetRepository(ctx context.Context, owner, name string) (*github.Repository, error) {
 	repo, _, err := c.gc.Repositories.Get(ctx, owner, name)
@@ -102,4 +88,21 @@ func (c *Client) GetFileContent(ctx context.Context, owner, repo, path string) (
 	}
 
 	return []byte(s), nil
+}
+
+func (q Query) String() string {
+	return q.qualifier + q.op + q.value
+}
+
+func joinQueries(queries ...Query) string {
+	var q string
+	for i, query := range queries {
+		q += query.String()
+
+		if i < len(queries)-1 {
+			q += " "
+		}
+	}
+
+	return q
 }

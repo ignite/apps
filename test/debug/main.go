@@ -53,14 +53,7 @@ func newCmdFromApp(rootCmd *cobra.Command, commands []*plugin.Command) {
 			panic(err)
 		}
 
-		for _, subCmd := range cmd.GetCommands() {
-			subCobraCmd, err := subCmd.ToCobraCommand()
-			if err != nil {
-				panic(err)
-			}
-			cobraCmd.AddCommand(subCobraCmd)
-		}
-
 		rootCmd.AddCommand(cobraCmd)
+		newCmdFromApp(cobraCmd, cmd.GetCommands())
 	}
 }
