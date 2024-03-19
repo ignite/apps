@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/blang/semver/v4"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/pkg/errors"
 
 	"github.com/ignite/apps/wasm/pkg/config"
 	"github.com/ignite/apps/wasm/pkg/xgit"
@@ -102,6 +102,9 @@ func (s Scaffolder) AddWasm(
 	}
 
 	configTOML, err := s.chain.ConfigTOMLPath()
+	if err != nil {
+		return xgenny.SourceModification{}, err
+	}
 	if _, err := os.Stat(configTOML); os.IsNotExist(err) {
 		s.session.Printf(`Cannot find the chain config. If the chain %[1]v is not initialized yet, run "%[1]vd init" or "ignite chain serve" to init the chain. 
 After, run the "ignite wasm config" command to add the wasm config

@@ -2,12 +2,11 @@ package cmd
 
 import (
 	"context"
-	"fmt"
 	"net/url"
 	"os"
 
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/pkg/errors"
 
 	"github.com/ignite/apps/explorer/gex"
 )
@@ -18,7 +17,7 @@ const maxNumArgs = 1
 func ExecuteGex(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	argc := len(cmd.Args)
 	if argc > maxNumArgs {
-		return fmt.Errorf("accepts at most %d arg(s), received %d", maxNumArgs, argc)
+		return errors.Errorf("accepts at most %d arg(s), received %d", maxNumArgs, argc)
 	}
 
 	ssl := false

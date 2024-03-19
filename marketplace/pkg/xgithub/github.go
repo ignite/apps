@@ -5,7 +5,7 @@ import (
 	"strconv"
 
 	"github.com/google/go-github/v56/github"
-	"github.com/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
 // Client is a wrapper around the GitHub client so that it can be used as

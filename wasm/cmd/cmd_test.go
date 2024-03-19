@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"os"
 	"path/filepath"
 	"testing"
 
@@ -8,6 +9,11 @@ import (
 )
 
 func Test_relativePath(t *testing.T) {
+	pwd, err := os.Getwd()
+	require.NoError(t, err)
+	relativeRoot, err := filepath.Rel(pwd, "/")
+	require.NoError(t, err)
+
 	tests := []struct {
 		name    string
 		appPath string
@@ -21,7 +27,7 @@ func Test_relativePath(t *testing.T) {
 		{
 			name:    "Relative path outside current directory",
 			appPath: "/path/file.txt",
-			want:    "../../../../../../../../../../../path/file.txt",
+			want:    filepath.Join(relativeRoot, "path/file.txt"),
 		},
 		{
 			name:    "App path is current directory",

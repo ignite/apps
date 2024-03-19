@@ -14,7 +14,7 @@ import (
 )
 
 func TestWasm(t *testing.T) {
-	t.Skip("this tests will only work after we release a new ignite version")
+	t.Skip("this tests will only work after we release a new ignite version (>= v29)")
 
 	var (
 		require     = require.New(t)
@@ -37,12 +37,8 @@ func TestWasm(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
-	assertGlobalPlugins(t, app, nil)
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
+	assertGlobalPlugins(t, nil)
 
 	env.Must(env.Exec("run wasm",
 		step.NewSteps(step.New(
@@ -102,7 +98,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)

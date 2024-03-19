@@ -33,12 +33,8 @@ func TestFlags(t *testing.T) {
 	))
 
 	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{
-		{
-			Path: pluginPath,
-		},
-	})
-	assertGlobalPlugins(t, app, nil)
+	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
+	assertGlobalPlugins(t, nil)
 
 	buf := &bytes.Buffer{}
 	env.Must(env.Exec("run hello",
@@ -52,6 +48,7 @@ func TestFlags(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Equal("Hello, Test!\n", buf.String())
@@ -68,6 +65,7 @@ func TestFlags(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
+			step.Stderr(buf),
 		)),
 	))
 	require.Contains(buf.String(), "Hello, Test!")
@@ -80,7 +78,7 @@ func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []plugins
 	require.ElementsMatch(t, expectedPlugins, cfg.Apps, "unexpected local apps")
 }
 
-func assertGlobalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
+func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
 	t.Helper()
 	cfgPath, err := plugin.PluginsPath()
 	require.NoError(t, err)

@@ -6,6 +6,7 @@ import (
 	"os"
 	"text/tabwriter"
 
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
@@ -22,12 +23,12 @@ func ExecuteInfo(_ context.Context, _ *plugin.ExecutedCommand, c *chain.Chain) e
 	write("Config Path", c.ConfigPath())
 	init, err := c.IsInitialized()
 	if err != nil {
-		return fmt.Errorf("could not find out if the chain is initialized: %w", err)
+		return errors.Errorf("could not find out if the chain is initialized: %s", err)
 	}
 	write("Is Initialized", init)
 	bin, err := c.Binary()
 	if err != nil {
-		return fmt.Errorf("could not find out chain's binary file name: %w", err)
+		return errors.Errorf("could not find out chain's binary file name: %s", err)
 	}
 	write("Binary File", bin)
 	w.Flush()

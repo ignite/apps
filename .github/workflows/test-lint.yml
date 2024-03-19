@@ -1,4 +1,4 @@
-name: Lint
+name: Static Analysis
 on:
   pull_request:
   push:
@@ -13,20 +13,23 @@ concurrency:
 
 jobs:
   lint:
-    name: 'Lint Go Code'
+    name: "govet | govulncheck | lint"
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3.4.0
+      - uses: actions/checkout@v4
+
       - uses: technote-space/get-diff-action@v6.1.2
         with:
           PATTERNS: |
             **/*.go
             */go.mod
             */go.sum
-      - uses: actions/setup-go@v4
+
+      - uses: actions/setup-go@v5
         if: env.GIT_DIFF
         with:
           go-version: '1.21'
+
       - name: Run Lint Tests
         if: env.GIT_DIFF
         env:

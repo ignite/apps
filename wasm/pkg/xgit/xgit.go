@@ -24,7 +24,7 @@ func FetchGitTags(repositoryURL string) (semver.Versions, error) {
 	// Clone the repository
 	path := filepath.Join(os.TempDir(), "wasmd")
 	if err := os.RemoveAll(path); err != nil {
-		return nil, errors.Errorf("failed to clone repository: %w", err)
+		return nil, errors.Errorf("failed to clone repository: %s", err)
 	}
 	repo, err := git.PlainClone(
 		path,
@@ -32,13 +32,13 @@ func FetchGitTags(repositoryURL string) (semver.Versions, error) {
 		&git.CloneOptions{URL: repositoryURL, Depth: 1},
 	)
 	if err != nil {
-		return nil, errors.Errorf("failed to clone repository: %w", err)
+		return nil, errors.Errorf("failed to clone repository: %s", err)
 	}
 
 	// Get the repository's tags
 	tags, err := repo.Tags()
 	if err != nil {
-		return nil, errors.Errorf("failed to get tags: %w", err)
+		return nil, errors.Errorf("failed to get tags: %s", err)
 	}
 
 	// Iterate over tags and collect their names
@@ -52,7 +52,7 @@ func FetchGitTags(repositoryURL string) (semver.Versions, error) {
 		return nil
 	})
 	if err != nil {
-		return nil, errors.Errorf("failed to iterate over tags: %w", err)
+		return nil, errors.Errorf("failed to iterate over tags: %s", err)
 	}
 	semver.Sort(versions)
 	return versions, nil

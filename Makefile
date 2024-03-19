@@ -5,7 +5,7 @@ PROJECT_NAME = 'ignite apps'
 
 ## goget: Run go get for all apps.
 goget:
-	@echo Running go mod tidy...
+	@echo Running go get $(REPO)...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
         if [ -e "$$dir/go.mod" ]; then \
             echo "Running go get $(REPO) in $$dir"; \
@@ -51,7 +51,7 @@ govulncheck:
 lint:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
         echo "Installing golangci-lint..."; \
-        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+        curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.56.2; \
     }
 	@echo Running golangci-lint...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
@@ -65,7 +65,7 @@ lint:
 lint-ci:
 	@command -v golangci-lint >/dev/null 2>&1 || { \
         echo "Installing golangci-lint..."; \
-        curl -sfL https://install.goreleaser.com/github.com/golangci/golangci-lint.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.42.1; \
+        curl -sfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(shell go env GOPATH)/bin v1.56.2; \
     }
 	@echo Running golangci-lint...
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
@@ -99,10 +99,15 @@ format:
 
 .PHONY: govet format lint
 
-## test-unit: Run the unit tests.
+## test-unit: Run unit tests for all apps.
 test-unit:
 	@echo Running unit tests...
-	@go list -f '{{.Dir}}/...' -m | xargs go test -race -failfast -v
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d -not -path '*/integration*'); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running unit tests in $$dir"; \
+            cd "$$dir" && go test -race -failfast -v -coverpkg=./... $(go list ./... | grep -v integration); \
+        fi \
+    done
 
 ## test-integration: Run the integration tests.
 test-integration:

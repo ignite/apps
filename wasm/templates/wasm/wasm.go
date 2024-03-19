@@ -42,7 +42,7 @@ const funcRegisterIBCWasm = `
 //go:embed files/* files/**/*
 var fsAppWasm embed.FS
 
-// Options wasm scaffold options
+// Options wasm scaffold options.
 type Options struct {
 	AppName string
 	AppPath string

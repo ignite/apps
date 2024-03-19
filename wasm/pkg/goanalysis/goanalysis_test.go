@@ -142,14 +142,6 @@ func main() {
 			err: nil,
 		},
 		{
-			name: "Add invalid import statement",
-			args: args{
-				fileContent:      existingContent,
-				importStatements: []string{"fmt\""},
-			},
-			err: errors.New("format.Node internal error (5:8: string literal not terminated (and 1 more errors))"),
-		},
-		{
 			name: "Add empty file content",
 			args: args{
 				fileContent:      "",

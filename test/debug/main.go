@@ -15,39 +15,52 @@ import (
 	explorer "github.com/ignite/apps/explorer/cmd"
 	hermes "github.com/ignite/apps/hermes/cmd"
 	marketplace "github.com/ignite/apps/marketplace/cmd"
+	wasm "github.com/ignite/apps/wasm/cmd"
 )
 
-var rootCmd = &cobra.Command{
-	Use:   "apps",
-	Short: "debug apps commands",
-}
-
-func newCmdFromApp(name string, cmds []*plugin.Command) *cobra.Command {
-	newCmd := &cobra.Command{Use: fmt.Sprintf("%s [app]", name)}
-	for _, cmd := range cmds {
-		cobraCmd, err := cmd.ToCobraCommand()
-		if err != nil {
-			panic(err)
-		}
-		newCmd.AddCommand(cobraCmd)
-	}
-	return newCmd
-}
-
 func main() {
+	rootCmd := &cobra.Command{
+		Use:   "apps",
+		Short: "debug apps commands",
+	}
+
+	// Add apps with ignite app commands.
+	newCmdFromApp(rootCmd, chaininfo.GetCommands())
+	newCmdFromApp(rootCmd, flags.GetCommands())
+	newCmdFromApp(rootCmd, healthmonitor.GetCommands())
+	newCmdFromApp(rootCmd, helloworld.GetCommands())
+	newCmdFromApp(rootCmd, hooks.GetCommands())
+	newCmdFromApp(rootCmd, explorer.GetCommands())
+	// Add ignite app commands for debugging here.
+
+	// Add apps with cobra commands.
 	rootCmd.AddCommand(
-		marketplace.NewMarketplace(),
 		hermes.NewHermes(),
-		newCmdFromApp("explorer", explorer.GetCommands()),
-		newCmdFromApp("chain-info", chaininfo.GetCommands()),
-		newCmdFromApp("flags", flags.GetCommands()),
-		newCmdFromApp("health-monitor", healthmonitor.GetCommands()),
-		newCmdFromApp("hello-world", helloworld.GetCommands()),
-		newCmdFromApp("hooks", hooks.GetCommands()),
-		// Add commands for debugging here.
+		marketplace.NewMarketplace(),
+		wasm.NewWasm(),
+		// Add cobra commands for debugging here.
 	)
 	if err := rootCmd.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)
+	}
+}
+
+func newCmdFromApp(rootCmd *cobra.Command, commands []*plugin.Command) {
+	for _, cmd := range commands {
+		cobraCmd, err := cmd.ToCobraCommand()
+		if err != nil {
+			panic(err)
+		}
+
+		for _, subCmd := range cmd.GetCommands() {
+			subCobraCmd, err := subCmd.ToCobraCommand()
+			if err != nil {
+				panic(err)
+			}
+			cobraCmd.AddCommand(subCobraCmd)
+		}
+
+		rootCmd.AddCommand(cobraCmd)
 	}
 }
