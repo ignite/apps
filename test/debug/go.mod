@@ -155,7 +155,7 @@ require (
 	github.com/huandu/skiplist v1.2.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/ignite/ignite-files/gex v0.0.1 // indirect
-	github.com/ignite/ignite-files/hermes v0.0.3 // indirect
+	github.com/ignite/ignite-files/hermes v1.8.1 // indirect
 	github.com/ignite/ignite-files/nodetime v0.0.4 // indirect
 	github.com/ignite/ignite-files/protoc v0.0.1 // indirect
 	github.com/ignite/web v0.6.1 // indirect
