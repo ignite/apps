@@ -53,7 +53,7 @@ func newCmdFromApp(rootCmd *cobra.Command, commands []*plugin.Command) {
 			panic(err)
 		}
 
-		rootCmd.AddCommand(cobraCmd)
 		newCmdFromApp(cobraCmd, cmd.GetCommands())
+		rootCmd.AddCommand(cobraCmd)
 	}
 }
