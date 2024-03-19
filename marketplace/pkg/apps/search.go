@@ -18,21 +18,23 @@ const (
 	appYMLFileName = "app.ignite.yml"
 )
 
-// AppRepository represents a GitHub repository with Ignite apps.
-type AppRepository struct {
-	PackageURL string
-	Name       string
-	Owner      string
-	Stars      int
-	UpdatedAt  time.Time
-	Apps       []App
-}
+type (
+	// AppRepository represents a GitHub repository with Ignite apps.
+	AppRepository struct {
+		PackageURL string
+		Name       string
+		Owner      string
+		Stars      int
+		UpdatedAt  time.Time
+		Apps       []App
+	}
 
-// App represents an Ignite app inside the repository.
-type App struct {
-	Name        string
-	Description string
-}
+	// App represents an Ignite app inside the repository.
+	App struct {
+		Name        string
+		Description string
+	}
+)
 
 // Search searches for repositories that have ignite app topic on GitHub given the query string and the minimum number of stars
 // and then fetches the app.ignite.yml file from each repository and returns the list of repositories along with their apps.
@@ -77,14 +79,13 @@ func listApps(ctx context.Context, client *xgithub.Client, repo *github.Reposito
 		return nil, err
 	}
 
-	var apps []App
+	apps := make([]App, 0)
 	for name, info := range conf.Apps {
 		apps = append(apps, App{
 			Name:        name,
 			Description: info.Description,
 		})
 	}
-
 	return apps, nil
 }
 
@@ -95,10 +96,8 @@ func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Rep
 	}
 
 	var conf plugin.AppsConfig
-	yaml.UnmarshalContext(ctx, data, &conf)
-	if err != nil {
+	if err := yaml.UnmarshalContext(ctx, data, &conf); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", appYMLFileName)
 	}
-
 	return &conf, nil
 }

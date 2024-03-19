@@ -16,28 +16,30 @@ import (
 
 const igniteCLIPackage = "github.com/ignite/cli"
 
-// AppRepositoryDetails represents the details of an Ignite app repository.
-type AppRepositoryDetails struct {
-	PackageURL  string
-	Name        string
-	Owner       string
-	Description string
-	Tags        []string
-	Stars       int
-	License     string
-	UpdatedAt   time.Time
-	URL         string
-	Apps        []AppDetails
-}
+type (
+	// AppRepositoryDetails represents the details of an Ignite app repository.
+	AppRepositoryDetails struct {
+		PackageURL  string
+		Name        string
+		Owner       string
+		Description string
+		Tags        []string
+		Stars       int
+		License     string
+		UpdatedAt   time.Time
+		URL         string
+		Apps        []AppDetails
+	}
 
-// AppDetails represents the details of an Ignite app.
-type AppDetails struct {
-	Name          string
-	Description   string
-	Path          string
-	GoVersion     string
-	IgniteVersion string
-}
+	// AppDetails represents the details of an Ignite app.
+	AppDetails struct {
+		Name          string
+		Description   string
+		Path          string
+		GoVersion     string
+		IgniteVersion string
+	}
+)
 
 // GetRepositoryDetails returns the details of an Ignite app repository.
 func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL string) (*AppRepositoryDetails, error) {

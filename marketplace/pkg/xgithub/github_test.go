@@ -20,13 +20,13 @@ func TestClient_SearchRepositories(t *testing.T) {
 			Total: github.Int(2),
 			Repositories: []*github.Repository{
 				{
-					FullName:        github.String("igniteapps/ignite-app-2"),
+					FullName:        github.String("igniteapps/ignite-cli-app-2"),
 					Description:     github.String("This is a test ignite app 2"),
 					StargazersCount: github.Int(20),
 					Topics:          []string{"ignite-cli-app"},
 				},
 				{
-					FullName:        github.String("igniteapps/ignite-app-1"),
+					FullName:        github.String("igniteapps/ignite-cli-app-1"),
 					Description:     github.String("This is a test ignite app 1"),
 					StargazersCount: github.Int(10),
 					Topics:          []string{"ignite-cli-app"},
@@ -65,7 +65,7 @@ func TestClient_GetRepository(t *testing.T) {
 		require = require.New(t)
 		assert  = assert.New(t)
 		repo    = &github.Repository{
-			Name: github.String("ignite-app"),
+			Name: github.String("ignite-cli-app"),
 			Owner: &github.User{
 				Login: github.String("igniteapps"),
 			},
@@ -74,12 +74,12 @@ func TestClient_GetRepository(t *testing.T) {
 			License: &github.License{
 				Name: github.String("MIT"),
 			},
-			HTMLURL: github.String("https://github.com/igniteapps/ignite-app"),
+			HTMLURL: github.String("https://github.com/igniteapps/ignite-cli-app"),
 		}
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal("/api/v3/repos/igniteapps/ignite-app", r.URL.Path)
+		assert.Equal("/api/v3/repos/igniteapps/ignite-cli-app", r.URL.Path)
 
 		err := json.NewEncoder(w).Encode(repo)
 		require.NoError(err)
@@ -91,7 +91,7 @@ func TestClient_GetRepository(t *testing.T) {
 	require.NoError(err)
 
 	client := &Client{gc: gc}
-	repo, err = client.GetRepository(context.Background(), "igniteapps", "ignite-app")
+	repo, err = client.GetRepository(context.Background(), "igniteapps", "ignite-cli-app")
 	require.NoError(err)
 	assert.Equal(repo, repo)
 }
