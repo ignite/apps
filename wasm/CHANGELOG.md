@@ -2,9 +2,9 @@
 
 ## [`v0.1.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.1.1)
 
-## Changes
+## Fixes
 
-* []() Update scaffolded ibc modules registration to avoid unused imports
+* [#77](https://github.com/ignite/apps/pull/77) Update scaffolded ibc modules registration to avoid unused imports
 
 ## [`v0.1.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.1.0)
 
