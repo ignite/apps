@@ -29,12 +29,8 @@ const funcRegisterIBCWasm = `
 		wasmtypes.ModuleName:        wasm.AppModule{},
 	}
 
-	for _, module := range modules {
-		if mod, ok := module.(interface {
-			RegisterInterfaces(registry cdctypes.InterfaceRegistry)
-		}); ok {
-			mod.RegisterInterfaces(registry)
-		}
+	for name, m := range modules {
+		module.CoreAppModuleBasicAdaptor(name, m).RegisterInterfaces(registry)
 	}
 
 	return modules`
