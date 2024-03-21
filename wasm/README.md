@@ -12,7 +12,7 @@ The app adds `ignite wasm` commands to add a [CosmWasm](https://cosmwasm.com/) i
 
 ## **Prerequisites**
 
-- Ignite CLI version v28.2.1 or greater. 
+- Ignite CLI version v28.3.0 or greater. 
     - Or migrate your chain using the [Ignite migration guides](https://docs.ignite.com/migration).
 - Knowledge of blockchain development and smart contracts.
 
