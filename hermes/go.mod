@@ -6,24 +6,14 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.5
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/gookit/color v1.5.4
-<<<<<<< Updated upstream
-	github.com/hashicorp/go-plugin v1.5.2
-	github.com/ignite/cli/v28 v28.2.0
+	github.com/hashicorp/go-plugin v1.6.0
+	github.com/ignite/cli/v28 v28.3.0
 	github.com/ignite/ignite-files/hermes v1.8.1
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.1.0
 	github.com/spf13/cobra v1.8.0
-	github.com/stretchr/testify v1.8.4
-	gopkg.in/yaml.v3 v3.0.1
-=======
-	github.com/hashicorp/go-plugin v1.6.0
-	github.com/ignite/cli/v28 v28.3.0
-	github.com/ignite/ignite-files/hermes v0.0.3
-	github.com/manifoldco/promptui v0.9.0
-	github.com/pelletier/go-toml/v2 v2.1.0
-	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.9.0
->>>>>>> Stashed changes
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
