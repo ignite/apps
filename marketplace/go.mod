@@ -8,7 +8,7 @@ require (
 	github.com/goccy/go-yaml v1.11.2
 	github.com/google/go-github/v56 v56.0.0
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/ignite/cli/v28 v28.2.0
+	github.com/ignite/cli/v28 v28.3.0
 	github.com/muesli/termenv v0.15.2
 	github.com/spf13/cobra v1.8.0
 	github.com/stretchr/testify v1.8.4

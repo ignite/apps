@@ -5,21 +5,21 @@ This package is a helper that you could use to debug your Ignite App by running 
 ## How to use
 
 ```shell
-go run test/debug/main.go <COMMAND>
+go run tools/debug/main.go <COMMAND>
 ```
 
 e.g:
 ```shell
-go run test/debug/main.go explorer <ARGS>
+go run tools/debug/main.go explorer <ARGS>
 ```
 
 ```shell
-go run test/debug/main.go hermes <ARGS>
+go run tools/debug/main.go hermes <ARGS>
 ```
 
 ## Developer instruction
 
-- Replace the app repo for a local folder into the `test/debug/go.mod`.
+- Replace the app repo for a local folder into the `tools/debug/go.mod`.
 ```go.mod
 replace (
 	github.com/ignite/apps/explorer => ../../explorer
