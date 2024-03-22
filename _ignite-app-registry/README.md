@@ -50,9 +50,12 @@ Below is the template for the `app.json` file. Replace each placeholder with the
       "type": "e.g., GitHub, GitLab"
     },
     "documentationUrl": "URL to the app's documentation",
-    "license": "License type, e.g., MIT, Apache 2.0",
+    "license": {
+      "name": "MIT",
+      "url": "github.com/username/app/LICENSE.md"
+    },
     "keywords": ["keyword1", "keyword2", "Useful for search and categorization"],
-    "supportedPlatforms": ["platform1", "platform2", "e.g., osmosis, cosmoshub"],
+    "supportedPlatforms": ["mac", "linux"],
     "socialMedia": {
       "twitter": "Optional Twitter handle",
       "telegram": "Optional Telegram group",

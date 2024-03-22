@@ -23,13 +23,18 @@
       "url": "https://github.com/ignite/apps/tree/explorer/v0.2.0/explorer"
     },
     "documentationUrl": "https://github.com/cosmos/gex",
-    "license": "MIT",
+    "license": {
+      "name": "MIT",
+      "url": "github.com/username/app/LICENSE.md"
+    },
     "keywords": ["explorer", "cli", "cosmos-sdk", "ignite app"],
+    "supportedPlatforms": ["mac", "linux"],
     "socialMedia": {
       "x": "",
       "telegram": "",
       "discord": "",
-      "reddit": ""
+      "reddit": "",
+      "website": ""
     },
     "donations": {
       "cryptoAddresses": {
