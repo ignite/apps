@@ -1,22 +1,16 @@
 {
     "appName": "explorer",
     "appDescription": "Shows real time feed of your blockchain.",
-    "latestRelease": {
-      "version": "0.2",
-      "date": "2024-02-27",
-      "releaseNotesUrl": "https://github.com/ignite/apps/releases/tag/explorer%2Fv0.2.0"
+    "ignite": ">28.3.0",
+    "dependencies": {
+      "docker": ">23.0.5"
     },
-    "igniteCompatibility": {
-      "lastTestedVersion": "ignite v28.2.0"
-    },
-    "cosmosSdkCompatibility": {
-      "lastWorkedVersion": "v0.50.4"
-    },
+    "cosmosSDK": ">0.50.4", 
     "features": [
       "CLI Explorer",
       "Gex"
     ],
-    "wasm": "no",
+    "wasm": false,
     "authors": [
       {
         "name": "jeronimoalbi",
@@ -26,15 +20,13 @@
       }
     ],
     "repository": {
-      "url": "https://github.com/ignite/apps/tree/explorer/v0.2.0/explorer",
-      "type": "GitHub"
+      "url": "https://github.com/ignite/apps/tree/explorer/v0.2.0/explorer"
     },
     "documentationUrl": "https://github.com/cosmos/gex",
     "license": "MIT",
     "keywords": ["explorer", "cli", "cosmos-sdk", "ignite app"],
-    "supportedPlatforms": ["macos", "windows", "linux", "cosmos", "osomosis", "evmos", "celestia", "dymension"],
     "socialMedia": {
-      "twitter": "",
+      "x": "",
       "telegram": "",
       "discord": "",
       "reddit": ""
