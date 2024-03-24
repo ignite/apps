@@ -14,8 +14,6 @@ import (
 )
 
 func TestWasm(t *testing.T) {
-	t.Skip("this tests will only work after we release a new ignite version (>= v29)")
-
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
@@ -53,17 +51,6 @@ func TestWasm(t *testing.T) {
 
 	// sign tx to add an item to the list.
 	steps := step.NewSteps(
-		step.New(
-			step.Exec(
-				app.Binary(),
-				"config",
-				"output", "json",
-			),
-			step.Workdir(app.SourcePath()),
-			step.PreExec(func() error {
-				return env.IsAppServed(ctx, servers.API)
-			}),
-		),
 		step.New(
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
