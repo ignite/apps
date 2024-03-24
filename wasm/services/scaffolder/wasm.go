@@ -125,10 +125,15 @@ After, run the "ignite wasm config" command to add the wasm config
 	}
 
 	// Scaffold wasm changes.
+	binaryName, err := s.chain.Binary()
+	if err != nil {
+		return xgenny.SourceModification{}, err
+	}
+
 	opts := &wasm.Options{
-		AppName: s.chain.Name(),
-		AppPath: path,
-		Home:    home,
+		BinaryName: binaryName,
+		AppPath:    path,
+		Home:       home,
 	}
 	g, err := wasm.NewWasmGenerator(tracer, opts)
 	if err != nil {

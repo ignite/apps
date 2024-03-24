@@ -40,9 +40,9 @@ var fsAppWasm embed.FS
 
 // Options wasm scaffold options.
 type Options struct {
-	AppName string
-	AppPath string
-	Home    string
+	BinaryName string
+	AppPath    string
+	Home       string
 }
 
 // Validate that options are usable.
@@ -194,7 +194,7 @@ ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
 // cmdModify cmd.go modification when adding wasm integration.
 func cmdModify(opts *Options) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(opts.AppPath, "cmd", opts.AppName+"d", "cmd/commands.go")
+		cmdPath := filepath.Join(opts.AppPath, "cmd", opts.BinaryName, "cmd/commands.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err

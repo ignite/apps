@@ -48,6 +48,7 @@ func TestHealthMonitor(t *testing.T) {
 	steps := step.NewSteps(
 		step.New(
 			step.Stderr(output),
+			step.Stdout(output),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
