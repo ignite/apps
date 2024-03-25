@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -40,9 +41,8 @@ func TestGexExplorer(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	var (
-		isRetrieved bool
-		output      = &bytes.Buffer{}
-		execErr     = &bytes.Buffer{}
+		output  = &bytes.Buffer{}
+		execErr = &bytes.Buffer{}
 	)
 	steps := step.NewSteps(
 		step.New(
@@ -61,13 +61,16 @@ func TestGexExplorer(t *testing.T) {
 		),
 	)
 
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
 		env.Must(env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
+		wg.Done()
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	wg.Wait()
 
-	require.True(isRetrieved)
 	require.Empty(execErr.String())
 	require.Equal("aborted\n", output.String())
 }
