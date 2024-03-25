@@ -53,7 +53,7 @@ func TestGexExplorer(t *testing.T) {
 			}),
 			step.Exec(envtest.IgniteApp, "e", "gex", "--rpc-address", servers.RPC),
 			step.InExec(func() error {
-				time.Sleep(10 * time.Second)
+				time.Sleep(15 * time.Second)
 				stepCancel()
 				return nil
 			}),
