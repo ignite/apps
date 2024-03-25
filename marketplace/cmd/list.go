@@ -47,8 +47,9 @@ func NewList() *cobra.Command {
 				return err
 			}
 
-			if len(repos) < 1 {
-				return fmt.Errorf("❌ No ignite application were found")
+			if len(repos) == 0 {
+				session.Println("❌ No ignite application were found")
+				return nil
 			}
 
 			session.StopSpinner()
