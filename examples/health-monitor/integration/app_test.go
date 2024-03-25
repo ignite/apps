@@ -39,10 +39,7 @@ func TestHealthMonitor(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	var (
-		isRetrieved bool
-		output      = &bytes.Buffer{}
-	)
+	output := &bytes.Buffer{}
 	steps := step.NewSteps(
 		step.New(
 			step.Stdout(output),
@@ -66,11 +63,10 @@ func TestHealthMonitor(t *testing.T) {
 	)
 
 	go func() {
-		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx))
+		env.Must(env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-	require.True(isRetrieved)
 
 	got := output.String()
 	require.Contains(got, "Chain ID: healthmonitor")
