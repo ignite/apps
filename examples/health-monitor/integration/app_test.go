@@ -5,6 +5,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 	"time"
 
@@ -62,12 +63,16 @@ func TestHealthMonitor(t *testing.T) {
 		),
 	)
 
+	var wg sync.WaitGroup
+	wg.Add(1)
 	go func() {
 		env.Must(env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
+		wg.Done()
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
 
+	wg.Wait()
 	got := output.String()
 	require.Contains(got, "Chain ID: healthmonitor")
 	require.Contains(got, "Version:")
