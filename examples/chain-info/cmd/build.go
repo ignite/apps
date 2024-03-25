@@ -21,7 +21,7 @@ func ExecuteBuild(ctx context.Context, cmd *plugin.ExecutedCommand, c *chain.Cha
 
 	output, _ := flags.GetString(flagOutput)
 	if err != nil {
-		return errors.Errorf("could not get --output flag: %s", err)
+		return errors.Errorf("could not get --%s flag: %s", flagOutput, err)
 	}
 
 	tempDir, err := os.MkdirTemp(os.TempDir(), "buildcache-*")

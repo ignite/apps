@@ -42,10 +42,8 @@ func NewInfo() *cobra.Command {
 		RunE: func(cmd *cobra.Command, args []string) error {
 			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
 
-			session := cliui.New(cliui.StartSpinner())
+			session := cliui.New(cliui.StartSpinnerWithText("🔎 Fetching repository details from GitHub..."))
 			defer session.End()
-
-			session.StartSpinner("🔎 Fetching repository details from GitHub...")
 
 			client := xgithub.NewClient(githubToken)
 			repo, err := apps.GetRepositoryDetails(cmd.Context(), client, args[0])
@@ -54,9 +52,7 @@ func NewInfo() *cobra.Command {
 			}
 
 			session.StopSpinner()
-
 			printRepoDetails(repo)
-
 			return nil
 		},
 	}
@@ -85,18 +81,12 @@ func printRepoDetails(repo *apps.AppRepositoryDetails) {
 	printAppsTable(repo)
 }
 
-func colorFromText(text string) lipgloss.Color {
-	h := fnv.New64a()
-	h.Write([]byte(text))
-	return lipgloss.Color(strconv.FormatUint(h.Sum64()%16, 10))
-}
-
 func printAppsTable(repo *apps.AppRepositoryDetails) {
 	printItem := func(w io.Writer, s string, v interface{}) {
 		fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
 	}
 
-	for i, app := range repo.Apps {
+	for _, app := range repo.Apps {
 		w := &tabwriter.Writer{}
 		w.Init(os.Stdout, 16, 8, 0, '\t', 0)
 
@@ -105,15 +95,18 @@ func printAppsTable(repo *apps.AppRepositoryDetails) {
 		printItem(w, "Path", app.Path)
 		printItem(w, "Go Version", app.GoVersion)
 		printItem(w, "Ignite Version", app.IgniteVersion)
-		w.Flush()
 
-		fmt.Println(installaitonStyle.Render(fmt.Sprintf(
+		fmt.Fprintln(w, installaitonStyle.Render(fmt.Sprintf(
 			"🚀 Install via: %s",
 			commandStyle.Render(fmt.Sprintf("ignite app -g install %s", path.Join(repo.PackageURL, app.Path))),
 		)))
 
-		if i < len(repo.Apps)-1 {
-			fmt.Fprintln(w)
-		}
+		w.Flush()
 	}
+}
+
+func colorFromText(text string) lipgloss.Color {
+	h := fnv.New64a()
+	h.Write([]byte(text))
+	return lipgloss.Color(strconv.FormatUint(h.Sum64()%16, 10))
 }

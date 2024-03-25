@@ -24,7 +24,6 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	var (
 		isJSON, _          = flags.GetBool(flagJSON)
 		refreshDuration, _ = flags.GetString(flagRefreshDuration)
-		closeAfter, _      = flags.GetString(flagCloseAfter)
 		rpcAddress, _      = flags.GetString(flagRPCAddress)
 	)
 
@@ -49,23 +48,11 @@ func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo 
 	ticker := time.NewTicker(refresh)
 	defer ticker.Stop()
 
-	closeDuration := time.Duration(0)
-	if closeAfter != "" {
-		closeDuration, err = time.ParseDuration(closeAfter)
-		if err != nil {
-			return errors.Errorf("failed to parse %s flag: %s", flagCloseAfter, err)
-		}
-	}
-	closeTime := time.Now().Add(closeDuration)
-
 	for {
 		select {
 		case <-ctx.Done():
 			break
 		case <-ticker.C:
-			if closeDuration > 0 && time.Now().After(closeTime) {
-				return nil
-			}
 			status, err := client.Status(ctx)
 			if err != nil {
 				return errors.Errorf("failed to get status: %s", err)

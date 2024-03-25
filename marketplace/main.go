@@ -13,9 +13,7 @@ import (
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	m := &plugin.Manifest{
-		Name: "marketplace",
-	}
+	m := &plugin.Manifest{Name: "marketplace"}
 	m.ImportCobraCommand(cmd.NewMarketplace(), "ignite")
 	return m, nil
 }

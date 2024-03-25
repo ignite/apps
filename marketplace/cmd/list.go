@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"fmt"
+	"strings"
 
 	"github.com/charmbracelet/lipgloss"
 	"github.com/dustin/go-humanize"
@@ -37,25 +38,22 @@ func NewList() *cobra.Command {
 				minStars, _    = cmd.Flags().GetUint(minStarsFlag)
 			)
 
-			session := cliui.New(cliui.StartSpinner())
+			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on GitHub..."))
 			defer session.End()
 
-			session.StartSpinner("🔎 Searching for ignite apps on GitHub...")
 			client := xgithub.NewClient(githubToken)
 			repos, err := apps.Search(cmd.Context(), client, query, minStars)
 			if err != nil {
 				return err
 			}
-			session.StopSpinner()
 
-			if len(repos) < 1 {
+			if len(repos) == 0 {
 				session.Println("❌ No ignite application were found")
 				return nil
 			}
 
-			printRepoTree(session, repos)
-
-			return nil
+			session.StopSpinner()
+			return session.Print(formatRepoTree(repos))
 		},
 	}
 
@@ -65,8 +63,9 @@ func NewList() *cobra.Command {
 	return c
 }
 
-func printRepoTree(sess *cliui.Session, repos []apps.AppRepository) {
-	for i, repo := range repos {
+func formatRepoTree(repos []apps.AppRepository) string {
+	b := &strings.Builder{}
+	for _, repo := range repos {
 		node := tree.NewNode(fmt.Sprintf(
 			"📦 %-50s %s %s",
 			repo.PackageURL,
@@ -78,15 +77,12 @@ func printRepoTree(sess *cliui.Session, repos []apps.AppRepository) {
 			node.AddChild(tree.NewNode(fmt.Sprintf(
 				"🔥 %-20s %s",
 				app.Name,
-				limitTextlength(app.Description, descriptionLimit),
+				limitTextLength(app.Description, descriptionLimit),
 			)))
 		}
-		sess.Print(node)
-
-		if i < len(repos)-1 {
-			sess.Println()
-		}
+		fmt.Fprintln(b, node)
 	}
+	return strings.TrimSuffix(b.String(), "\n")
 }
 
 func humanizeInt(n int, unit string) string {
@@ -94,7 +90,7 @@ func humanizeInt(n int, unit string) string {
 	return humanize.FtoaWithDigits(value, 1) + suffix + " " + unit
 }
 
-func limitTextlength(text string, limit int) string {
+func limitTextLength(text string, limit int) string {
 	if len(text) > limit {
 		return text[:limit-3] + "..."
 	}
