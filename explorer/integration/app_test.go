@@ -40,38 +40,35 @@ func TestGexExplorer(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	var (
-		isRetrieved         bool
-		output              = &bytes.Buffer{}
-		stepCtx, stepCancel = context.WithCancel(env.Ctx())
+		isRetrieved bool
+		output      = &bytes.Buffer{}
+		execErr     = &bytes.Buffer{}
 	)
 	steps := step.NewSteps(
 		step.New(
 			step.Stdout(output),
-			step.Stderr(os.Stderr),
+			step.Stderr(execErr),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
 			step.Exec(envtest.IgniteApp, "e", "gex", "--rpc-address", servers.RPC),
 			step.InExec(func() error {
-				time.Sleep(15 * time.Second)
-				stepCancel()
+				time.Sleep(10 * time.Second)
+				cancel()
 				return nil
 			}),
 		),
 	)
 
 	go func() {
-		defer cancel()
-		isRetrieved = env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(stepCtx))
+		isRetrieved = env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx))
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
 
-	if !isRetrieved {
-		t.FailNow()
-	}
-
+	require.True(isRetrieved)
+	require.Empty(execErr.String())
 	require.Equal("aborted\n", output.String())
 }
 
