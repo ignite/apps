@@ -34,7 +34,7 @@ func TestMarketplace(t *testing.T) {
 	// One local plugin expected
 	assertGlobalPlugins(t, []pluginsconfig.Plugin{{Path: pluginPath}})
 
-	buf := &bytes.Buffer{}
+	listOutput := &bytes.Buffer{}
 	env.Must(env.Exec("run marketplace list",
 		step.NewSteps(step.New(
 			step.Exec(
@@ -42,10 +42,32 @@ func TestMarketplace(t *testing.T) {
 				"marketplace",
 				"list",
 			),
-			step.Stdout(buf),
+			// all test outputs are going to the stdErr for no reason, but
+			// it's ok when we run the app. The output goes to stdout.
+			step.Stderr(listOutput),
+			step.Stdout(listOutput),
 		)),
 	))
-	require.True(strings.HasPrefix(buf.String(), "📦"), "unexpected output: %s", buf.String())
+	gotList := listOutput.String()
+	require.True(strings.HasPrefix(gotList, "📦"), "unexpected output: %s", gotList)
+
+	infoOutput := &bytes.Buffer{}
+	env.Must(env.Exec("run marketplace info",
+		step.NewSteps(step.New(
+			step.Exec(
+				envtest.IgniteApp,
+				"marketplace",
+				"info",
+				"github.com/ignite/apps",
+			),
+			// all test outputs are going to the stdErr for no reason, but
+			// it's ok when we run the app. The output goes to stdout.
+			step.Stderr(infoOutput),
+			step.Stdout(infoOutput),
+		)),
+	))
+	gotInfo := infoOutput.String()
+	require.Contains(gotInfo, "Description:\tIgnite Apps")
 }
 
 func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
