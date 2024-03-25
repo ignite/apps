@@ -40,9 +40,8 @@ func TestHealthMonitor(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	var (
-		isRetrieved         bool
-		output              = &bytes.Buffer{}
-		stepCtx, stepCancel = context.WithCancel(env.Ctx())
+		isRetrieved bool
+		output      = &bytes.Buffer{}
 	)
 	steps := step.NewSteps(
 		step.New(
@@ -60,22 +59,18 @@ func TestHealthMonitor(t *testing.T) {
 			),
 			step.InExec(func() error {
 				time.Sleep(2 * time.Second)
-				stepCancel()
+				cancel()
 				return nil
 			}),
 		),
 	)
 
 	go func() {
-		defer cancel()
-		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(stepCtx))
+		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx))
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-
-	if !isRetrieved {
-		t.FailNow()
-	}
+	require.True(isRetrieved)
 
 	got := output.String()
 	require.Contains(got, "Chain ID: healthmonitor")
