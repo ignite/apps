@@ -69,7 +69,7 @@ func TestChainInfo(t *testing.T) {
 		)),
 	))
 	got = buf.String()
-	require.Equal("Chain built successfully at testd\n", got)
+	require.Equal("Chain built successfully at chain-infod\n", got)
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
