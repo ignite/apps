@@ -18,7 +18,7 @@ func TestGexExplorer(t *testing.T) {
 		require = require.New(t)
 		assert  = assert.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/test/explorer")
+		app     = env.Scaffold("github.com/apps/explorer")
 
 		assertPlugins = func(expectedLocalPlugins, expectedGlobalPlugins []pluginsconfig.Plugin) {
 			localCfg, err := pluginsconfig.ParseDir(app.SourcePath())

@@ -43,12 +43,9 @@ func TestMarketplace(t *testing.T) {
 				"list",
 			),
 			step.Stdout(buf),
-			step.Stderr(buf),
 		)),
 	))
-	require.Condition(func() bool {
-		return strings.HasPrefix(buf.String(), "❌") || strings.HasPrefix(buf.String(), "📦")
-	}, "unexpected output: %s", buf.String())
+	require.True(strings.HasPrefix(buf.String(), "📦"), "unexpected output: %s", buf.String())
 }
 
 func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
