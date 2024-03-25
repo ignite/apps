@@ -41,7 +41,6 @@ func TestGexExplorer(t *testing.T) {
 
 	var (
 		isRetrieved         bool
-		got                 string
 		output              = &bytes.Buffer{}
 		stepCtx, stepCancel = context.WithCancel(env.Ctx())
 	)
