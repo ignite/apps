@@ -47,6 +47,7 @@ func TestGexExplorer(t *testing.T) {
 	steps := step.NewSteps(
 		step.New(
 			step.Stdout(output),
+			step.Stderr(os.Stderr),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
@@ -71,7 +72,7 @@ func TestGexExplorer(t *testing.T) {
 		t.FailNow()
 	}
 
-	require.Equal(output.String(), "aborted\n")
+	require.Equal("aborted\n", output.String())
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
