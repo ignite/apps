@@ -62,7 +62,7 @@ func TestGexExplorer(t *testing.T) {
 	)
 
 	go func() {
-		isRetrieved = env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx))
+		env.Must(env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
