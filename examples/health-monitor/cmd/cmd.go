@@ -6,7 +6,6 @@ const (
 	flagJSON            = "json"
 	flagPath            = "path"
 	flagRefreshDuration = "refresh-duration"
-	flagCloseAfter      = "close-after"
 	flagRPCAddress      = "rpc-address"
 )
 
@@ -39,12 +38,6 @@ func GetCommands() []*plugin.Command {
 							Usage:        "refresh duration of the monitor",
 							DefaultValue: "5s",
 							Type:         plugin.FlagTypeString,
-						},
-						{
-							Name:      flagCloseAfter,
-							Shorthand: "c",
-							Usage:     "close the monitor after duration",
-							Type:      plugin.FlagTypeString,
 						},
 						{
 							Name:  flagRPCAddress,

@@ -5,12 +5,11 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"strings"
 	"testing"
+	"time"
 
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
 	"github.com/stretchr/testify/require"
@@ -41,9 +40,9 @@ func TestHealthMonitor(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	var (
-		isRetrieved bool
-		got         string
-		output      = &bytes.Buffer{}
+		isRetrieved         bool
+		output              = &bytes.Buffer{}
+		stepCtx, stepCancel = context.WithCancel(env.Ctx())
 	)
 	steps := step.NewSteps(
 		step.New(
@@ -58,16 +57,10 @@ func TestHealthMonitor(t *testing.T) {
 				"monitor",
 				"--rpc-address", servers.RPC,
 				"--refresh-duration", "1s",
-				"--close-after", "2s",
 			),
-			step.PostExec(func(execErr error) error {
-				if execErr != nil {
-					return execErr
-				}
-				got = output.String()
-				if !strings.Contains(got, "Chain ID: healthmonitor") {
-					return errors.Errorf("invalid output: %s", got)
-				}
+			step.InExec(func() error {
+				time.Sleep(2 * time.Second)
+				stepCancel()
 				return nil
 			}),
 		),
@@ -75,7 +68,7 @@ func TestHealthMonitor(t *testing.T) {
 
 	go func() {
 		defer cancel()
-		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry())
+		isRetrieved = env.Exec("run health-monitor", steps, envtest.ExecRetry(), envtest.ExecCtx(stepCtx))
 	}()
 
 	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
@@ -84,6 +77,7 @@ func TestHealthMonitor(t *testing.T) {
 		t.FailNow()
 	}
 
+	got := output.String()
 	require.Contains(got, "Chain ID: healthmonitor")
 	require.Contains(got, "Version:")
 	require.Contains(got, "Height:")
