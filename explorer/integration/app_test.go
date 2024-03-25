@@ -53,7 +53,7 @@ func TestGexExplorer(t *testing.T) {
 			}),
 			step.Exec(envtest.IgniteApp, "e", "gex", "--rpc-address", servers.RPC),
 			step.InExec(func() error {
-				time.Sleep(15 * time.Second)
+				time.Sleep(6 * time.Second)
 				stepCancel()
 				return nil
 			}),
@@ -70,6 +70,8 @@ func TestGexExplorer(t *testing.T) {
 	if !isRetrieved {
 		t.FailNow()
 	}
+
+	require.Equal(output.String(), "aborted\n")
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
