@@ -9,8 +9,8 @@ The Ignite App Registry is a directory designed to catalog applications built wi
 To add your app to the Ignite App Registry, follow these steps:
 
 1. **Fork the Repository**: Start by forking the `ignite/apps` repository to your own GitHub account.
-2. **Create a New Directory within `_ignite-app-registy`: Inside the repository and inside the directory `_ignite_app_registry`, create a new directory named after your app. Ensure the name is unique and descriptive.
-3. **Add Your `app.json` File**: In your app's directory, add an `app.json` file. This file should contain all the relevant details about your app according to the template provided below.
+2. **Set Up Your App Directory**: Inside the repository and inside the directory `_ignite_app_registry`, create a new directory named after your app. Ensure the name is unique and descriptive.
+3. **Configure Your App**: In your app's directory, add an `app.json` file. This file should contain all the relevant details about your app according to the template provided below.
 4. **Submit a Pull Request**: Once you've added your app's directory and `app.json` file, submit a pull request to the original `ignite/apps` repository. Your pull request will be reviewed by the  maintainers, and once approved, your app will be listed in the registry.
 
 ## `app.json` File Structure**
@@ -57,7 +57,7 @@ Below is the template for the `app.json` file. Replace each placeholder with the
     "keywords": ["keyword1", "keyword2", "Useful for search and categorization"],
     "supportedPlatforms": ["mac", "linux"],
     "socialMedia": {
-      "twitter": "Optional Twitter handle",
+      "x": "Optional X handle",
       "telegram": "Optional Telegram group",
       "discord": "Optional Discord server",
       "reddit": "Optional Reddit page",
