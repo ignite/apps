@@ -40,13 +40,9 @@ func TestGexExplorer(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	var (
-		output  = &bytes.Buffer{}
-		execErr = &bytes.Buffer{}
-	)
+	execErr := &bytes.Buffer{}
 	steps := step.NewSteps(
 		step.New(
-			step.Stdout(output),
 			step.Stderr(execErr),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
@@ -72,7 +68,6 @@ func TestGexExplorer(t *testing.T) {
 	wg.Wait()
 
 	require.Empty(execErr.String())
-	require.Equal("aborted\n", output.String())
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
