@@ -36,7 +36,7 @@ func TestParse(t *testing.T) {
 			want: &url.URL{Host: "localhost:4005", Scheme: schemeHTTPS},
 		},
 		{
-			name: "no schema and port",
+			name: "no scheme and port",
 			addr: "localhost",
 			want: &url.URL{Host: "localhost:80", Scheme: schemeHTTP},
 		},
