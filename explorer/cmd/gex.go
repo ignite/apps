@@ -5,9 +5,8 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-
-	"github.com/ignite/apps/explorer/gex"
-	"github.com/ignite/apps/explorer/pkg/xurl"
+	"github.com/ignite/gex/pkg/xurl"
+	"github.com/ignite/gex/services/explorer"
 )
 
 // ExecuteGex executes explorer gex subcommand.
@@ -17,25 +16,15 @@ func ExecuteGex(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	rpcAddress, _ := flags.GetString(flagRPCAddress)
+	rpcAddress, err := flags.GetString(flagRPCAddress)
 	if err != nil {
 		return errors.Errorf("could not get --%s flag: %s", flagRPCAddress, err)
 	}
 
-	rpcURL, err := xurl.Parse(rpcAddress)
+	hostURL, err := xurl.Parse(rpcAddress)
 	if err != nil {
-		return errors.Wrapf(err, "failed to parse RPC URL %s", rpcAddress)
+		return err
 	}
 
-	g, err := gex.New(
-		gex.WithHost(rpcURL.Hostname()),
-		gex.WithPort(rpcURL.Port()),
-		gex.WithSSL(xurl.IsSSL(rpcURL)),
-	)
-	if err != nil {
-		return errors.Wrap(err, "failed to initialize Gex")
-	}
-	defer g.Cleanup()
-
-	return g.Run(ctx)
+	return explorer.Run(ctx, hostURL.String())
 }
