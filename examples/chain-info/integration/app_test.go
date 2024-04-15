@@ -18,7 +18,7 @@ func TestChainInfo(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/test/test")
+		app     = env.Scaffold("github.com/apps/chain-info")
 	)
 
 	dir, err := os.Getwd()
@@ -46,16 +46,17 @@ func TestChainInfo(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
-			step.Stderr(buf),
 		)),
 	))
-	require.Contains(buf.String(), "Version:")
-	require.Contains(buf.String(), "App Path:")
-	require.Contains(buf.String(), "Config Path:")
-	require.Contains(buf.String(), "Is Initialized:")
-	require.Contains(buf.String(), "Binary File:")
 
+	got := buf.String()
+	require.Contains(got, "Version:")
+	require.Contains(got, "App Path:")
+	require.Contains(got, "Config Path:")
+	require.Contains(got, "Is Initialized:")
+	require.Contains(got, "Binary File:")
 	buf.Reset()
+
 	env.Must(env.Exec("run build",
 		step.NewSteps(step.New(
 			step.Exec(
@@ -65,10 +66,10 @@ func TestChainInfo(t *testing.T) {
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
-			step.Stderr(buf),
 		)),
 	))
-	require.Equal("Chain built successfully at testd\n", buf.String())
+	got = buf.String()
+	require.Equal("Chain built successfully at chain-infod\n", got)
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {

@@ -55,7 +55,11 @@ func Search(ctx context.Context, client *xgithub.Client, query string, minStars 
 	result := make([]AppRepository, 0, len(repos))
 	for _, repo := range repos {
 		apps, err := listApps(ctx, client, repo)
-		if err != nil && !errors.Is(err, &github.RateLimitError{}) {
+
+		var rateLimitErr *github.RateLimitError
+		if errors.As(err, &rateLimitErr) {
+			return nil, err
+		} else if err != nil {
 			// Ignore the repository since it doesn't have a valid app.ignite.yml file.
 			continue
 		}

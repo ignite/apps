@@ -73,8 +73,7 @@ func finish(ctx context.Context, session *cliui.Session, path string, wasmVersio
 		return err
 	}
 
-	// TODO this function will be available only in the next cli version
-	// _ = gocmd.GoImports(ctx, path) // goimports installation could fail, so ignore the error
+	_ = gocmd.GoImports(ctx, path) // goimports installation could fail, so ignore the error
 
 	return nil
 }
