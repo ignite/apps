@@ -61,7 +61,6 @@ require (
 	github.com/btcsuite/btcd/btcec/v2 v2.3.3 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
-	github.com/cespare/xxhash v1.1.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v0.9.1 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
@@ -91,9 +90,8 @@ require (
 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.3.0 // indirect
 	github.com/desertbit/timer v0.0.0-20180107155436-c41aec40b27f // indirect
-	github.com/dgraph-io/badger/v2 v2.2007.4 // indirect
+	github.com/dgraph-io/badger/v4 v4.2.0 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
-	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
 	github.com/distribution/reference v0.5.0 // indirect
 	github.com/docker/docker v24.0.7+incompatible // indirect
 	github.com/dustin/go-humanize v1.0.1 // indirect
@@ -132,6 +130,7 @@ require (
 	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/golang/snappy v0.0.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
+	github.com/google/flatbuffers v1.12.1 // indirect
 	github.com/google/go-cmp v0.6.0 // indirect
 	github.com/google/go-github/v48 v48.2.0 // indirect
 	github.com/google/go-github/v56 v56.0.0 // indirect
@@ -154,7 +153,7 @@ require (
 	github.com/hdevalence/ed25519consensus v0.2.0 // indirect
 	github.com/huandu/skiplist v1.2.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/ignite/ignite-files/gex v0.0.1 // indirect
+	github.com/ignite/gex v1.0.0 // indirect
 	github.com/ignite/ignite-files/hermes v1.8.1 // indirect
 	github.com/ignite/ignite-files/nodetime v0.0.4 // indirect
 	github.com/ignite/ignite-files/protoc v0.0.1 // indirect
@@ -188,7 +187,9 @@ require (
 	github.com/mtibben/percent v0.2.1 // indirect
 	github.com/muesli/reflow v0.3.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
+	github.com/mum4k/termdash v0.20.0 // indirect
 	github.com/nqd/flat v0.2.0 // indirect
+	github.com/nsf/termbox-go v1.1.1 // indirect
 	github.com/oasisprotocol/curve25519-voi v0.0.0-20230904125328-1f23a7beb09a // indirect
 	github.com/oklog/run v1.1.0 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
@@ -233,6 +234,7 @@ require (
 	github.com/zondax/hid v0.9.2 // indirect
 	github.com/zondax/ledger-go v0.14.3 // indirect
 	go.etcd.io/bbolt v1.4.0-alpha.0.0.20240404170359-43604f3112c5 // indirect
+	go.opencensus.io v0.24.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/exp v0.0.0-20240409090435-93d18d7e34b8 // indirect
