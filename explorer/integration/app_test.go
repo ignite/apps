@@ -40,17 +40,21 @@ func TestGexExplorer(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	execErr := &bytes.Buffer{}
+	var (
+		execErr    = &bytes.Buffer{}
+		execResult = &bytes.Buffer{}
+	)
 	steps := step.NewSteps(
 		step.New(
 			step.Stderr(execErr),
+			step.Stdout(execResult),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
 			step.Exec(envtest.IgniteApp, "e", "gex", "--rpc-address", servers.RPC),
 			step.InExec(func() error {
-				time.Sleep(10 * time.Second)
+				time.Sleep(5 * time.Second)
 				cancel()
 				return nil
 			}),
@@ -68,6 +72,7 @@ func TestGexExplorer(t *testing.T) {
 	wg.Wait()
 
 	require.Empty(execErr.String())
+	require.Equal("aborted\n", execResult.String())
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
