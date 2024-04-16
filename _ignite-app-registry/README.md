@@ -21,23 +21,17 @@ Below is the template for the `app.json` file. Replace each placeholder with the
 {
     "appName": "Your App Name",
     "appDescription": "A brief description of what your app does.",
-    "latestRelease": {
-      "version": "x.y.z",
-      "date": "YYYY-MM-DD",
-      "releaseNotesUrl": "URL to the release notes or changelog"
+    "ignite": ">28.3.0",
+    "dependencies": {
+      "docker": ">23.0.5"
     },
-    "igniteCompatibility": {
-      "lastTestedVersion": "ignite vX.Y.Z"
-    },
-    "cosmosSdkCompatibility": {
-      "lastWorkedVersion": "vX.Y.Z"
-    },
+    "cosmosSDK": ">0.50.4",
     "features": [
       "Feature 1",
       "Feature 2",
       "Additional features..."
     ],
-    "wasm": "Indicate if your app uses wasm (yes/no)",
+    "wasm": false,
     "authors": [
       {
         "name": "Author Name",
@@ -46,8 +40,7 @@ Below is the template for the `app.json` file. Replace each placeholder with the
       }
     ],
     "repository": {
-      "url": "URL to the app's repository",
-      "type": "e.g., GitHub, GitLab"
+      "url": "URL to the app's repository"
     },
     "documentationUrl": "URL to the app's documentation",
     "license": {
@@ -61,7 +54,7 @@ Below is the template for the `app.json` file. Replace each placeholder with the
       "telegram": "Optional Telegram group",
       "discord": "Optional Discord server",
       "reddit": "Optional Reddit page",
-      "website": "Optional website page"
+      "website": ""
     },
     "donations": {
       "cryptoAddresses": {
@@ -71,7 +64,6 @@ Below is the template for the `app.json` file. Replace each placeholder with the
       "fiatDonationLinks": "URL to Patreon, Ko-fi, etc."
     }
 }
-
 ```
 
 ## **Best Practices**
