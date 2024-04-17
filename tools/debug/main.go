@@ -35,7 +35,7 @@ func main() {
 
 	// Add apps with cobra commands.
 	rootCmd.AddCommand(
-		hermes.NewHermes(),
+		hermes.NewRelayer(),
 		marketplace.NewMarketplace(),
 		wasm.NewWasm(),
 		// Add cobra commands for debugging here.
