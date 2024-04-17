@@ -8,15 +8,26 @@ const (
 	flagConfig = "config"
 )
 
+// NewRelayer creates a new Relayer command that holds
+func NewRelayer() *cobra.Command {
+	root := &cobra.Command{
+		Use:           "relayer [command]",
+		Aliases:       []string{"r"},
+		Short:         "Connect blockchains with an IBC relayer",
+		SilenceUsage:  true,
+		SilenceErrors: true,
+	}
+	root.AddCommand(NewHermes())
+	return root
+}
+
 // NewHermes creates a new Hermes relayer command that holds
 // some other sub commands related to hermes relayer.
 func NewHermes() *cobra.Command {
 	c := &cobra.Command{
-		Use:           "hermes [command]",
-		Aliases:       []string{"h"},
-		Short:         "Hermes relayer wrapper",
-		SilenceUsage:  true,
-		SilenceErrors: true,
+		Use:     "hermes [command]",
+		Aliases: []string{"h"},
+		Short:   "Hermes relayer wrapper",
 	}
 
 	// configure flags.

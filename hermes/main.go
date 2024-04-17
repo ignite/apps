@@ -14,16 +14,18 @@ type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	m := &plugin.Manifest{Name: "hermes"}
-	m.ImportCobraCommand(cmd.NewHermes(), "ignite")
+	m.ImportCobraCommand(cmd.NewRelayer(), "ignite")
 	return m, nil
 }
 
 func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Run the "hermes" command as if it were a root command. To do
-	// so remove the first two arguments which are "ignite"
-	// from OSArgs to treat "hermes" as the root command.
+	// Instead of a switch on c.Use, we run the root command like if
+	// we were in a command line context. This implies to set os.Args
+	// correctly.
+	// Remove the first arg "ignite" from OsArgs because our hermes
+	// command root is "relayer" not "ignite".
 	os.Args = c.OsArgs[1:]
-	return cmd.NewHermes().Execute()
+	return cmd.NewRelayer().Execute()
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
