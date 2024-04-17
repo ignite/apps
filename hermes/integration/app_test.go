@@ -215,6 +215,8 @@ func runChain(
 }
 
 func TestHermes(t *testing.T) {
+	t.Skip("skip till the cli V29 to avoid relayer command conflicts")
+
 	var (
 		env         = envtest.New(t)
 		app         = env.Scaffold("github.com/apps/hermes-app")
