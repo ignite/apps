@@ -2,7 +2,7 @@
 
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/explorer/v0.3.0)
 
-* The Gex app was not working when we passed a custom RPC address.
+* The Gex app was malfunctioning when passing a custom RPC address.
 * Add gex integration tests.
 * Use `ignite/gex@v1.0.0` instead `cosmos/gex`.
 
