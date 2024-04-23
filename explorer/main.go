@@ -20,10 +20,10 @@ func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 }
 
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	args := c.OsArgs
-	name := args[len(args)-1]
+	// Remove the first two elements "ignite" and "flags" from OsArgs.
+	args := c.OsArgs[2:]
 
-	switch name {
+	switch args[0] {
 	case "gex":
 		return cmd.ExecuteGex(ctx, c)
 	default:

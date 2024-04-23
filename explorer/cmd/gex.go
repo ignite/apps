@@ -2,49 +2,29 @@ package cmd
 
 import (
 	"context"
-	"net/url"
-	"os"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-
-	"github.com/ignite/apps/explorer/gex"
+	"github.com/ignite/gex/pkg/xurl"
+	"github.com/ignite/gex/services/explorer"
 )
-
-const maxNumArgs = 1
 
 // ExecuteGex executes explorer gex subcommand.
 func ExecuteGex(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	argc := len(cmd.Args)
-	if argc > maxNumArgs {
-		return errors.Errorf("accepts at most %d arg(s), received %d", maxNumArgs, argc)
-	}
-
-	ssl := false
-	host := "localhost"
-	port := "26657"
-
-	if argc == 1 {
-		rpcURL, err := url.Parse(cmd.Args[0])
-		if err != nil {
-			return errors.Wrapf(err, "failed to parse RPC URL %s", cmd.Args[0])
-		}
-
-		ssl = rpcURL.Scheme == "https"
-		host = rpcURL.Hostname()
-		port = rpcURL.Port()
-		if port == "" {
-			if ssl {
-				port = "443"
-			} else {
-				port = "80"
-			}
-		}
-	}
-
-	g, err := gex.New()
+	flags, err := cmd.NewFlags()
 	if err != nil {
-		return errors.Wrap(err, "failed to initialize Gex")
+		return err
 	}
-	return g.Run(ctx, os.Stdout, os.Stderr, host, port, ssl)
+
+	rpcAddress, err := flags.GetString(flagRPCAddress)
+	if err != nil {
+		return errors.Errorf("could not get --%s flag: %s", flagRPCAddress, err)
+	}
+
+	hostURL, err := xurl.Parse(rpcAddress)
+	if err != nil {
+		return err
+	}
+
+	return explorer.Run(ctx, hostURL.String())
 }
