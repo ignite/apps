@@ -10,6 +10,8 @@ import (
 	"github.com/ignite/apps/marketplace/cmd"
 )
 
+var _ plugin.Interface = app{}
+
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {

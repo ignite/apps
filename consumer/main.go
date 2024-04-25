@@ -9,6 +9,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
+var _ plugin.Interface = app{}
+
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
