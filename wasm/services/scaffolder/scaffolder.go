@@ -54,7 +54,7 @@ func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 	return nil
 }
 
-// finish finalize the scaffolded coded downloading the wasm and formatting the code.
+// finish finalize the scaffolded code downloading the wasm and formatting the code.
 func finish(ctx context.Context, session *cliui.Session, path string, wasmVersion semver.Version) error {
 	// Add wasmd to the go.mod
 	session.StartSpinner("Downloading wasmd module...")
