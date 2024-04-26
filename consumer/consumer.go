@@ -15,8 +15,8 @@ import (
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	commitmenttypes "github.com/cosmos/ibc-go/v8/modules/core/23-commitment/types"
 	ibctmtypes "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
-	ccvconsumertypes "github.com/cosmos/interchain-security/v3/x/ccv/consumer/types"
-	ccvtypes "github.com/cosmos/interchain-security/v3/x/ccv/types"
+	ccvconsumertypes "github.com/cosmos/interchain-security/v5/x/ccv/consumer/types"
+	ccvtypes "github.com/cosmos/interchain-security/v5/x/ccv/types"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	pluginv1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
 )
@@ -51,6 +51,7 @@ func writeConsumerGenesis(chain *pluginv1.ChainInfo) error {
 			"0", // disable soft opt-out
 			[]string{},
 			[]string{},
+			ccvtypes.DefaultRetryDelayPeriod,
 		)
 	)
 	// Load public key from priv_validator_key.json file
@@ -64,7 +65,7 @@ func writeConsumerGenesis(chain *pluginv1.ChainInfo) error {
 		cmtypes.UpdateValidator(pk.Bytes(), 1, pk.Type()),
 	}
 	// Build consumer genesis
-	consumerGen := ccvtypes.NewInitialGenesisState(providerClientState, providerConsState, valUpdates, params)
+	consumerGen := ccvtypes.NewInitialConsumerGenesisState(providerClientState, providerConsState, valUpdates, params)
 	// Read genesis file
 	genPath := getGenesisPath(chain)
 	genState, genDoc, err := genutiltypes.GenesisStateFromGenFile(genPath)
@@ -101,7 +102,7 @@ func isInitialized(chain *pluginv1.ChainInfo) (bool, error) {
 		return false, nil
 	}
 	var (
-		consumerGenesis   ccvtypes.GenesisState
+		consumerGenesis   ccvtypes.ConsumerGenesisState
 		interfaceRegistry = codectypes.NewInterfaceRegistry()
 		codec             = codec.NewProtoCodec(interfaceRegistry)
 	)
@@ -109,7 +110,7 @@ func isInitialized(chain *pluginv1.ChainInfo) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	return len(consumerGenesis.InitialValSet) != 0, nil
+	return len(consumerGenesis.GetProvider().InitialValSet) != 0, nil
 }
 
 // getPubKey returns the validator public key.

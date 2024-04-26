@@ -12,8 +12,8 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	ccvconsumertypes "github.com/cosmos/interchain-security/v3/x/ccv/consumer/types"
-	ccvtypes "github.com/cosmos/interchain-security/v3/x/ccv/types"
+	ccvconsumertypes "github.com/cosmos/interchain-security/v5/x/ccv/consumer/types"
+	ccvtypes "github.com/cosmos/interchain-security/v5/x/ccv/types"
 
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	v1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
@@ -137,10 +137,10 @@ func TestExecute(t *testing.T) {
 				_ = bz
 				interfaceRegistry := codectypes.NewInterfaceRegistry()
 				codec := codec.NewProtoCodec(interfaceRegistry)
-				var gen ccvtypes.GenesisState
+				var gen ccvtypes.ConsumerGenesisState
 				codec.MustUnmarshalJSON(bz, &gen)
-				require.Equal(t, "provider", gen.GetProviderClientState().ChainId)
-				require.NotEmpty(t, gen.InitialValSet)
+				require.Equal(t, "provider", gen.GetProvider().ClientState.ChainId)
+				require.NotEmpty(t, gen.GetProvider().InitialValSet)
 			}
 		})
 	}
