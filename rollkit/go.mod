@@ -4,6 +4,7 @@ go 1.22.0
 
 require (
 	github.com/gobuffalo/genny/v2 v2.1.0
+	github.com/gobuffalo/plush/v4 v4.1.19
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/ignite/cli/v28 v28.3.0
 	github.com/spf13/cobra v1.8.0
@@ -91,7 +92,6 @@ require (
 	github.com/gobuffalo/helpers v0.6.7 // indirect
 	github.com/gobuffalo/logger v1.0.7 // indirect
 	github.com/gobuffalo/packd v1.0.2 // indirect
-	github.com/gobuffalo/plush/v4 v4.1.19 // indirect
 	github.com/gobuffalo/tags/v3 v3.1.4 // indirect
 	github.com/gobuffalo/validate/v3 v3.3.3 // indirect
 	github.com/goccy/go-yaml v1.11.2 // indirect
@@ -222,3 +222,5 @@ require (
 	pgregory.net/rapid v1.1.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
+
+replace github.com/ignite/cli/v28 => ../../cli

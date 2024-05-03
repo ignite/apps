@@ -6,7 +6,7 @@ import "github.com/spf13/cobra"
 // some other sub commands related to Rollkit.
 func NewRollkit() *cobra.Command {
 	c := &cobra.Command{
-		Use:           "rolkkit [command]",
+		Use:           "rollkit [command]",
 		Aliases:       []string{"r"},
 		Short:         "Ignite rollkit integration",
 		SilenceUsage:  true,

@@ -41,8 +41,8 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 
 		content, err := xast.AppendImports(
 			f.String(),
-			"rollserv github.com/rollkit/cosmos-sdk-starter/server",
-			"rollconf github.com/rollkit/rollkit/config",
+			xast.WithLastNamedImport("rollserv", "github.com/rollkit/cosmos-sdk-starter/server"),
+			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/config"),
 		)
 		if err != nil {
 			return err
