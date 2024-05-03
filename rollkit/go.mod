@@ -6,7 +6,7 @@ require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.19
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/ignite/cli/v28 v28.3.0
+	github.com/ignite/cli/v28 v28.3.1-0.20240503084005-ddf17ce222c2
 	github.com/spf13/cobra v1.8.0
 )
 
@@ -222,5 +222,3 @@ require (
 	pgregory.net/rapid v1.1.0 // indirect
 	sigs.k8s.io/yaml v1.4.0 // indirect
 )
-
-replace github.com/ignite/cli/v28 => ../../cli
