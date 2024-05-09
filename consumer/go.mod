@@ -8,7 +8,7 @@ require (
 	github.com/cometbft/cometbft v0.38.6
 	github.com/cosmos/cosmos-sdk v0.50.5
 	github.com/cosmos/ibc-go/v8 v8.1.1
-	github.com/cosmos/interchain-security/v5 v5.0.0-rc0
+	github.com/cosmos/interchain-security/v5 v5.0.0
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/ignite/cli/v28 v28.3.0
 	github.com/stretchr/testify v1.9.0
