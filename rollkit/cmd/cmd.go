@@ -16,6 +16,7 @@ func NewRollkit() *cobra.Command {
 	// add sub commands.
 	c.AddCommand(
 		NewRollkitAdd(),
+		NewRollkitInit(),
 	)
 	return c
 }
