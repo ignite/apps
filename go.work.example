@@ -9,4 +9,5 @@ use (
 	./explorer
 	./hermes
 	./marketplace
+	./rollkit
 )

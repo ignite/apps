@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
+	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/apps/rollkit/cmd"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-
-	"github.com/ignite/apps/explorer/cmd"
 )
 
 var _ plugin.Interface = app{}
@@ -15,22 +14,19 @@ var _ plugin.Interface = app{}
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	return &plugin.Manifest{
-		Name:     "explorer",
-		Commands: cmd.GetCommands(),
-	}, nil
+	m := &plugin.Manifest{Name: "rollkit"}
+	m.ImportCobraCommand(cmd.NewRollkit(), "ignite")
+	return m, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Remove the first two elements "ignite" and "flags" from OsArgs.
-	args := c.OsArgs[2:]
-
-	switch args[0] {
-	case "gex":
-		return cmd.ExecuteGex(ctx, c)
-	default:
-		return errors.Errorf("unknown command: %s", c.Path)
-	}
+func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+	// Instead of a switch on c.Use, we run the root command like if
+	// we were in a command line context. This implies to set os.Args
+	// correctly.
+	// Remove the first arg "ignite" from OSArgs because our rollkit
+	// command root is "rollkit" not "ignite".
+	os.Args = c.OsArgs[1:]
+	return cmd.NewRollkit().Execute()
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
@@ -49,7 +45,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"explorer": plugin.NewGRPC(&app{}),
+			"rollkit": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})

@@ -45,11 +45,6 @@ type Options struct {
 	Home       string
 }
 
-// Validate that options are usable.
-func (opts *Options) Validate() error {
-	return nil
-}
-
 // NewWasmGenerator returns the generator to scaffold a wasm integration inside an app.
 func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Generator, error) {
 	var (
