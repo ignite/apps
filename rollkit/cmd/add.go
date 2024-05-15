@@ -40,7 +40,7 @@ func NewRollkitAdd() *cobra.Command {
 				return err
 			}
 
-			chain, err := chain.New(absPath)
+			chain, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
 			if err != nil {
 				return err
 			}
@@ -59,7 +59,7 @@ func NewRollkitAdd() *cobra.Command {
 				return err
 			}
 
-			session.Printf("🎉 RollKit added (`%[1]v`).\n Use `ignite rollkit init` to init `%s`\n", chain.AppPath(), chain.Name())
+			session.Printf("🎉 RollKit added (`%[1]v`).", chain.AppPath(), chain.Name())
 			return nil
 		},
 	}

@@ -35,22 +35,22 @@ func NewRollkitInit() *cobra.Command {
 				return err
 			}
 
-			rollkitChain, err := chain.New(absPath)
+			rc, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
 			if err != nil {
 				return err
 			}
 
-			if err := rollkitChain.Init(cmd.Context(), chain.InitArgsAll); err != nil {
+			if err := rc.Init(cmd.Context(), chain.InitArgsAll); err != nil {
 				return err
 			}
 
-			home, err := rollkitChain.Home()
+			home, err := rc.Home()
 			if err != nil {
 				return err
 			}
 
 			// modify genesis (add sequencer)
-			genesisPath, err := rollkitChain.GenesisPath()
+			genesisPath, err := rc.GenesisPath()
 			if err != nil {
 				return err
 			}
@@ -78,7 +78,7 @@ func NewRollkitInit() *cobra.Command {
 				return err
 			}
 
-			return session.Printf("🗃  Initialized. Checkout your rollkit chain's home (data) directory: %s\n", colors.Info(home))
+			return session.Printf("🗃 Initialized. Checkout your rollkit chain's home (data) directory: %s\n", colors.Info(home))
 		},
 	}
 
