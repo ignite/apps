@@ -23,7 +23,7 @@
   "documentationUrl": "https://github.com/ignite/apps/tree/main/rollkit/README.md",
   "license": {
     "name": "MIT",
-    "url": "github.com/ignite/apps/LICENSE.md"
+    "url": "github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
     "rollup",

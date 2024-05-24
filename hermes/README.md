@@ -1,6 +1,6 @@
 # Hermes
 
-`hermes` is a app developed for [Ignite CLI](https://github.com/ignite/cli).
+`hermes` is an app developed for [Ignite CLI](https://github.com/ignite/cli).
 
 The app adds `ignite relayer hermes` commands to allow IBC communication between two different blockchain apps using [Hermes relayer](https://github.com/informalsystems/hermes).
 
