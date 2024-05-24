@@ -1,34 +1,32 @@
 {
-  "appName": "explorer",
-  "appDescription": "Shows real time feed of your blockchain",
+  "appName": "wasm",
+  "appDescription": "Scaffold a CosmosWasm-enabled chain with ease",
   "ignite": ">28.3.0",
-  "dependencies": {
-    "docker": ">23.0.5"
-  },
+  "dependencies": {},
   "cosmosSDK": ">0.50.4",
   "features": [
-    "CLI Explorer",
-    "Gex"
+    "Scaffolder",
+    "CosmWasm"
   ],
   "wasm": false,
   "authors": [
     {
-      "name": "Jeronimo Albi",
+      "name": "Danilo Pantani",
       "email": "",
       "website": "",
-      "github": "jeronimoalbi"
+      "github": "pantani"
     }
   ],
   "repository": {
-    "url": "https://github.com/ignite/apps/tree/main/explorer"
+    "url": "https://github.com/ignite/apps/tree/main/wasm"
   },
   "documentationUrl": "https://github.com/cosmos/gex",
   "license": {
     "name": "MIT",
-    "url": "github.com/username/app/LICENSE.md"
+    "url": "github.com/ignite/apps/LICENSE.md"
   },
   "keywords": [
-    "explorer",
+    "wasm",
     "cli",
     "cosmos-sdk",
     "ignite app"

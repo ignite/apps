@@ -1,34 +1,33 @@
 {
-  "appName": "explorer",
-  "appDescription": "Shows real time feed of your blockchain",
-  "ignite": ">28.3.0",
-  "dependencies": {
-    "docker": ">23.0.5"
-  },
-  "cosmosSDK": ">0.50.4",
+  "appName": "rollkit",
+  "appDescription": "Scaffold a RollKit application with ease",
+  "ignite": ">28.4.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.6",
   "features": [
-    "CLI Explorer",
-    "Gex"
+    "Scaffolder",
+    "Rollkit"
   ],
   "wasm": false,
   "authors": [
     {
-      "name": "Jeronimo Albi",
+      "name": "Julien Robert",
       "email": "",
       "website": "",
-      "github": "jeronimoalbi"
+      "github": "julienrbrt"
     }
   ],
   "repository": {
-    "url": "https://github.com/ignite/apps/tree/main/explorer"
+    "url": "https://github.com/ignite/apps/tree/main/rollkit"
   },
-  "documentationUrl": "https://github.com/cosmos/gex",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/rollkit/README.md",
   "license": {
     "name": "MIT",
-    "url": "github.com/username/app/LICENSE.md"
+    "url": "github.com/ignite/apps/LICENSE.md"
   },
   "keywords": [
-    "explorer",
+    "rollup",
+    "rollkit",
     "cli",
     "cosmos-sdk",
     "ignite app"
