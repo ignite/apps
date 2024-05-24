@@ -1,0 +1,51 @@
+{
+  "appName": "hermes",
+  "appDescription": "A wrapper around the hermes IBC relayer",
+  "ignite": ">0.27.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.1",
+  "features": [
+    "IBC relayer"
+  ],
+  "wasm": false,
+  "authors": [
+    {
+      "name": "Danilo Pantani",
+      "email": "",
+      "website": "",
+      "github": "pantani"
+    }
+  ],
+  "repository": {
+    "url": "https://github.com/ignite/apps/tree/main/hermes"
+  },
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/hermes/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "relayer",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "socialMedia": {
+    "x": "",
+    "telegram": "",
+    "discord": "",
+    "reddit": "",
+    "website": ""
+  },
+  "donations": {
+    "cryptoAddresses": {
+      "cosmos": "",
+      "otherSupportedCryptos": ""
+    },
+    "fiatDonationLinks": ""
+  }
+}
