@@ -15,6 +15,7 @@ cd gm
 ignite app install -g github.com/ignite/apps/rollkit@rollkit/v0.1.0
 ignite rollkit add
 ignite chain build
+ignite rollkit init
 ```
 
 Learn more about Rollkit and Ignite in their respective documentation:
