@@ -18,7 +18,8 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath = "path"
+	flagPath    = "path"
+	flagLocalDa = "local-da"
 )
 
 func NewRollkitAdd() *cobra.Command {
@@ -59,7 +60,7 @@ func NewRollkitAdd() *cobra.Command {
 				return err
 			}
 
-			session.Printf("🎉 RollKit added (`%[1]v`).", chain.AppPath(), chain.Name())
+			session.Printf("🎉 RollKit added (`%[1]v`).\n", chain.AppPath(), chain.Name())
 			return nil
 		},
 	}

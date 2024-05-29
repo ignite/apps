@@ -12,6 +12,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
+	configchain "github.com/ignite/cli/v28/ignite/config/chain"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -38,6 +39,24 @@ func NewRollkitInit() *cobra.Command {
 			rc, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
 			if err != nil {
 				return err
+			}
+
+			if localDa, err := cmd.Flags().GetBool(flagLocalDa); err == nil && localDa {
+				igniteConfig, err := rc.Config()
+				if err != nil {
+					return err
+				}
+
+				igniteConfig.Validators[0].Bonded = "1000000000stake"
+				for i, account := range igniteConfig.Accounts {
+					if account.Name == igniteConfig.Validators[0].Name {
+						igniteConfig.Accounts[i].Coins = []string{"10000000000000000000000000stake"}
+					}
+				}
+
+				if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
+					return err
+				}
 			}
 
 			if err := rc.Init(cmd.Context(), chain.InitArgsAll); err != nil {
@@ -83,6 +102,7 @@ func NewRollkitInit() *cobra.Command {
 	}
 
 	c.Flags().StringP(flagPath, "p", ".", "path of the app")
+	c.Flags().BoolP(flagLocalDa, "l", false, "use local-da (creates the expected genesis account for local-da)")
 
 	return c
 }
