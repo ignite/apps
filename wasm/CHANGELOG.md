@@ -1,5 +1,11 @@
 # Wasm App Changelog
 
+## Unreleased
+
+### Fixes
+
+* [#99](https://github.com/ignite/apps/pull/99) Fix missing CLI imports
+
 ## [`v0.1.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.1.1)
 
 ## Fixes
