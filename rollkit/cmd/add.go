@@ -18,7 +18,8 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath = "path"
+	flagPath    = "path"
+	flagLocalDa = "local-da"
 )
 
 func NewRollkitAdd() *cobra.Command {
@@ -40,12 +41,12 @@ func NewRollkitAdd() *cobra.Command {
 				return err
 			}
 
-			chain, err := chain.New(absPath)
+			c, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
 			if err != nil {
 				return err
 			}
 
-			g, err := template.NewRollKitGenerator(chain)
+			g, err := template.NewRollKitGenerator(c)
 			if err != nil {
 				return err
 			}
@@ -55,12 +56,11 @@ func NewRollkitAdd() *cobra.Command {
 				return err
 			}
 
-			if finish(cmd.Context(), session, chain.AppPath()) != nil {
+			if finish(cmd.Context(), session, c.AppPath()) != nil {
 				return err
 			}
 
-			session.Printf("\n🎉 RollKit added (`%[1]v`).\n\n", chain.AppPath())
-			return nil
+			return session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
 		},
 	}
 

@@ -38,7 +38,7 @@ func TestRollkit(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	env.Must(env.Exec("run rollkit app",
+	env.Must(env.Exec("run rollkit add",
 		step.NewSteps(step.New(
 			step.Exec(
 				envtest.IgniteApp,
@@ -62,9 +62,6 @@ func TestRollkit(t *testing.T) {
 		),
 		step.New(
 			step.Exec(bin, "start", "--help"),
-			step.PostExec(func(exitErr error) error {
-				return os.Remove(bin)
-			}),
 			step.Stdout(buf),
 			step.Workdir(app.SourcePath()),
 		)),
@@ -72,6 +69,27 @@ func TestRollkit(t *testing.T) {
 
 	if !strings.Contains(buf.String(), "--rollkit.da_") {
 		t.Errorf("rollkitd doesn't contain --rollkit flags: %s", buf.String())
+	}
+
+	buf.Reset()
+
+	env.Must(env.Exec("run rollkit init", step.NewSteps(
+		step.New(
+			step.Exec(
+				envtest.IgniteApp,
+				"rollkit",
+				"init",
+			),
+			step.PostExec(func(exitErr error) error {
+				return os.Remove(bin)
+			}),
+			step.Workdir(app.SourcePath()),
+			step.Stdout(buf),
+		),
+	)))
+
+	if !strings.Contains(buf.String(), "Initialized. Checkout your rollkit chain's home") {
+		t.Errorf("ignite rollkit init has failed: %s", buf.String())
 	}
 }
 
