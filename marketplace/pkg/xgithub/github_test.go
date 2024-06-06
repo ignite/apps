@@ -1,4 +1,4 @@
-package xgithub
+package xgithub_test
 
 import (
 	"context"
@@ -8,62 +8,25 @@ import (
 	"testing"
 
 	"github.com/google/go-github/v56/github"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
-func TestClient_SearchRepositories(t *testing.T) {
-	var (
-		require      = require.New(t)
-		assert       = assert.New(t)
-		searchResult = &github.RepositoriesSearchResult{
-			Total: github.Int(2),
-			Repositories: []*github.Repository{
-				{
-					FullName:        github.String("igniteapps/ignite-cli-app-2"),
-					Description:     github.String("This is a test ignite app 2"),
-					StargazersCount: github.Int(20),
-					Topics:          []string{"ignite-cli-app"},
-				},
-				{
-					FullName:        github.String("igniteapps/ignite-cli-app-1"),
-					Description:     github.String("This is a test ignite app 1"),
-					StargazersCount: github.Int(10),
-					Topics:          []string{"ignite-cli-app"},
-				},
-			},
-		}
-	)
+func TestClient_GetDirectoryFiles(t *testing.T) {
+	gc := xgithub.NewClient("")
 
-	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal("/api/v3/search/repositories", r.URL.Path)
-		assert.Equal("test topic:ignite-cli-app stars:>=10", r.FormValue("q"))
-		assert.Equal("stars", r.FormValue("sort"))
+	files, err := gc.GetDirectoryFiles(context.Background(), "ignite", "apps", "_registry")
+	require.NoError(t, err)
 
-		err := json.NewEncoder(w).Encode(searchResult)
-		require.NoError(err)
-	}))
-	defer ts.Close()
-
-	gc := github.NewClient(nil)
-	gc, err := gc.WithEnterpriseURLs(ts.URL, ts.URL)
-	require.NoError(err)
-
-	client := &Client{gc: gc}
-	repos, total, err := client.SearchRepositories(
-		context.Background(),
-		&github.SearchOptions{Sort: "stars", Order: "desc"},
-		StringQuery("test"), TopicQuery("ignite-cli-app"), MinStarsQuery(10),
-	)
-	require.NoError(err)
-	assert.Equal(*searchResult.Total, total)
-	assert.Equal(searchResult.Repositories, repos)
+	require.Contains(t, files, "_registry/README.md")
+	require.Contains(t, files, "_registry/registry.json")
+	require.GreaterOrEqual(t, len(files), 5)
 }
 
 func TestClient_GetRepository(t *testing.T) {
 	var (
 		require = require.New(t)
-		assert  = assert.New(t)
 		repo    = &github.Repository{
 			Name: github.String("ignite-cli-app"),
 			Owner: &github.User{
@@ -79,7 +42,7 @@ func TestClient_GetRepository(t *testing.T) {
 	)
 
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		assert.Equal("/api/v3/repos/igniteapps/ignite-cli-app", r.URL.Path)
+		require.Equal("/api/v3/repos/igniteapps/ignite-cli-app", r.URL.Path)
 
 		err := json.NewEncoder(w).Encode(repo)
 		require.NoError(err)
@@ -90,8 +53,8 @@ func TestClient_GetRepository(t *testing.T) {
 	gc, err := gc.WithEnterpriseURLs(ts.URL, ts.URL)
 	require.NoError(err)
 
-	client := &Client{gc: gc}
+	client := &xgithub.Client{GithubClient: gc}
 	repo, err = client.GetRepository(context.Background(), "igniteapps", "ignite-cli-app")
 	require.NoError(err)
-	assert.Equal(repo, repo)
+	require.Equal(repo, repo)
 }

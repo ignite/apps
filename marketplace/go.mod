@@ -4,7 +4,6 @@ go 1.21.1
 
 require (
 	github.com/charmbracelet/lipgloss v0.9.1
-	github.com/dustin/go-humanize v1.0.1
 	github.com/goccy/go-yaml v1.11.2
 	github.com/google/go-github/v56 v56.0.0
 	github.com/hashicorp/go-plugin v1.6.0
@@ -72,6 +71,7 @@ require (
 	github.com/dgraph-io/badger/v2 v2.2007.4 // indirect
 	github.com/dgraph-io/ristretto v0.1.1 // indirect
 	github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 // indirect
+	github.com/dustin/go-humanize v1.0.1 // indirect
 	github.com/dvsekhvalnov/jose2go v1.6.0 // indirect
 	github.com/emicklei/dot v1.6.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect

@@ -9,15 +9,13 @@ import (
 	"strconv"
 	"strings"
 	"text/tabwriter"
-	"time"
 
 	"github.com/charmbracelet/lipgloss"
-	"github.com/dustin/go-humanize"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/marketplace/pkg/apps"
 	"github.com/ignite/apps/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/marketplace/registry"
 )
 
 var (
@@ -46,7 +44,7 @@ func NewInfo() *cobra.Command {
 			defer session.End()
 
 			client := xgithub.NewClient(githubToken)
-			repo, err := apps.GetRepositoryDetails(cmd.Context(), client, args[0])
+			repo, err := registry.GetRepositoryDetails(cmd.Context(), client, args[0])
 			if err != nil {
 				return err
 			}
@@ -58,7 +56,7 @@ func NewInfo() *cobra.Command {
 	}
 }
 
-func printRepoDetails(repo *apps.AppRepositoryDetails) {
+func printRepoDetails(repo *registry.AppRepositoryDetails) {
 	w := &tabwriter.Writer{}
 	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
 	printItem := func(s string, v interface{}) {
@@ -73,7 +71,6 @@ func printRepoDetails(repo *apps.AppRepositoryDetails) {
 	printItem("Tags", strings.Join(tags, " "))
 	printItem("Stars", strconv.Itoa(repo.Stars))
 	printItem("License", repo.License)
-	printItem("Updated At", repo.UpdatedAt.Format(time.DateTime)+" "+updatedAtStyle.Render("("+humanize.Time(repo.UpdatedAt)+")"))
 	printItem("URL", linkStyle.Render(repo.URL))
 	printItem("Apps", "")
 	w.Flush()
@@ -81,7 +78,7 @@ func printRepoDetails(repo *apps.AppRepositoryDetails) {
 	printAppsTable(repo)
 }
 
-func printAppsTable(repo *apps.AppRepositoryDetails) {
+func printAppsTable(repo *registry.AppRepositoryDetails) {
 	printItem := func(w io.Writer, s string, v interface{}) {
 		fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
 	}

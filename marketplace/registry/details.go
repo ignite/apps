@@ -1,4 +1,4 @@
-package apps
+package registry
 
 import (
 	"context"
@@ -7,39 +7,41 @@ import (
 	"strings"
 	"time"
 
+	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"golang.org/x/mod/modfile"
 
 	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
-const igniteCLIPackage = "github.com/ignite/cli"
-
-type (
-	// AppRepositoryDetails represents the details of an Ignite app repository.
-	AppRepositoryDetails struct {
-		PackageURL  string
-		Name        string
-		Owner       string
-		Description string
-		Tags        []string
-		Stars       int
-		License     string
-		UpdatedAt   time.Time
-		URL         string
-		Apps        []AppDetails
-	}
-
-	// AppDetails represents the details of an Ignite app.
-	AppDetails struct {
-		Name          string
-		Description   string
-		Path          string
-		GoVersion     string
-		IgniteVersion string
-	}
+const (
+	appYMLFileName = "app.ignite.yml"
 )
+
+// AppRepositoryDetails represents the details of an Ignite app repository.
+type AppRepositoryDetails struct {
+	PackageURL  string
+	Name        string
+	Owner       string
+	Description string
+	Tags        []string
+	Stars       int
+	License     string
+	UpdatedAt   time.Time
+	URL         string
+	Apps        []AppDetails
+}
+
+// AppDetails represents the details of an Ignite app.
+type AppDetails struct {
+	Name          string
+	Description   string
+	Path          string
+	GoVersion     string
+	IgniteVersion string
+}
 
 // GetRepositoryDetails returns the details of an Ignite app repository.
 func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL string) (*AppRepositoryDetails, error) {
@@ -122,4 +124,17 @@ func findCLIVersion(modFile *modfile.File) string {
 	}
 
 	return ""
+}
+
+func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Repository) (*plugin.AppsConfig, error) {
+	data, err := client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
+	}
+
+	var conf plugin.AppsConfig
+	if err := yaml.UnmarshalContext(ctx, data, &conf); err != nil {
+		return nil, errors.Wrapf(err, "failed to unmarshal %s file", appYMLFileName)
+	}
+	return &conf, nil
 }

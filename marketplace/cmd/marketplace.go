@@ -17,16 +17,15 @@ func NewMarketplace() *cobra.Command {
 	c := &cobra.Command{
 		Use:     "marketplace [command]",
 		Aliases: []string{"mp"},
-		Short:   "Run marketplace commands",
-		Long: `Marketplace is a command line tool that helps you to search for ignite apps
-			using GitHub search API. It also helps you to get more information about an app.
-			Please note that Github API has a very limited rate limit for unauthenticated requests
-			so it's recommended to use the --github-token flag you want to use marketplace commands frequently.`,
+		Short:   "Browse the Ignite App Marketplace",
+		Long: `Marketplace is a command line tool that helps you to search for ignite apps.
+It also helps you to get more information about an app.
+Please note this command uses the Github API that a very limited rate limit for unauthenticated requests
+so it's recommended to use the --github-token flag you want to use marketplace commands frequently.`,
 		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 
-	// add sub commands.
 	c.AddCommand(
 		NewList(),
 		NewInfo(),
