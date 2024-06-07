@@ -23,7 +23,6 @@ var githubRepoPattern = regexp.MustCompile(`^github\.com\/([a-zA-Z0-9\-_]+)\/([a
 
 // AppRepositoryDetails represents the details of an Ignite app repository.
 type AppRepositoryDetails struct {
-	PackageURL  string
 	Name        string
 	Owner       string
 	Description string
@@ -38,6 +37,7 @@ type AppRepositoryDetails struct {
 // AppDetails represents the details of an Ignite app.
 type AppDetails struct {
 	Name          string
+	PackageURL    string
 	Description   string
 	Path          string
 	GoVersion     string
@@ -64,7 +64,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 
 	repoOwner, repoName, err := validatePackageURL(appEntry.RepositoryURL)
 	if err != nil {
-		return nil, errors.Wrap(err, "invalid package URL")
+		return nil, err
 	}
 
 	repo, err := r.client.GetRepository(ctx, repoOwner, repoName)
@@ -90,6 +90,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 
 		appDetails = AppDetails{
 			Name:          name,
+			PackageURL:    path.Join(appEntry.RepositoryURL, info.Path),
 			Description:   info.Description,
 			Path:          info.Path,
 			GoVersion:     goMod.Go.Version,
@@ -98,7 +99,6 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 	}
 
 	result := &AppRepositoryDetails{
-		PackageURL:  appEntry.RepositoryURL,
 		Name:        repo.GetName(),
 		Owner:       repo.GetOwner().GetLogin(),
 		Description: repo.GetDescription(),

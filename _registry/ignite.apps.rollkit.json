@@ -12,7 +12,7 @@
       "github": "julienrbrt"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps/rollkit",
+  "repositoryUrl": "https://github.com/ignite/apps",
   "documentationUrl": "https://github.com/ignite/apps/tree/main/rollkit/README.md",
   "license": {
     "name": "MIT",

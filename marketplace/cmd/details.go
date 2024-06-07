@@ -95,8 +95,7 @@ func printAppsTable(repo *registry.AppRepositoryDetails) {
 	printItem(w, "Ignite Version", repo.App.IgniteVersion)
 
 	fmt.Fprintln(w, installaitonStyle.Render(fmt.Sprintf(
-		"🚀 Install via: %s",
-		commandStyle.Render(fmt.Sprintf("ignite app -g install %s", repo.PackageURL)),
+		"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", repo.App.PackageURL)),
 	)))
 
 	w.Flush()

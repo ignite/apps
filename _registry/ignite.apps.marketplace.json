@@ -12,8 +12,8 @@
       "github": "Ehsan-saradar"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps/marketplace",
-  "documentationUrl": "",
+  "repositoryUrl": "https://github.com/ignite/apps",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/marketplace/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
