@@ -14,8 +14,8 @@ import (
 
 const descriptionLimit = 75
 
-// NewList creates a new list command that searches all the ignite apps in GitHub.
-func NewList() *cobra.Command {
+// NewListCmd creates a new list command that lists all the ignite apps from the app registry.
+func NewListCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "list",
 		Short: "List all the ignite apps",
@@ -23,7 +23,7 @@ func NewList() *cobra.Command {
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			var githubToken, _ = cmd.Flags().GetString(githubTokenFlag)
 
-			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on GitHub..."))
+			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))
 			defer session.End()
 
 			client := xgithub.NewClient(githubToken)
@@ -49,24 +49,21 @@ func NewList() *cobra.Command {
 
 func formatAppsTree(entries []registry.AppEntry) string {
 	b := &strings.Builder{}
-	for i, entry := range entries {
+	for _, entry := range entries {
 		node := tree.NewNode(fmt.Sprintf(
-			"%d. %-20s",
-			i+1,
+			"%s : %s",
 			entry.Name,
+			limitTextLength(entry.Description, descriptionLimit),
 		))
 		node.AddChild(tree.NewNode(fmt.Sprintf(
-			"📖 %s",
-			limitTextLength(entry.Description, descriptionLimit),
-		)))
-		node.AddChild(tree.NewNode(fmt.Sprintf(
 			"📦 %s",
-			entry.Repository.URL,
+			entry.RepositoryURL,
 		)))
 
-		fmt.Fprintln(b, node)
+		fmt.Fprint(b, node)
 	}
-	return strings.TrimSuffix(b.String(), "\n")
+
+	return b.String()
 }
 
 func limitTextLength(text string, limit int) string {

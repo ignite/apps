@@ -27,8 +27,9 @@ so it's recommended to use the --github-token flag you want to use marketplace c
 	}
 
 	c.AddCommand(
-		NewList(),
-		NewInfo(),
+		NewListCmd(),
+		NewDetailsCmd(),
+		NewInstallCmd(),
 	)
 
 	c.PersistentFlags().String(githubTokenFlag, "", "GitHub access token")

@@ -5,7 +5,6 @@ import (
 	"hash/fnv"
 	"io"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"text/tabwriter"
@@ -31,12 +30,13 @@ var (
 			Bold(true)
 )
 
-// NewInfo creates a new info command that shows the details of an ignite application repository.
-func NewInfo() *cobra.Command {
+// NewDetailsCmd creates a new details command that shows the details of an ignite application repository.
+func NewDetailsCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:   "info [package-url]",
-		Short: "Show the details of an ignite application repository",
-		Args:  cobra.ExactArgs(1),
+		Use:     "details [name]",
+		Aliases: []string{"info"},
+		Short:   "Show the details of an ignite application repository",
+		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
 
@@ -44,7 +44,9 @@ func NewInfo() *cobra.Command {
 			defer session.End()
 
 			client := xgithub.NewClient(githubToken)
-			repo, err := registry.GetRepositoryDetails(cmd.Context(), client, args[0])
+			registryQuerier := registry.NewRegistryQuerier(client)
+
+			repo, err := registryQuerier.GetAppDetails(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
@@ -83,23 +85,21 @@ func printAppsTable(repo *registry.AppRepositoryDetails) {
 		fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
 	}
 
-	for _, app := range repo.Apps {
-		w := &tabwriter.Writer{}
-		w.Init(os.Stdout, 16, 8, 0, '\t', 0)
+	w := &tabwriter.Writer{}
+	w.Init(os.Stdout, 16, 8, 0, '\t', 0)
 
-		printItem(w, "Name", app.Name)
-		printItem(w, "Description", app.Description)
-		printItem(w, "Path", app.Path)
-		printItem(w, "Go Version", app.GoVersion)
-		printItem(w, "Ignite Version", app.IgniteVersion)
+	printItem(w, "Name", repo.App.Name)
+	printItem(w, "Description", repo.App.Description)
+	printItem(w, "Path", repo.App.Path)
+	printItem(w, "Go Version", repo.App.GoVersion)
+	printItem(w, "Ignite Version", repo.App.IgniteVersion)
 
-		fmt.Fprintln(w, installaitonStyle.Render(fmt.Sprintf(
-			"🚀 Install via: %s",
-			commandStyle.Render(fmt.Sprintf("ignite app -g install %s", path.Join(repo.PackageURL, app.Path))),
-		)))
+	fmt.Fprintln(w, installaitonStyle.Render(fmt.Sprintf(
+		"🚀 Install via: %s",
+		commandStyle.Render(fmt.Sprintf("ignite app -g install %s", repo.PackageURL)),
+	)))
 
-		w.Flush()
-	}
+	w.Flush()
 }
 
 func colorFromText(text string) lipgloss.Color {

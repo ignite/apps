@@ -4,6 +4,7 @@ import (
 	"context"
 	"fmt"
 	"path"
+	"regexp"
 	"strings"
 	"time"
 
@@ -12,13 +13,13 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"golang.org/x/mod/modfile"
-
-	"github.com/ignite/apps/marketplace/pkg/xgithub"
 )
 
 const (
 	appYMLFileName = "app.ignite.yml"
 )
+
+var githubRepoPattern = regexp.MustCompile(`^github\.com\/([a-zA-Z0-9\-_]+)\/([a-zA-Z0-9\-_]+)(\/[a-zA-Z0-9\-_]+)*$`)
 
 // AppRepositoryDetails represents the details of an Ignite app repository.
 type AppRepositoryDetails struct {
@@ -31,7 +32,7 @@ type AppRepositoryDetails struct {
 	License     string
 	UpdatedAt   time.Time
 	URL         string
-	Apps        []AppDetails
+	App         AppDetails
 }
 
 // AppDetails represents the details of an Ignite app.
@@ -43,25 +44,61 @@ type AppDetails struct {
 	IgniteVersion string
 }
 
-// GetRepositoryDetails returns the details of an Ignite app repository.
-func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL string) (*AppRepositoryDetails, error) {
-	repoOwner, repoName, err := validatePackageURL(pkgURL)
+// GetAppDetails returns the details of an Ignite app repository.
+func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppRepositoryDetails, error) {
+	apps, err := r.List(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	var appEntry AppEntry
+	for _, app := range apps {
+		if app.Name == appName {
+			appEntry = app
+		}
+	}
+
+	if appEntry.Name == "" {
+		return nil, errors.Errorf("app %s not found", appName)
+	}
+
+	repoOwner, repoName, err := validatePackageURL(appEntry.RepositoryURL)
 	if err != nil {
 		return nil, errors.Wrap(err, "invalid package URL")
 	}
 
-	repo, err := client.GetRepository(ctx, repoOwner, repoName)
+	repo, err := r.client.GetRepository(ctx, repoOwner, repoName)
 	if err != nil {
 		return nil, err
 	}
 
-	appYML, err := getAppsConfig(ctx, client, repo)
+	appYML, err := r.getAppsConfig(ctx, repo)
 	if err != nil {
 		return nil, err
+	}
+
+	var appDetails AppDetails
+	for name, info := range appYML.Apps {
+		if name != appName {
+			continue
+		}
+
+		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path))
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", name)
+		}
+
+		appDetails = AppDetails{
+			Name:          name,
+			Description:   info.Description,
+			Path:          info.Path,
+			GoVersion:     goMod.Go.Version,
+			IgniteVersion: findCLIVersion(goMod),
+		}
 	}
 
 	result := &AppRepositoryDetails{
-		PackageURL:  pkgURL,
+		PackageURL:  appEntry.RepositoryURL,
 		Name:        repo.GetName(),
 		Owner:       repo.GetOwner().GetLogin(),
 		Description: repo.GetDescription(),
@@ -70,40 +107,14 @@ func GetRepositoryDetails(ctx context.Context, client *xgithub.Client, pkgURL st
 		License:     repo.GetLicense().GetName(),
 		UpdatedAt:   repo.GetUpdatedAt().Time,
 		URL:         repo.GetHTMLURL(),
-		Apps:        make([]AppDetails, 0, len(appYML.Apps)),
-	}
-	for name, info := range appYML.Apps {
-		goMod, err := getGoMod(ctx, client, repo, path.Clean(info.Path))
-		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", name)
-		}
-
-		result.Apps = append(result.Apps, AppDetails{
-			Name:          name,
-			Description:   info.Description,
-			Path:          info.Path,
-			GoVersion:     goMod.Go.Version,
-			IgniteVersion: findCLIVersion(goMod),
-		})
+		App:         appDetails,
 	}
 
 	return result, nil
 }
 
-func validatePackageURL(pkgURL string) (owner, name string, err error) {
-	parts := strings.Split(pkgURL, "/")
-	if len(parts) != 3 {
-		return "", "", errors.Errorf("package URL must be in github.com/{owner}/{repo} format")
-	}
-	if parts[0] != "github.com" {
-		return "", "", errors.Errorf("only GitHub packages are supported")
-	}
-
-	return parts[1], parts[2], nil
-}
-
-func getGoMod(ctx context.Context, client *xgithub.Client, repo *github.Repository, fpath string) (*modfile.File, error) {
-	contents, err := client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), path.Join(fpath, "go.mod"))
+func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fpath string) (*modfile.File, error) {
+	contents, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), path.Join(fpath, "go.mod"))
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get file content")
 	}
@@ -116,18 +127,8 @@ func getGoMod(ctx context.Context, client *xgithub.Client, repo *github.Reposito
 	return mod, nil
 }
 
-func findCLIVersion(modFile *modfile.File) string {
-	for _, require := range modFile.Require {
-		if strings.HasPrefix(require.Mod.Path, igniteCLIPackage) {
-			return require.Mod.Version
-		}
-	}
-
-	return ""
-}
-
-func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Repository) (*plugin.AppsConfig, error) {
-	data, err := client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
+func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository) (*plugin.AppsConfig, error) {
+	data, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
 	}
@@ -137,4 +138,23 @@ func getAppsConfig(ctx context.Context, client *xgithub.Client, repo *github.Rep
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", appYMLFileName)
 	}
 	return &conf, nil
+}
+
+func validatePackageURL(pkgURL string) (owner, name string, err error) {
+	parts := githubRepoPattern.FindStringSubmatch(pkgURL)
+	if len(parts) != 2 {
+		return "", "", errors.Errorf("invalid package URL: %s", pkgURL)
+	}
+
+	return parts[1], parts[2], nil
+}
+
+func findCLIVersion(modFile *modfile.File) string {
+	for _, require := range modFile.Require {
+		if strings.HasPrefix(require.Mod.Path, igniteCLIPackage) {
+			return require.Mod.Version
+		}
+	}
+
+	return ""
 }

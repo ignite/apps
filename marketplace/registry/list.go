@@ -3,6 +3,9 @@ package registry
 import (
 	"context"
 	"encoding/json"
+	"fmt"
+	"io"
+	"net/http"
 	"regexp"
 	"strings"
 
@@ -41,7 +44,7 @@ func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 			continue
 		}
 
-		entry, err := r.getRegistryEntry(ctx, file)
+		entry, err := r.getRegistryEntry(file)
 		if err != nil {
 			return nil, err
 		}
@@ -52,14 +55,21 @@ func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 	return entries, nil
 }
 
-func (r *Querier) getRegistryEntry(ctx context.Context, fileName string) (*AppEntry, error) {
-	data, err := r.client.GetFileContent(ctx, igniteGitHubOrg, igniteAppsRepo, fileName)
+func (r *Querier) getRegistryEntry(fileName string) (*AppEntry, error) {
+	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
+	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}
+	defer resp.Body.Close()
+
+	body, err := io.ReadAll(resp.Body)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to read %s file content", fileName)
+	}
 
 	var entry *AppEntry
-	if err := json.Unmarshal(data, &entry); err != nil {
+	if err := json.Unmarshal(body, &entry); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", fileName)
 	}
 

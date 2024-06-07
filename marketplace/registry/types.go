@@ -3,21 +3,17 @@ package registry
 type AppEntry struct {
 	Name         string `json:"appName,omitempty"`
 	Description  string `json:"appDescription,omitempty"`
-	IgniteVerion string `json:"ignite,omitempty"`
+	Ignite       string `json:"ignite,omitempty"`
 	Dependencies struct {
 		Docker string `json:"docker,omitempty"`
 	} `json:"dependencies,omitempty"`
-	CosmosSDKVersion string   `json:"cosmosSDK,omitempty"`
-	Features         []string `json:"features,omitempty"`
-	Wasm             bool     `json:"wasm,omitempty"`
-	Authors          []struct {
+	CosmosSDK string `json:"cosmosSDK,omitempty"`
+	Authors   []struct {
 		Name    string `json:"name,omitempty"`
 		Email   string `json:"email,omitempty"`
 		Website string `json:"website,omitempty"`
 	} `json:"authors,omitempty"`
-	Repository struct {
-		URL string `json:"url,omitempty"`
-	} `json:"repository,omitempty"`
+	RepositoryURL    string `json:"repositoryUrl,omitempty"`
 	DocumentationURL string `json:"documentationUrl,omitempty"`
 	License          struct {
 		Name string `json:"name,omitempty"`

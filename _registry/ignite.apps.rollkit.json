@@ -4,11 +4,6 @@
   "ignite": ">28.4.0",
   "dependencies": {},
   "cosmosSDK": ">0.50.6",
-  "features": [
-    "Scaffolder",
-    "Rollkit"
-  ],
-  "wasm": false,
   "authors": [
     {
       "name": "Julien Robert",
@@ -17,15 +12,14 @@
       "github": "julienrbrt"
     }
   ],
-  "repository": {
-    "url": "https://github.com/ignite/apps/tree/main/rollkit"
-  },
+  "repositoryUrl": "https://github.com/ignite/apps/rollkit",
   "documentationUrl": "https://github.com/ignite/apps/tree/main/rollkit/README.md",
   "license": {
     "name": "MIT",
-    "url": "github.com/ignite/apps/blob/main/LICENSE"
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
+    "scaffolder",
     "rollup",
     "rollkit",
     "cli",
@@ -35,19 +29,5 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ],
-  "socialMedia": {
-    "x": "",
-    "telegram": "",
-    "discord": "",
-    "reddit": "",
-    "website": ""
-  },
-  "donations": {
-    "cryptoAddresses": {
-      "cosmos": "",
-      "otherSupportedCryptos": ""
-    },
-    "fiatDonationLinks": ""
-  }
+  ]
 }

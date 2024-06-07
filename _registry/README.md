@@ -15,56 +15,8 @@ To add your app to the Ignite App Registry, follow these steps:
 
 ## `app.json` File Structure**
 
-Below is the template for the `username.repository.app_name.json` file. Replace each placeholder with the specific details of your app.
-
-```json
-{
-    "appName": "Your App Name",
-    "appDescription": "A brief description of what your app does.",
-    "ignite": ">28.3.0",
-    "dependencies": {
-      "docker": ">23.0.5"
-    },
-    "cosmosSDK": ">0.50.4",
-    "features": [
-      "Feature 1",
-      "Feature 2",
-      "Additional features..."
-    ],
-    "wasm": false,
-    "authors": [
-      {
-        "name": "Author Name",
-        "email": "email@example.com",
-        "website": "Optional author or company website"
-      }
-    ],
-    "repository": {
-      "url": "URL to the app's repository"
-    },
-    "documentationUrl": "URL to the app's documentation",
-    "license": {
-      "name": "MIT",
-      "url": "github.com/username/app/LICENSE.md"
-    },
-    "keywords": ["keyword1", "keyword2", "Useful for search and categorization"],
-    "supportedPlatforms": ["mac", "linux"],
-    "socialMedia": {
-      "x": "Optional X handle",
-      "telegram": "Optional Telegram group",
-      "discord": "Optional Discord server",
-      "reddit": "Optional Reddit page",
-      "website": ""
-    },
-    "donations": {
-      "cryptoAddresses": {
-        "cosmos": "cosmos1...",
-        "otherSupportedCryptos": "address"
-      },
-      "fiatDonationLinks": "URL to Patreon, Ko-fi, etc."
-    }
-}
-```
+The expected template of the `username.repository.app_name.json` file can be found [here](./registry.json).  
+Replace each placeholder with the specific details of your app.
 
 ## Best Practices
 
