@@ -57,7 +57,7 @@ func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 
 func (r *Querier) getRegistryEntry(fileName string) (*AppEntry, error) {
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/julien/marketplace/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
+	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}
