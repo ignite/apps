@@ -2,11 +2,7 @@ package cmd
 
 import (
 	"fmt"
-	"hash/fnv"
-	"io"
-	"os"
 	"strconv"
-	"strings"
 	"text/tabwriter"
 
 	"github.com/charmbracelet/lipgloss"
@@ -21,10 +17,11 @@ var (
 	linkStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("10")).
 			Underline(true)
-	installaitonStyle = lipgloss.NewStyle().
+
+	installationStyle = lipgloss.NewStyle().
 				Border(lipgloss.NormalBorder()).
-				BorderForeground(lipgloss.Color("9")).
-				MarginLeft(15)
+				BorderForeground(lipgloss.Color("9"))
+
 	commandStyle = lipgloss.NewStyle().
 			Foreground(lipgloss.Color("2")).
 			Bold(true)
@@ -33,7 +30,7 @@ var (
 // NewDetailsCmd creates a new details command that shows the details of an ignite application repository.
 func NewDetailsCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "details [name]",
+		Use:     "details [app name]",
 		Aliases: []string{"info"},
 		Short:   "Show the details of an ignite application repository",
 		Args:    cobra.ExactArgs(1),
@@ -46,63 +43,34 @@ func NewDetailsCmd() *cobra.Command {
 			client := xgithub.NewClient(githubToken)
 			registryQuerier := registry.NewRegistryQuerier(client)
 
-			repo, err := registryQuerier.GetAppDetails(cmd.Context(), args[0])
+			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0])
 			if err != nil {
 				return err
 			}
 
 			session.StopSpinner()
-			printRepoDetails(repo)
+
+			w := &tabwriter.Writer{}
+			printItem := func(s string, v interface{}) {
+				fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
+			}
+			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
+
+			printItem("Name", appDetails.App.Name)
+			printItem("Description", appDetails.App.Description)
+			printItem("Stars", strconv.Itoa(appDetails.Stars))
+			printItem("Go version", appDetails.App.GoVersion)
+			printItem("Ignite version", appDetails.App.IgniteVersion)
+			printItem("Documentation", appDetails.App.DocumentationURL)
+			printItem("Repository", linkStyle.Render(appDetails.URL))
+
+			fmt.Fprintln(w, installationStyle.Render(fmt.Sprintf(
+				"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", appDetails.App.PackageURL)),
+			)))
+
+			w.Flush()
+
 			return nil
 		},
 	}
-}
-
-func printRepoDetails(repo *registry.AppRepositoryDetails) {
-	w := &tabwriter.Writer{}
-	w.Init(os.Stdout, 0, 8, 0, '\t', 0)
-	printItem := func(s string, v interface{}) {
-		fmt.Fprintf(w, "%s:\t%v\n", s, v)
-	}
-
-	printItem("Description", repo.Description)
-	tags := make([]string, len(repo.Tags))
-	for i, tag := range repo.Tags {
-		tags[i] = lipgloss.NewStyle().Background(colorFromText(tag)).Render(tag)
-	}
-	printItem("Tags", strings.Join(tags, " "))
-	printItem("Stars", strconv.Itoa(repo.Stars))
-	printItem("License", repo.License)
-	printItem("URL", linkStyle.Render(repo.URL))
-	printItem("Apps", "")
-	w.Flush()
-
-	printAppsTable(repo)
-}
-
-func printAppsTable(repo *registry.AppRepositoryDetails) {
-	printItem := func(w io.Writer, s string, v interface{}) {
-		fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
-	}
-
-	w := &tabwriter.Writer{}
-	w.Init(os.Stdout, 16, 8, 0, '\t', 0)
-
-	printItem(w, "Name", repo.App.Name)
-	printItem(w, "Description", repo.App.Description)
-	printItem(w, "Path", repo.App.Path)
-	printItem(w, "Go Version", repo.App.GoVersion)
-	printItem(w, "Ignite Version", repo.App.IgniteVersion)
-
-	fmt.Fprintln(w, installaitonStyle.Render(fmt.Sprintf(
-		"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", repo.App.PackageURL)),
-	)))
-
-	w.Flush()
-}
-
-func colorFromText(text string) lipgloss.Color {
-	h := fnv.New64a()
-	h.Write([]byte(text))
-	return lipgloss.Color(strconv.FormatUint(h.Sum64()%16, 10))
 }

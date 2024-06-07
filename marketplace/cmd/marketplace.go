@@ -22,7 +22,6 @@ func NewMarketplace() *cobra.Command {
 It also helps you to get more information about an app.
 Please note this command uses the Github API that a very limited rate limit for unauthenticated requests
 so it's recommended to use the --github-token flag you want to use marketplace commands frequently.`,
-		SilenceUsage:  true,
 		SilenceErrors: true,
 	}
 

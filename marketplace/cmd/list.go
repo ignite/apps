@@ -18,7 +18,7 @@ const descriptionLimit = 75
 func NewListCmd() *cobra.Command {
 	c := &cobra.Command{
 		Use:   "list",
-		Short: "List all the ignite apps",
+		Short: "List all the ignite apps from the app registry",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			var githubToken, _ = cmd.Flags().GetString(githubTokenFlag)

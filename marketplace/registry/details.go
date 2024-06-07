@@ -19,14 +19,12 @@ const (
 	appYMLFileName = "app.ignite.yml"
 )
 
-var githubRepoPattern = regexp.MustCompile(`^github\.com\/([a-zA-Z0-9\-_]+)\/([a-zA-Z0-9\-_]+)(\/[a-zA-Z0-9\-_]+)*$`)
+var githubRepoPattern = regexp.MustCompile(`^(https?:\/\/)?github\.com\/([a-zA-Z0-9\-_]+)\/([a-zA-Z0-9\-_]+)(\/[a-zA-Z0-9\-_]+)*$`)
 
 // AppRepositoryDetails represents the details of an Ignite app repository.
 type AppRepositoryDetails struct {
 	Name        string
-	Owner       string
 	Description string
-	Tags        []string
 	Stars       int
 	License     string
 	UpdatedAt   time.Time
@@ -36,12 +34,13 @@ type AppRepositoryDetails struct {
 
 // AppDetails represents the details of an Ignite app.
 type AppDetails struct {
-	Name          string
-	PackageURL    string
-	Description   string
-	Path          string
-	GoVersion     string
-	IgniteVersion string
+	Name             string
+	PackageURL       string
+	DocumentationURL string
+	Description      string
+	Path             string
+	GoVersion        string
+	IgniteVersion    string
 }
 
 // GetAppDetails returns the details of an Ignite app repository.
@@ -62,7 +61,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		return nil, errors.Errorf("app %s not found", appName)
 	}
 
-	repoOwner, repoName, err := validatePackageURL(appEntry.RepositoryURL)
+	repoOwner, repoName, err := validateRepoUrl(appEntry.RepositoryURL)
 	if err != nil {
 		return nil, err
 	}
@@ -89,20 +88,19 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		}
 
 		appDetails = AppDetails{
-			Name:          name,
-			PackageURL:    path.Join(appEntry.RepositoryURL, info.Path),
-			Description:   info.Description,
-			Path:          info.Path,
-			GoVersion:     goMod.Go.Version,
-			IgniteVersion: findCLIVersion(goMod),
+			Name:             name,
+			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL), info.Path),
+			DocumentationURL: appEntry.DocumentationURL,
+			Description:      info.Description,
+			Path:             info.Path,
+			GoVersion:        goMod.Go.Version,
+			IgniteVersion:    findCLIVersion(goMod),
 		}
 	}
 
 	result := &AppRepositoryDetails{
 		Name:        repo.GetName(),
-		Owner:       repo.GetOwner().GetLogin(),
 		Description: repo.GetDescription(),
-		Tags:        repo.Topics,
 		Stars:       repo.GetStargazersCount(),
 		License:     repo.GetLicense().GetName(),
 		UpdatedAt:   repo.GetUpdatedAt().Time,
@@ -140,13 +138,13 @@ func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository) (*p
 	return &conf, nil
 }
 
-func validatePackageURL(pkgURL string) (owner, name string, err error) {
-	parts := githubRepoPattern.FindStringSubmatch(pkgURL)
-	if len(parts) != 2 {
-		return "", "", errors.Errorf("invalid package URL: %s", pkgURL)
+func validateRepoUrl(repoURL string) (owner, name string, err error) {
+	matches := githubRepoPattern.FindStringSubmatch(repoURL)
+	if len(matches) < 4 {
+		return "", "", errors.Errorf("invalid repo URL: %s", repoURL)
 	}
 
-	return parts[1], parts[2], nil
+	return matches[2], matches[3], nil
 }
 
 func findCLIVersion(modFile *modfile.File) string {
@@ -157,4 +155,14 @@ func findCLIVersion(modFile *modfile.File) string {
 	}
 
 	return ""
+}
+
+// stripHttpOrHttpsFromUrl strips http or https scheme from a URL
+func stripHTTPOrHTTPSFromURL(url string) string {
+	if url[:8] == "https://" {
+		url = url[8:]
+	} else if url[:7] == "http://" {
+		url = url[7:]
+	}
+	return url
 }
