@@ -1,4 +1,4 @@
-module github.com/ignite/apps/marketplace
+module github.com/ignite/apps/appregistry
 
 go 1.21.1
 

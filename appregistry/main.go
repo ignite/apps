@@ -7,7 +7,7 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"github.com/ignite/apps/marketplace/cmd"
+	"github.com/ignite/apps/appregistry/cmd"
 )
 
 var _ plugin.Interface = app{}
@@ -15,8 +15,8 @@ var _ plugin.Interface = app{}
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	m := &plugin.Manifest{Name: "marketplace"}
-	m.ImportCobraCommand(cmd.NewMarketplace(), "ignite")
+	m := &plugin.Manifest{Name: "appregistry"}
+	m.ImportCobraCommand(cmd.NewAppRegistry(), "ignite")
 	return m, nil
 }
 
@@ -24,10 +24,10 @@ func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.Client
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.
-	// Remove the first arg "ignite" from OSArgs because our marketplace
-	// command root is "marketplace" not "ignite".
+	// Remove the first arg "ignite" from OSArgs because our appregistry
+	// command root is "appregistry" not "ignite".
 	os.Args = c.OsArgs[1:]
-	return cmd.NewMarketplace().Execute()
+	return cmd.NewAppRegistry().Execute()
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
@@ -46,7 +46,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"marketplace": plugin.NewGRPC(&app{}),
+			"appregistry": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})

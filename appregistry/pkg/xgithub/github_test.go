@@ -10,7 +10,7 @@ import (
 	"github.com/google/go-github/v56/github"
 	"github.com/stretchr/testify/require"
 
-	"github.com/ignite/apps/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/appregistry/pkg/xgithub"
 )
 
 func TestClient_GetDirectoryFiles(t *testing.T) {

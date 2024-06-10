@@ -8,8 +8,8 @@ import (
 	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 
-	"github.com/ignite/apps/marketplace/pkg/xgithub"
-	"github.com/ignite/apps/marketplace/registry"
+	"github.com/ignite/apps/appregistry/pkg/xgithub"
+	"github.com/ignite/apps/appregistry/registry"
 )
 
 func NewInstallCmd() *cobra.Command {

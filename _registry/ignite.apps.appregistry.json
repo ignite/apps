@@ -1,5 +1,5 @@
 {
-  "appName": "marketplace",
+  "appName": "appregistry",
   "appDescription": "Explore the world of Ignite applications and more!",
   "ignite": ">28.0.0",
   "dependencies": {},
@@ -15,13 +15,13 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/marketplace/README.md",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/appregistry/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
-    "marketplace",
+    "appregistry",
     "registry",
     "cli",
     "cosmos-sdk",

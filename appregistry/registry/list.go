@@ -11,7 +11,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 
-	"github.com/ignite/apps/marketplace/pkg/xgithub"
+	"github.com/ignite/apps/appregistry/pkg/xgithub"
 )
 
 const (
@@ -31,7 +31,7 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 	return &Querier{client: client}
 }
 
-// List list apps from the ignite app marketplace/registry.
+// List list apps from the ignite app appregistry/registry.
 func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 	appsFiles, err := r.client.GetDirectoryFiles(ctx, igniteGitHubOrg, igniteAppsRepo, registryDir)
 	if err != nil {
