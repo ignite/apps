@@ -6,9 +6,9 @@ apps:
   hermes:
     description: A wrapper around the hermes IBC relayer
     path: ./hermes
-  marketplace:
+  appregistry:
     description: Explore the world of Ignite applications and more!
-    path: ./marketplace
+    path: ./appregistry
   consumer:
     description: Internal Ignite App for scaffolding consumer chains (not to be installed manually)
     path: ./consumer
