@@ -6,7 +6,7 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ignite/apps/marketplace/pkg/tree"
+	"github.com/ignite/apps/appregistry/pkg/tree"
 )
 
 func TestTree(t *testing.T) {

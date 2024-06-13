@@ -8,6 +8,6 @@ use (
 	./examples/hooks
 	./explorer
 	./hermes
-	./marketplace
+	./appregistry
 	./rollkit
 )
