@@ -5,9 +5,9 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"github.com/ignite/cli/v29/ignite/services/plugin"
-	"spaceship/cmd"
+	"github.com/ignite/apps/spaceship/cmd"
 )
 
 type app struct{}
@@ -22,10 +22,11 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
 	// Remove the first two elements "ignite" and "spaceship" from OsArgs.
 	args := c.OsArgs[2:]
-
 	switch args[0] {
-	case "hello":
-		return cmd.ExecuteHello(ctx, c)
+	case "aws":
+		return cmd.ExecuteAWS(ctx, c)
+	case "ssh":
+		return cmd.ExecuteSSH(ctx, c)
 	default:
 		return fmt.Errorf("unknown command: %s", c.Path)
 	}

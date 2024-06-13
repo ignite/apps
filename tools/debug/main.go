@@ -15,6 +15,7 @@ import (
 	explorer "github.com/ignite/apps/explorer/cmd"
 	hermes "github.com/ignite/apps/hermes/cmd"
 	marketplace "github.com/ignite/apps/marketplace/cmd"
+	spaceship "github.com/ignite/apps/spaceship/cmd"
 	wasm "github.com/ignite/apps/wasm/cmd"
 )
 
@@ -31,6 +32,7 @@ func main() {
 	newCmdFromApp(rootCmd, helloworld.GetCommands())
 	newCmdFromApp(rootCmd, hooks.GetCommands())
 	newCmdFromApp(rootCmd, explorer.GetCommands())
+	newCmdFromApp(rootCmd, spaceship.GetCommands())
 	// Add ignite app commands for debugging here.
 
 	// Add apps with cobra commands.
