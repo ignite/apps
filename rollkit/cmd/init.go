@@ -21,7 +21,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/chain"
 )
 
-const defaultValPower = 1000
+const defaultValPower = 1
 
 func NewRollkitInit() *cobra.Command {
 	c := &cobra.Command{
@@ -107,7 +107,10 @@ func NewRollkitInit() *cobra.Command {
 	}
 
 	c.Flags().StringP(flagPath, "p", ".", "path of the app")
+
+	// deprecated flags
 	c.Flags().Bool("local-da", false, "this flag does nothing but is kept for backward compatibility")
+	c.Flags().MarkDeprecated("local-da", "this flag does nothing but is kept for backward compatibility")
 
 	return c
 }
