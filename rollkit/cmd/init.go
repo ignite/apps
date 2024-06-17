@@ -56,7 +56,7 @@ func NewRollkitInit() *cobra.Command {
 			igniteConfig.Validators[0].Bonded = coins.String()
 			for i, account := range igniteConfig.Accounts {
 				if account.Name == igniteConfig.Validators[0].Name {
-					igniteConfig.Accounts[i].Coins = []string{coins.AddAmount(sdk.DefaultPowerReduction).String()}
+					igniteConfig.Accounts[i].Coins = []string{coins.String()}
 				}
 			}
 
