@@ -1,5 +1,9 @@
 # Rollkit App Changelog
 
+## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.1)
+
+* []() Improve bonded tokens setting.
+
 ## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.0)
 
 * [#92](https://github.com/ignite/apps/pull/92) Add `rollkit init` command.
