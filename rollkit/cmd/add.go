@@ -18,8 +18,7 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath    = "path"
-	flagLocalDa = "local-da"
+	flagPath = "path"
 )
 
 func NewRollkitAdd() *cobra.Command {
