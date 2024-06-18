@@ -47,17 +47,17 @@ ignite scaffold app <name> && cd <name>
 ignite app install -g $(pwd)
 ```
 
-### **Contribution Prerequisites**
+### Contribution Prerequisites
 
 - Familiarity with Git and GitHub.
 - Understanding of the project's technology stack and goals.
 
-## **Community**
+## Community
 
 - Join the community conversations on [Discord](https://discord.com/invite/ignite) or [X/Twitter](https://twitter.com/ignite).
 - Follow the project's progress and updates.
 
-## **Pull Request Process**
+## Pull Request Process*
 
 - Update the README.md or documentation with details of changes to the interface, if applicable.
 - Increase the version numbers in any examples files and the README.md to the new version that this Pull Request would represent.
@@ -65,9 +65,9 @@ ignite app install -g $(pwd)
 
 ## **License**
 
-**TODO**
+See [LICENSE](LICENSE) for more information.
 
-## **Questions?**
+## Questions?
 
 If you have any questions about contributing, please feel free to contact us.
 
