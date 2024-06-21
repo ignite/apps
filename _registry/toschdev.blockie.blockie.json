@@ -10,11 +10,11 @@
         "github": "toschdev"
       }
     ],
-    "repositoryUrl": "https://github.com/toschdev/blockie",
-    "documentationUrl": "https://github.com/toschdev/blockie/blob/main/README.md",
+    "repositoryUrl": "https://github.com/toschdev/ignite-blockie",
+    "documentationUrl": "https://github.com/toschdev/ignite-blockie/blob/main/README.md",
     "license": {
       "name": "Apache License 2.0",
-      "url": "https://github.com/toschdev/blockie/blob/main/LICENSE"
+      "url": "https://github.com/toschdev/ignite-blockie/blob/main/LICENSE"
     },
     "keywords": [
       "ignite",
