@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"math"
 	"os"
 	"path/filepath"
@@ -12,107 +13,96 @@ import (
 	cmttypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-
 	configchain "github.com/ignite/cli/v28/ignite/config/chain"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/pkg/errors"
 )
 
 const defaultValPower = 1
 
-func NewRollkitInit() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "init",
-		Short: "Init rollkit support",
-		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, args []string) error {
-			session := cliui.New()
-			defer session.End()
+func InitHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return err
+	}
 
-			appPath, err := cmd.Flags().GetString(flagPath)
-			if err != nil {
-				return err
-			}
-			absPath, err := filepath.Abs(appPath)
-			if err != nil {
-				return err
-			}
+	session := cliui.New()
+	defer session.End()
 
-			rc, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
-			if err != nil {
-				return err
-			}
+	appPath, err := flags.GetString(flagPath)
+	if err != nil {
+		return err
+	}
+	absPath, err := filepath.Abs(appPath)
+	if err != nil {
+		return err
+	}
 
-			// use val power to set validator power in ignite config.yaml
-			igniteConfig, err := rc.Config()
-			if err != nil {
-				return err
-			}
+	rc, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
+	if err != nil {
+		return err
+	}
 
-			coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
-			igniteConfig.Validators[0].Bonded = coins.String()
-			for i, account := range igniteConfig.Accounts {
-				if account.Name == igniteConfig.Validators[0].Name {
-					igniteConfig.Accounts[i].Coins = []string{coins.String()}
-				}
-			}
+	// use val power to set validator power in ignite config.yaml
+	igniteConfig, err := rc.Config()
+	if err != nil {
+		return err
+	}
 
-			if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
-				return err
-			}
+	coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
+	igniteConfig.Validators[0].Bonded = coins.String()
+	for i, account := range igniteConfig.Accounts {
+		if account.Name == igniteConfig.Validators[0].Name {
+			igniteConfig.Accounts[i].Coins = []string{coins.String()}
+		}
+	}
 
-			if err := rc.Init(cmd.Context(), chain.InitArgsAll); err != nil {
-				return err
-			}
+	if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
+		return err
+	}
 
-			home, err := rc.Home()
-			if err != nil {
-				return err
-			}
+	if err := rc.Init(ctx, chain.InitArgsAll); err != nil {
+		return err
+	}
 
-			// modify genesis (add sequencer)
-			genesisPath, err := rc.GenesisPath()
-			if err != nil {
-				return err
-			}
+	home, err := rc.Home()
+	if err != nil {
+		return err
+	}
 
-			genesis, err := genutiltypes.AppGenesisFromFile(genesisPath)
-			if err != nil {
-				return err
-			}
+	// modify genesis (add sequencer)
+	genesisPath, err := rc.GenesisPath()
+	if err != nil {
+		return err
+	}
 
-			pubKey, err := getPubKey(home)
-			if err != nil {
-				return err
-			}
+	genesis, err := genutiltypes.AppGenesisFromFile(genesisPath)
+	if err != nil {
+		return err
+	}
 
-			genesis.Consensus.Validators = []cmttypes.GenesisValidator{
-				{
-					Name:    "Rollkit Sequencer",
-					Address: pubKey.Address(),
-					PubKey:  pubKey,
-					Power:   defaultValPower,
-				},
-			}
+	pubKey, err := getPubKey(home)
+	if err != nil {
+		return err
+	}
 
-			if err := genesis.SaveAs(genesisPath); err != nil {
-				return err
-			}
-
-			return session.Printf("🗃 Initialized. Checkout your rollkit chain's home (data) directory: %s\n", colors.Info(home))
+	genesis.Consensus.Validators = []cmttypes.GenesisValidator{
+		{
+			Name:    "Rollkit Sequencer",
+			Address: pubKey.Address(),
+			PubKey:  pubKey,
+			Power:   defaultValPower,
 		},
 	}
 
-	c.Flags().StringP(flagPath, "p", ".", "path of the app")
+	if err := genesis.SaveAs(genesisPath); err != nil {
+		return err
+	}
 
-	// deprecated flags
-	c.Flags().Bool("local-da", false, "this flag does nothing but is kept for backward compatibility")
-	c.Flags().MarkDeprecated("local-da", "this flag does nothing but is kept for backward compatibility")
-
-	return c
+	return session.Printf("🗃 Initialized. Checkout your rollkit chain's home (data) directory: %s\n", colors.Info(home))
 }
 
 // getPubKey returns the validator public key.
