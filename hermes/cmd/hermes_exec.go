@@ -1,24 +1,15 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
+	"context"
+	"os"
+
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
-// NewHermesExecute execute hermes relayer commands.
-func NewHermesExecute() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "exec [args...]",
-		Short: "Execute a hermes raw command",
-		Args:  cobra.MinimumNArgs(1),
-		RunE:  hermesExecuteHandler,
-	}
-
-	return c
-}
-
-func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
+func ExecuteHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	h, err := hermes.New()
 	if err != nil {
 		return err
@@ -26,10 +17,10 @@ func hermesExecuteHandler(cmd *cobra.Command, args []string) error {
 	defer h.Cleanup()
 
 	return h.Run(
-		cmd.Context(),
-		hermes.WithArgs(args...),
-		hermes.WithStdIn(cmd.InOrStdin()),
-		hermes.WithStdOut(cmd.OutOrStdout()),
-		hermes.WithStdErr(cmd.ErrOrStderr()),
+		ctx,
+		hermes.WithArgs(cmd.Args...),
+		hermes.WithStdIn(os.Stdin),
+		hermes.WithStdOut(os.Stdout),
+		hermes.WithStdErr(os.Stderr),
 	)
 }
