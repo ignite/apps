@@ -4,7 +4,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
-// GetCommands returns the list of explorer app commands.
+// GetCommands returns the list of app commands.
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
