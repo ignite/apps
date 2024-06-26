@@ -13,8 +13,9 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
+	"github.com/spf13/pflag"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )
@@ -92,87 +93,13 @@ const (
 	mnemonicEntropySize = 256
 )
 
-// NewHermesConfigure configure the hermes relayer and create the config file.
-func NewHermesConfigure() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "configure [chain-a-id] [chain-a-rpc] [chain-a-grpc] [chain-b-id] [chain-b-rpc] [chain-b-grpc]",
-		Short: "Configure the Hermes realyer creating the config file, client, channels and connection",
-		Args:  cobra.ExactArgs(6),
-		RunE:  hermesConfigureHandler,
+func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+	args := cmd.Args
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return err
 	}
 
-	c.Flags().String(flagChainAPortID, "transfer", "Port ID of the chain A")
-	c.Flags().String(flagChainBPortID, "transfer", "Port ID of the chain B")
-	c.Flags().Bool(flagChainACCVConsumerChain, false, "only specify true if the chain A is a CCV consumer")
-	c.Flags().Bool(flagChainBCCVConsumerChain, false, "only specify true if the chain B is a CCV consumer")
-	c.Flags().String(flagChainAEventSourceURL, "", "WS event source url of the chain A")
-	c.Flags().String(flagChainBEventSourceURL, "", "WS event source url of the chain B")
-	c.Flags().String(flagChainAEventSourceMode, "push", "WS event source mode of the chain A (event source url should be set to use this flag)")
-	c.Flags().String(flagChainBEventSourceMode, "push", "WS event source mode of the chain B (event source url should be set to use this flag)")
-	c.Flags().String(flagChainAEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain A (event source url should be set to use this flag)")
-	c.Flags().String(flagChainBEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain B (event source url should be set to use this flag)")
-	c.Flags().String(flagChainARPCTimeout, "10s", "RPC timeout of the chain A")
-	c.Flags().String(flagChainBRPCTimeout, "10s", "RPC timeout of the chain B")
-	c.Flags().Bool(flagChainATrustedNode, false, "enable trusted node on the chain A")
-	c.Flags().Bool(flagChainBTrustedNode, false, "enable trusted node on the chain B")
-	c.Flags().String(flagChainAAccountPrefix, "cosmos", "account prefix of the chain A")
-	c.Flags().String(flagChainBAccountPrefix, "cosmos", "account prefix of the chain B")
-	c.Flags().String(flagChainAKeyName, "wallet", "hermes account name of the chain A")
-	c.Flags().String(flagChainBKeyName, "wallet", "hermes account name of the chain B")
-	c.Flags().String(flagChainAAddressType, "cosmos", "address type of the chain A")
-	c.Flags().String(flagChainBAddressType, "cosmos", "address type of the chain B")
-	c.Flags().String(flagChainAStorePrefix, "ibc", "store prefix of the chain A")
-	c.Flags().String(flagChainBStorePrefix, "ibc", "store prefix of the chain B")
-	c.Flags().Uint64(flagChainADefaultGas, 100000, "default gas used for transactions on chain A")
-	c.Flags().Uint64(flagChainBDefaultGas, 100000, "default gas used for transactions on chain B")
-	c.Flags().Uint64(flagChainAMaxGas, 400000, "max gas used for transactions on chain A")
-	c.Flags().Uint64(flagChainBMaxGas, 400000, "max gas used for transactions on chain B")
-	c.Flags().String(flagChainAGasPrice, "0.025stake", "gas price used for transactions on chain A")
-	c.Flags().String(flagChainBGasPrice, "0.025stake", "gas price used for transactions on chain B")
-	c.Flags().String(flagChainAGasMultiplier, "1.1", "gas multiplier used for transactions on chain A")
-	c.Flags().String(flagChainBGasMultiplier, "1.1", "gas multiplier used for transactions on chain B")
-	c.Flags().Uint64(flagChainAMaxMsgNum, 30, "max message number used for transactions on chain A")
-	c.Flags().Uint64(flagChainBMaxMsgNum, 30, "max message number used for transactions on chain B")
-	c.Flags().Uint64(flagChainAMaxTxSize, 2097152, "max transaction size on chain A")
-	c.Flags().Uint64(flagChainBMaxTxSize, 2097152, "max transaction size on chain B")
-	c.Flags().String(flagChainAClockDrift, "5s", "clock drift of the chain A")
-	c.Flags().String(flagChainBClockDrift, "5s", "clock drift of the chain B")
-	c.Flags().String(flagChainAMaxBlockTime, "30s", "maximum block time of the chain A")
-	c.Flags().String(flagChainBMaxBlockTime, "30s", "maximum block time of the chain B")
-	c.Flags().String(flagChainATrustingPeriod, "14days", "trusting period of the chain A")
-	c.Flags().String(flagChainBTrustingPeriod, "14days", "trusting period of the chain B")
-	c.Flags().Uint64(flagChainATrustThresholdNumerator, 2, "trusting threshold numerator of the chain A")
-	c.Flags().Uint64(flagChainBTrustThresholdNumerator, 2, "trusting threshold numerator of the chain B")
-	c.Flags().Uint64(flagChainATrustThresholdDenominator, 3, "trusting threshold denominator of the chain A")
-	c.Flags().Uint64(flagChainBTrustThresholdDenominator, 3, "trusting threshold denominator of the chain B")
-	c.Flags().String(flagChainAMemoPrefix, "", "memo prefix of the chain A")
-	c.Flags().String(flagChainBMemoPrefix, "", "memo prefix of the chain B")
-	c.Flags().String(flagChainAFaucet, "", "faucet URL of the chain A")
-	c.Flags().String(flagChainBFaucet, "", "faucet URL of the chain B")
-
-	c.Flags().Bool(flagTelemetryEnabled, false, "enable hermes telemetry")
-	c.Flags().String(flagTelemetryHost, "127.0.0.1", "hermes telemetry host")
-	c.Flags().Uint64(flagTelemetryPort, 3001, "hermes telemetry port")
-	c.Flags().Bool(flagRestEnabled, false, "enable hermes rest")
-	c.Flags().String(flagRestHost, "127.0.0.1", "hermes rest host")
-	c.Flags().Uint64(flagRestPort, 3000, "hermes rest port")
-	c.Flags().Bool(flagModeChannelsEnabled, true, "enable hermes channels")
-	c.Flags().Bool(flagModeClientsEnabled, true, "enable hermes clients")
-	c.Flags().Bool(flagModeClientsMisbehaviour, true, "enable hermes clients misbehaviour")
-	c.Flags().Bool(flagModeClientsRefresh, true, "enable hermes client refresh time")
-	c.Flags().Bool(flagModeConnectionsEnabled, true, "enable hermes connections")
-	c.Flags().Bool(flagModePacketsEnabled, true, "enable hermes packets")
-	c.Flags().Uint64(flagModePacketsClearInterval, 100, "hermes packet clear interval")
-	c.Flags().Bool(flagModePacketsClearOnStart, true, "enable hermes packets clear on start")
-	c.Flags().Bool(flagModePacketsTxConfirmation, true, "hermes packet transaction confirmation")
-	c.Flags().Bool(flagAutoRegisterCounterpartyPayee, false, "auto register the counterparty payee on a destination chain to the relayer's address on the source chain")
-	c.Flags().Bool(flagGenerateWallets, false, "automatically generate wallets if they do not exist")
-	c.Flags().Bool(flagOverwriteConfig, false, "overwrite the current config if it already exists")
-
-	return c
-}
-
-func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	session := cliui.New(cliui.StartSpinner())
 	defer session.End()
 
@@ -182,26 +109,23 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainAID = args[0]
 		chainBID = args[3]
 
-		generateWallets, _ = cmd.Flags().GetBool(flagGenerateWallets)
-		overwriteConfig, _ = cmd.Flags().GetBool(flagOverwriteConfig)
-		chainAPortID, _    = cmd.Flags().GetString(flagChainAPortID)
-		chainAFaucet, _    = cmd.Flags().GetString(flagChainAFaucet)
-		chainBPortID, _    = cmd.Flags().GetString(flagChainBPortID)
-		chainBFaucet, _    = cmd.Flags().GetString(flagChainBFaucet)
-		customCfg          = getConfig(cmd)
+		generateWallets, _ = flags.GetBool(flagGenerateWallets)
+		overwriteConfig, _ = flags.GetBool(flagOverwriteConfig)
+		chainAPortID, _    = flags.GetString(flagChainAPortID)
+		chainAFaucet, _    = flags.GetString(flagChainAFaucet)
+		chainBPortID, _    = flags.GetString(flagChainBPortID)
+		chainBFaucet, _    = flags.GetString(flagChainBFaucet)
+		customCfg          = getConfig(flags)
 	)
 
-	var (
-		hermesCfg *hermes.Config
-		err       error
-	)
+	var hermesCfg *hermes.Config
 	if customCfg != "" {
 		hermesCfg, err = hermes.LoadConfig(customCfg)
 		if err != nil {
 			return err
 		}
 	} else {
-		hermesCfg, err = newHermesConfig(cmd, args, customCfg)
+		hermesCfg, err = newHermesConfig(flags, args, customCfg)
 		if err != nil {
 			return err
 		}
@@ -242,7 +166,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	session.StartSpinner("Verifying chain keys")
 
 	if err := ensureAccount(
-		cmd.Context(),
+		ctx,
 		session,
 		hermesCfg,
 		h,
@@ -255,7 +179,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	if err := ensureAccount(
-		cmd.Context(),
+		ctx,
 		session,
 		hermesCfg,
 		h,
@@ -275,7 +199,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		clientAResult    = hermes.ClientResult{}
 	)
 	if err := h.CreateClient(
-		cmd.Context(),
+		ctx,
 		chainAID,
 		chainBID,
 		hermes.WithConfigFile(cfgPath),
@@ -301,7 +225,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		clientBResult    = hermes.ClientResult{}
 	)
 	if err := h.CreateClient(
-		cmd.Context(),
+		ctx,
 		chainBID,
 		chainAID,
 		hermes.WithConfigFile(cfgPath),
@@ -328,7 +252,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		connection    = hermes.ConnectionResult{}
 	)
 	if err := h.CreateConnection(
-		cmd.Context(),
+		ctx,
 		chainAID,
 		clientAResult.CreateClient.ClientID,
 		clientBResult.CreateClient.ClientID,
@@ -357,7 +281,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		channel    = hermes.ConnectionResult{}
 	)
 	if err := h.CreateChannel(
-		cmd.Context(),
+		ctx,
 		chainAID,
 		connection.ASide.ConnectionID,
 		chainAPortID,
@@ -506,7 +430,7 @@ GetKey:
 }
 
 // newHermesConfig create a new hermes config based in the cmd args.
-func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*hermes.Config, error) {
+func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*hermes.Config, error) {
 	// if a custom config was set, save it in the ignite hermes folder
 	if customCfg != "" {
 		c, err := hermes.LoadConfig(customCfg)
@@ -518,22 +442,22 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 
 	// Create the default hermes config
 	var (
-		telemetryEnabled, _                         = cmd.Flags().GetBool(flagTelemetryEnabled)
-		telemetryHost, _                            = cmd.Flags().GetString(flagTelemetryHost)
-		telemetryPort, _                            = cmd.Flags().GetUint64(flagTelemetryPort)
-		restEnabled, _                              = cmd.Flags().GetBool(flagRestEnabled)
-		restHost, _                                 = cmd.Flags().GetString(flagRestHost)
-		restPort, _                                 = cmd.Flags().GetUint64(flagRestPort)
-		modeChannelsEnabled, _                      = cmd.Flags().GetBool(flagModeChannelsEnabled)
-		modeClientsEnabled, _                       = cmd.Flags().GetBool(flagModeClientsEnabled)
-		modeClientsMisbehaviour, _                  = cmd.Flags().GetBool(flagModeClientsMisbehaviour)
-		modeClientsRefresh, _                       = cmd.Flags().GetBool(flagModeClientsRefresh)
-		modeConnectionsEnabled, _                   = cmd.Flags().GetBool(flagModeConnectionsEnabled)
-		modePacketsEnabled, _                       = cmd.Flags().GetBool(flagModePacketsEnabled)
-		modePacketsClearInterval, _                 = cmd.Flags().GetUint64(flagModePacketsClearInterval)
-		modePacketsClearOnStart, _                  = cmd.Flags().GetBool(flagModePacketsClearOnStart)
-		modePacketsTxConfirmation, _                = cmd.Flags().GetBool(flagModePacketsTxConfirmation)
-		modePacketsAutoRegisterCounterpartyPayee, _ = cmd.Flags().GetBool(flagAutoRegisterCounterpartyPayee)
+		telemetryEnabled, _                         = flags.GetBool(flagTelemetryEnabled)
+		telemetryHost, _                            = flags.GetString(flagTelemetryHost)
+		telemetryPort, _                            = flags.GetUint64(flagTelemetryPort)
+		restEnabled, _                              = flags.GetBool(flagRestEnabled)
+		restHost, _                                 = flags.GetString(flagRestHost)
+		restPort, _                                 = flags.GetUint64(flagRestPort)
+		modeChannelsEnabled, _                      = flags.GetBool(flagModeChannelsEnabled)
+		modeClientsEnabled, _                       = flags.GetBool(flagModeClientsEnabled)
+		modeClientsMisbehaviour, _                  = flags.GetBool(flagModeClientsMisbehaviour)
+		modeClientsRefresh, _                       = flags.GetBool(flagModeClientsRefresh)
+		modeConnectionsEnabled, _                   = flags.GetBool(flagModeConnectionsEnabled)
+		modePacketsEnabled, _                       = flags.GetBool(flagModePacketsEnabled)
+		modePacketsClearInterval, _                 = flags.GetUint64(flagModePacketsClearInterval)
+		modePacketsClearOnStart, _                  = flags.GetBool(flagModePacketsClearOnStart)
+		modePacketsTxConfirmation, _                = flags.GetBool(flagModePacketsTxConfirmation)
+		modePacketsAutoRegisterCounterpartyPayee, _ = flags.GetBool(flagAutoRegisterCounterpartyPayee)
 	)
 
 	c := hermes.DefaultConfig(
@@ -561,28 +485,28 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		chainARPCAddr  = args[1]
 		chainAGRPCAddr = args[2]
 
-		chainAEventSourceMode, _           = cmd.Flags().GetString(flagChainAEventSourceMode)
-		chainAEventSourceURL, _            = cmd.Flags().GetString(flagChainAEventSourceURL)
-		chainAEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainAEventSourceBatchDelay)
-		chainARPCTimeout, _                = cmd.Flags().GetString(flagChainARPCTimeout)
-		chainAAccountPrefix, _             = cmd.Flags().GetString(flagChainAAccountPrefix)
-		chainAAddressType, _               = cmd.Flags().GetString(flagChainAAddressType)
-		chainAKeyName, _                   = cmd.Flags().GetString(flagChainAKeyName)
-		chainAStorePrefix, _               = cmd.Flags().GetString(flagChainAStorePrefix)
-		chainADefaultGas, _                = cmd.Flags().GetUint64(flagChainADefaultGas)
-		chainAMaxGas, _                    = cmd.Flags().GetUint64(flagChainAMaxGas)
-		chainAGasPrice, _                  = cmd.Flags().GetString(flagChainAGasPrice)
-		chainAGasMultiplier, _             = cmd.Flags().GetString(flagChainAGasMultiplier)
-		chainAMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainAMaxMsgNum)
-		chainAMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainAMaxTxSize)
-		chainAClockDrift, _                = cmd.Flags().GetString(flagChainAClockDrift)
-		chainAMaxBlockTime, _              = cmd.Flags().GetString(flagChainAMaxBlockTime)
-		chainATrustingPeriod, _            = cmd.Flags().GetString(flagChainATrustingPeriod)
-		chainATrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainATrustThresholdNumerator)
-		chainATrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainATrustThresholdDenominator)
-		chainACCVConsumerChain, _          = cmd.Flags().GetBool(flagChainACCVConsumerChain)
-		chainATrustedNode, _               = cmd.Flags().GetBool(flagChainATrustedNode)
-		chainAMemoPrefix, _                = cmd.Flags().GetString(flagChainAMemoPrefix)
+		chainAEventSourceMode, _           = flags.GetString(flagChainAEventSourceMode)
+		chainAEventSourceURL, _            = flags.GetString(flagChainAEventSourceURL)
+		chainAEventSourceBatchDelay, _     = flags.GetString(flagChainAEventSourceBatchDelay)
+		chainARPCTimeout, _                = flags.GetString(flagChainARPCTimeout)
+		chainAAccountPrefix, _             = flags.GetString(flagChainAAccountPrefix)
+		chainAAddressType, _               = flags.GetString(flagChainAAddressType)
+		chainAKeyName, _                   = flags.GetString(flagChainAKeyName)
+		chainAStorePrefix, _               = flags.GetString(flagChainAStorePrefix)
+		chainADefaultGas, _                = flags.GetUint64(flagChainADefaultGas)
+		chainAMaxGas, _                    = flags.GetUint64(flagChainAMaxGas)
+		chainAGasPrice, _                  = flags.GetString(flagChainAGasPrice)
+		chainAGasMultiplier, _             = flags.GetString(flagChainAGasMultiplier)
+		chainAMaxMsgNum, _                 = flags.GetUint64(flagChainAMaxMsgNum)
+		chainAMaxTxSize, _                 = flags.GetUint64(flagChainAMaxTxSize)
+		chainAClockDrift, _                = flags.GetString(flagChainAClockDrift)
+		chainAMaxBlockTime, _              = flags.GetString(flagChainAMaxBlockTime)
+		chainATrustingPeriod, _            = flags.GetString(flagChainATrustingPeriod)
+		chainATrustThresholdNumerator, _   = flags.GetUint64(flagChainATrustThresholdNumerator)
+		chainATrustThresholdDenominator, _ = flags.GetUint64(flagChainATrustThresholdDenominator)
+		chainACCVConsumerChain, _          = flags.GetBool(flagChainACCVConsumerChain)
+		chainATrustedNode, _               = flags.GetBool(flagChainATrustedNode)
+		chainAMemoPrefix, _                = flags.GetString(flagChainAMemoPrefix)
 	)
 
 	chainAGasMulti := new(big.Float)
@@ -666,28 +590,28 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		chainBRPCAddr  = args[4]
 		chainBGRPCAddr = args[5]
 
-		chainBEventSourceMode, _           = cmd.Flags().GetString(flagChainBEventSourceMode)
-		chainBEventSourceURL, _            = cmd.Flags().GetString(flagChainBEventSourceURL)
-		chainBEventSourceBatchDelay, _     = cmd.Flags().GetString(flagChainBEventSourceBatchDelay)
-		chainBRPCTimeout, _                = cmd.Flags().GetString(flagChainBRPCTimeout)
-		chainBAccountPrefix, _             = cmd.Flags().GetString(flagChainBAccountPrefix)
-		chainBAddressType, _               = cmd.Flags().GetString(flagChainBAddressType)
-		chainBKeyName, _                   = cmd.Flags().GetString(flagChainBKeyName)
-		chainBStorePrefix, _               = cmd.Flags().GetString(flagChainBStorePrefix)
-		chainBDefaultGas, _                = cmd.Flags().GetUint64(flagChainBDefaultGas)
-		chainBMaxGas, _                    = cmd.Flags().GetUint64(flagChainBMaxGas)
-		chainBGasPrice, _                  = cmd.Flags().GetString(flagChainBGasPrice)
-		chainBGasMultiplier, _             = cmd.Flags().GetString(flagChainBGasMultiplier)
-		chainBMaxMsgNum, _                 = cmd.Flags().GetUint64(flagChainBMaxMsgNum)
-		chainBMaxTxSize, _                 = cmd.Flags().GetUint64(flagChainBMaxTxSize)
-		chainBClockDrift, _                = cmd.Flags().GetString(flagChainBClockDrift)
-		chainBMaxBlockTime, _              = cmd.Flags().GetString(flagChainBMaxBlockTime)
-		chainBTrustingPeriod, _            = cmd.Flags().GetString(flagChainBTrustingPeriod)
-		chainBTrustThresholdNumerator, _   = cmd.Flags().GetUint64(flagChainBTrustThresholdNumerator)
-		chainBTrustThresholdDenominator, _ = cmd.Flags().GetUint64(flagChainBTrustThresholdDenominator)
-		chainBCCVConsumerChain, _          = cmd.Flags().GetBool(flagChainBCCVConsumerChain)
-		chainBTrustedNode, _               = cmd.Flags().GetBool(flagChainBTrustedNode)
-		chainBMemoPrefix, _                = cmd.Flags().GetString(flagChainBMemoPrefix)
+		chainBEventSourceMode, _           = flags.GetString(flagChainBEventSourceMode)
+		chainBEventSourceURL, _            = flags.GetString(flagChainBEventSourceURL)
+		chainBEventSourceBatchDelay, _     = flags.GetString(flagChainBEventSourceBatchDelay)
+		chainBRPCTimeout, _                = flags.GetString(flagChainBRPCTimeout)
+		chainBAccountPrefix, _             = flags.GetString(flagChainBAccountPrefix)
+		chainBAddressType, _               = flags.GetString(flagChainBAddressType)
+		chainBKeyName, _                   = flags.GetString(flagChainBKeyName)
+		chainBStorePrefix, _               = flags.GetString(flagChainBStorePrefix)
+		chainBDefaultGas, _                = flags.GetUint64(flagChainBDefaultGas)
+		chainBMaxGas, _                    = flags.GetUint64(flagChainBMaxGas)
+		chainBGasPrice, _                  = flags.GetString(flagChainBGasPrice)
+		chainBGasMultiplier, _             = flags.GetString(flagChainBGasMultiplier)
+		chainBMaxMsgNum, _                 = flags.GetUint64(flagChainBMaxMsgNum)
+		chainBMaxTxSize, _                 = flags.GetUint64(flagChainBMaxTxSize)
+		chainBClockDrift, _                = flags.GetString(flagChainBClockDrift)
+		chainBMaxBlockTime, _              = flags.GetString(flagChainBMaxBlockTime)
+		chainBTrustingPeriod, _            = flags.GetString(flagChainBTrustingPeriod)
+		chainBTrustThresholdNumerator, _   = flags.GetUint64(flagChainBTrustThresholdNumerator)
+		chainBTrustThresholdDenominator, _ = flags.GetUint64(flagChainBTrustThresholdDenominator)
+		chainBCCVConsumerChain, _          = flags.GetBool(flagChainBCCVConsumerChain)
+		chainBTrustedNode, _               = flags.GetBool(flagChainBTrustedNode)
+		chainBMemoPrefix, _                = flags.GetString(flagChainBMemoPrefix)
 	)
 
 	chainBGasMulti := new(big.Float)
