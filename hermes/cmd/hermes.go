@@ -56,7 +56,6 @@ func GetCommands() []*plugin.Command {
 					Flags: []*plugin.Flag{
 						{Name: flagChainAPortID, DefaultValue: "transfer", Usage: "port ID of the chain A", Type: plugin.FlagTypeString},
 						{Name: flagChainBPortID, DefaultValue: "transfer", Usage: "port ID of the chain B", Type: plugin.FlagTypeString},
-						{Name: flagChainAPortID, DefaultValue: "transfer", Usage: "port ID of the chain A", Type: plugin.FlagTypeString},
 						{Name: flagChainACCVConsumerChain, DefaultValue: "false", Usage: "only specify true if the chain A is a CCV consumer", Type: plugin.FlagTypeBool},
 						{Name: flagChainBCCVConsumerChain, DefaultValue: "false", Usage: "only specify true if the chain B is a CCV consumer", Type: plugin.FlagTypeBool},
 						{Name: flagChainAEventSourceURL, Usage: "WS event source url of the chain A", Type: plugin.FlagTypeString},

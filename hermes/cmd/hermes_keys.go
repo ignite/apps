@@ -45,7 +45,7 @@ func KeysAddFileHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error 
 	)
 }
 
-func KeysList(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func KeysListHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	args := cmd.Args
 	h, err := hermes.New()
 	if err != nil {
@@ -62,7 +62,7 @@ func KeysList(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	)
 }
 
-func NewHermesKeysDelete(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func KeysDeleteHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	h, err := hermes.New()
 	if err != nil {
 		return err
