@@ -31,13 +31,13 @@ func main() {
 	newCmdFromApp(rootCmd, helloworld.GetCommands())
 	newCmdFromApp(rootCmd, hooks.GetCommands())
 	newCmdFromApp(rootCmd, explorer.GetCommands())
+	newCmdFromApp(rootCmd, wasm.GetCommands())
 	// Add ignite app commands for debugging here.
 
 	// Add apps with cobra commands.
 	rootCmd.AddCommand(
 		hermes.NewRelayer(),
 		appregistry.NewAppRegistry(),
-		wasm.NewWasm(),
 		// Add cobra commands for debugging here.
 	)
 	if err := rootCmd.Execute(); err != nil {

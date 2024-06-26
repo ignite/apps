@@ -2,9 +2,9 @@ package main
 
 import (
 	"context"
-	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/wasm/cmd"
@@ -13,17 +13,24 @@ import (
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	m := &plugin.Manifest{Name: "wasm"}
-	m.ImportCobraCommand(cmd.NewWasm(), "ignite")
+	m := &plugin.Manifest{
+		Name:     "wasm",
+		Commands: cmd.GetCommands(),
+	}
 	return m, nil
 }
 
-func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Run the "hermes" command as if it were a root command. To do
-	// so remove the first two arguments which are "ignite relayer"
-	// from OSArgs to treat "hermes" as the root command.
-	os.Args = c.OsArgs[1:]
-	return cmd.NewWasm().Execute()
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+	// Remove the three two elements "ignite" and "wasm" from OsArgs.
+	args := c.OsArgs[2:]
+	switch args[0] {
+	case "add":
+		return cmd.AddHandler(ctx, c)
+	case "init":
+		return cmd.ConfigHandler(ctx, c)
+	default:
+		return errors.Errorf("unknown command: %s", c.Path)
+	}
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
