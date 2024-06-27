@@ -231,6 +231,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
 
 	h, err := hermes.New()
@@ -288,6 +289,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Client '%s' created (%s -> %s)",
 		clientAResult.CreateClient.ClientID,
@@ -314,6 +316,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Client %s' created (%s -> %s)",
 		clientBResult.CreateClient.ClientID,
@@ -342,6 +345,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Connection '%s (%s) <-> %s (%s)' created",
 		chainAID,
@@ -372,6 +376,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Channel '%s (%s) <-> %s (%s)' created",
 		chainAID,
@@ -497,10 +502,13 @@ GetKey:
 		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
 			return "", err
 		}
+		session.StopSpinner()
 		_ = session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
 
 		goto GetKey
 	}
+
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
 	return keysChainResult.Wallet.Account, nil
 }
