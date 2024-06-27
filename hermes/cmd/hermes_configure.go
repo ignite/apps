@@ -429,7 +429,7 @@ func ensureAccount(
 			return err
 		}
 
-		_ = session.Printf("new balance %s for %s", newBalance.String(), chainAddr)
+		_ = session.Println(color.Yellow.Sprintf("New balance from faucet: %s", newBalance.String()))
 	}
 	return nil
 }
@@ -514,13 +514,13 @@ GetKey:
 		}
 
 		session.StopSpinner()
-		_ = session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
+		_ = session.Println(color.Green.Sprintf("Chain %s key created", chainID))
 
 		goto GetKey
 	}
 
 	session.StopSpinner()
-	_ = session.Println(color.Green.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
+	_ = session.Println(color.Yellow.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
 
 	return keysChainResult.Wallet.Account, nil
 }
