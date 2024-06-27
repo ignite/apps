@@ -173,10 +173,8 @@ func NewHermesConfigure() *cobra.Command {
 }
 
 func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
-	session := cliui.New(cliui.StartSpinner())
+	session := cliui.New(cliui.StartSpinnerWithText("Generating Hermes config"))
 	defer session.End()
-
-	session.StartSpinner("Generating Hermes config")
 
 	var (
 		chainAID = args[0]
@@ -216,6 +214,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	} else {
+		session.StopSpinner()
 		if err := session.AskConfirm(fmt.Sprintf(
 			"Hermes %s <-> %s config already exist at %s. Do you want to reuse this config file",
 			chainAID,
@@ -240,7 +239,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	}
 	defer h.Cleanup()
 
-	session.StartSpinner("Verifying chain keys")
+	session.StartSpinner(fmt.Sprintf("Verifying chain A (%s) keys", chainAID))
 
 	if err := ensureAccount(
 		cmd.Context(),
@@ -255,6 +254,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
+	session.StartSpinner(fmt.Sprintf("Verifying chain B (%s) keys", chainBID))
+
 	if err := ensureAccount(
 		cmd.Context(),
 		session,
@@ -268,9 +269,8 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	session.StartSpinner("Creating clients")
-
 	// create client A
+	session.StartSpinner("Creating client A")
 	var (
 		bufClientAResult = bytes.Buffer{}
 		clientAResult    = hermes.ClientResult{}
@@ -298,6 +298,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	))
 
 	// create client B
+	session.StartSpinner("Creating client B")
 	var (
 		bufClientBResult = bytes.Buffer{}
 		clientBResult    = hermes.ClientResult{}
@@ -323,9 +324,9 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID,
 		chainAID,
 	))
-	session.StartSpinner("Creating connection")
 
 	// create connection
+	session.StartSpinner("Creating connection")
 	var (
 		bufConnection = bytes.Buffer{}
 		connection    = hermes.ConnectionResult{}
@@ -353,9 +354,9 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainBID,
 		connection.BSide.ConnectionID,
 	))
-	session.StartSpinner("Creating channel")
 
 	// create and query channel
+	session.StartSpinner("Creating channel")
 	var (
 		bufChannel = bytes.Buffer{}
 		channel    = hermes.ConnectionResult{}
@@ -403,6 +404,9 @@ func ensureAccount(
 	if err != nil {
 		return err
 	}
+
+	session.StartSpinner(fmt.Sprintf("verifying %s balance", chainAddr))
+
 	chain, err := hCfg.Chains.Get(chainID)
 	if err != nil {
 		return err
@@ -419,10 +423,13 @@ func ensureAccount(
 			flagChainBFaucet)
 	}
 	if faucetAddr != "" {
-		_, err := chain.TryRetrieve(ctx, chainAddr, faucetAddr)
+		session.StartSpinner(fmt.Sprintf("requesting faucet balance for %s", chainAddr))
+		newBalance, err := chain.TryRetrieve(ctx, chainAddr, faucetAddr)
 		if err != nil {
 			return err
 		}
+
+		_ = session.Printf("new balance %s for %s", newBalance.String(), chainAddr)
 	}
 	return nil
 }
@@ -457,6 +464,7 @@ GetKey:
 	if keysChainResult.Wallet.Account == "" {
 		var mnemonic string
 		if !generateWallets {
+			session.StopSpinner()
 			if err := session.Ask(cliquiz.NewQuestion(
 				fmt.Sprintf(
 					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one:",
@@ -477,6 +485,8 @@ GetKey:
 			if err != nil {
 				return "", err
 			}
+
+			session.StopSpinner()
 			_ = session.Printf(
 				"%s %s\n",
 				color.Yellow.Sprint("New mnemonic generated:"),
@@ -502,6 +512,7 @@ GetKey:
 		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
 			return "", err
 		}
+
 		session.StopSpinner()
 		_ = session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
 
@@ -510,6 +521,7 @@ GetKey:
 
 	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
+
 	return keysChainResult.Wallet.Account, nil
 }
 
