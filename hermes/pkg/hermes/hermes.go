@@ -31,6 +31,7 @@ const (
 	FlagMnemonicFile     = "mnemonic-file"
 	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
+	FlagFullScan         = "full-scan"
 )
 
 const (
@@ -372,17 +373,13 @@ func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain
 	if showCounterparty {
 		flags[FlagShowCounterparty] = true
 	}
-	options = append(
-		options,
-		WithFlags(flags),
-		WithArgs(string(cmdQuery), string(cmdChannels)),
-	)
+	options = append(options, WithArgs(string(cmdQuery), string(cmdChannels)), WithFlags(flags))
 	return h.Run(ctx, options...)
 }
 
 // Start starts the Hermes relayer.
 func (h *Hermes) Start(ctx context.Context, options ...Option) error {
-	options = append(options, WithArgs(string(cmdStart)))
+	options = append(options, WithArgs(string(cmdStart)), WithFlags(Flags{FlagFullScan: true}))
 	return h.Run(ctx, options...)
 }
 
