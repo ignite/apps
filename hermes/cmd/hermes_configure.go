@@ -44,6 +44,7 @@ const (
 	flagChainACCVConsumerChain          = "chain-a-ccv-consumer-chain"
 	flagChainATrustedNode               = "chain-a-trusted-node"
 	flagChainAMemoPrefix                = "chain-a-memo-prefix"
+	flagChainAType                      = "chain-a-type"
 
 	flagChainBPortID                    = "chain-b-port-id"
 	flagChainBEventSourceMode           = "chain-b-event-source-mode"
@@ -69,6 +70,7 @@ const (
 	flagChainBCCVConsumerChain          = "chain-b-ccv-consumer-chain"
 	flagChainBTrustedNode               = "chain-b-trusted-node"
 	flagChainBMemoPrefix                = "chain-b-memo-prefix"
+	flagChainBType                      = "chain-b-type"
 
 	flagTelemetryEnabled              = "telemetry-enabled"
 	flagTelemetryHost                 = "telemetry-host"
@@ -113,8 +115,8 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().String(flagChainBEventSourceBatchDelay, "500ms", "WS event source batch delay time of the chain B (event source url should be set to use this flag)")
 	c.Flags().String(flagChainARPCTimeout, "10s", "RPC timeout of the chain A")
 	c.Flags().String(flagChainBRPCTimeout, "10s", "RPC timeout of the chain B")
-	c.Flags().Bool(flagChainATrustedNode, false, "enable trusted node on the chain A")
-	c.Flags().Bool(flagChainBTrustedNode, false, "enable trusted node on the chain B")
+	c.Flags().Bool(flagChainATrustedNode, true, "enable trusted node on the chain A")
+	c.Flags().Bool(flagChainBTrustedNode, true, "enable trusted node on the chain B")
 	c.Flags().String(flagChainAAccountPrefix, "cosmos", "account prefix of the chain A")
 	c.Flags().String(flagChainBAccountPrefix, "cosmos", "account prefix of the chain B")
 	c.Flags().String(flagChainAKeyName, "wallet", "hermes account name of the chain A")
@@ -123,14 +125,14 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().String(flagChainBAddressType, "cosmos", "address type of the chain B")
 	c.Flags().String(flagChainAStorePrefix, "ibc", "store prefix of the chain A")
 	c.Flags().String(flagChainBStorePrefix, "ibc", "store prefix of the chain B")
-	c.Flags().Uint64(flagChainADefaultGas, 100000, "default gas used for transactions on chain A")
-	c.Flags().Uint64(flagChainBDefaultGas, 100000, "default gas used for transactions on chain B")
-	c.Flags().Uint64(flagChainAMaxGas, 400000, "max gas used for transactions on chain A")
-	c.Flags().Uint64(flagChainBMaxGas, 400000, "max gas used for transactions on chain B")
-	c.Flags().String(flagChainAGasPrice, "0.025stake", "gas price used for transactions on chain A")
-	c.Flags().String(flagChainBGasPrice, "0.025stake", "gas price used for transactions on chain B")
-	c.Flags().String(flagChainAGasMultiplier, "1.1", "gas multiplier used for transactions on chain A")
-	c.Flags().String(flagChainBGasMultiplier, "1.1", "gas multiplier used for transactions on chain B")
+	c.Flags().Uint64(flagChainADefaultGas, 1000000, "default gas used for transactions on chain A")
+	c.Flags().Uint64(flagChainBDefaultGas, 1000000, "default gas used for transactions on chain B")
+	c.Flags().Uint64(flagChainAMaxGas, 10000000, "max gas used for transactions on chain A")
+	c.Flags().Uint64(flagChainBMaxGas, 10000000, "max gas used for transactions on chain B")
+	c.Flags().String(flagChainAGasPrice, "0.001stake", "gas price used for transactions on chain A")
+	c.Flags().String(flagChainBGasPrice, "0.001stake", "gas price used for transactions on chain B")
+	c.Flags().String(flagChainAGasMultiplier, "1.2", "gas multiplier used for transactions on chain A")
+	c.Flags().String(flagChainBGasMultiplier, "1.2", "gas multiplier used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxMsgNum, 30, "max message number used for transactions on chain A")
 	c.Flags().Uint64(flagChainBMaxMsgNum, 30, "max message number used for transactions on chain B")
 	c.Flags().Uint64(flagChainAMaxTxSize, 2097152, "max transaction size on chain A")
@@ -149,6 +151,8 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().String(flagChainBMemoPrefix, "", "memo prefix of the chain B")
 	c.Flags().String(flagChainAFaucet, "", "faucet URL of the chain A")
 	c.Flags().String(flagChainBFaucet, "", "faucet URL of the chain B")
+	c.Flags().String(flagChainAType, "CosmosSdk", "type of the chain A")
+	c.Flags().String(flagChainBType, "CosmosSdk", "type of the chain B")
 
 	c.Flags().Bool(flagTelemetryEnabled, false, "enable hermes telemetry")
 	c.Flags().String(flagTelemetryHost, "127.0.0.1", "hermes telemetry host")
@@ -612,6 +616,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		chainACCVConsumerChain, _          = cmd.Flags().GetBool(flagChainACCVConsumerChain)
 		chainATrustedNode, _               = cmd.Flags().GetBool(flagChainATrustedNode)
 		chainAMemoPrefix, _                = cmd.Flags().GetString(flagChainAMemoPrefix)
+		chainAType, _                      = cmd.Flags().GetString(flagChainAType)
 	)
 
 	chainAGasMulti := new(big.Float)
@@ -683,6 +688,9 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 	if chainAMemoPrefix != "" {
 		optChainA = append(optChainA, hermes.WithChainMemoPrefix(chainAMemoPrefix))
 	}
+	if chainAType != "" {
+		optChainA = append(optChainA, hermes.WithChainType(chainAType))
+	}
 
 	_, err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
 	if err != nil {
@@ -717,6 +725,7 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 		chainBCCVConsumerChain, _          = cmd.Flags().GetBool(flagChainBCCVConsumerChain)
 		chainBTrustedNode, _               = cmd.Flags().GetBool(flagChainBTrustedNode)
 		chainBMemoPrefix, _                = cmd.Flags().GetString(flagChainBMemoPrefix)
+		chainBType, _                      = cmd.Flags().GetString(flagChainBType)
 	)
 
 	chainBGasMulti := new(big.Float)
@@ -787,6 +796,9 @@ func newHermesConfig(cmd *cobra.Command, args []string, customCfg string) (*herm
 	}
 	if chainBMemoPrefix != "" {
 		optChainB = append(optChainB, hermes.WithChainMemoPrefix(chainBMemoPrefix))
+	}
+	if chainBType != "" {
+		optChainB = append(optChainB, hermes.WithChainType(chainBType))
 	}
 
 	_, err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)

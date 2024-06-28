@@ -119,6 +119,7 @@ type (
 		TrustingPeriod   string         `toml:"trusting_period" json:"trusting_period"`
 		TrustThreshold   TrustThreshold `toml:"trust_threshold,inline" json:"trust_threshold"`
 		MemoPrefix       string         `toml:"memo_prefix" json:"memo_prefix"`
+		ChainType        string         `toml:"type" json:"type"`
 	}
 
 	// EventSource represents the chain event source into the Hermes config struct.
@@ -443,6 +444,13 @@ func WithChainTrustedNode(trustedNode bool) ChainOption {
 func WithChainMemoPrefix(memoPrefix string) ChainOption {
 	return func(c *Chain) {
 		c.MemoPrefix = memoPrefix
+	}
+}
+
+// WithChainType set the chain type into the Hermes config.
+func WithChainType(chainType string) ChainOption {
+	return func(c *Chain) {
+		c.ChainType = chainType
 	}
 }
 
