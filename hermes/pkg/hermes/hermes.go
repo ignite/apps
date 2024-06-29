@@ -181,17 +181,29 @@ type (
 	}
 )
 
+func defaultConfig() configs {
+	return configs{
+		flags:  make(Flags),
+		args:   make([]string, 0),
+		stdin:  os.Stdin,
+		stdout: os.Stdout,
+		stderr: os.Stderr,
+	}
+}
+
 // WithArgs assigns the command args.
 func WithArgs(args ...string) Option {
 	return func(c *configs) {
-		c.args = args
+		c.args = append(c.args, args...)
 	}
 }
 
 // WithFlags assigns the command flags.
 func WithFlags(flags Flags) Option {
 	return func(c *configs) {
-		c.flags = flags
+		for k, v := range flags {
+			c.flags[k] = v
+		}
 	}
 }
 
@@ -385,7 +397,7 @@ func (h *Hermes) Start(ctx context.Context, options ...Option) error {
 
 // Run runs a Hermes command using the options.
 func (h *Hermes) Run(ctx context.Context, options ...Option) error {
-	c := configs{}
+	c := defaultConfig()
 	for _, o := range options {
 		o(&c)
 	}

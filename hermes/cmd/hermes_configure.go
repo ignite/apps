@@ -94,6 +94,7 @@ const (
 	flagAutoRegisterCounterpartyPayee = "auto_register_counterparty_payee"
 	flagGenerateWallets               = "generate-wallets"
 	flagOverwriteConfig               = "overwrite-config"
+	flagChannelVersion                = "channel-version"
 
 	mnemonicEntropySize = 256
 )
@@ -180,6 +181,7 @@ func NewHermesConfigure() *cobra.Command {
 	c.Flags().Bool(flagAutoRegisterCounterpartyPayee, false, "auto register the counterparty payee on a destination chain to the relayer's address on the source chain")
 	c.Flags().Bool(flagGenerateWallets, false, "automatically generate wallets if they do not exist")
 	c.Flags().Bool(flagOverwriteConfig, false, "overwrite the current config if it already exists")
+	c.Flags().String(flagChannelVersion, "", "set the channel version for the create channel hermes command")
 
 	return c
 }
@@ -198,6 +200,7 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 		chainAFaucet, _    = cmd.Flags().GetString(flagChainAFaucet)
 		chainBPortID, _    = cmd.Flags().GetString(flagChainBPortID)
 		chainBFaucet, _    = cmd.Flags().GetString(flagChainBFaucet)
+		channelVersion, _  = cmd.Flags().GetString(flagChannelVersion)
 		customCfg          = getConfig(cmd)
 	)
 
@@ -370,18 +373,25 @@ func hermesConfigureHandler(cmd *cobra.Command, args []string) error {
 	// create and query channel
 	session.StartSpinner("Creating channel")
 	var (
-		bufChannel = bytes.Buffer{}
-		channel    = hermes.ConnectionResult{}
+		bufChannel     = bytes.Buffer{}
+		channel        = hermes.ConnectionResult{}
+		createChanOpts = []hermes.Option{
+			hermes.WithConfigFile(cfgPath),
+			hermes.WithStdOut(&bufChannel),
+			hermes.WithJSONOutput(),
+		}
 	)
+	if channelVersion != "" {
+		createChanOpts = append(createChanOpts, hermes.WithFlags(hermes.Flags{flagChannelVersion: channelVersion}))
+	}
+
 	if err := h.CreateChannel(
 		cmd.Context(),
 		chainAID,
 		connection.ASide.ConnectionID,
 		chainAPortID,
 		chainBPortID,
-		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&bufChannel),
-		hermes.WithJSONOutput(),
+		createChanOpts...,
 	); err != nil {
 		return err
 	}
