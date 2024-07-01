@@ -7,7 +7,7 @@ require (
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.0
-	github.com/ignite/cli/v28 v28.4.0
+	github.com/ignite/cli/v28 v28.3.0
 	github.com/ignite/ignite-files/hermes v1.10.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.1.0
