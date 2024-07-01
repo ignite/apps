@@ -1,5 +1,11 @@
 # Hermes App Changelog
 
+## Unreleased
+
+### Chore
+
+* [#114](https://github.com/ignite/apps/pull/114) Bump hermes binary to v1.10.0
+
 ## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.0)
 
 * Update app to support gRPC.
