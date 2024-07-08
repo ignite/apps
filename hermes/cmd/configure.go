@@ -29,6 +29,7 @@ const (
 	flagChainAAccountPrefix             = "chain-a-account-prefix"
 	flagChainAAddressType               = "chain-a-address-types"
 	flagChainAKeyName                   = "chain-a-key-name"
+	flagChainAKeyStoreType              = "chain-a-key-store-type"
 	flagChainAStorePrefix               = "chain-a-store-prefix"
 	flagChainADefaultGas                = "chain-a-default-gas"
 	flagChainAMaxGas                    = "chain-a-max-gas"
@@ -45,6 +46,8 @@ const (
 	flagChainACCVConsumerChain          = "chain-a-ccv-consumer-chain"
 	flagChainATrustedNode               = "chain-a-trusted-node"
 	flagChainAMemoPrefix                = "chain-a-memo-prefix"
+	flagChainAType                      = "chain-a-type"
+	flagChainASequentialBatchTx         = "chain-a-sequential-batch-tx"
 
 	flagChainBPortID                    = "chain-b-port-id"
 	flagChainBEventSourceMode           = "chain-b-event-source-mode"
@@ -54,6 +57,7 @@ const (
 	flagChainBAccountPrefix             = "chain-b-account-prefix"
 	flagChainBAddressType               = "chain-b-address-types"
 	flagChainBKeyName                   = "chain-b-key-name"
+	flagChainBKeyStoreType              = "chain-b-key-store-type"
 	flagChainBStorePrefix               = "chain-b-store-prefix"
 	flagChainBDefaultGas                = "chain-b-default-gas"
 	flagChainBMaxGas                    = "chain-b-max-gas"
@@ -70,6 +74,8 @@ const (
 	flagChainBCCVConsumerChain          = "chain-b-ccv-consumer-chain"
 	flagChainBTrustedNode               = "chain-b-trusted-node"
 	flagChainBMemoPrefix                = "chain-b-memo-prefix"
+	flagChainBType                      = "chain-b-type"
+	flagChainBSequentialBatchTx         = "chain-b-sequential-batch-tx"
 
 	flagTelemetryEnabled              = "telemetry-enabled"
 	flagTelemetryHost                 = "telemetry-host"
@@ -89,6 +95,7 @@ const (
 	flagAutoRegisterCounterpartyPayee = "auto_register_counterparty_payee"
 	flagGenerateWallets               = "generate-wallets"
 	flagOverwriteConfig               = "overwrite-config"
+	flagChannelVersion                = "channel-version"
 
 	mnemonicEntropySize = 256
 )
@@ -100,10 +107,8 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	session := cliui.New(cliui.StartSpinner())
+	session := cliui.New(cliui.StartSpinnerWithText("Generating Hermes config"))
 	defer session.End()
-
-	session.StartSpinner("Generating Hermes config")
 
 	var (
 		chainAID = args[0]
@@ -115,6 +120,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		chainAFaucet, _    = flags.GetString(flagChainAFaucet)
 		chainBPortID, _    = flags.GetString(flagChainBPortID)
 		chainBFaucet, _    = flags.GetString(flagChainBFaucet)
+		channelVersion, _  = flags.GetString(flagChannelVersion)
 		customCfg          = getConfig(flags)
 	)
 
@@ -140,6 +146,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 			return err
 		}
 	} else {
+		session.StopSpinner()
 		if err := session.AskConfirm(fmt.Sprintf(
 			"Hermes %s <-> %s config already exist at %s. Do you want to reuse this config file",
 			chainAID,
@@ -155,6 +162,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		}
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
 
 	h, err := hermes.New()
@@ -163,7 +171,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 	defer h.Cleanup()
 
-	session.StartSpinner("Verifying chain keys")
+	session.StartSpinner(fmt.Sprintf("Verifying chain A (%s) keys", chainAID))
 
 	if err := ensureAccount(
 		ctx,
@@ -178,6 +186,8 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	session.StartSpinner(fmt.Sprintf("Verifying chain B (%s) keys", chainBID))
+
 	if err := ensureAccount(
 		ctx,
 		session,
@@ -191,9 +201,8 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	session.StartSpinner("Creating clients")
-
 	// create client A
+	session.StartSpinner("Creating client A")
 	var (
 		bufClientAResult = bytes.Buffer{}
 		clientAResult    = hermes.ClientResult{}
@@ -212,6 +221,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Client '%s' created (%s -> %s)",
 		clientAResult.CreateClient.ClientID,
@@ -220,6 +230,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	))
 
 	// create client B
+	session.StartSpinner("Creating client B")
 	var (
 		bufClientBResult = bytes.Buffer{}
 		clientBResult    = hermes.ClientResult{}
@@ -238,15 +249,16 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Client %s' created (%s -> %s)",
 		clientBResult.CreateClient.ClientID,
 		chainBID,
 		chainAID,
 	))
-	session.StartSpinner("Creating connection")
 
 	// create connection
+	session.StartSpinner("Creating connection")
 	var (
 		bufConnection = bytes.Buffer{}
 		connection    = hermes.ConnectionResult{}
@@ -266,6 +278,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Connection '%s (%s) <-> %s (%s)' created",
 		chainAID,
@@ -273,22 +286,29 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		chainBID,
 		connection.BSide.ConnectionID,
 	))
-	session.StartSpinner("Creating channel")
 
 	// create and query channel
+	session.StartSpinner("Creating channel")
 	var (
-		bufChannel = bytes.Buffer{}
-		channel    = hermes.ConnectionResult{}
+		bufChannel     = bytes.Buffer{}
+		channel        = hermes.ConnectionResult{}
+		createChanOpts = []hermes.Option{
+			hermes.WithConfigFile(cfgPath),
+			hermes.WithStdOut(&bufChannel),
+			hermes.WithJSONOutput(),
+		}
 	)
+	if channelVersion != "" {
+		createChanOpts = append(createChanOpts, hermes.WithFlags(hermes.Flags{flagChannelVersion: channelVersion}))
+	}
+
 	if err := h.CreateChannel(
 		ctx,
 		chainAID,
 		connection.ASide.ConnectionID,
 		chainAPortID,
 		chainBPortID,
-		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdOut(&bufChannel),
-		hermes.WithJSONOutput(),
+		createChanOpts...,
 	); err != nil {
 		return err
 	}
@@ -296,6 +316,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf(
 		"Channel '%s (%s) <-> %s (%s)' created",
 		chainAID,
@@ -322,6 +343,9 @@ func ensureAccount(
 	if err != nil {
 		return err
 	}
+
+	session.StartSpinner(fmt.Sprintf("verifying %s balance", chainAddr))
+
 	chain, err := hCfg.Chains.Get(chainID)
 	if err != nil {
 		return err
@@ -338,10 +362,18 @@ func ensureAccount(
 			flagChainBFaucet)
 	}
 	if faucetAddr != "" {
-		_, err := chain.TryRetrieve(ctx, chainAddr, faucetAddr)
+		session.StartSpinner(fmt.Sprintf("requesting faucet balance for %s", chainAddr))
+		newBalance, err := chain.TryRetrieve(ctx, chainAddr, faucetAddr)
 		if err != nil {
 			return err
 		}
+
+		session.StopSpinner()
+		_ = session.Printf(
+			"%s %s\n",
+			color.Green.Sprint("New balance from faucet:"),
+			color.Yellow.Sprint(newBalance.String()),
+		)
 	}
 	return nil
 }
@@ -376,6 +408,7 @@ GetKey:
 	if keysChainResult.Wallet.Account == "" {
 		var mnemonic string
 		if !generateWallets {
+			session.StopSpinner()
 			if err := session.Ask(cliquiz.NewQuestion(
 				fmt.Sprintf(
 					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one:",
@@ -396,6 +429,8 @@ GetKey:
 			if err != nil {
 				return "", err
 			}
+
+			session.StopSpinner()
 			_ = session.Printf(
 				"%s %s\n",
 				color.Yellow.Sprint("New mnemonic generated:"),
@@ -421,11 +456,20 @@ GetKey:
 		if err := hermes.ValidateResult(bufKeysChainAdd.Bytes()); err != nil {
 			return "", err
 		}
-		_ = session.Println(color.Yellow.Sprintf("Chain %s key created", chainID))
+
+		session.StopSpinner()
+		_ = session.Println(color.Green.Sprintf("Chain %s key created", chainID))
 
 		goto GetKey
 	}
-	_ = session.Println(color.Green.Sprintf("Chain %s relayer wallet: %s", chainID, keysChainResult.Wallet.Account))
+
+	session.StopSpinner()
+	_ = session.Printf(
+		"%s %s\n",
+		color.Green.Sprintf("Chain %s relayer wallet:", chainID),
+		color.Yellow.Sprint(keysChainResult.Wallet.Account),
+	)
+
 	return keysChainResult.Wallet.Account, nil
 }
 
@@ -492,6 +536,7 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 		chainAAccountPrefix, _             = flags.GetString(flagChainAAccountPrefix)
 		chainAAddressType, _               = flags.GetString(flagChainAAddressType)
 		chainAKeyName, _                   = flags.GetString(flagChainAKeyName)
+		chainAKeyStoreType, _              = flags.GetString(flagChainAKeyStoreType)
 		chainAStorePrefix, _               = flags.GetString(flagChainAStorePrefix)
 		chainADefaultGas, _                = flags.GetUint64(flagChainADefaultGas)
 		chainAMaxGas, _                    = flags.GetUint64(flagChainAMaxGas)
@@ -507,6 +552,8 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 		chainACCVConsumerChain, _          = flags.GetBool(flagChainACCVConsumerChain)
 		chainATrustedNode, _               = flags.GetBool(flagChainATrustedNode)
 		chainAMemoPrefix, _                = flags.GetString(flagChainAMemoPrefix)
+		chainAType, _                      = flags.GetString(flagChainAType)
+		chainASequentialBatchTx, _         = flags.GetBool(flagChainASequentialBatchTx)
 	)
 
 	chainAGasMulti := new(big.Float)
@@ -518,6 +565,9 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	optChainA := []hermes.ChainOption{
 		hermes.WithChainTrustThreshold(chainATrustThresholdNumerator, chainATrustThresholdDenominator),
 		hermes.WithChainGasMultiplier(chainAGasMulti),
+		hermes.WithChainCCVConsumerChain(chainACCVConsumerChain),
+		hermes.WithChainTrustedNode(chainATrustedNode),
+		hermes.WithChainSequentialBatchTx(chainASequentialBatchTx),
 	}
 	if chainAEventSourceURL != "" {
 		optChainA = append(optChainA, hermes.WithChainEventSource(
@@ -537,6 +587,9 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	}
 	if chainAKeyName != "" {
 		optChainA = append(optChainA, hermes.WithChainKeyName(chainAKeyName))
+	}
+	if chainAKeyStoreType != "" {
+		optChainA = append(optChainA, hermes.WithChainKeyStoreType(chainAKeyStoreType))
 	}
 	if chainAStorePrefix != "" {
 		optChainA = append(optChainA, hermes.WithChainStorePrefix(chainAStorePrefix))
@@ -569,14 +622,11 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	if chainATrustingPeriod != "" {
 		optChainA = append(optChainA, hermes.WithChainTrustingPeriod(chainATrustingPeriod))
 	}
-	if chainACCVConsumerChain {
-		optChainA = append(optChainA, hermes.WithChainCCVConsumerChain(chainACCVConsumerChain))
-	}
-	if chainATrustedNode {
-		optChainA = append(optChainA, hermes.WithChainTrustedNode(chainATrustedNode))
-	}
 	if chainAMemoPrefix != "" {
 		optChainA = append(optChainA, hermes.WithChainMemoPrefix(chainAMemoPrefix))
+	}
+	if chainAType != "" {
+		optChainA = append(optChainA, hermes.WithChainType(chainAType))
 	}
 
 	_, err := c.AddChain(chainAID, chainARPCAddr, chainAGRPCAddr, optChainA...)
@@ -597,6 +647,7 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 		chainBAccountPrefix, _             = flags.GetString(flagChainBAccountPrefix)
 		chainBAddressType, _               = flags.GetString(flagChainBAddressType)
 		chainBKeyName, _                   = flags.GetString(flagChainBKeyName)
+		chainBKeyStoreType, _              = flags.GetString(flagChainBKeyStoreType)
 		chainBStorePrefix, _               = flags.GetString(flagChainBStorePrefix)
 		chainBDefaultGas, _                = flags.GetUint64(flagChainBDefaultGas)
 		chainBMaxGas, _                    = flags.GetUint64(flagChainBMaxGas)
@@ -612,6 +663,8 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 		chainBCCVConsumerChain, _          = flags.GetBool(flagChainBCCVConsumerChain)
 		chainBTrustedNode, _               = flags.GetBool(flagChainBTrustedNode)
 		chainBMemoPrefix, _                = flags.GetString(flagChainBMemoPrefix)
+		chainBType, _                      = flags.GetString(flagChainBType)
+		chainBSequentialBatchTx, _         = flags.GetBool(flagChainBSequentialBatchTx)
 	)
 
 	chainBGasMulti := new(big.Float)
@@ -623,6 +676,9 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	optChainB := []hermes.ChainOption{
 		hermes.WithChainTrustThreshold(chainBTrustThresholdNumerator, chainBTrustThresholdDenominator),
 		hermes.WithChainGasMultiplier(chainBGasMulti),
+		hermes.WithChainCCVConsumerChain(chainBCCVConsumerChain),
+		hermes.WithChainTrustedNode(chainBTrustedNode),
+		hermes.WithChainSequentialBatchTx(chainBSequentialBatchTx),
 	}
 	if chainBEventSourceURL != "" {
 		optChainB = append(optChainB, hermes.WithChainEventSource(
@@ -642,6 +698,9 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	}
 	if chainBKeyName != "" {
 		optChainB = append(optChainB, hermes.WithChainKeyName(chainBKeyName))
+	}
+	if chainBKeyStoreType != "" {
+		optChainB = append(optChainB, hermes.WithChainKeyStoreType(chainBKeyStoreType))
 	}
 	if chainBStorePrefix != "" {
 		optChainB = append(optChainB, hermes.WithChainStorePrefix(chainBStorePrefix))
@@ -674,14 +733,11 @@ func newHermesConfig(flags *pflag.FlagSet, args []string, customCfg string) (*he
 	if chainBTrustingPeriod != "" {
 		optChainB = append(optChainB, hermes.WithChainTrustingPeriod(chainBTrustingPeriod))
 	}
-	if chainBCCVConsumerChain {
-		optChainB = append(optChainB, hermes.WithChainCCVConsumerChain(chainBCCVConsumerChain))
-	}
-	if chainBTrustedNode {
-		optChainB = append(optChainB, hermes.WithChainTrustedNode(chainBTrustedNode))
-	}
 	if chainBMemoPrefix != "" {
 		optChainB = append(optChainB, hermes.WithChainMemoPrefix(chainBMemoPrefix))
+	}
+	if chainBType != "" {
+		optChainB = append(optChainB, hermes.WithChainType(chainBType))
 	}
 
 	_, err = c.AddChain(chainBID, chainBRPCAddr, chainBGRPCAddr, optChainB...)
