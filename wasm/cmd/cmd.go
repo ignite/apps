@@ -21,7 +21,10 @@ const (
 	statusScaffolding  = "Scaffolding..."
 	statusAddingConfig = "Adding config..."
 
-	defaultWasmVersion = "v0.50.0"
+	defaultSimulationGasLimit = 0
+	defaultSmartQueryGasLimit = 3_000_000
+	defaultMemoryCacheSize    = 100
+	defaultWasmVersion        = "v0.50.0"
 )
 
 // GetCommands returns the list of extension commands.
@@ -43,10 +46,9 @@ func GetCommands() []*plugin.Command {
 							Type:      plugin.FlagTypeString,
 						},
 						{
-							Name:      flagHome,
-							Usage:     "directory where the blockchain node is initialized",
-							Shorthand: "h",
-							Type:      plugin.FlagTypeString,
+							Name:  flagHome,
+							Usage: "directory where the blockchain node is initialized",
+							Type:  plugin.FlagTypeString,
 						},
 						{
 							Name:         flagSimulationGasLimit,
@@ -86,10 +88,9 @@ func GetCommands() []*plugin.Command {
 							Type:      plugin.FlagTypeString,
 						},
 						{
-							Name:      flagHome,
-							Usage:     "directory where the blockchain node is initialized",
-							Shorthand: "h",
-							Type:      plugin.FlagTypeString,
+							Name:  flagHome,
+							Usage: "directory where the blockchain node is initialized",
+							Type:  plugin.FlagTypeString,
 						},
 						{
 							Name:         flagSimulationGasLimit,
@@ -135,23 +136,35 @@ func getHome(flags *pflag.FlagSet) string {
 }
 
 func getWasmVersion(flags *pflag.FlagSet) string {
-	version, _ := flags.GetString(flagVersion)
+	version, err := flags.GetString(flagVersion)
+	if err != nil || version == "" {
+		version = defaultWasmVersion
+	}
 	version = strings.Replace(version, "v", "", 1)
 	return version
 }
 
 func getSimulationGasLimit(flags *pflag.FlagSet) uint64 {
-	simulationGasLimit, _ := flags.GetUint64(flagSimulationGasLimit)
+	simulationGasLimit, err := flags.GetUint64(flagSimulationGasLimit)
+	if err != nil || simulationGasLimit == 0 {
+		simulationGasLimit = defaultSimulationGasLimit
+	}
 	return simulationGasLimit
 }
 
 func getSmartQueryGasLimit(flags *pflag.FlagSet) uint64 {
-	smartQueryGasLimit, _ := flags.GetUint64(flagSmartQueryGasLimit)
+	smartQueryGasLimit, err := flags.GetUint64(flagSmartQueryGasLimit)
+	if err != nil || smartQueryGasLimit == 0 {
+		smartQueryGasLimit = defaultSmartQueryGasLimit
+	}
 	return smartQueryGasLimit
 }
 
 func getMemoryCacheSize(flags *pflag.FlagSet) uint64 {
-	memoryCacheSize, _ := flags.GetUint64(flagMemoryCacheSize)
+	memoryCacheSize, err := flags.GetUint64(flagMemoryCacheSize)
+	if err != nil || memoryCacheSize == 0 {
+		memoryCacheSize = defaultMemoryCacheSize
+	}
 	return memoryCacheSize
 }
 
