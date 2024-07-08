@@ -35,12 +35,6 @@ func GetCommands() []*plugin.Command {
 							Shorthand: "p",
 							Type:      plugin.FlagTypeString,
 						},
-						{
-							Name:         "local-da",
-							Usage:        "this flag does nothing but is kept for backward compatibility",
-							DefaultValue: "false",
-							Type:         plugin.FlagTypeBool,
-						},
 					},
 				},
 			},
