@@ -54,8 +54,7 @@ func TestWasm(t *testing.T) {
 		step.New(
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
-				err := env.IsAppServed(ctx, servers.API)
-				return err
+				return env.IsAppServed(ctx, servers.API)
 			}),
 			step.Exec(
 				envtest.IgniteApp,
