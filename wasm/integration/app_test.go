@@ -17,7 +17,7 @@ func TestWasm(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/wasm-app")
+		app         = env.Scaffold("github.com/apps/wasmapp")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
