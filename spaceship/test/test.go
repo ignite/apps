@@ -19,5 +19,4 @@ func main() {
 	appPath := os.Args[5]
 
 	ssh.New(user, password, host, port, appPath)
-
 }

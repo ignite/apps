@@ -15,8 +15,8 @@
 "app:hermes":
   - hermes/**/*
 
-"app:marketplace":
-  - marketplace/**/*
+"app:appregistry":
+  - appregistry/**/*
 
 "app:wasm":
   - wasm/**/*

@@ -3,6 +3,7 @@ module github.com/ignite/apps/rollkit
 go 1.22.0
 
 require (
+	cosmossdk.io/math v1.3.0
 	github.com/cometbft/cometbft v0.38.6
 	github.com/cosmos/cosmos-sdk v0.50.6
 	github.com/gobuffalo/genny/v2 v2.1.0
@@ -21,7 +22,6 @@ require (
 	cosmossdk.io/depinject v1.0.0-alpha.4 // indirect
 	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/log v1.3.1 // indirect
-	cosmossdk.io/math v1.3.0 // indirect
 	cosmossdk.io/store v1.1.0 // indirect
 	cosmossdk.io/x/tx v0.13.2 // indirect
 	dario.cat/mergo v1.0.0 // indirect

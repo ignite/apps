@@ -4,28 +4,20 @@
   "ignite": ">28.3.0",
   "dependencies": {},
   "cosmosSDK": ">0.50.4",
-  "features": [
-    "Scaffolder",
-    "CosmWasm"
-  ],
-  "wasm": false,
   "authors": [
     {
       "name": "Danilo Pantani",
-      "email": "",
-      "website": "",
       "github": "pantani"
     }
   ],
-  "repository": {
-    "url": "https://github.com/ignite/apps/tree/main/wasm"
-  },
-  "documentationUrl": "https://github.com/cosmos/gex",
+  "repositoryUrl": "https://github.com/ignite/apps",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/wasm/README.md",
   "license": {
     "name": "MIT",
-    "url": "github.com/ignite/apps/blob/main/LICENSE"
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
+    "scaffolder",
     "wasm",
     "cli",
     "cosmos-sdk",
@@ -34,19 +26,5 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ],
-  "socialMedia": {
-    "x": "",
-    "telegram": "",
-    "discord": "",
-    "reddit": "",
-    "website": ""
-  },
-  "donations": {
-    "cryptoAddresses": {
-      "cosmos": "",
-      "otherSupportedCryptos": ""
-    },
-    "fiatDonationLinks": ""
-  }
+  ]
 }

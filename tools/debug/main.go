@@ -7,6 +7,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/spf13/cobra"
 
+	appregistry "github.com/ignite/apps/appregistry/cmd"
 	chaininfo "github.com/ignite/apps/examples/chain-info/cmd"
 	flags "github.com/ignite/apps/examples/flags/cmd"
 	healthmonitor "github.com/ignite/apps/examples/health-monitor/cmd"
@@ -14,7 +15,6 @@ import (
 	hooks "github.com/ignite/apps/examples/hooks/cmd"
 	explorer "github.com/ignite/apps/explorer/cmd"
 	hermes "github.com/ignite/apps/hermes/cmd"
-	marketplace "github.com/ignite/apps/marketplace/cmd"
 	spaceship "github.com/ignite/apps/spaceship/cmd"
 	wasm "github.com/ignite/apps/wasm/cmd"
 )
@@ -38,7 +38,7 @@ func main() {
 	// Add apps with cobra commands.
 	rootCmd.AddCommand(
 		hermes.NewRelayer(),
-		marketplace.NewMarketplace(),
+		appregistry.NewAppRegistry(),
 		wasm.NewWasm(),
 		// Add cobra commands for debugging here.
 	)

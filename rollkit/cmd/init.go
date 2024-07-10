@@ -1,13 +1,16 @@
 package cmd
 
 import (
+	"math"
 	"os"
 	"path/filepath"
 
+	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto"
 	cmtjson "github.com/cometbft/cometbft/libs/json"
 	cmprivval "github.com/cometbft/cometbft/privval"
 	cmttypes "github.com/cometbft/cometbft/types"
+	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
@@ -17,6 +20,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 )
+
+const defaultValPower = 1
 
 func NewRollkitInit() *cobra.Command {
 	c := &cobra.Command{
@@ -41,22 +46,22 @@ func NewRollkitInit() *cobra.Command {
 				return err
 			}
 
-			if localDa, err := cmd.Flags().GetBool(flagLocalDa); err == nil && localDa {
-				igniteConfig, err := rc.Config()
-				if err != nil {
-					return err
-				}
+			// use val power to set validator power in ignite config.yaml
+			igniteConfig, err := rc.Config()
+			if err != nil {
+				return err
+			}
 
-				igniteConfig.Validators[0].Bonded = "1000000000stake"
-				for i, account := range igniteConfig.Accounts {
-					if account.Name == igniteConfig.Validators[0].Name {
-						igniteConfig.Accounts[i].Coins = []string{"10000000000000000000000000stake"}
-					}
+			coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
+			igniteConfig.Validators[0].Bonded = coins.String()
+			for i, account := range igniteConfig.Accounts {
+				if account.Name == igniteConfig.Validators[0].Name {
+					igniteConfig.Accounts[i].Coins = []string{coins.String()}
 				}
+			}
 
-				if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
-					return err
-				}
+			if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
+				return err
 			}
 
 			if err := rc.Init(cmd.Context(), chain.InitArgsAll); err != nil {
@@ -89,7 +94,7 @@ func NewRollkitInit() *cobra.Command {
 					Name:    "Rollkit Sequencer",
 					Address: pubKey.Address(),
 					PubKey:  pubKey,
-					Power:   1000,
+					Power:   defaultValPower,
 				},
 			}
 
@@ -102,7 +107,10 @@ func NewRollkitInit() *cobra.Command {
 	}
 
 	c.Flags().StringP(flagPath, "p", ".", "path of the app")
-	c.Flags().BoolP(flagLocalDa, "l", false, "use local-da (creates the expected genesis account for local-da)")
+
+	// deprecated flags
+	c.Flags().Bool("local-da", false, "this flag does nothing but is kept for backward compatibility")
+	c.Flags().MarkDeprecated("local-da", "this flag does nothing but is kept for backward compatibility")
 
 	return c
 }

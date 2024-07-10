@@ -9,6 +9,7 @@ go run tools/debug/main.go <COMMAND>
 ```
 
 e.g:
+
 ```shell
 go run tools/debug/main.go explorer <ARGS>
 ```
@@ -20,15 +21,17 @@ go run tools/debug/main.go hermes <ARGS>
 ## Developer instruction
 
 - Replace the app repo for a local folder into the `tools/debug/go.mod`.
+
 ```go.mod
 replace (
-	github.com/ignite/apps/explorer => ../../explorer
-	github.com/ignite/apps/hermes => ../../hermes
-	github.com/ignite/apps/<MY-APP> => ../../<MY-APP> 
+ github.com/ignite/apps/explorer => ../../explorer
+ github.com/ignite/apps/hermes => ../../hermes
+ github.com/ignite/apps/<MY-APP> => ../../<MY-APP> 
 )
 ```
 
 - Add the command to be debugged.
+
 ```go
 rootCmd.AddCommand(
     explorer.NewExplorer(),
