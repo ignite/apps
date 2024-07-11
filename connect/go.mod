@@ -5,7 +5,6 @@ go 1.22.0
 require (
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.4.0
-	github.com/spf13/cobra v1.8.0
 )
 
 require (
@@ -74,6 +73,7 @@ require (
 	github.com/skeema/knownhosts v1.2.1 // indirect
 	github.com/sourcegraph/annotate v0.0.0-20160123013949-f4cad6c6324d // indirect
 	github.com/sourcegraph/syntaxhighlight v0.0.0-20170531221838-bd320f5d308e // indirect
+	github.com/spf13/cobra v1.8.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	go.etcd.io/bbolt v1.3.8 // indirect
