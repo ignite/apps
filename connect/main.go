@@ -2,10 +2,13 @@ package main
 
 import (
 	"context"
-	"fmt"
+	"strings"
 
 	hplugin "github.com/hashicorp/go-plugin"
+
 	"github.com/ignite/apps/connect/cmd"
+
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
@@ -29,7 +32,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	args := c.OsArgs[2:]
 	switch args[0] {
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}
 }
 
