@@ -1,22 +1,43 @@
 package cmd
 
-import "github.com/spf13/cobra"
+import (
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+)
 
-// NewRollkit creates a new rollkit command that holds
-// some other sub commands related to Rollkit.
-func NewRollkit() *cobra.Command {
-	c := &cobra.Command{
-		Use:           "rollkit [command]",
-		Aliases:       []string{"r"},
-		Short:         "Ignite rollkit integration",
-		SilenceUsage:  true,
-		SilenceErrors: true,
+// GetCommands returns the list of app commands.
+func GetCommands() []*plugin.Command {
+	return []*plugin.Command{
+		{
+			Use:     "rollkit [command]",
+			Aliases: []string{"r"},
+			Short:   "Ignite rollkit integration",
+			Commands: []*plugin.Command{
+				{
+					Use:   "add",
+					Short: "Add rollkit support",
+					Long:  "Add rollkit support to your Cosmos SDK chain",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+					},
+				},
+				{
+					Use:   "init",
+					Short: "Init rollkit support",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+					},
+				},
+			},
+		},
 	}
-
-	// add sub commands.
-	c.AddCommand(
-		NewRollkitAdd(),
-		NewRollkitInit(),
-	)
-	return c
 }
