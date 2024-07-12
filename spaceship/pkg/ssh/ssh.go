@@ -3,59 +3,151 @@ package ssh
 import (
 	"context"
 	"fmt"
-	"log"
 	"net/url"
-	"os"
+	"os/exec"
 	"path/filepath"
-	"time"
+	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"golang.org/x/crypto/ssh"
-	"golang.org/x/sync/errgroup"
+	"github.com/melbahja/goph"
+	"github.com/pkg/sftp"
 )
 
-const chainAppName = "chain-app"
+const (
+	igniteAppName = "ignite"
+	workdir       = "spaceship"
+)
+
+var (
+	igniteWorkdir = filepath.Join(workdir, "ignite")
+	igniteBinary  = filepath.Join(igniteWorkdir, "ignite")
+)
 
 type SSH struct {
-	username   string
-	password   string
-	host       string
-	port       string
-	binaryPath string
-	client     *ssh.Client
+	username    string
+	password    string
+	host        string
+	port        string
+	rawKey      string
+	key         string
+	keyPassword string
+	client      *goph.Client
 }
 
-// NewFromURI creates a new ssh object from a URI URL.
-func NewFromURI(uri, binaryPath string) (*SSH, error) {
-	// parse the URI.
-	parsedURL, err := url.Parse(uri)
-	if err != nil {
-		return nil, errors.Wrapf(err, "Error parsing URL %s", uri)
-	}
-	var (
-		host     = parsedURL.Hostname()
-		port     = parsedURL.Port()
-		username = ""
-		password = ""
-	)
+// Option configures ssh config.
+type Option func(*SSH) error
 
-	// extract user information.
-	if parsedURL.User != nil {
-		username = parsedURL.User.Username()
-		password, _ = parsedURL.User.Password()
+// WithUser set SSH username.
+func WithUser(username string) Option {
+	return func(o *SSH) error {
+		o.username = strings.TrimSpace(username)
+		return nil
 	}
-	return New(username, password, host, port, binaryPath), nil
+}
+
+// WithPassword set SSH password.
+func WithPassword(password string) Option {
+	return func(o *SSH) error {
+		o.password = strings.TrimSpace(password)
+		return nil
+	}
+}
+
+// WithPort set SSH port.
+func WithPort(port string) Option {
+	return func(o *SSH) error {
+		o.port = strings.TrimSpace(port)
+		return nil
+	}
+}
+
+// WithRawKey set SSH raw key.
+func WithRawKey(rawKey string) Option {
+	return func(o *SSH) error {
+		o.rawKey = strings.TrimSpace(rawKey)
+		return nil
+	}
+}
+
+// WithKey set SSH key.
+func WithKey(key string) Option {
+	return func(o *SSH) error {
+		o.key = strings.TrimSpace(key)
+		return nil
+	}
+}
+
+// WithKeyPassword set SSH key password.
+func WithKeyPassword(keyPassword string) Option {
+	return func(o *SSH) error {
+		o.keyPassword = strings.TrimSpace(keyPassword)
+		return nil
+	}
+}
+
+// WithURI set SSH URI.
+func WithURI(uri string) Option {
+	return func(o *SSH) error {
+		uri = strings.TrimSpace(uri)
+		parsedURL, err := url.Parse(uri)
+		if err != nil {
+			return errors.Wrapf(err, "error parsing URI %s", uri)
+		}
+		o.host = parsedURL.Hostname()
+		o.port = parsedURL.Port()
+		o.username = ""
+		o.password = ""
+
+		// extract user information.
+		if parsedURL.User != nil {
+			o.username = parsedURL.User.Username()
+			o.password, _ = parsedURL.User.Password()
+		}
+		return nil
+	}
+}
+
+func (s *SSH) validate() error {
+	switch {
+	case s.username == "":
+		return fmt.Errorf("ssh username is required")
+	case s.key != "" && s.rawKey != "":
+		return errors.New("ssh key and raw key are both set")
+	case s.key != "" && s.password != "":
+		return errors.New("ssh key and password are both set")
+	case s.rawKey != "" && s.password != "":
+		return errors.New("ssh raw key and password are both set")
+	default:
+		return nil
+	}
+}
+
+func (s *SSH) auth() (goph.Auth, error) {
+	switch {
+	case s.rawKey != "":
+		return goph.RawKey(s.rawKey, s.keyPassword)
+	case s.key != "":
+		return goph.Key(s.key, s.keyPassword)
+	case s.password != "":
+		return goph.Password(s.password), nil
+	default:
+		return goph.KeyboardInteractive(s.password), nil
+	}
 }
 
 // New creates a new ssh object.
-func New(username, password, host, port, binaryPath string) *SSH {
-	return &SSH{
-		username:   username,
-		password:   password,
-		host:       host,
-		port:       port,
-		binaryPath: binaryPath,
+func New(host string, options ...Option) (*SSH, error) {
+	s := &SSH{
+		username: "root",
+		host:     host,
+		port:     "22",
 	}
+	for _, apply := range options {
+		if err := apply(s); err != nil {
+			return nil, err
+		}
+	}
+	return s, s.validate()
 }
 
 // Close closes the SSH client.
@@ -64,79 +156,77 @@ func (s *SSH) Close() error {
 }
 
 // Connect connects the SSH client.
-func (s *SSH) Connect() (err error) {
-	// SSH connection setup
-	config := &ssh.ClientConfig{
-		User:            s.username,
-		Auth:            []ssh.AuthMethod{ssh.Password(s.password)},
-		HostKeyCallback: ssh.InsecureIgnoreHostKey(),
-		Timeout:         10 * time.Second,
+func (s *SSH) Connect(ctx context.Context) error {
+	auth, err := s.auth()
+	if err != nil {
+		return err
+	}
+	s.client, err = goph.New(s.username, s.host, auth)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to connect to %v", s)
 	}
 
-	// Establish SSH connection
-	s.client, err = ssh.Dial("tcp", fmt.Sprintf("%s:%s", s.host, s.port), config)
+	return s.ensureEnvironment(ctx)
+}
+
+func (s *SSH) ensureEnvironment(ctx context.Context) error {
+	sftp, err := s.client.NewSftp()
 	if err != nil {
-		return errors.Wrapf(err, "Failed to connect to %s:%s", s.host, s.port)
+		return err
+	}
+	if err := s.ensureHomeFolder(sftp); err != nil {
+		return err
+	}
+	if err := s.ensureIgniteBin(ctx, sftp); err != nil {
+		return err
 	}
 	return nil
 }
 
-func (s *SSH) NewSession() (*ssh.Session, error) {
-	return s.client.NewSession()
-}
-
-func (s *SSH) RunApp() error {
-	// create a new session for running the application.
-	runSession, err := s.NewSession()
-	if err != nil {
-		return errors.Wrap(err, "failed to create SSH session for running app")
-	}
-	defer runSession.Close()
-
-	// run the application on the remote server.
-	if err := runSession.Run(fmt.Sprintf("./%s", chainAppName)); err != nil {
-		return errors.Wrap(err, "failed to run app")
+func (s *SSH) ensureHomeFolder(sftp *sftp.Client) error {
+	if err := sftp.MkdirAll(igniteWorkdir); err != nil {
+		return errors.Wrapf(err, "failed to create workdir %s", igniteWorkdir)
 	}
 	return nil
 }
 
-func (s *SSH) SendBinary(ctx context.Context) error {
-	// create a new SSH session.
-	session, err := s.NewSession()
-	if err != nil {
-		return errors.Wrap(err, "failed to create SSH session")
-	}
-	defer session.Close()
-
-	// read the built application.
-	appData, err := os.ReadFile(filepath.Join(filepath.Dir(s.binaryPath), chainAppName))
-	if err != nil {
-		log.Fatalf("Failed to read built app: %s", err)
-	}
-
-	// start SCP process.
-	errg, ctx := errgroup.WithContext(ctx)
-	errg.Go(func() error {
-		w, err := session.StdinPipe()
-		if err != nil {
-			return err
-		}
-		defer w.Close()
-		if _, err := fmt.Fprintln(w, "C0755", len(appData), chainAppName); err != nil {
-			return err
-		}
-		if _, err := w.Write(appData); err != nil {
-			return err
-		}
-		_, err = fmt.Fprintln(w, "\x00")
+func (s *SSH) ensureIgniteBin(ctx context.Context, sftp *sftp.Client) error {
+	if err := s.SendBinary(igniteAppName, igniteWorkdir); err != nil {
 		return err
-	})
-	if err := errg.Wait(); err != nil {
+	}
+	if err := sftp.Chmod(igniteBinary, 0o755); err != nil {
 		return err
 	}
 
-	if err := session.Run("/usr/bin/scp -tr ."); err != nil {
-		return errors.Wrap(err, "Failed to transfer applo")
+	cmd, err := s.client.CommandContext(ctx, igniteBinary, "-h")
+	if err != nil {
+		return err
+	}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return err
+	}
+	if len(out) == 0 {
+		return errors.New("ignite binary doesn't exist")
+	}
+	return nil
+}
+
+func (s *SSH) SendFile(srcPath, dstPath string) error {
+	srcPath, err := filepath.Abs(srcPath)
+	if err != nil {
+		return err
+	}
+	return s.client.Upload(srcPath, filepath.Join(dstPath, filepath.Base(srcPath)))
+}
+
+func (s *SSH) SendBinary(binaryName, dstPath string) error {
+	path, err := exec.LookPath(binaryName)
+	if err != nil {
+		return err
+	}
+	if err := s.client.Upload(path, filepath.Join(dstPath, binaryName)); err != nil {
+		return err
 	}
 	return nil
 }
