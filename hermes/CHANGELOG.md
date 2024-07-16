@@ -2,9 +2,10 @@
 
 ## Unreleased
 
-### Chore
+## [`v0.2.4`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.4)
 
 * [#114](https://github.com/ignite/apps/pull/114) Bump hermes binary to v1.10.0
+* [#119](https://github.com/ignite/apps/pull/119) fix: update relayer command path
 
 ## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.0)
 
