@@ -484,8 +484,9 @@ func TestCustomIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(queryOutput.Bytes(), &queryResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", queryOutput.String())
+				out := queryOutput.Bytes()
+				if err := json.Unmarshal(out, &queryResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				if len(queryResponse.Channels) == 0 ||
 					len(queryResponse.Channels[0].ConnectionHops) == 0 {
@@ -534,8 +535,9 @@ func TestCustomIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(txOutput.Bytes(), &txResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", txOutput.String())
+				out := txOutput.Bytes()
+				if err := json.Unmarshal(out, &txResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				return cmdrunner.New().Run(ctx, step.New(
 					step.Exec(
@@ -594,8 +596,9 @@ func TestCustomIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(postOutput.Bytes(), &postResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", postOutput.String())
+				out := postOutput.Bytes()
+				if err := json.Unmarshal(out, &postResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				if len(postResponse.Post) != 1 {
 					return errors.Errorf("invalid posts count %d", len(postResponse.Post))
@@ -745,8 +748,9 @@ func TestTransferIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(queryOutput.Bytes(), &queryResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", queryOutput.String())
+				out := queryOutput.Bytes()
+				if err := json.Unmarshal(out, &queryResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				if len(queryResponse.Channels) == 0 ||
 					len(queryResponse.Channels[0].ConnectionHops) == 0 {
@@ -796,8 +800,9 @@ func TestTransferIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(txOutput.Bytes(), &txResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", txOutput.String())
+				out := txOutput.Bytes()
+				if err := json.Unmarshal(out, &txResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				return cmdrunner.New().Run(ctx, step.New(
 					step.Exec(
@@ -857,8 +862,9 @@ func TestTransferIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(balanceOutput.Bytes(), &balanceResponse); err != nil {
-					return errors.Wrapf(err, "unmarshalling tx response: %s", balanceOutput.String())
+				out := balanceOutput.Bytes()
+				if err := json.Unmarshal(out, &balanceResponse); err != nil {
+					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
 				if balanceResponse.Balances.Empty() {
 					return errors.Errorf("empty balances")
