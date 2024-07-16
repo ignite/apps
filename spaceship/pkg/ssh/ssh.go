@@ -17,9 +17,7 @@ import (
 )
 
 const (
-	goAppName     = "go"
-	igniteAppName = "ignite"
-	workdir       = "spaceship"
+	workdir = "spaceship"
 )
 
 type SSH struct {
@@ -150,14 +148,6 @@ func (s *SSH) Bin() string {
 
 func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
-}
-
-func (s *SSH) Ignite() string {
-	return filepath.Join(s.Bin(), igniteAppName)
-}
-
-func (s *SSH) Go() string {
-	return filepath.Join(s.Bin(), goAppName)
 }
 
 func (s *SSH) validate() error {
@@ -305,16 +295,4 @@ func (s *SSH) UploadBinary(srcPath string) (string, error) {
 func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {
 	path := s.Home()
 	return path, s.Upload(ctx, srcPath, path)
-}
-
-func (s *SSH) RunIgniteCommand(ctx context.Context, args ...string) (string, error) {
-	cmd, err := s.client.CommandContext(ctx, s.Ignite(), args...)
-	if err != nil {
-		return "", err
-	}
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
-	return string(out), nil
 }
