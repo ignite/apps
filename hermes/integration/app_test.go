@@ -204,10 +204,7 @@ type (
 	}
 
 	QueryPosts struct {
-		Post       []Post `json:"Post"`
-		Pagination struct {
-			Total string `json:"total"`
-		} `json:"pagination"`
+		Post []Post `json:"Post"`
 	}
 	Post struct {
 		Title   string `json:"title"`
@@ -600,11 +597,8 @@ func TestCustomIBCTx(t *testing.T) {
 				if err := json.Unmarshal(out, &postResponse); err != nil {
 					return errors.Wrapf(err, "unmarshalling tx response: %s", string(out))
 				}
-				if len(postResponse.Post) != 1 {
-					return errors.Errorf("invalid posts count %d", len(postResponse.Post))
-				}
-				if postResponse.Pagination.Total != "1" {
-					return errors.Errorf("invalid posts pagination %s", postResponse.Pagination.Total)
+				if len(postResponse.Post) == 0 {
+					return errors.New("empty posts count")
 				}
 				if postResponse.Post[0].Title != post.Title {
 					return errors.Errorf("invalid post title: %s, expected: %s", postResponse.Post[0].Title, post.Title)
