@@ -201,7 +201,7 @@ func (s *SSH) Close() error {
 }
 
 // Connect connects the SSH client.
-func (s *SSH) Connect(ctx context.Context) error {
+func (s *SSH) Connect() error {
 	auth, err := s.auth()
 	if err != nil {
 		return err
@@ -217,10 +217,10 @@ func (s *SSH) Connect(ctx context.Context) error {
 		return err
 	}
 
-	return s.ensureEnvironment(ctx)
+	return s.ensureEnvironment()
 }
 
-func (s *SSH) ensureEnvironment(ctx context.Context) error {
+func (s *SSH) ensureEnvironment() error {
 	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
 		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
 	}
@@ -230,22 +230,22 @@ func (s *SSH) ensureEnvironment(ctx context.Context) error {
 	if err := s.sftpClient.MkdirAll(s.Source()); err != nil {
 		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
 	}
-	if err := s.ensureLocalBin(ctx, igniteAppName); err != nil {
+	if err := s.ensureLocalBin(igniteAppName); err != nil {
 		return errors.Wrapf(err, "failed to add ignite binary")
 	}
-	if err := s.ensureLocalBin(ctx, goAppName); err != nil {
+	if err := s.ensureLocalBin(goAppName); err != nil {
 		return errors.Wrapf(err, "failed to add go binary")
 	}
 	return nil
 }
 
-func (s *SSH) ensureLocalBin(ctx context.Context, name string) error {
+func (s *SSH) ensureLocalBin(name string) error {
 	// find ignite binary path
 	path, err := exec.LookPath(name)
 	if err != nil {
 		return err
 	}
-	_, err = s.UploadBinary(ctx, path)
+	_, err = s.UploadBinary(path)
 	if err != nil {
 		return err
 	}
@@ -299,7 +299,7 @@ func (s *SSH) UploadFile(filePath, dstPath string) error {
 	return s.client.Upload(srcPath, dstPath)
 }
 
-func (s *SSH) UploadBinary(ctx context.Context, srcPath string) (string, error) {
+func (s *SSH) UploadBinary(srcPath string) (string, error) {
 	var (
 		filename = filepath.Base(srcPath)
 		binPath  = filepath.Join(s.Bin(), filename)
@@ -311,19 +311,6 @@ func (s *SSH) UploadBinary(ctx context.Context, srcPath string) (string, error) 
 	// give binary permission
 	if err := s.sftpClient.Chmod(binPath, 0o755); err != nil {
 		return "", err
-	}
-
-	// check if the binary exist
-	cmd, err := s.client.CommandContext(ctx, binPath, "-h")
-	if err != nil {
-		return "", err
-	}
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		return "", err
-	}
-	if len(out) == 0 {
-		return "", errors.Errorf("%s binary doesn't exist", binPath)
 	}
 	return binPath, nil
 }

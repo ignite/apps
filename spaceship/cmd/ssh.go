@@ -28,7 +28,7 @@ func ExecuteSSHDevelopment(ctx context.Context, chain *plugin.ChainInfo) error {
 	if err != nil {
 		return err
 	}
-	if err := c.Connect(ctx); err != nil {
+	if err := c.Connect(); err != nil {
 		return err
 	}
 	defer c.Close()
@@ -84,12 +84,12 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 	if err != nil {
 		return err
 	}
-	if err := c.Connect(ctx); err != nil {
+	if err := c.Connect(); err != nil {
 		return err
 	}
 	defer c.Close()
 
-	binPath, err := c.UploadBinary(ctx, chainBin)
+	binPath, err := c.UploadBinary(chainBin)
 	if err != nil {
 		return err
 	}
