@@ -21,6 +21,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/xast"
 	yamlmap "github.com/ignite/cli/v28/ignite/pkg/yaml"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
@@ -37,12 +38,7 @@ var (
 	marsConfig = v1.Config{
 		Config: base.Config{
 			Version: 1,
-			Build: base.Build{
-				Proto: base.Proto{
-					Path:            "proto",
-					ThirdPartyPaths: []string{"third_party/proto", "proto_vendor"},
-				},
-			},
+			Build:   base.Build{Proto: base.Proto{Path: "proto"}},
 			Accounts: []base.Account{
 				{
 					Name:     "alice",
@@ -88,12 +84,7 @@ var (
 	earthConfig = v1.Config{
 		Config: base.Config{
 			Version: 1,
-			Build: base.Build{
-				Proto: base.Proto{
-					Path:            "proto",
-					ThirdPartyPaths: []string{"third_party/proto", "proto_vendor"},
-				},
-			},
+			Build:   base.Build{Proto: base.Proto{Path: "proto"}},
 			Accounts: []base.Account{
 				{
 					Name:     "alice",
@@ -139,58 +130,60 @@ var (
 
 	nameOnRecvIbcPostPacket = "OnRecvIbcPostPacket"
 	funcOnRecvIbcPostPacket = `
-	packetAck.PostId, err = k.PostSeq.Next(ctx)
-	if err != nil {
+	if err := data.ValidateBasic(); err != nil {
 		return packetAck, err
 	}
-	return packetAck, k.Post.Set(ctx, packetAck.PostId, types.Post{Title: data.Title, Content: data.Content})`
+
+	packetAck.PostId = k.AppendPost(ctx,
+		types.Post{
+			Title:   data.Title,
+			Content: data.Content,
+		},
+	)
+	return packetAck, nil`
 
 	nameOnAcknowledgementIbcPostPacket = "OnAcknowledgementIbcPostPacket"
 	funcOnAcknowledgementIbcPostPacket = `
 	switch dispatchedAck := ack.Response.(type) {
 	case *channeltypes.Acknowledgement_Error:
-		// We will not treat acknowledgment error in this tutorial
 		return nil
 	case *channeltypes.Acknowledgement_Result:
-		// Decode the packet acknowledgment
 		var packetAck types.IbcPostPacketAck
 		if err := types.ModuleCdc.UnmarshalJSON(dispatchedAck.Result, &packetAck); err != nil {
-			// The counter-party module doesn't implement the correct acknowledgment format
 			return errors.New("cannot unmarshal acknowledgment")
 		}
 
-		seq, err := k.SentPostSeq.Next(ctx)
-		if err != nil {
-			return err
-		}
-
-		return k.SentPost.Set(ctx, seq,
+		k.AppendSentPost(ctx,
 			types.SentPost{
 				PostId: packetAck.PostId,
 				Title:  data.Title,
 				Chain:  packet.DestinationPort + "-" + packet.DestinationChannel,
 			},
 		)
+
+		return nil
 	default:
 		return errors.New("the counter-party module does not implement the correct acknowledgment format")
 	}`
 
 	nameOnTimeoutIbcPostPacket = "OnTimeoutIbcPostPacket"
 	funcOnTimeoutIbcPostPacket = `
-	seq, err := k.TimeoutPostSeq.Next(ctx)
-	if err != nil {
-		return err
-	}
-
-	return k.TimeoutPost.Set(ctx, seq,
+	k.AppendTimeoutPost(ctx,
 		types.TimeoutPost{
 			Title: data.Title,
 			Chain: packet.DestinationPort + "-" + packet.DestinationChannel,
 		},
-	)`
+	)
+	return nil`
 )
 
 type (
+	TxResponse struct {
+		Code   int
+		RawLog string `json:"raw_log"`
+		TxHash string `json:"txhash"`
+	}
+
 	QueryChannels struct {
 		Channels []struct {
 			ChannelId      string   `json:"channel_id"`
@@ -208,6 +201,17 @@ type (
 
 	QueryBalances struct {
 		Balances sdk.Coins `json:"balances"`
+	}
+
+	QueryPosts struct {
+		Post       []Post `json:"Post"`
+		Pagination struct {
+			Total string `json:"total"`
+		} `json:"pagination"`
+	}
+	Post struct {
+		Title   string `json:"title"`
+		Content string `json:"content"`
 	}
 )
 
@@ -267,8 +271,6 @@ func runChain(
 }
 
 func TestCustomIBCTx(t *testing.T) {
-	t.Skip("skip till new CLI version > v28.4.0 released")
-
 	var (
 		name        = "blog"
 		env         = envtest.New(t)
@@ -382,17 +384,16 @@ func TestCustomIBCTx(t *testing.T) {
 		)),
 	))
 
-	// wait for CLI version > v28.4.0
-	// ibcPostPath := filepath.Join(app.SourcePath(), "x/blog/keeper/ibc_post.go")
-	// content, err := os.ReadFile(ibcPostPath)
-	// require.NoError(t, err)
-	// fileContent, err := xast.ModifyFunction(string(content), nameOnRecvIbcPostPacket, xast.ReplaceFuncBody(funcOnRecvIbcPostPacket))
-	// require.NoError(t, err)
-	// fileContent, err = xast.ModifyFunction(fileContent, nameOnAcknowledgementIbcPostPacket, xast.ReplaceFuncBody(funcOnAcknowledgementIbcPostPacket))
-	// require.NoError(t, err)
-	// fileContent, err = xast.ModifyFunction(fileContent, nameOnTimeoutIbcPostPacket, xast.ReplaceFuncBody(funcOnTimeoutIbcPostPacket))
-	// require.NoError(t, err)
-	// require.NoError(t, os.WriteFile(ibcPostPath, []byte(fileContent), 0o644))
+	ibcPostPath := filepath.Join(app.SourcePath(), "x/blog/keeper/ibc_post.go")
+	content, err := os.ReadFile(ibcPostPath)
+	require.NoError(t, err)
+	fileContent, err := xast.ModifyFunction(string(content), nameOnRecvIbcPostPacket, xast.ReplaceFuncBody(funcOnRecvIbcPostPacket))
+	require.NoError(t, err)
+	fileContent, err = xast.ModifyFunction(fileContent, nameOnAcknowledgementIbcPostPacket, xast.ReplaceFuncBody(funcOnAcknowledgementIbcPostPacket))
+	require.NoError(t, err)
+	fileContent, err = xast.ModifyFunction(fileContent, nameOnTimeoutIbcPostPacket, xast.ReplaceFuncBody(funcOnTimeoutIbcPostPacket))
+	require.NoError(t, err)
+	require.NoError(t, os.WriteFile(ibcPostPath, []byte(fileContent), 0o644))
 
 	// serve both chains.
 	ports, err := availableport.Find(
@@ -500,11 +501,11 @@ func TestCustomIBCTx(t *testing.T) {
 
 	var (
 		sender     = "alice"
+		txResponse TxResponse
 		txOutput   = &bytes.Buffer{}
-		txResponse struct {
-			Code   int
-			RawLog string `json:"raw_log"`
-			TxHash string `json:"txhash"`
+		post       = Post{
+			Title:   "Hello",
+			Content: "Hello Mars, I'm Alice from Earth",
 		}
 	)
 
@@ -518,8 +519,8 @@ func TestCustomIBCTx(t *testing.T) {
 				"send-ibc-post",
 				"blog",
 				"channel-0",
-				"Hello",
-				"Hello Mars, I'm Alice from Earth",
+				post.Title,
+				post.Content,
 				"--from", sender,
 				"--node", earthRPC,
 				"--home", earthHome,
@@ -573,12 +574,12 @@ func TestCustomIBCTx(t *testing.T) {
 		"tx failed code=%d log=%s", txResponse.Code, txResponse.RawLog)
 
 	var (
-		balanceOutput   = &bytes.Buffer{}
-		balanceResponse QueryBalances
+		postOutput   = &bytes.Buffer{}
+		postResponse QueryPosts
 	)
 	env.Must(env.Exec("check ibc balance", step.NewSteps(
 		step.New(
-			step.Stdout(balanceOutput),
+			step.Stdout(postOutput),
 			step.Exec(
 				app.Binary(),
 				"q",
@@ -593,14 +594,20 @@ func TestCustomIBCTx(t *testing.T) {
 				if execErr != nil {
 					return execErr
 				}
-				if err := json.Unmarshal(balanceOutput.Bytes(), &balanceResponse); err != nil {
+				if err := json.Unmarshal(postOutput.Bytes(), &postResponse); err != nil {
 					return errors.Errorf("unmarshalling tx response: %w", err)
 				}
-				if balanceResponse.Balances.Empty() {
-					return errors.Errorf("empty balances")
+				if len(postResponse.Post) != 1 {
+					return errors.Errorf("invalid posts count %s", len(postResponse.Post))
 				}
-				if !strings.HasPrefix(balanceResponse.Balances[0].Denom, "ibc/") {
-					return errors.Errorf("invalid ibc balance: %v", balanceResponse.Balances[0])
+				if postResponse.Pagination.Total != "1" {
+					return errors.Errorf("invalid posts pagination %s", postResponse.Pagination.Total)
+				}
+				if postResponse.Post[0].Title != post.Title {
+					return errors.Errorf("invalid post title: %s, expected: %s", postResponse.Post[0].Title, post.Title)
+				}
+				if postResponse.Post[0].Content != post.Content {
+					return errors.Errorf("invalid post content: %s, expected: %s", postResponse.Post[0].Content, post.Content)
 				}
 				return nil
 			}),
