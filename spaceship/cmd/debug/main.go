@@ -38,7 +38,7 @@ func main() {
 				fmt.Fprintln(os.Stderr, err)
 				return
 			}
-		case "prod":
+		case "deploy":
 			if err := cmd.ExecuteSSHDeploy(ctx, chainInfo); err != nil {
 				fmt.Fprintln(os.Stderr, err)
 				return
