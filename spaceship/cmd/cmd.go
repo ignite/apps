@@ -10,8 +10,18 @@ func GetCommands() []*plugin.Command {
 			Short: "spaceship is an awesome Ignite application!",
 			Commands: []*plugin.Command{
 				{
-					Use:   "hello",
-					Short: "Say hello to the world of ignite!",
+					Use:   "ssh",
+					Short: "deploy your chain trough ssh",
+					Commands: []*plugin.Command{
+						{
+							Use:   "dev",
+							Short: "deploy your chain into a development mode",
+						},
+						{
+							Use:   "deploy",
+							Short: "deploy your chain into a production mode",
+						},
+					},
 				},
 			},
 		},

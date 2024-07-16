@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/cmd"
@@ -19,16 +20,28 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	}, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.ClientAPI) error {
+	chainInfo, err := api.GetChainInfo(ctx)
+	if err != nil {
+		return errors.Errorf("failed to get chain info: %s", err)
+	}
+
 	// Remove the first two elements "ignite" and "spaceship" from OsArgs.
 	args := c.OsArgs[2:]
 	switch args[0] {
 	case "aws":
 		return cmd.ExecuteAWS(ctx, c)
 	case "ssh":
-		return cmd.ExecuteSSH(ctx, c)
+		switch args[1] {
+		case "dev":
+			return cmd.ExecuteSSHDevelopment(ctx, chainInfo)
+		case "deploy":
+			return cmd.ExecuteSSHDeploy(ctx, chainInfo)
+		default:
+			return fmt.Errorf("unknown ssh command: %s", args[1])
+		}
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return fmt.Errorf("unknown command: %s", args[0])
 	}
 }
 

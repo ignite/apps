@@ -4,23 +4,22 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
+	"golang.org/x/sync/errgroup"
 )
 
 const (
+	goAppName     = "go"
 	igniteAppName = "ignite"
 	workdir       = "spaceship"
-)
-
-var (
-	igniteWorkdir = filepath.Join(workdir, "ignite")
-	igniteBinary  = filepath.Join(igniteWorkdir, "ignite")
 )
 
 type SSH struct {
@@ -31,7 +30,9 @@ type SSH struct {
 	rawKey      string
 	key         string
 	keyPassword string
+	workspace   string
 	client      *goph.Client
+	sftpClient  *sftp.Client
 }
 
 // Option configures ssh config.
@@ -85,26 +86,82 @@ func WithKeyPassword(keyPassword string) Option {
 	}
 }
 
-// WithURI set SSH URI.
-func WithURI(uri string) Option {
+// WithWorkspace set SSH workspace.
+func WithWorkspace(workspace string) Option {
 	return func(o *SSH) error {
-		uri = strings.TrimSpace(uri)
-		parsedURL, err := url.Parse(uri)
-		if err != nil {
-			return errors.Wrapf(err, "error parsing URI %s", uri)
-		}
-		o.host = parsedURL.Hostname()
-		o.port = parsedURL.Port()
-		o.username = ""
-		o.password = ""
-
-		// extract user information.
-		if parsedURL.User != nil {
-			o.username = parsedURL.User.Username()
-			o.password, _ = parsedURL.User.Password()
-		}
+		o.workspace = strings.TrimSpace(workspace)
 		return nil
 	}
+}
+
+// New creates a new ssh object.
+func New(host string, options ...Option) (*SSH, error) {
+	host, port, username, password, err := parseURI(host)
+	if err != nil {
+		return nil, err
+	}
+	s := &SSH{
+		username:  username,
+		host:      host,
+		port:      port,
+		password:  password,
+		workspace: randstr.Runes(10),
+	}
+	for _, apply := range options {
+		if err := apply(s); err != nil {
+			return nil, err
+		}
+	}
+	return s, s.validate()
+}
+
+func parseURI(uri string) (host string, port string, username string, password string, err error) {
+	uri = strings.TrimSpace(uri)
+	if !strings.HasPrefix(uri, "ssh://") {
+		uri = "ssh://" + uri
+	}
+	parsedURL, err := url.Parse(uri)
+	if err != nil {
+		return "", "", "", "", errors.Wrapf(err, "error parsing URI %s", uri)
+	}
+	host = parsedURL.Hostname()
+	port = parsedURL.Port()
+	if port == "" {
+		port = "22"
+	}
+
+	if parsedURL.User != nil {
+		username = parsedURL.User.Username()
+		password, _ = parsedURL.User.Password()
+	}
+	if username == "" {
+		username = "root"
+	}
+	return host, port, username, password, nil
+}
+
+func (s *SSH) Workspace() string {
+	return filepath.Join(workdir, s.workspace)
+}
+
+func (s *SSH) Bin() string {
+	return filepath.Join(s.Workspace(), "bin")
+}
+
+func (s *SSH) Home() string {
+	return filepath.Join(s.Workspace(), "home")
+}
+
+func (s *SSH) Source() string {
+	return filepath.Join(s.Workspace(), "source")
+}
+
+func (s *SSH) Ignite() string {
+	return filepath.Join(s.Bin(), igniteAppName)
+}
+
+func (s *SSH) Go() string {
+	return filepath.Join(s.Bin(), goAppName)
 }
 
 func (s *SSH) validate() error {
@@ -135,23 +192,11 @@ func (s *SSH) auth() (goph.Auth, error) {
 	}
 }
 
-// New creates a new ssh object.
-func New(host string, options ...Option) (*SSH, error) {
-	s := &SSH{
-		username: "root",
-		host:     host,
-		port:     "22",
-	}
-	for _, apply := range options {
-		if err := apply(s); err != nil {
-			return nil, err
-		}
-	}
-	return s, s.validate()
-}
-
 // Close closes the SSH client.
 func (s *SSH) Close() error {
+	if err := s.sftpClient.Close(); err != nil {
+		return err
+	}
 	return s.client.Close()
 }
 
@@ -161,72 +206,146 @@ func (s *SSH) Connect(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
 	s.client, err = goph.New(s.username, s.host, auth)
 	if err != nil {
 		return errors.Wrapf(err, "Failed to connect to %v", s)
+	}
+
+	s.sftpClient, err = s.client.NewSftp()
+	if err != nil {
+		return err
 	}
 
 	return s.ensureEnvironment(ctx)
 }
 
 func (s *SSH) ensureEnvironment(ctx context.Context) error {
-	sftp, err := s.client.NewSftp()
+	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
+		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
+	}
+	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
+		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
+	}
+	if err := s.sftpClient.MkdirAll(s.Source()); err != nil {
+		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
+	}
+	if err := s.ensureLocalBin(ctx, igniteAppName); err != nil {
+		return errors.Wrapf(err, "failed to add ignite binary")
+	}
+	if err := s.ensureLocalBin(ctx, goAppName); err != nil {
+		return errors.Wrapf(err, "failed to add go binary")
+	}
+	return nil
+}
+
+func (s *SSH) ensureLocalBin(ctx context.Context, name string) error {
+	// find ignite binary path
+	path, err := exec.LookPath(name)
 	if err != nil {
 		return err
 	}
-	if err := s.ensureHomeFolder(sftp); err != nil {
-		return err
-	}
-	if err := s.ensureIgniteBin(ctx, sftp); err != nil {
+	_, err = s.UploadBinary(ctx, path)
+	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (s *SSH) ensureHomeFolder(sftp *sftp.Client) error {
-	if err := sftp.MkdirAll(igniteWorkdir); err != nil {
-		return errors.Wrapf(err, "failed to create workdir %s", igniteWorkdir)
-	}
-	return nil
-}
+func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string) error {
+	grp, ctx := errgroup.WithContext(ctx)
+	grp.SetLimit(5)
+	err := filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
+		if err != nil {
+			return err
+		}
 
-func (s *SSH) ensureIgniteBin(ctx context.Context, sftp *sftp.Client) error {
-	if err := s.SendBinary(igniteAppName, igniteWorkdir); err != nil {
-		return err
-	}
-	if err := sftp.Chmod(igniteBinary, 0o755); err != nil {
-		return err
-	}
+		if !info.IsDir() {
+			rel, err := filepath.Rel(srcPath, path)
+			if err != nil {
+				return err
+			}
+			// skip hidden files and folders.
+			if strings.HasPrefix(rel, ".") {
+				return nil
+			}
+			newPath := filepath.Join(dstPath, rel)
 
-	cmd, err := s.client.CommandContext(ctx, igniteBinary, "-h")
+			grp.Go(func() error {
+				if err := s.UploadFile(path, newPath); err != nil {
+					return errors.Wrapf(err, "failed to upload file %s to %s", path, newPath)
+				}
+				return nil
+			})
+		}
+		return nil
+	})
 	if err != nil {
 		return err
+	}
+	return grp.Wait()
+}
+
+func (s *SSH) UploadFile(filePath, dstPath string) error {
+	dstDir := filepath.Dir(dstPath)
+	if err := s.sftpClient.MkdirAll(dstDir); err != nil {
+		return errors.Wrapf(err, "failed to create destiny path %s", dstDir)
+	}
+
+	srcPath, err := filepath.Abs(filePath)
+	if err != nil {
+		return err
+	}
+	return s.client.Upload(srcPath, dstPath)
+}
+
+func (s *SSH) UploadBinary(ctx context.Context, srcPath string) (string, error) {
+	var (
+		filename = filepath.Base(srcPath)
+		binPath  = filepath.Join(s.Bin(), filename)
+	)
+	if err := s.UploadFile(srcPath, binPath); err != nil {
+		return "", err
+	}
+
+	// give binary permission
+	if err := s.sftpClient.Chmod(binPath, 0o755); err != nil {
+		return "", err
+	}
+
+	// check if the binary exist
+	cmd, err := s.client.CommandContext(ctx, binPath, "-h")
+	if err != nil {
+		return "", err
 	}
 	out, err := cmd.CombinedOutput()
 	if err != nil {
-		return err
+		return "", err
 	}
 	if len(out) == 0 {
-		return errors.New("ignite binary doesn't exist")
+		return "", errors.Errorf("%s binary doesn't exist", binPath)
 	}
-	return nil
+	return binPath, nil
 }
 
-func (s *SSH) SendFile(srcPath, dstPath string) error {
-	srcPath, err := filepath.Abs(srcPath)
-	if err != nil {
-		return err
-	}
-	return s.client.Upload(srcPath, filepath.Join(dstPath, filepath.Base(srcPath)))
+func (s *SSH) UploadSource(ctx context.Context, srcPath string) (string, error) {
+	path := s.Source()
+	return path, s.Upload(ctx, srcPath, path)
 }
 
-func (s *SSH) SendBinary(binaryName, dstPath string) error {
-	path, err := exec.LookPath(binaryName)
+func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {
+	path := s.Home()
+	return path, s.Upload(ctx, srcPath, path)
+}
+
+func (s *SSH) RunIgniteCommand(ctx context.Context, args ...string) (string, error) {
+	cmd, err := s.client.CommandContext(ctx, s.Ignite(), args...)
 	if err != nil {
-		return err
+		return "", err
 	}
-	if err := s.client.Upload(path, filepath.Join(dstPath, binaryName)); err != nil {
-		return err
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
 	}
-	return nil
+	return string(out), nil
 }
