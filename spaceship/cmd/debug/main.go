@@ -33,11 +33,6 @@ func main() {
 		}
 	case "ssh":
 		switch args[2] {
-		case "dev":
-			if err := cmd.ExecuteSSHDevelopment(ctx, chainInfo); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
 		case "deploy":
 			if err := cmd.ExecuteSSHDeploy(ctx, chainInfo); err != nil {
 				fmt.Fprintln(os.Stderr, err)

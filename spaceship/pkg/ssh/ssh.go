@@ -152,10 +152,6 @@ func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
 }
 
-func (s *SSH) Source() string {
-	return filepath.Join(s.Workspace(), "source")
-}
-
 func (s *SSH) Ignite() string {
 	return filepath.Join(s.Bin(), igniteAppName)
 }
@@ -226,15 +222,6 @@ func (s *SSH) ensureEnvironment() error {
 	}
 	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
 		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
-	}
-	if err := s.sftpClient.MkdirAll(s.Source()); err != nil {
-		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
-	}
-	if err := s.ensureLocalBin(igniteAppName); err != nil {
-		return errors.Wrapf(err, "failed to add ignite binary")
-	}
-	if err := s.ensureLocalBin(goAppName); err != nil {
-		return errors.Wrapf(err, "failed to add go binary")
 	}
 	return nil
 }
@@ -313,11 +300,6 @@ func (s *SSH) UploadBinary(srcPath string) (string, error) {
 		return "", err
 	}
 	return binPath, nil
-}
-
-func (s *SSH) UploadSource(ctx context.Context, srcPath string) (string, error) {
-	path := s.Source()
-	return path, s.Upload(ctx, srcPath, path)
 }
 
 func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {

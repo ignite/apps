@@ -14,10 +14,6 @@ func GetCommands() []*plugin.Command {
 					Short: "deploy your chain trough ssh",
 					Commands: []*plugin.Command{
 						{
-							Use:   "dev",
-							Short: "deploy your chain into a development mode",
-						},
-						{
 							Use:   "deploy",
 							Short: "deploy your chain into a production mode",
 						},

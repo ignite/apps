@@ -12,42 +12,6 @@ import (
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 )
 
-func ExecuteSSHDevelopment(ctx context.Context, chain *plugin.ChainInfo) error {
-	var (
-		host = "danilopantani@127.0.0.1"          // arg host or URI
-		key  = "/Users/danilopantani/.ssh/id_rsa" // flag key
-		// user = "danilopantani"                    // flag user
-		// password = ""                          // flag password
-		// port     = "22" // flag port
-		// keyPassword = args[5] // flag key password
-		// keyRaw      = args[6] // flag key raw
-		args = []string{"chain", "build"} // arg ignite cmd
-	)
-
-	c, err := ssh.New(host, ssh.WithKey(key), ssh.WithWorkspace(chain.ChainId))
-	if err != nil {
-		return err
-	}
-	if err := c.Connect(); err != nil {
-		return err
-	}
-	defer c.Close()
-
-	srcPath, err := c.UploadSource(ctx, chain.AppPath)
-	if err != nil {
-		return err
-	}
-
-	args = append(args, "-p", srcPath)
-	out, err := c.RunIgniteCommand(ctx, args...)
-	if err != nil {
-		return err
-	}
-
-	fmt.Println(out)
-	return nil
-}
-
 // ExecuteSSHDeploy executes the ssh deploy subcommand.
 func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 	// args := os.Args[2:]
