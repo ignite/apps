@@ -61,6 +61,8 @@ func TestWasm(t *testing.T) {
 				"wasm",
 				"config",
 			),
+			step.Stdout(os.Stdout),
+			step.Stderr(os.Stderr),
 		),
 	)
 
