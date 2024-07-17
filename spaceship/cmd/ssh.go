@@ -23,6 +23,7 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 		// port     = "22" // flag port
 		// keyPassword = args[5] // flag key password
 		// keyRaw      = args[6] // flag key raw
+		initChain = true // flag key raw
 
 		localDir  = filepath.Join(os.TempDir(), "spaceship")
 		binOutput = filepath.Join(localDir, "bin")
@@ -34,13 +35,6 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 	igniteChainBuildCmd := ignitecmd.NewChainBuild()
 	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", binOutput})
 	if err := igniteChainBuildCmd.ExecuteContext(ctx); err != nil {
-		return err
-	}
-
-	// init the chain
-	igniteChainInitCmd := ignitecmd.NewChainInit()
-	igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "-h", chainHome})
-	if err := igniteChainInitCmd.ExecuteContext(ctx); err != nil {
 		return err
 	}
 
@@ -59,10 +53,19 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 	}
 	fmt.Println(binPath)
 
-	homePath, err := c.UploadHome(ctx, chainHome)
-	if err != nil {
-		return err
+	if initChain {
+		// init the chain
+		igniteChainInitCmd := ignitecmd.NewChainInit()
+		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", chainHome})
+		if err := igniteChainInitCmd.ExecuteContext(ctx); err != nil {
+			return err
+		}
+
+		homePath, err := c.UploadHome(ctx, chainHome)
+		if err != nil {
+			return err
+		}
+		fmt.Println(homePath)
 	}
-	fmt.Println(homePath)
 	return nil
 }
