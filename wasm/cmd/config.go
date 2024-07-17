@@ -22,7 +22,7 @@ const (
 	flagMemoryCacheSize = "memory-cache-size"
 )
 
-func ConfigHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func ConfigHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
 	flags, err := cmd.NewFlags()
 	if err != nil {
 		return err
