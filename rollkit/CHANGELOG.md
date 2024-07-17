@@ -1,5 +1,9 @@
 # Rollkit App Changelog
 
+## Unreleased
+
+* [#112](https://github.com/ignite/apps/pull/112) Use default command instead cobra commands.
+
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.1)
 
 * [#106](https://github.com/ignite/apps/pull/106) Improve bonded tokens setting.

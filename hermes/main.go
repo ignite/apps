@@ -39,10 +39,11 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 			return cmd.KeysListHandler(ctx, c)
 		case "delete":
 			return cmd.KeysDeleteHandler(ctx, c)
+		default:
+			return errors.Errorf("unknown keys command: %s", args[1])
 		}
-		return cmd.StartHandler(ctx, c)
 	default:
-		return errors.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", args[0])
 	}
 }
 
