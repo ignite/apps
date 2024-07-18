@@ -11,13 +11,9 @@ import (
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
-func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
-
+func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) {
 	var (
+		flags     = cmd.Flags
 		args      = cmd.Args
 		customCfg = getConfig(flags)
 		cfgName   = strings.Join(args, hermes.ConfigNameSeparator)

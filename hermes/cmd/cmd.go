@@ -2,11 +2,6 @@ package cmd
 
 import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/spf13/pflag"
-)
-
-const (
-	flagConfig = "config"
 )
 
 // GetCommands returns the list of app commands.
@@ -145,9 +140,4 @@ func GetCommands() []*plugin.Command {
 			},
 		},
 	}
-}
-
-func getConfig(flags *pflag.FlagSet) string {
-	config, _ := flags.GetString(flagConfig)
-	return config
 }
