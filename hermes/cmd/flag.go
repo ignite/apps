@@ -136,7 +136,7 @@ func exportToFlagValue(f *plugin.Flag) (interface{}, error) {
 	case plugin.FlagTypeInt:
 		v, err := strconv.Atoi(flagValue(f))
 		if err != nil {
-			return int(0), err
+			return 0, err
 		}
 		return v, nil
 	case plugin.FlagTypeUint:
