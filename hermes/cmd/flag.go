@@ -111,7 +111,7 @@ func getFlag[A any](flags []*plugin.Flag, key string) (result A, err error) {
 
 	value, ok := v.(A)
 	if !ok {
-		return result, errors.Wrapf(ErrFlagAssertion, "type assertion to %T failed", v)
+		return result, errors.Wrapf(ErrFlagAssertion, "type assertion to %T failed for field %s", v, key)
 	}
 	return value, nil
 }
@@ -136,25 +136,25 @@ func exportToFlagValue(f *plugin.Flag) (interface{}, error) {
 	case plugin.FlagTypeInt:
 		v, err := strconv.Atoi(flagValue(f))
 		if err != nil {
-			return 0, err
+			return int(0), err
 		}
 		return v, nil
 	case plugin.FlagTypeUint:
 		v, err := strconv.ParseUint(flagValue(f), 10, 64)
 		if err != nil {
-			return 0, err
+			return uint(0), err
 		}
 		return v, nil
 	case plugin.FlagTypeInt64:
 		v, err := strconv.ParseInt(flagValue(f), 10, 64)
 		if err != nil {
-			return 0, err
+			return int64(0), err
 		}
 		return v, nil
 	case plugin.FlagTypeUint64:
 		v, err := strconv.ParseUint(flagValue(f), 10, 64)
 		if err != nil {
-			return 0, err
+			return uint64(0), err
 		}
 		return v, nil
 	case plugin.FlagTypeStringSlice:
