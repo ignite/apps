@@ -150,6 +150,10 @@ func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
 }
 
+func (s *SSH) RunnerScript() string {
+	return filepath.Join(s.Workspace(), "run.sh")
+}
+
 func (s *SSH) validate() error {
 	switch {
 	case s.username == "":
@@ -208,10 +212,10 @@ func (s *SSH) Connect() error {
 
 func (s *SSH) ensureEnvironment() error {
 	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
-		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
+		return errors.Wrapf(err, "failed to create bin dir %s", s.Bin())
 	}
 	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
-		return errors.Wrapf(err, "failed to create dir %s", s.Bin())
+		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
 	}
 	return nil
 }
@@ -292,7 +296,48 @@ func (s *SSH) UploadBinary(srcPath string) (string, error) {
 	return binPath, nil
 }
 
+func (s *SSH) UploadRunnerScript(srcPath string) (string, error) {
+	path := s.RunnerScript()
+	if err := s.UploadFile(srcPath, s.RunnerScript()); err != nil {
+		return "", err
+	}
+
+	// give binary permission
+	if err := s.sftpClient.Chmod(path, 0o755); err != nil {
+		return "", err
+	}
+	return path, nil
+}
+
 func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {
 	path := s.Home()
 	return path, s.Upload(ctx, srcPath, path)
+}
+
+func (s *SSH) RunCommand(ctx context.Context, name string, args ...string) (string, error) {
+	cmd, err := s.client.CommandContext(ctx, name, args...)
+	if err != nil {
+		return "", err
+	}
+	out, err := cmd.CombinedOutput()
+	if err != nil {
+		return "", err
+	}
+	return string(out), nil
+}
+
+func (s *SSH) Start(ctx context.Context) (string, error) {
+	return s.runScript(ctx, "start")
+}
+
+func (s *SSH) Stop(ctx context.Context) (string, error) {
+	return s.runScript(ctx, "stop")
+}
+
+func (s *SSH) Status(ctx context.Context) (string, error) {
+	return s.runScript(ctx, "status")
+}
+
+func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
+	return s.RunCommand(ctx, s.RunnerScript(), args...)
 }

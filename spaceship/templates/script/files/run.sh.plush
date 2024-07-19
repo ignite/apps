@@ -1,0 +1,75 @@
+#!/bin/bash
+
+HOME_PATH="$HOME/<%= home %>"
+COMMAND="$HOME/<%= binary %> start --home $HOME_PATH"
+PID_FILE="$HOME/<%= path %>/spaceship.pid"
+
+# Function to get the current date and time formatted for the log file
+get_log_file_name() {
+    echo "$HOME/<%= path %>/log/$(date '+%Y-%m-%d_%H-%M-%S').log"
+}
+
+# Function to ensure the directory exists
+ensure_directory_exists() {
+    DIR=$(dirname "$1")
+    if [ ! -d "$DIR" ]; then
+        mkdir -p "$DIR"
+    fi
+}
+
+start() {
+    ensure_directory_exists "$PID_FILE"
+    LOG_FILE=$(get_log_file_name)
+    ensure_directory_exists "$LOG_FILE"
+
+    echo "Starting $COMMAND..."
+    nohup $COMMAND > "$LOG_FILE" 2>&1 &
+    echo $! > "$PID_FILE"
+    echo "$COMMAND started with PID $(cat $PID_FILE)."
+    echo "Logs are being written to $LOG_FILE"
+}
+
+stop() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        echo "Stopping $COMMAND with PID $PID..."
+        kill "$PID"
+        rm "$PID_FILE"
+        echo "$COMMAND stopped."
+    else
+        echo "$COMMAND is not running."
+    fi
+}
+
+status() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null; then
+            echo "$COMMAND is running with PID $PID."
+        else
+            echo "$COMMAND is not running, but PID file exists."
+        fi
+    else
+        echo "$COMMAND is not running."
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
