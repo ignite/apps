@@ -144,7 +144,7 @@ func exportToFlagValue(f *plugin.Flag) (interface{}, error) {
 		if err != nil {
 			return uint(0), err
 		}
-		return v, nil
+		return uint(v), nil
 	case plugin.FlagTypeInt64:
 		v, err := strconv.ParseInt(flagValue(f), 10, 64)
 		if err != nil {
