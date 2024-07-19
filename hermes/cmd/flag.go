@@ -158,8 +158,13 @@ func exportToFlagValue(f *plugin.Flag) (interface{}, error) {
 		}
 		return v, nil
 	case plugin.FlagTypeStringSlice:
-		s := strings.Trim(flagValue(f), "[]")
-		return strings.Fields(s), nil
+		v := strings.Trim(flagValue(f), "[]")
+		s := strings.Split(v, ",")
+		if len(s) == 0 || (len(s) == 1 && s[0] == "") {
+			return []string{}, nil
+		}
+
+		return s, nil
 	default:
 		return strings.TrimSpace(flagValue(f)), nil
 	}
