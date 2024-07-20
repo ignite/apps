@@ -1,7 +1,6 @@
 package ssh
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"sort"
@@ -28,7 +27,7 @@ func (a Logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a Logs) Less(i, j int) bool { return a[i].Time.Before(a[j].Time) }
 
 func (s *SSH) LatestLog() ([]byte, error) {
-	logFiles, err := getLogFiles(s.Log())
+	logFiles, err := s.getLogFiles()
 	if err != nil {
 		return nil, errors.Wrap(err, "error fetching log files")
 	}
@@ -40,20 +39,36 @@ func (s *SSH) LatestLog() ([]byte, error) {
 
 	// Get the latest log file
 	latestLogFile := logFiles[len(logFiles)-1]
-	fmt.Printf("Latest log file: %s\n", latestLogFile.Name)
+	return s.readFileToBytes(latestLogFile.Name)
+}
 
-	// Read the file and return its contents as bytes.
-	data, err := os.ReadFile(latestLogFile.Name)
+// readFileToBytes reads the contents of a file and returns them as a byte slice.
+func (s *SSH) readFileToBytes(filePath string) ([]byte, error) {
+	file, err := s.sftpClient.OpenFile(filePath, os.O_RDONLY)
 	if err != nil {
-		return nil, errors.Wrapf(err, "error reading the latest log file %s", latestLogFile.Name)
+		return nil, err
+	}
+	defer file.Close()
+
+	stat, err := file.Stat()
+	if err != nil {
+		return nil, err
+	}
+
+	data := make([]byte, stat.Size())
+	_, err = file.Read(data)
+	if err != nil {
+		return nil, err
 	}
 
 	return data, nil
 }
 
 // getLogFiles fetches all log files from the specified directory.
-func getLogFiles(dir string) (Logs, error) {
-	files, err := os.ReadDir(dir)
+func (s *SSH) getLogFiles() (Logs, error) {
+	dir := s.Log()
+
+	files, err := s.sftpClient.ReadDir(dir)
 	if err != nil {
 		return nil, err
 	}
@@ -66,13 +81,9 @@ func getLogFiles(dir string) (Logs, error) {
 
 		// Assuming log files have a .log extension
 		if filepath.Ext(file.Name()) == logExtension {
-			info, err := file.Info()
-			if err != nil {
-				return nil, err
-			}
 			logFiles = append(logFiles, Log{
 				Name: filepath.Join(dir, file.Name()),
-				Time: info.ModTime(),
+				Time: file.ModTime(),
 			})
 		}
 	}
