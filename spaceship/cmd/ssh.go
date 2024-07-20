@@ -7,24 +7,130 @@ import (
 	"path/filepath"
 
 	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 	"github.com/ignite/apps/spaceship/templates/script"
 )
 
-// ExecuteSSHDeploy executes the ssh deploy subcommand.
-func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
-	// args := os.Args[2:]
+const (
+	flagPort        = "port"
+	flagUser        = "user"
+	flagPassword    = "password"
+	flagKey         = "key"
+	flagRawKey      = "raw-key"
+	flagKeyPassword = "key-password"
+	flagInitChain   = "init-chain"
+)
+
+func executeSSH(cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH, error) {
+	args := cmd.Args
+	if len(args) < 1 {
+		return nil, errors.New("must specify unless a uri host")
+	}
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return nil, err
+	}
+
 	var (
-		host = "danilopantani@127.0.0.1"          // arg host or URI
-		key  = "/Users/danilopantani/.ssh/id_rsa" // flag key
-		// user = "danilopantani"                    // flag user
-		// password = ""                          // flag password
-		// port     = "22" // flag port
-		// keyPassword = args[5] // flag key password
-		// keyRaw      = args[6] // flag key raw
-		initChain = true // flag key raw
+		host = args[0]
+
+		user, _        = flags.GetString(flagUser)
+		port, _        = flags.GetString(flagPort)
+		password, _    = flags.GetString(flagPassword)
+		key, _         = flags.GetString(flagKey)
+		rawKey, _      = flags.GetString(flagRawKey)
+		keyPassword, _ = flags.GetString(flagKeyPassword)
+	)
+
+	// Connect to the SSH.
+	c, err := ssh.New(
+		host,
+		ssh.WithUser(user),
+		ssh.WithPort(port),
+		ssh.WithPassword(password),
+		ssh.WithKey(key),
+		ssh.WithRawKey(rawKey),
+		ssh.WithKeyPassword(keyPassword),
+		ssh.WithWorkspace(chain.ChainId),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, c.Connect()
+}
+
+// ExecuteSSHStatus executes the ssh status subcommand.
+func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	c, err := executeSSH(cmd, chain)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	status, err := c.Status(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println(status)
+	return nil
+}
+
+// ExecuteSSHSStop executes the ssh stop subcommand.
+func ExecuteSSHSStop(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	c, err := executeSSH(cmd, chain)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	stop, err := c.Stop(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println(stop)
+	return nil
+}
+
+// ExecuteSSHRestart executes the ssh restart subcommand.
+func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	c, err := executeSSH(cmd, chain)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	restart, err := c.Restart(ctx)
+	if err != nil {
+		return err
+	}
+	fmt.Println(restart)
+	return nil
+}
+
+// ExecuteSSHLog executes the ssh log subcommand.
+func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	c, err := executeSSH(cmd, chain)
+	if err != nil {
+		return err
+	}
+	defer c.Close()
+	log, err := c.LatestLog()
+	if err != nil {
+		return err
+	}
+	fmt.Println(string(log))
+	return nil
+}
+
+// ExecuteSSHDeploy executes the ssh deploy subcommand.
+func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return err
+	}
+	var (
+		initChain, _ = flags.GetBool(flagInitChain)
 
 		localDir       = filepath.Join(os.TempDir(), "spaceship", chain.ChainId)
 		localChainHome = filepath.Join(localDir, "home")
@@ -32,19 +138,19 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 		localChainBin  = fmt.Sprintf("%s/%sd", localBinOutput, chain.ChainId)
 	)
 
-	// Connect to the SSH.
-	c, err := ssh.New(host, ssh.WithKey(key), ssh.WithWorkspace(chain.ChainId))
+	c, err := executeSSH(cmd, chain)
 	if err != nil {
-		return err
-	}
-	if err := c.Connect(); err != nil {
 		return err
 	}
 	defer c.Close()
 
+	os, err := c.Target(ctx)
+	if err != nil {
+		return err
+	}
 	// We are using the ignite chain build command to build the app.
 	igniteChainBuildCmd := ignitecmd.NewChainBuild()
-	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput})
+	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput, "--release", "--release.targets", os})
 	if err := igniteChainBuildCmd.ExecuteContext(ctx); err != nil {
 		return err
 	}
@@ -91,5 +197,6 @@ func ExecuteSSHDeploy(ctx context.Context, chain *plugin.ChainInfo) error {
 		return err
 	}
 	fmt.Println(status)
+
 	return nil
 }

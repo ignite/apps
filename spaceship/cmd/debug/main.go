@@ -24,22 +24,47 @@ func main() {
 			AppPath: filepath.Join(home, "Desktop/go/src/github.com/ignite/mars"),
 			ChainId: "mars",
 		}
+		c = &plugin.ExecutedCommand{
+			Use:    args[1],
+			Path:   "ignite spaceship " + args[1],
+			Args:   []string{"danilopantani@127.0.0.1"},
+			OsArgs: os.Args,
+			With:   nil,
+			Flags: []*plugin.Flag{
+				{
+					Name:      "key",
+					Shorthand: "k",
+					Usage:     "ssh key",
+					Type:      plugin.FlagTypeString,
+					Value:     "/Users/danilopantani/.ssh/id_rsa",
+				},
+			},
+		}
 	)
 	switch args[1] {
-	case "aws":
-		if err := cmd.ExecuteAWS(ctx, nil); err != nil {
+	case "deploy":
+		if err := cmd.ExecuteSSHDeploy(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-	case "ssh":
-		switch args[2] {
-		case "deploy":
-			if err := cmd.ExecuteSSHDeploy(ctx, chainInfo); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-		default:
-			fmt.Fprintf(os.Stderr, "unknown ssh command: %s", args[2])
+	case "log":
+		if err := cmd.ExecuteSSHLog(ctx, c, chainInfo); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+	case "status":
+		if err := cmd.ExecuteSSHStatus(ctx, c, chainInfo); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+	case "restart":
+		if err := cmd.ExecuteSSHRestart(ctx, c, chainInfo); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return
+		}
+	case "stop":
+		if err := cmd.ExecuteSSHSStop(ctx, c, chainInfo); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 	default:

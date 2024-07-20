@@ -10,6 +10,7 @@ import (
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
@@ -39,6 +40,9 @@ type Option func(*SSH) error
 // WithUser set SSH username.
 func WithUser(username string) Option {
 	return func(o *SSH) error {
+		if o.username != "" {
+			return nil
+		}
 		o.username = strings.TrimSpace(username)
 		return nil
 	}
@@ -47,6 +51,9 @@ func WithUser(username string) Option {
 // WithPassword set SSH password.
 func WithPassword(password string) Option {
 	return func(o *SSH) error {
+		if o.password != "" {
+			return nil
+		}
 		o.password = strings.TrimSpace(password)
 		return nil
 	}
@@ -55,6 +62,9 @@ func WithPassword(password string) Option {
 // WithPort set SSH port.
 func WithPort(port string) Option {
 	return func(o *SSH) error {
+		if o.port != "" {
+			return nil
+		}
 		o.port = strings.TrimSpace(port)
 		return nil
 	}
@@ -63,6 +73,9 @@ func WithPort(port string) Option {
 // WithRawKey set SSH raw key.
 func WithRawKey(rawKey string) Option {
 	return func(o *SSH) error {
+		if o.rawKey != "" {
+			return nil
+		}
 		o.rawKey = strings.TrimSpace(rawKey)
 		return nil
 	}
@@ -71,6 +84,9 @@ func WithRawKey(rawKey string) Option {
 // WithKey set SSH key.
 func WithKey(key string) Option {
 	return func(o *SSH) error {
+		if o.key != "" {
+			return nil
+		}
 		o.key = strings.TrimSpace(key)
 		return nil
 	}
@@ -79,6 +95,9 @@ func WithKey(key string) Option {
 // WithKeyPassword set SSH key password.
 func WithKeyPassword(keyPassword string) Option {
 	return func(o *SSH) error {
+		if o.keyPassword != "" {
+			return nil
+		}
 		o.keyPassword = strings.TrimSpace(keyPassword)
 		return nil
 	}
@@ -150,6 +169,10 @@ func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
 }
 
+func (s *SSH) Log() string {
+	return filepath.Join(s.Workspace(), "log")
+}
+
 func (s *SSH) RunnerScript() string {
 	return filepath.Join(s.Workspace(), "run.sh")
 }
@@ -215,6 +238,9 @@ func (s *SSH) ensureEnvironment() error {
 		return errors.Wrapf(err, "failed to create bin dir %s", s.Bin())
 	}
 	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
+		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
+	}
+	if err := s.sftpClient.MkdirAll(s.Log()); err != nil {
 		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
 	}
 	return nil
@@ -323,11 +349,15 @@ func (s *SSH) RunCommand(ctx context.Context, name string, args ...string) (stri
 	if err != nil {
 		return "", err
 	}
-	return string(out), nil
+	return strings.TrimSpace(string(out)), nil
 }
 
 func (s *SSH) Start(ctx context.Context) (string, error) {
 	return s.runScript(ctx, "start")
+}
+
+func (s *SSH) Restart(ctx context.Context) (string, error) {
+	return s.runScript(ctx, "restart")
 }
 
 func (s *SSH) Stop(ctx context.Context) (string, error) {
@@ -340,4 +370,38 @@ func (s *SSH) Status(ctx context.Context) (string, error) {
 
 func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
 	return s.RunCommand(ctx, s.RunnerScript(), args...)
+}
+
+func (s *SSH) OS(ctx context.Context) (string, error) {
+	v, err := s.Uname(ctx)
+	if err != nil {
+		return "", err
+	}
+	return strings.ToLower(v), nil
+}
+
+func (s *SSH) Arch(ctx context.Context) (string, error) {
+	v, err := s.Uname(ctx, "-m")
+	if err != nil {
+		return "", err
+	}
+	return strings.ToLower(v), nil
+}
+
+func (s *SSH) Target(ctx context.Context) (string, error) {
+	os, err := s.OS(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	arch, err := s.Arch(ctx)
+	if err != nil {
+		return "", err
+	}
+
+	return gocmd.BuildTarget(os, arch), nil
+}
+
+func (s *SSH) Uname(ctx context.Context, args ...string) (string, error) {
+	return s.RunCommand(ctx, "uname", args...)
 }

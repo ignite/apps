@@ -29,17 +29,16 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	// Remove the first two elements "ignite" and "spaceship" from OsArgs.
 	args := c.OsArgs[2:]
 	switch args[0] {
-	case "aws":
-		return cmd.ExecuteAWS(ctx, c)
-	case "ssh":
-		switch args[1] {
-		case "dev":
-			return cmd.ExecuteSSHDevelopment(ctx, chainInfo)
-		case "deploy":
-			return cmd.ExecuteSSHDeploy(ctx, chainInfo)
-		default:
-			return fmt.Errorf("unknown ssh command: %s", args[1])
-		}
+	case "deploy":
+		return cmd.ExecuteSSHDeploy(ctx, c, chainInfo)
+	case "log":
+		return cmd.ExecuteSSHLog(ctx, c, chainInfo)
+	case "status":
+		return cmd.ExecuteSSHStatus(ctx, c, chainInfo)
+	case "restart":
+		return cmd.ExecuteSSHRestart(ctx, c, chainInfo)
+	case "stop":
+		return cmd.ExecuteSSHSStop(ctx, c, chainInfo)
 	default:
 		return fmt.Errorf("unknown command: %s", args[0])
 	}
