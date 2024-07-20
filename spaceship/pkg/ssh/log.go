@@ -13,18 +13,18 @@ const (
 	logExtension = ".log"
 )
 
-// Log represents a log file with its name and modification time.
-type Log struct {
-	Name string
-	Time time.Time
+// log represents a log file with its name and modification time.
+type log struct {
+	name string
+	time time.Time
 }
 
-// Logs implements sort.Interface based on the Time field.
-type Logs []Log
+// logs implements sort.Interface based on the Time field.
+type logs []log
 
-func (a Logs) Len() int           { return len(a) }
-func (a Logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a Logs) Less(i, j int) bool { return a[i].Time.Before(a[j].Time) }
+func (a logs) Len() int           { return len(a) }
+func (a logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a logs) Less(i, j int) bool { return a[i].time.Before(a[j].time) }
 
 func (s *SSH) LatestLog() ([]byte, error) {
 	logFiles, err := s.getLogFiles()
@@ -39,7 +39,7 @@ func (s *SSH) LatestLog() ([]byte, error) {
 
 	// Get the latest log file
 	latestLogFile := logFiles[len(logFiles)-1]
-	return s.readFileToBytes(latestLogFile.Name)
+	return s.readFileToBytes(latestLogFile.name)
 }
 
 // readFileToBytes reads the contents of a file and returns them as a byte slice.
@@ -65,7 +65,7 @@ func (s *SSH) readFileToBytes(filePath string) ([]byte, error) {
 }
 
 // getLogFiles fetches all log files from the specified directory.
-func (s *SSH) getLogFiles() (Logs, error) {
+func (s *SSH) getLogFiles() (logs, error) {
 	dir := s.Log()
 
 	files, err := s.sftpClient.ReadDir(dir)
@@ -73,7 +73,7 @@ func (s *SSH) getLogFiles() (Logs, error) {
 		return nil, err
 	}
 
-	logFiles := make([]Log, 0)
+	logFiles := make([]log, 0)
 	for _, file := range files {
 		if file.IsDir() {
 			continue
@@ -81,9 +81,9 @@ func (s *SSH) getLogFiles() (Logs, error) {
 
 		// Assuming log files have a .log extension
 		if filepath.Ext(file.Name()) == logExtension {
-			logFiles = append(logFiles, Log{
-				Name: filepath.Join(dir, file.Name()),
-				Time: file.ModTime(),
+			logFiles = append(logFiles, log{
+				name: filepath.Join(dir, file.Name()),
+				time: file.ModTime(),
 			})
 		}
 	}
