@@ -177,7 +177,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 
 	// Create the runner script.
-	localRunScriptPath, err := script.NewRunScript(c.Workspace(), home, binPath, localDir)
+	localRunScriptPath, err := script.NewRunScript(c.Workspace(), c.Log(), home, binPath, localDir)
 	if err != nil {
 		return err
 	}

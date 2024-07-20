@@ -15,7 +15,7 @@ import (
 var fsRunScript embed.FS
 
 // NewRunScript returns the generator to scaffold a chain run script.
-func NewRunScript(path, home, binary, output string) (string, error) {
+func NewRunScript(path, log, home, binary, output string) (string, error) {
 	var (
 		g         = genny.New()
 		runScript = xgenny.NewEmbedWalker(
@@ -30,6 +30,7 @@ func NewRunScript(path, home, binary, output string) (string, error) {
 
 	ctx := plush.NewContext()
 	ctx.Set("path", path)
+	ctx.Set("log", log)
 	ctx.Set("home", home)
 	ctx.Set("binary", binary)
 

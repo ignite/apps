@@ -1,12 +1,12 @@
 #!/bin/bash
 
 HOME_PATH="$HOME/<%= home %>"
-COMMAND="$HOME/<%= binary %> start --home $HOME_PATH"
+COMMAND="$HOME/<%= binary %> start --home $HOME_PATH --minimum-gas-prices 0.025stake"
 PID_FILE="$HOME/<%= path %>/spaceship.pid"
 
 # Function to get the current date and time formatted for the log file
 get_log_file_name() {
-    echo "$HOME/<%= path %>/log/$(date '+%Y-%m-%d_%H-%M-%S').log"
+    echo "$HOME/<%= log %>/$(date '+%Y-%m-%d_%H-%M-%S').log"
 }
 
 # Function to ensure the directory exists
