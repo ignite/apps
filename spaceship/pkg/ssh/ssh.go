@@ -169,6 +169,10 @@ func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
 }
 
+func (s *SSH) Genesis() string {
+	return filepath.Join(s.Home(), "config", "genesis.json")
+}
+
 func (s *SSH) Log() string {
 	return filepath.Join(s.Workspace(), "log")
 }
@@ -370,6 +374,19 @@ func (s *SSH) Status(ctx context.Context) (string, error) {
 
 func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
 	return s.RunCommand(ctx, s.RunnerScript(), args...)
+}
+
+func (s *SSH) HasInitialized(ctx context.Context) bool {
+	return s.Exist(ctx, s.Genesis())
+}
+
+func (s *SSH) Exist(ctx context.Context, path string) bool {
+	cmd := fmt.Sprintf("[ -f '%s' ] && echo 'true'", path)
+	exist, err := s.RunCommand(ctx, cmd)
+	if err != nil {
+		return false
+	}
+	return exist == "true"
 }
 
 func (s *SSH) OS(ctx context.Context) (string, error) {

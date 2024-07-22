@@ -126,13 +126,18 @@ func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plug
 // ExecuteSSHDeploy executes the ssh deploy subcommand.
 func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
 	flags, err := cmd.NewFlags()
+
+	localDir, err := os.MkdirTemp(os.TempDir(), "spaceship")
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = os.RemoveAll(localDir)
+	}()
+
 	var (
 		initChain, _ = flags.GetBool(flagInitChain)
 
-		localDir       = filepath.Join(os.TempDir(), "spaceship", chain.ChainId)
 		localChainHome = filepath.Join(localDir, "home")
 		localBinOutput = filepath.Join(localDir, "bin")
 		localChainBin  = fmt.Sprintf("%s/%sd", localBinOutput, chain.ChainId)
@@ -144,13 +149,15 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 	defer c.Close()
 
-	os, err := c.Target(ctx)
-	if err != nil {
-		return err
-	}
+	//os, err := c.Target(ctx)
+	//if err != nil {
+	//	return err
+	//}
+
 	// We are using the ignite chain build command to build the app.
 	igniteChainBuildCmd := ignitecmd.NewChainBuild()
-	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput, "--release", "--release.targets", os})
+	// igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput, "--release", "--release.targets", os})
+	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput})
 	if err := igniteChainBuildCmd.ExecuteContext(ctx); err != nil {
 		return err
 	}
@@ -162,7 +169,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 
 	home := c.Home()
-	if initChain {
+	if initChain || !c.HasInitialized(ctx) {
 		// Init the chain.
 		igniteChainInitCmd := ignitecmd.NewChainInit()
 		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome})
@@ -191,12 +198,5 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return err
 	}
 	fmt.Println(start)
-
-	status, err := c.Status(ctx)
-	if err != nil {
-		return err
-	}
-	fmt.Println(status)
-
 	return nil
 }

@@ -38,6 +38,13 @@ func main() {
 					Type:      plugin.FlagTypeString,
 					Value:     "/Users/danilopantani/.ssh/id_rsa",
 				},
+				{
+					Name:      "init-chain",
+					Shorthand: "i",
+					Usage:     "run init chain and create the home folder",
+					Type:      plugin.FlagTypeBool,
+					Value:     "true",
+				},
 			},
 		}
 	)

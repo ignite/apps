@@ -53,7 +53,7 @@ func GetCommands() []*plugin.Command {
 						&plugin.Flag{
 							Name:      flagInitChain,
 							Shorthand: "i",
-							Usage:     "ssh user",
+							Usage:     "run init chain and create the home folder",
 							Type:      plugin.FlagTypeBool,
 						},
 					),
