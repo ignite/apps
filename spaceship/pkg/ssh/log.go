@@ -26,6 +26,7 @@ func (a logs) Len() int           { return len(a) }
 func (a logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a logs) Less(i, j int) bool { return a[i].time.Before(a[j].time) }
 
+// LatestLog returns the latest log from the server.
 func (s *SSH) LatestLog() ([]byte, error) {
 	logFiles, err := s.getLogFiles()
 	if err != nil {

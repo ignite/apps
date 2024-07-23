@@ -1,3 +1,7 @@
+// Package ssh provides functionalities for establishing SSH connections
+// and performing various operations such as file uploads, command execution,
+// and managing remote environments.
+
 package ssh
 
 import (
@@ -21,6 +25,8 @@ const (
 	workdir = "spaceship"
 )
 
+// SSH represents the SSH configuration and clients for connecting and interacting
+// with remote servers via SSH.
 type SSH struct {
 	username    string
 	password    string
@@ -34,10 +40,10 @@ type SSH struct {
 	sftpClient  *sftp.Client
 }
 
-// Option configures ssh config.
+// Option configures SSH settings.
 type Option func(*SSH) error
 
-// WithUser set SSH username.
+// WithUser sets the SSH username.
 func WithUser(username string) Option {
 	return func(o *SSH) error {
 		if o.username != "" {
@@ -48,7 +54,7 @@ func WithUser(username string) Option {
 	}
 }
 
-// WithPassword set SSH password.
+// WithPassword sets the SSH password.
 func WithPassword(password string) Option {
 	return func(o *SSH) error {
 		if o.password != "" {
@@ -59,7 +65,7 @@ func WithPassword(password string) Option {
 	}
 }
 
-// WithPort set SSH port.
+// WithPort sets the SSH port.
 func WithPort(port string) Option {
 	return func(o *SSH) error {
 		if o.port != "" {
@@ -70,7 +76,7 @@ func WithPort(port string) Option {
 	}
 }
 
-// WithRawKey set SSH raw key.
+// WithRawKey sets the SSH raw key.
 func WithRawKey(rawKey string) Option {
 	return func(o *SSH) error {
 		if o.rawKey != "" {
@@ -81,7 +87,7 @@ func WithRawKey(rawKey string) Option {
 	}
 }
 
-// WithKey set SSH key.
+// WithKey sets the SSH key.
 func WithKey(key string) Option {
 	return func(o *SSH) error {
 		if o.key != "" {
@@ -92,7 +98,7 @@ func WithKey(key string) Option {
 	}
 }
 
-// WithKeyPassword set SSH key password.
+// WithKeyPassword sets the SSH key password.
 func WithKeyPassword(keyPassword string) Option {
 	return func(o *SSH) error {
 		if o.keyPassword != "" {
@@ -103,7 +109,7 @@ func WithKeyPassword(keyPassword string) Option {
 	}
 }
 
-// WithWorkspace set SSH workspace.
+// WithWorkspace sets the SSH workspace.
 func WithWorkspace(workspace string) Option {
 	return func(o *SSH) error {
 		o.workspace = strings.TrimSpace(workspace)
@@ -111,7 +117,7 @@ func WithWorkspace(workspace string) Option {
 	}
 }
 
-// New creates a new ssh object.
+// New creates a new SSH object with the given host and options.
 func New(host string, options ...Option) (*SSH, error) {
 	host, port, username, password, err := parseURI(host)
 	if err != nil {
@@ -132,6 +138,7 @@ func New(host string, options ...Option) (*SSH, error) {
 	return s, s.validate()
 }
 
+// parseURI parses the SSH URI and extracts the host, port, username, and password.
 func parseURI(uri string) (host string, port string, username string, password string, err error) {
 	uri = strings.TrimSpace(uri)
 	if !strings.HasPrefix(uri, "ssh://") {
@@ -157,30 +164,37 @@ func parseURI(uri string) (host string, port string, username string, password s
 	return host, port, username, password, nil
 }
 
+// Workspace returns the workspace directory for the SSH session.
 func (s *SSH) Workspace() string {
 	return filepath.Join(workdir, s.workspace)
 }
 
+// Bin returns the binary directory within the workspace.
 func (s *SSH) Bin() string {
 	return filepath.Join(s.Workspace(), "bin")
 }
 
+// Home returns the home directory within the workspace.
 func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
 }
 
+// Genesis returns the path to the genesis.json file within the home directory.
 func (s *SSH) Genesis() string {
 	return filepath.Join(s.Home(), "config", "genesis.json")
 }
 
+// Log returns the log directory within the workspace.
 func (s *SSH) Log() string {
 	return filepath.Join(s.Workspace(), "log")
 }
 
+// RunnerScript returns the path to the runner script within the workspace.
 func (s *SSH) RunnerScript() string {
 	return filepath.Join(s.Workspace(), "run.sh")
 }
 
+// validate checks if the SSH configuration is valid.
 func (s *SSH) validate() error {
 	switch {
 	case s.username == "":
@@ -196,6 +210,7 @@ func (s *SSH) validate() error {
 	}
 }
 
+// auth returns the appropriate authentication method based on the SSH configuration.
 func (s *SSH) auth() (goph.Auth, error) {
 	switch {
 	case s.rawKey != "":
@@ -209,7 +224,7 @@ func (s *SSH) auth() (goph.Auth, error) {
 	}
 }
 
-// Close closes the SSH client.
+// Close closes the SSH and SFTP clients.
 func (s *SSH) Close() error {
 	if err := s.sftpClient.Close(); err != nil {
 		return err
@@ -217,7 +232,7 @@ func (s *SSH) Close() error {
 	return s.client.Close()
 }
 
-// Connect connects the SSH client.
+// Connect establishes the SSH connection and initializes the SFTP client.
 func (s *SSH) Connect() error {
 	auth, err := s.auth()
 	if err != nil {
@@ -237,6 +252,7 @@ func (s *SSH) Connect() error {
 	return s.ensureEnvironment()
 }
 
+// ensureEnvironment ensures that the necessary directories exist on the remote server.
 func (s *SSH) ensureEnvironment() error {
 	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
 		return errors.Wrapf(err, "failed to create bin dir %s", s.Bin())
@@ -250,6 +266,7 @@ func (s *SSH) ensureEnvironment() error {
 	return nil
 }
 
+// ensureLocalBin uploads the specified binary to the remote server's bin directory.
 func (s *SSH) ensureLocalBin(name string) error {
 	// find ignite binary path
 	path, err := exec.LookPath(name)
@@ -263,6 +280,7 @@ func (s *SSH) ensureLocalBin(name string) error {
 	return nil
 }
 
+// Upload uploads a directory recursively to the remote server.
 func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string) error {
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(5)
@@ -297,6 +315,7 @@ func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string) error {
 	return grp.Wait()
 }
 
+// UploadFile uploads a single file to the remote server.
 func (s *SSH) UploadFile(filePath, dstPath string) error {
 	dstDir := filepath.Dir(dstPath)
 	if err := s.sftpClient.MkdirAll(dstDir); err != nil {
@@ -310,6 +329,8 @@ func (s *SSH) UploadFile(filePath, dstPath string) error {
 	return s.client.Upload(srcPath, dstPath)
 }
 
+// UploadBinary uploads a binary file to the remote server's bin directory
+// and sets the appropriate permissions.
 func (s *SSH) UploadBinary(srcPath string) (string, error) {
 	var (
 		filename = filepath.Base(srcPath)
@@ -326,6 +347,8 @@ func (s *SSH) UploadBinary(srcPath string) (string, error) {
 	return binPath, nil
 }
 
+// UploadRunnerScript uploads a runner script to the remote server
+// and sets the appropriate permissions.
 func (s *SSH) UploadRunnerScript(srcPath string) (string, error) {
 	path := s.RunnerScript()
 	if err := s.UploadFile(srcPath, s.RunnerScript()); err != nil {
@@ -339,49 +362,82 @@ func (s *SSH) UploadRunnerScript(srcPath string) (string, error) {
 	return path, nil
 }
 
+// UploadHome uploads the home directory to the remote server.
 func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {
 	path := s.Home()
 	return path, s.Upload(ctx, srcPath, path)
 }
 
+// RunCommand runs a command on the remote server and returns the output.
 func (s *SSH) RunCommand(ctx context.Context, name string, args ...string) (string, error) {
 	cmd, err := s.client.CommandContext(ctx, name, args...)
 	if err != nil {
 		return "", err
 	}
-	out, err := cmd.CombinedOutput()
+	cmdOut, err := cmd.CombinedOutput()
+	output := strings.TrimSpace(string(cmdOut))
 	if err != nil {
-		return "", err
+		return "", errors.Errorf(
+			"%s: failed to run %s %s\n%s",
+			err.Error(),
+			name,
+			strings.Join(args, " "),
+			output,
+		)
 	}
-	return strings.TrimSpace(string(out)), nil
+	return output, nil
 }
 
+// Start runs the "start" script on the remote server.
 func (s *SSH) Start(ctx context.Context) (string, error) {
 	return s.runScript(ctx, "start")
 }
 
+// Restart runs the "restart" script on the remote server.
 func (s *SSH) Restart(ctx context.Context) (string, error) {
 	return s.runScript(ctx, "restart")
 }
 
+// Stop runs the "stop" script on the remote server.
 func (s *SSH) Stop(ctx context.Context) (string, error) {
 	return s.runScript(ctx, "stop")
 }
 
+// Status runs the "status" script on the remote server.
 func (s *SSH) Status(ctx context.Context) (string, error) {
 	return s.runScript(ctx, "status")
 }
 
+// runScript runs the specified script with arguments on the remote server.
 func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
 	return s.RunCommand(ctx, s.RunnerScript(), args...)
 }
 
+// HasInitialized checks if the genesis file exists on the remote server.
 func (s *SSH) HasInitialized(ctx context.Context) bool {
-	return s.Exist(ctx, s.Genesis())
+	return s.FileExist(ctx, s.Genesis())
 }
 
-func (s *SSH) Exist(ctx context.Context, path string) bool {
-	cmd := fmt.Sprintf("[ -f '%s' ] && echo 'true'", path)
+// FolderExist checks if a directory exists at the specified path on the remote server.
+// It returns true if the directory exists, otherwise false.
+func (s *SSH) FolderExist(ctx context.Context, path string) bool {
+	return s.exist(ctx, path, false)
+}
+
+// FileExist checks if a file exists at the specified path on the remote server.
+// It returns true if the file exists, otherwise false.
+func (s *SSH) FileExist(ctx context.Context, path string) bool {
+	return s.exist(ctx, path, true)
+}
+
+// exist checks if a file or directory exists at the specified path on the remote server.
+// If isFile is true, it checks for a file, otherwise it checks for a directory.
+// It returns true if the specified file or directory exists, otherwise false.
+func (s *SSH) exist(ctx context.Context, path string, isFile bool) bool {
+	cmd := fmt.Sprintf("[ -d '%s' ] && echo 'true'", path)
+	if isFile {
+		cmd = fmt.Sprintf("[ -f '%s' ] && echo 'true'", path)
+	}
 	exist, err := s.RunCommand(ctx, cmd)
 	if err != nil {
 		return false
@@ -389,6 +445,7 @@ func (s *SSH) Exist(ctx context.Context, path string) bool {
 	return exist == "true"
 }
 
+// OS returns the operating system type of the remote server.
 func (s *SSH) OS(ctx context.Context) (string, error) {
 	v, err := s.Uname(ctx)
 	if err != nil {
@@ -397,6 +454,7 @@ func (s *SSH) OS(ctx context.Context) (string, error) {
 	return strings.ToLower(v), nil
 }
 
+// Arch returns the architecture type of the remote server.
 func (s *SSH) Arch(ctx context.Context) (string, error) {
 	v, err := s.Uname(ctx, "-m")
 	if err != nil {
@@ -405,6 +463,7 @@ func (s *SSH) Arch(ctx context.Context) (string, error) {
 	return strings.ToLower(v), nil
 }
 
+// Target returns the build target for the remote server based on its OS and architecture.
 func (s *SSH) Target(ctx context.Context) (string, error) {
 	os, err := s.OS(ctx)
 	if err != nil {
@@ -419,6 +478,7 @@ func (s *SSH) Target(ctx context.Context) (string, error) {
 	return gocmd.BuildTarget(os, arch), nil
 }
 
+// Uname runs the "uname" command with the specified arguments on the remote server.
 func (s *SSH) Uname(ctx context.Context, args ...string) (string, error) {
 	return s.RunCommand(ctx, "uname", args...)
 }
