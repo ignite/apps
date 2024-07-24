@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
+	"github.com/ignite/apps/spaceship/pkg/tarball"
 	"github.com/ignite/apps/spaceship/templates/script"
 )
+
+var ErrServerNotInitialized = errors.New("server not initialized")
 
 const (
 	flagPort        = "port"
@@ -70,6 +74,11 @@ func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return err
 	}
 	defer c.Close()
+
+	if !c.HasRunnerScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	status, err := c.Status(ctx)
 	if err != nil {
 		return err
@@ -85,6 +94,11 @@ func ExecuteSSHSStop(ctx context.Context, cmd *plugin.ExecutedCommand, chain *pl
 		return err
 	}
 	defer c.Close()
+
+	if !c.HasRunnerScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	stop, err := c.Stop(ctx)
 	if err != nil {
 		return err
@@ -100,6 +114,11 @@ func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *
 		return err
 	}
 	defer c.Close()
+
+	if !c.HasRunnerScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	restart, err := c.Restart(ctx)
 	if err != nil {
 		return err
@@ -115,6 +134,11 @@ func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plug
 		return err
 	}
 	defer c.Close()
+
+	if !c.HasRunnerScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	log, err := c.LatestLog()
 	if err != nil {
 		return err
@@ -140,7 +164,6 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 
 		localChainHome = filepath.Join(localDir, "home")
 		localBinOutput = filepath.Join(localDir, "bin")
-		localChainBin  = fmt.Sprintf("%s/%sd", localBinOutput, chain.ChainId)
 	)
 
 	c, err := executeSSH(cmd, chain)
@@ -149,27 +172,50 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 	defer c.Close()
 
-	//os, err := c.Target(ctx)
-	//if err != nil {
-	//	return err
-	//}
+	target, err := c.Target(ctx)
+	if err != nil {
+		return err
+	}
 
 	// We are using the ignite chain build command to build the app.
 	igniteChainBuildCmd := ignitecmd.NewChainBuild()
-	// igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput, "--release", "--release.targets", os})
-	igniteChainBuildCmd.SetArgs([]string{"-p", chain.AppPath, "-o", localBinOutput})
+	igniteChainBuildCmd.SetArgs([]string{
+		"-p",
+		chain.AppPath,
+		"-o",
+		localBinOutput,
+		"--release",
+		"--release.targets",
+		target,
+	})
 	if err := igniteChainBuildCmd.ExecuteContext(ctx); err != nil {
 		return err
 	}
 
-	// Upload the built binary.
-	binPath, err := c.UploadBinary(localChainBin)
+	// Extract and upload the built binary.
+	var (
+		binName           = fmt.Sprintf("%sd", chain.ChainId)
+		localChainTarball = fmt.Sprintf(
+			"%s/%s_%s.tar.gz",
+			localBinOutput,
+			chain.ChainId,
+			strings.ReplaceAll(target, ":", "_"),
+		)
+	)
+	extracted, err := tarball.Extract(ctx, localChainTarball, localBinOutput, binName)
+	if err != nil {
+		return err
+	}
+	if len(extracted) == 0 {
+		return errors.Errorf("zero files extracted from the tarball %s", localChainTarball)
+	}
+	binPath, err := c.UploadBinary(extracted[0])
 	if err != nil {
 		return err
 	}
 
 	home := c.Home()
-	if initChain || !c.HasInitialized(ctx) {
+	if initChain || !c.HasGenesis(ctx) {
 		// Init the chain.
 		igniteChainInitCmd := ignitecmd.NewChainInit()
 		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome})
@@ -198,5 +244,6 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return err
 	}
 	fmt.Println(start)
+
 	return nil
 }

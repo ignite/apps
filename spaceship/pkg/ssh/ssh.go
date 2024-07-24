@@ -413,9 +413,14 @@ func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
 	return s.RunCommand(ctx, s.RunnerScript(), args...)
 }
 
-// HasInitialized checks if the genesis file exists on the remote server.
-func (s *SSH) HasInitialized(ctx context.Context) bool {
+// HasGenesis checks if the genesis file exists on the remote server.
+func (s *SSH) HasGenesis(ctx context.Context) bool {
 	return s.FileExist(ctx, s.Genesis())
+}
+
+// HasRunnerScript checks if the runner script file exists on the remote server.
+func (s *SSH) HasRunnerScript(ctx context.Context) bool {
+	return s.FileExist(ctx, s.RunnerScript())
 }
 
 // FolderExist checks if a directory exists at the specified path on the remote server.
