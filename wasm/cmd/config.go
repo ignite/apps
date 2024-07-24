@@ -1,12 +1,13 @@
 package cmd
 
 import (
+	"context"
 	"os"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/wasm/pkg/config"
 )
@@ -21,33 +22,22 @@ const (
 	flagMemoryCacheSize = "memory-cache-size"
 )
 
-// NewWasmConfig add wasm config to a chain.
-func NewWasmConfig() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "config",
-		Short: "Add wasm config support",
-		Args:  cobra.NoArgs,
-		RunE:  wasmConfigExecuteHandler,
+func ConfigHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return err
 	}
 
-	flagSetPath(c)
-	flagSetHome(c)
-	flagSetWasmConfigs(c)
-
-	return c
-}
-
-func wasmConfigExecuteHandler(cmd *cobra.Command, _ []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusAddingConfig))
 	defer session.End()
 
 	var (
-		simulationGasLimit = getSimulationGasLimit(cmd)
-		smartQueryGasLimit = getSmartQueryGasLimit(cmd)
-		memoryCacheSize    = getMemoryCacheSize(cmd)
+		simulationGasLimit = getSimulationGasLimit(flags)
+		smartQueryGasLimit = getSmartQueryGasLimit(flags)
+		memoryCacheSize    = getMemoryCacheSize(flags)
 	)
 
-	c, err := newChainWithHomeFlags(cmd, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
+	c, err := newChainWithHomeFlags(flags, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
 	}
