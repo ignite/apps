@@ -465,6 +465,9 @@ func (s *SSH) Arch(ctx context.Context) (string, error) {
 	if err != nil {
 		return "", err
 	}
+	if arch, ok := archMap[v]; ok {
+		v = arch
+	}
 	return strings.ToLower(v), nil
 }
 

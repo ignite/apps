@@ -36,7 +36,7 @@ func main() {
 					Shorthand: "k",
 					Usage:     "ssh key",
 					Type:      plugin.FlagTypeString,
-					Value:     "/Users/danilopantani/.ssh/id_rsa",
+					Value:     filepath.Join(home, ".ssh/id_rsa"),
 				},
 				{
 					Name:      "init-chain",

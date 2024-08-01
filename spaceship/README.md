@@ -1,53 +1,86 @@
 # Spaceship
 
-Spaceship is an Ignite App designed to extend the [Ignite CLI](https://github.com/ignite/cli) and assist developers in deploying their blockchain via SSH.
+Spaceship is an Ignite App designed to extend the [Ignite CLI](https://github.com/ignite/cli) by providing tools to
+deploy blockchain applications via SSH.
 
 ## Prerequisites
 
-* Ignite CLI version v28.4.0 or higher.
-* A blockchain scaffolded by Ignite.
+* Ignite CLI: Version v28.4.0 or higher is required.
+* Blockchain Scaffold: A blockchain scaffolded using Ignite
 
 ## Usage
 
-Spaceship offers several ways to connect to your SSH server:
+Spaceship provides multiple ways to connect to your SSH server for deployment:
 
 ```sh
 ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa
-OR
 ignite spaceship deploy 127.0.0.1 --user root --key $HOME/.ssh/id_rsa
-OR
 ignite spaceship deploy 127.0.0.1 --user root --password password
-OR
 ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --key-password key_password
 ```
 
-Each time you run this command, the binary is built, and the chain home folder is created based on the chain configuration. 
-The app then connects to the server via SSH, creates workspaces, transfers the binary, and runs it using a runner script. 
-The workspaces are created in `$HOME/workspace/<chain-id>` and consist of the following elements:
+Each command initiates a build of the blockchain binary and sets up the chain's home directory based on the
+configuration. The app then connects to the specified SSH server, establishes workspaces, transfers the binary, and
+executes it using a runner script. The workspaces are organized under $HOME/workspace/<chain-id> and include:
 
-- `$HOME/workspace/<chain-id>/bin` - The directory containing the chain binary.
-- `$HOME/workspace/<chain-id>/home` - The chain home folder.
-- `$HOME/workspace/<chain-id>/log` - Logs of the running chain.
-- `$HOME/workspace/<chain-id>/run.sh` - Runner script to run the binary in the background using nohup.
-- `$HOME/workspace/<chain-id>/spaceship.pid` - The PID of the currently running chain.
+- Binary Directory: $HOME/workspace/<chain-id>/bin - Contains the chain binary.
+- Home Directory: $HOME/workspace/<chain-id>/home - Stores chain data.
+- Log Directory: $HOME/workspace/<chain-id>/log - Holds logs of the running chain.
+- Runner Script: $HOME/workspace/<chain-id>/run.sh - A script to start the binary in the background using nohup.
+- PID File: $HOME/workspace/<chain-id>/spaceship.pid - Stores the PID of the currently running chain instance.
 
-To check the status of your chain, use:
+### Managing the Chain
+
+To manage your blockchain deployment, use the following commands:
+
+- Check Status:
+
 ```sh
 ignite spaceship status root@127.0.0.1 --key $HOME/.ssh/id_rsa
 ```
 
-To view the chain logs, use:
+- View Logs:
+
 ```sh
 ignite spaceship log root@127.0.0.1 --key $HOME/.ssh/id_rsa
 ```
 
-To stop the running chain, use:
+- Restart the Chain:
+
+```sh
+ignite spaceship restart root@127.0.0.1 --key $HOME/.ssh/id_rsa
+```
+
+- Stop the Chain:
+
 ```sh
 ignite spaceship stop root@127.0.0.1 --key $HOME/.ssh/id_rsa
 ```
 
-If you need to redeploy the chain on the same server, the home folder will not be overwritten. To reinitialize the chain, use the --init-chain flag.
+To redeploy the chain on the same server without overwriting the home directory, use the --init-chain flag to
+reinitialize the chain if necessary.
 
-Learn more about Ignite in the respective documentation:
+### Config
 
-* <https://docs.ignite.com>
+You can override the default [chain configuration](https://docs.ignite.com/references/config#validators) by using the
+Ignite configuration file. Validators' node configuration files are stored in the data directory. By default, Spaceship
+initializes the chain locally in a temporary folder using the Ignite config file and then copies the configuration to
+the remote machine at $HOME/workspace/<chain-id>/home.
+Configuration resets are performed by Ignite when necessary, especially when using the --init-chain flag or if the chain
+was not previously initialized.
+
+Example Ignite config:
+
+```
+validators:
+  - name: alice
+    bonded: '100000000stake'
+    app:
+      pruning: "nothing"
+    config:
+      moniker: "mychain"
+    client:
+      output: "json"
+```
+
+For more information, please refer to the [Ignite documentation](https://docs.ignite.com).
