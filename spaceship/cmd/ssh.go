@@ -10,6 +10,7 @@ import (
 	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/schollz/progressbar/v3"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 	"github.com/ignite/apps/spaceship/pkg/tarball"
@@ -187,9 +188,28 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		"--release",
 		"--release.targets",
 		target,
+		"-v",
 	})
 	if err := igniteChainBuildCmd.ExecuteContext(ctx); err != nil {
 		return err
+	}
+
+	// Define a progress callback function.
+	bar := progressbar.DefaultBytes(1, "uploading")
+	progressCallback := func(bytesUploaded int64, totalBytes int64) error {
+		if bar.GetMax64() != totalBytes {
+			bar.ChangeMax64(totalBytes)
+			bar.Reset()
+		}
+		if err := bar.Set64(bytesUploaded); err != nil {
+			return err
+		}
+		if bytesUploaded == totalBytes {
+			if err := bar.Finish(); err != nil {
+				return err
+			}
+		}
+		return nil
 	}
 
 	// Extract and upload the built binary.
@@ -209,7 +229,9 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	if len(extracted) == 0 {
 		return errors.Errorf("zero files extracted from the tarball %s", localChainTarball)
 	}
-	binPath, err := c.UploadBinary(extracted[0])
+
+	bar.Describe("uploading chain binary")
+	binPath, err := c.UploadBinary(extracted[0], progressCallback)
 	if err != nil {
 		return err
 	}
@@ -218,12 +240,13 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	if initChain || !c.HasGenesis(ctx) {
 		// Init the chain.
 		igniteChainInitCmd := ignitecmd.NewChainInit()
-		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome})
+		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome}) // TODO add verbose flag after merge and backport this one https://github.com/ignite/cli/pull/4286
 		if err := igniteChainInitCmd.ExecuteContext(ctx); err != nil {
 			return err
 		}
 
-		home, err = c.UploadHome(ctx, localChainHome)
+		bar.Describe("uploading chain home folder")
+		home, err = c.UploadHome(ctx, localChainHome, progressCallback)
 		if err != nil {
 			return err
 		}
@@ -235,7 +258,8 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return err
 	}
 
-	if _, err := c.UploadRunnerScript(localRunScriptPath); err != nil {
+	bar.Describe("uploading runner script")
+	if _, err := c.UploadRunnerScript(localRunScriptPath, progressCallback); err != nil {
 		return err
 	}
 

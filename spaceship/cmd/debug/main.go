@@ -27,7 +27,7 @@ func main() {
 		c = &plugin.ExecutedCommand{
 			Use:    args[1],
 			Path:   "ignite spaceship " + args[1],
-			Args:   []string{"danilopantani@127.0.0.1"},
+			Args:   []string{fmt.Sprintf("%s@127.0.0.1", filepath.Base(home))},
 			OsArgs: os.Args,
 			With:   nil,
 			Flags: []*plugin.Flag{

@@ -8,7 +8,6 @@ import (
 	"context"
 	"fmt"
 	"net/url"
-	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -18,7 +17,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
-	"golang.org/x/sync/errgroup"
 )
 
 const (
@@ -267,105 +265,17 @@ func (s *SSH) ensureEnvironment() error {
 }
 
 // ensureLocalBin uploads the specified binary to the remote server's bin directory.
-func (s *SSH) ensureLocalBin(name string) error {
+func (s *SSH) ensureLocalBin(name string, progressCallback ProgressCallback) error {
 	// find ignite binary path
 	path, err := exec.LookPath(name)
 	if err != nil {
 		return err
 	}
-	_, err = s.UploadBinary(path)
+	_, err = s.UploadBinary(path, progressCallback)
 	if err != nil {
 		return err
 	}
 	return nil
-}
-
-// Upload uploads a directory recursively to the remote server.
-func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string) error {
-	grp, ctx := errgroup.WithContext(ctx)
-	grp.SetLimit(5)
-	err := filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
-		if err != nil {
-			return err
-		}
-
-		if !info.IsDir() {
-			rel, err := filepath.Rel(srcPath, path)
-			if err != nil {
-				return err
-			}
-			// skip hidden files and folders.
-			if strings.HasPrefix(rel, ".") {
-				return nil
-			}
-			newPath := filepath.Join(dstPath, rel)
-
-			grp.Go(func() error {
-				if err := s.UploadFile(path, newPath); err != nil {
-					return errors.Wrapf(err, "failed to upload file %s to %s", path, newPath)
-				}
-				return nil
-			})
-		}
-		return nil
-	})
-	if err != nil {
-		return err
-	}
-	return grp.Wait()
-}
-
-// UploadFile uploads a single file to the remote server.
-func (s *SSH) UploadFile(filePath, dstPath string) error {
-	dstDir := filepath.Dir(dstPath)
-	if err := s.sftpClient.MkdirAll(dstDir); err != nil {
-		return errors.Wrapf(err, "failed to create destiny path %s", dstDir)
-	}
-
-	srcPath, err := filepath.Abs(filePath)
-	if err != nil {
-		return err
-	}
-	return s.client.Upload(srcPath, dstPath)
-}
-
-// UploadBinary uploads a binary file to the remote server's bin directory
-// and sets the appropriate permissions.
-func (s *SSH) UploadBinary(srcPath string) (string, error) {
-	var (
-		filename = filepath.Base(srcPath)
-		binPath  = filepath.Join(s.Bin(), filename)
-	)
-	if err := s.UploadFile(srcPath, binPath); err != nil {
-		return "", err
-	}
-
-	// give binary permission
-	if err := s.sftpClient.Chmod(binPath, 0o755); err != nil {
-		return "", err
-	}
-	return binPath, nil
-}
-
-// UploadRunnerScript uploads a runner script to the remote server
-// and sets the appropriate permissions.
-func (s *SSH) UploadRunnerScript(srcPath string) (string, error) {
-	path := s.RunnerScript()
-	if err := s.UploadFile(srcPath, s.RunnerScript()); err != nil {
-		return "", err
-	}
-
-	// give binary permission
-	if err := s.sftpClient.Chmod(path, 0o755); err != nil {
-		return "", err
-	}
-	return path, nil
-}
-
-// UploadHome uploads the home directory to the remote server.
-func (s *SSH) UploadHome(ctx context.Context, srcPath string) (string, error) {
-	path := s.Home()
-	return path, s.Upload(ctx, srcPath, path)
 }
 
 // RunCommand runs a command on the remote server and returns the output.
