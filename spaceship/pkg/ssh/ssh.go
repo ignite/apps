@@ -162,6 +162,34 @@ func parseURI(uri string) (host string, port string, username string, password s
 	return host, port, username, password, nil
 }
 
+// Close closes the SSH and SFTP clients.
+func (s *SSH) Close() error {
+	if err := s.sftpClient.Close(); err != nil {
+		return err
+	}
+	return s.client.Close()
+}
+
+// Connect establishes the SSH connection and initializes the SFTP client.
+func (s *SSH) Connect() error {
+	auth, err := s.auth()
+	if err != nil {
+		return err
+	}
+
+	s.client, err = goph.NewUnknown(s.username, s.host, auth)
+	if err != nil {
+		return errors.Wrapf(err, "Failed to connect to %v", s)
+	}
+
+	s.sftpClient, err = s.client.NewSftp()
+	if err != nil {
+		return err
+	}
+
+	return s.ensureEnvironment()
+}
+
 // Workspace returns the workspace directory for the SSH session.
 func (s *SSH) Workspace() string {
 	return filepath.Join(workdir, s.workspace)
@@ -220,34 +248,6 @@ func (s *SSH) auth() (goph.Auth, error) {
 	default:
 		return goph.KeyboardInteractive(s.password), nil
 	}
-}
-
-// Close closes the SSH and SFTP clients.
-func (s *SSH) Close() error {
-	if err := s.sftpClient.Close(); err != nil {
-		return err
-	}
-	return s.client.Close()
-}
-
-// Connect establishes the SSH connection and initializes the SFTP client.
-func (s *SSH) Connect() error {
-	auth, err := s.auth()
-	if err != nil {
-		return err
-	}
-
-	s.client, err = goph.New(s.username, s.host, auth)
-	if err != nil {
-		return errors.Wrapf(err, "Failed to connect to %v", s)
-	}
-
-	s.sftpClient, err = s.client.NewSftp()
-	if err != nil {
-		return err
-	}
-
-	return s.ensureEnvironment()
 }
 
 // ensureEnvironment ensures that the necessary directories exist on the remote server.
