@@ -8,6 +8,7 @@ import (
 	"context"
 	"fmt"
 	"net/url"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -15,8 +16,10 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v28/ignite/pkg/randstr"
+	"github.com/manifoldco/promptui"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
+	"golang.org/x/crypto/ssh/knownhosts"
 )
 
 const (
@@ -177,7 +180,19 @@ func (s *SSH) Connect() error {
 		return err
 	}
 
-	s.client, err = goph.NewUnknown(s.username, s.host, auth)
+	s.client, err = goph.New(s.username, s.host, auth)
+	if errors.Is(err, &knownhosts.KeyError{}) {
+		prompt := promptui.Prompt{
+			Label:     fmt.Sprintf("Unknown host: %s. Do you want to proceed with the connection anyway", s.host),
+			IsConfirm: true,
+			Stdout:    os.Stdout,
+			Stdin:     os.Stdin,
+		}
+		if _, err := prompt.Run(); err != nil {
+			return err
+		}
+		s.client, err = goph.NewUnknown(s.username, s.host, auth)
+	}
 	if err != nil {
 		return errors.Wrapf(err, "Failed to connect to %v", s)
 	}
