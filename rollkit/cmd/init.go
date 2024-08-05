@@ -24,10 +24,7 @@ import (
 const defaultValPower = 1
 
 func InitHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New()
 	defer session.End()

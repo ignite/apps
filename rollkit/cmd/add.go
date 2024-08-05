@@ -21,10 +21,7 @@ const (
 )
 
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()

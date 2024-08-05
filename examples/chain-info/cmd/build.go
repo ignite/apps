@@ -14,12 +14,9 @@ import (
 
 // ExecuteBuild executes the build subcommand.
 func ExecuteBuild(ctx context.Context, cmd *plugin.ExecutedCommand, c *chain.Chain) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
-	output, _ := flags.GetString(flagOutput)
+	output, err := flags.GetString(flagOutput)
 	if err != nil {
 		return errors.Errorf("could not get --%s flag: %s", flagOutput, err)
 	}

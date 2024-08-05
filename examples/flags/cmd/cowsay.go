@@ -11,12 +11,8 @@ import (
 
 // ExecuteCowsay executes the cowsay subcommand.
 func ExecuteCowsay(_ context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
-
 	var (
+		flags   = plugin.Flags(cmd.Flags)
 		name, _ = flags.GetString(flagName)
 		typ, _  = flags.GetString(flagType)
 	)

@@ -10,7 +10,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/spf13/pflag"
 )
 
 const (
@@ -125,17 +124,17 @@ var (
 	}
 )
 
-func getPath(flags *pflag.FlagSet) string {
+func getPath(flags plugin.Flags) string {
 	path, _ := flags.GetString(flagPath)
 	return path
 }
 
-func getHome(flags *pflag.FlagSet) string {
+func getHome(flags plugin.Flags) string {
 	home, _ := flags.GetString(flagHome)
 	return home
 }
 
-func getWasmVersion(flags *pflag.FlagSet) string {
+func getWasmVersion(flags plugin.Flags) string {
 	version, err := flags.GetString(flagVersion)
 	if err != nil || version == "" {
 		version = defaultWasmVersion
@@ -144,7 +143,7 @@ func getWasmVersion(flags *pflag.FlagSet) string {
 	return version
 }
 
-func getSimulationGasLimit(flags *pflag.FlagSet) uint64 {
+func getSimulationGasLimit(flags plugin.Flags) uint64 {
 	simulationGasLimit, err := flags.GetUint64(flagSimulationGasLimit)
 	if err != nil || simulationGasLimit == 0 {
 		simulationGasLimit = defaultSimulationGasLimit
@@ -152,7 +151,7 @@ func getSimulationGasLimit(flags *pflag.FlagSet) uint64 {
 	return simulationGasLimit
 }
 
-func getSmartQueryGasLimit(flags *pflag.FlagSet) uint64 {
+func getSmartQueryGasLimit(flags plugin.Flags) uint64 {
 	smartQueryGasLimit, err := flags.GetUint64(flagSmartQueryGasLimit)
 	if err != nil || smartQueryGasLimit == 0 {
 		smartQueryGasLimit = defaultSmartQueryGasLimit
@@ -160,7 +159,7 @@ func getSmartQueryGasLimit(flags *pflag.FlagSet) uint64 {
 	return smartQueryGasLimit
 }
 
-func getMemoryCacheSize(flags *pflag.FlagSet) uint64 {
+func getMemoryCacheSize(flags plugin.Flags) uint64 {
 	memoryCacheSize, err := flags.GetUint64(flagMemoryCacheSize)
 	if err != nil || memoryCacheSize == 0 {
 		memoryCacheSize = defaultMemoryCacheSize
@@ -169,7 +168,7 @@ func getMemoryCacheSize(flags *pflag.FlagSet) uint64 {
 }
 
 // newChainWithHomeFlags create new *chain.Chain with home and path flags.
-func newChainWithHomeFlags(flags *pflag.FlagSet, chainOption ...chain.Option) (*chain.Chain, error) {
+func newChainWithHomeFlags(flags plugin.Flags, chainOption ...chain.Option) (*chain.Chain, error) {
 	// Check if custom home is provided
 	if home := getHome(flags); home != "" {
 		chainOption = append(chainOption, chain.HomePath(home))

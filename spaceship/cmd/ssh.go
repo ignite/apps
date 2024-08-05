@@ -34,14 +34,11 @@ func executeSSH(cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH,
 	if len(args) < 1 {
 		return nil, errors.New("must specify unless a uri host")
 	}
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return nil, err
-	}
 
 	var (
 		host = args[0]
 
+		flags          = plugin.Flags(cmd.Flags)
 		user, _        = flags.GetString(flagUser)
 		port, _        = flags.GetString(flagPort)
 		password, _    = flags.GetString(flagPassword)
@@ -150,7 +147,7 @@ func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plug
 
 // ExecuteSSHDeploy executes the ssh deploy subcommand.
 func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
-	flags, err := cmd.NewFlags()
+	flags := plugin.Flags(cmd.Flags)
 
 	localDir, err := os.MkdirTemp(os.TempDir(), "spaceship")
 	if err != nil {
