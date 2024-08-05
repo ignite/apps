@@ -20,10 +20,7 @@ const (
 	statusScaffolding  = "Scaffolding..."
 	statusAddingConfig = "Adding config..."
 
-	defaultSimulationGasLimit = 0
-	defaultSmartQueryGasLimit = 3_000_000
-	defaultMemoryCacheSize    = 100
-	defaultWasmVersion        = "v0.50.0"
+	defaultWasmVersion = "v0.50.0"
 )
 
 // GetCommands returns the list of extension commands.
@@ -135,35 +132,23 @@ func getHome(flags plugin.Flags) string {
 }
 
 func getWasmVersion(flags plugin.Flags) string {
-	version, err := flags.GetString(flagVersion)
-	if err != nil || version == "" {
-		version = defaultWasmVersion
-	}
+	version, _ := flags.GetString(flagVersion)
 	version = strings.Replace(version, "v", "", 1)
 	return version
 }
 
 func getSimulationGasLimit(flags plugin.Flags) uint64 {
-	simulationGasLimit, err := flags.GetUint64(flagSimulationGasLimit)
-	if err != nil || simulationGasLimit == 0 {
-		simulationGasLimit = defaultSimulationGasLimit
-	}
+	simulationGasLimit, _ := flags.GetUint64(flagSimulationGasLimit)
 	return simulationGasLimit
 }
 
 func getSmartQueryGasLimit(flags plugin.Flags) uint64 {
-	smartQueryGasLimit, err := flags.GetUint64(flagSmartQueryGasLimit)
-	if err != nil || smartQueryGasLimit == 0 {
-		smartQueryGasLimit = defaultSmartQueryGasLimit
-	}
+	smartQueryGasLimit, _ := flags.GetUint64(flagSmartQueryGasLimit)
 	return smartQueryGasLimit
 }
 
 func getMemoryCacheSize(flags plugin.Flags) uint64 {
-	memoryCacheSize, err := flags.GetUint64(flagMemoryCacheSize)
-	if err != nil || memoryCacheSize == 0 {
-		memoryCacheSize = defaultMemoryCacheSize
-	}
+	memoryCacheSize, _ := flags.GetUint64(flagMemoryCacheSize)
 	return memoryCacheSize
 }
 
