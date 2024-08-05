@@ -43,13 +43,21 @@ func main() {
 	)
 	switch args[1] {
 	case "deploy":
-		c.Flags = append(c.Flags, &plugin.Flag{
-			Name:      "init-chain",
-			Shorthand: "i",
-			Usage:     "run init chain and create the home folder",
-			Type:      plugin.FlagTypeBool,
-			Value:     "true",
-		})
+		c.Flags = append(c.Flags,
+			&plugin.Flag{
+				Name:      "init-chain",
+				Shorthand: "i",
+				Usage:     "run init chain and create the home folder",
+				Type:      plugin.FlagTypeBool,
+				Value:     "true",
+			},
+			&plugin.Flag{
+				Name:      "init-chain",
+				Shorthand: "i",
+				Usage:     "run init chain and create the home folder",
+				Type:      plugin.FlagTypeBool,
+				Value:     "true",
+			})
 		if err := cmd.ExecuteSSHDeploy(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return
