@@ -61,7 +61,20 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:   "log",
 					Short: "get chain logs if its running",
-					Flags: defaultFlags,
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagLines,
+							Shorthand:    "l",
+							Usage:        "number of lines of chain logs",
+							Type:         plugin.FlagTypeInt,
+							DefaultValue: "100",
+						},
+						&plugin.Flag{
+							Name:  flagRealTime,
+							Usage: "show the logs in the real time",
+							Type:  plugin.FlagTypeBool,
+						},
+					),
 				},
 				{
 					Use:   "status",

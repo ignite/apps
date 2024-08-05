@@ -38,23 +38,29 @@ func main() {
 					Type:      plugin.FlagTypeString,
 					Value:     filepath.Join(home, ".ssh/id_rsa"),
 				},
-				{
-					Name:      "init-chain",
-					Shorthand: "i",
-					Usage:     "run init chain and create the home folder",
-					Type:      plugin.FlagTypeBool,
-					Value:     "true",
-				},
 			},
 		}
 	)
 	switch args[1] {
 	case "deploy":
+		c.Flags = append(c.Flags, &plugin.Flag{
+			Name:      "init-chain",
+			Shorthand: "i",
+			Usage:     "run init chain and create the home folder",
+			Type:      plugin.FlagTypeBool,
+			Value:     "true",
+		})
 		if err := cmd.ExecuteSSHDeploy(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 	case "log":
+		c.Flags = append(c.Flags, &plugin.Flag{
+			Name:  "real-time",
+			Usage: "show the logs in the real time",
+			Type:  plugin.FlagTypeBool,
+			Value: "true",
+		})
 		if err := cmd.ExecuteSSHLog(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return

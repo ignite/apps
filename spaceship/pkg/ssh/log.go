@@ -1,9 +1,13 @@
 package ssh
 
 import (
+	"bufio"
+	"context"
+	"io"
 	"os"
 	"path/filepath"
 	"sort"
+	"strings"
 	"time"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
@@ -26,43 +30,94 @@ func (a logs) Len() int           { return len(a) }
 func (a logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a logs) Less(i, j int) bool { return a[i].time.Before(a[j].time) }
 
-// LatestLog returns the latest log from the server.
-func (s *SSH) LatestLog() ([]byte, error) {
+// LatestLog returns the last n lines from the latest log file.
+func (s *SSH) LatestLog(n int) (string, error) {
 	logFiles, err := s.getLogFiles()
 	if err != nil {
-		return nil, errors.Wrap(err, "error fetching log files")
+		return "", errors.Wrap(err, "error fetching log files")
 	}
 	if len(logFiles) == 0 {
-		return nil, errors.Wrap(err, "no log files found")
+		return "", errors.Wrap(err, "no log files found")
 	}
 	// Sort log files by modification time.
 	sort.Sort(logFiles)
 
 	// Get the latest log file
 	latestLogFile := logFiles[len(logFiles)-1]
-	return s.readFileToBytes(latestLogFile.name)
+	lines, err := s.readLastNLines(latestLogFile.name, n)
+	if err != nil {
+		return "", errors.Wrap(err, "error reading last log line")
+	}
+	return strings.Join(lines, "\n"), nil
 }
 
-// readFileToBytes reads the contents of a file and returns them as a byte slice.
-func (s *SSH) readFileToBytes(filePath string) ([]byte, error) {
+// readLastNLines reads the last n lines from the specified file.
+func (s *SSH) readLastNLines(filePath string, n int) ([]string, error) {
 	file, err := s.sftpClient.OpenFile(filePath, os.O_RDONLY)
 	if err != nil {
 		return nil, err
 	}
 	defer file.Close()
 
-	stat, err := file.Stat()
-	if err != nil {
+	// Use a buffer to read the file
+	lines := make([]string, 0)
+	scanner := bufio.NewScanner(file)
+
+	// Read lines into a buffer
+	for scanner.Scan() {
+		lines = append(lines, scanner.Text())
+		if len(lines) == n {
+			break
+		}
+	}
+	if err := scanner.Err(); err != nil {
 		return nil, err
 	}
 
-	data := make([]byte, stat.Size())
-	_, err = file.Read(data)
+	return lines, nil
+}
+
+// FollowLog follows the latest log file and sends new lines to the provided channel in real-time.
+func (s *SSH) FollowLog(ctx context.Context, ch chan<- string) error {
+	logFiles, err := s.getLogFiles()
 	if err != nil {
-		return nil, err
+		return errors.Wrap(err, "error fetching log files")
 	}
 
-	return data, nil
+	if len(logFiles) == 0 {
+		return errors.Wrap(err, "no log files found")
+	}
+	// Sort log files by modification time.
+	sort.Sort(logFiles)
+
+	// Get the latest log file
+	latestLogFile := logFiles[len(logFiles)-1]
+	file, err := s.sftpClient.OpenFile(latestLogFile.name, os.O_RDONLY)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
+
+	// Seek to the end of the file
+	file.Seek(0, io.SeekEnd)
+
+	reader := bufio.NewReader(file)
+	for {
+		select {
+		case <-ctx.Done():
+			return ctx.Err()
+		default:
+			line, err := reader.ReadString('\n')
+			if err != nil {
+				if err == io.EOF {
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				return err
+			}
+			ch <- line
+		}
+	}
 }
 
 // getLogFiles fetches all log files from the specified directory.

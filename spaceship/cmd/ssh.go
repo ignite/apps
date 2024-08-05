@@ -11,6 +11,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/schollz/progressbar/v3"
+	"golang.org/x/sync/errgroup"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 	"github.com/ignite/apps/spaceship/pkg/tarball"
@@ -27,6 +28,10 @@ const (
 	flagRawKey      = "raw-key"
 	flagKeyPassword = "key-password"
 	flagInitChain   = "init-chain"
+	flagLines       = "lines"
+	flagRealTime    = "real-time"
+
+	defaultLines = 100
 )
 
 func executeSSH(cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH, error) {
@@ -130,6 +135,18 @@ func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *
 
 // ExecuteSSHLog executes the ssh log subcommand.
 func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+	flags, err := cmd.NewFlags()
+	if err != nil {
+		return err
+	}
+	var (
+		lines, _    = flags.GetInt(flagLines)
+		realTime, _ = flags.GetBool(flagRealTime)
+	)
+	if lines == 0 {
+		lines = defaultLines
+	}
+
 	c, err := executeSSH(cmd, chain)
 	if err != nil {
 		return err
@@ -140,11 +157,40 @@ func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plug
 		return ErrServerNotInitialized
 	}
 
-	log, err := c.LatestLog()
+	logs, err := c.LatestLog(lines)
 	if err != nil {
 		return err
 	}
-	fmt.Println(string(log))
+	fmt.Println(logs)
+
+	if realTime {
+		// Create a buffered channel to receive log lines.
+		logChannel := make(chan string, 100)
+		g, ctx := errgroup.WithContext(ctx)
+
+		// Start the FollowLog method in a goroutine using errgroup
+		g.Go(func() error {
+			return c.FollowLog(ctx, logChannel)
+		})
+
+		// Start a goroutine to consume log lines
+		g.Go(func() error {
+			for {
+				select {
+				case line := <-logChannel:
+					fmt.Print(line)
+				case <-ctx.Done():
+					return ctx.Err()
+				}
+			}
+		})
+
+		// Wait for all goroutines to complete
+		if err := g.Wait(); err != nil && !errors.Is(err, context.Canceled) {
+			return err
+		}
+	}
+
 	return nil
 }
 
