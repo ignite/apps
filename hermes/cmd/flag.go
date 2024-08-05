@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"strconv"
-	"strings"
-
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
@@ -90,89 +86,7 @@ const (
 	mnemonicEntropySize = 256
 )
 
-var (
-	ErrFlagNotFound  = errors.New("flag not found")
-	ErrFlagAssertion = errors.New("flag type assertion to failed")
-)
-
-func getConfig(flags []*plugin.Flag) string {
-	config, _ := getFlag[string](flags, flagConfig)
+func getConfig(flags plugin.Flags) string {
+	config, _ := flags.GetString(flagConfig)
 	return config
-}
-
-// getFlag function to get flag with a generic return type
-// TODO remove these helpers for flags after we fix this issue:
-// https://github.com/ignite/apps/issues/116
-func getFlag[A any](flags []*plugin.Flag, key string) (result A, err error) {
-	v, err := getValue(flags, key)
-	if err != nil {
-		return result, err
-	}
-
-	value, ok := v.(A)
-	if !ok {
-		return result, errors.Wrapf(ErrFlagAssertion, "type assertion to %T failed for field %s", v, key)
-	}
-	return value, nil
-}
-
-func getValue(flags []*plugin.Flag, key string) (interface{}, error) {
-	for _, flag := range flags {
-		if flag.Name == key {
-			return exportToFlagValue(flag)
-		}
-	}
-	return nil, errors.Wrapf(ErrFlagNotFound, "flag %s not found", key)
-}
-
-func exportToFlagValue(f *plugin.Flag) (interface{}, error) {
-	switch f.Type {
-	case plugin.FlagTypeBool:
-		v, err := strconv.ParseBool(flagValue(f))
-		if err != nil {
-			return false, err
-		}
-		return v, nil
-	case plugin.FlagTypeInt:
-		v, err := strconv.Atoi(flagValue(f))
-		if err != nil {
-			return 0, err
-		}
-		return v, nil
-	case plugin.FlagTypeUint:
-		v, err := strconv.ParseUint(flagValue(f), 10, 64)
-		if err != nil {
-			return uint(0), err
-		}
-		return uint(v), nil
-	case plugin.FlagTypeInt64:
-		v, err := strconv.ParseInt(flagValue(f), 10, 64)
-		if err != nil {
-			return int64(0), err
-		}
-		return v, nil
-	case plugin.FlagTypeUint64:
-		v, err := strconv.ParseUint(flagValue(f), 10, 64)
-		if err != nil {
-			return uint64(0), err
-		}
-		return v, nil
-	case plugin.FlagTypeStringSlice:
-		v := strings.Trim(flagValue(f), "[]")
-		s := strings.Split(v, ",")
-		if len(s) == 0 || (len(s) == 1 && s[0] == "") {
-			return []string{}, nil
-		}
-
-		return s, nil
-	default:
-		return strings.TrimSpace(flagValue(f)), nil
-	}
-}
-
-func flagValue(flag *plugin.Flag) string {
-	if flag.Value != "" {
-		return flag.Value
-	}
-	return flag.DefaultValue
 }
