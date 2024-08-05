@@ -1,5 +1,8 @@
 version: 1
 apps:
+  spaceship:
+    description: Deploy your chain into a remote server in minutes
+    path: ./spaceship
   explorer:
     description: Easy to use terminal chain explorer for testing your Ignite blockchains
     path: ./explorer

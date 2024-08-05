@@ -10,4 +10,5 @@ use (
 	./hermes
 	./appregistry
 	./rollkit
+	./spaceship
 )
