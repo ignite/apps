@@ -9,10 +9,7 @@ import (
 
 // ExecuteHello executes the hello subcommand.
 func ExecuteHello(_ context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	name, err := flags.GetString(flagName)
 	if err != nil {

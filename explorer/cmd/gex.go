@@ -11,10 +11,7 @@ import (
 
 // ExecuteGex executes explorer gex subcommand.
 func ExecuteGex(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	rpcAddress, err := flags.GetString(flagRPCAddress)
 	if err != nil {

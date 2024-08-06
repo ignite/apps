@@ -9,27 +9,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
-
-// NewWasm creates a new wasm command that holds
-// some other sub commands related to CosmWasm.
-func NewWasm() *cobra.Command {
-	c := &cobra.Command{
-		Use:           "wasm [command]",
-		Aliases:       []string{"w"},
-		Short:         "Ignite wasm integration",
-		SilenceUsage:  true,
-		SilenceErrors: true,
-	}
-
-	// add sub commands.
-	c.AddCommand(
-		NewWasmAdd(),
-		NewWasmConfig(),
-	)
-	return c
-}
 
 const (
 	flagPath    = "path"
@@ -42,6 +23,96 @@ const (
 	defaultWasmVersion = "v0.50.0"
 )
 
+// GetCommands returns the list of extension commands.
+func GetCommands() []*plugin.Command {
+	return []*plugin.Command{
+		{
+			Use:     "wasm [command]",
+			Aliases: []string{"w"},
+			Short:   "Ignite wasm integration",
+			Commands: []*plugin.Command{
+				{
+					Use:   "add",
+					Short: "Add wasm support",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+						{
+							Name:  flagHome,
+							Usage: "directory where the blockchain node is initialized",
+							Type:  plugin.FlagTypeString,
+						},
+						{
+							Name:         flagSimulationGasLimit,
+							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
+							DefaultValue: "0",
+							Type:         plugin.FlagTypeUint64,
+						},
+						{
+							Name:         flagSmartQueryGasLimit,
+							Usage:        "the max gas to be used in a smart query contract call",
+							DefaultValue: "3000000",
+							Type:         plugin.FlagTypeUint64,
+						},
+						{
+							Name:         flagMemoryCacheSize,
+							Usage:        "memory cache size in MiB not bytes",
+							DefaultValue: "100",
+							Type:         plugin.FlagTypeUint64,
+						},
+						{
+							Name:         flagVersion,
+							Usage:        "wasmd semantic version",
+							Shorthand:    "v",
+							DefaultValue: defaultWasmVersion,
+							Type:         plugin.FlagTypeString,
+						},
+					},
+				},
+				{
+					Use:   "config",
+					Short: "Add wasm config support",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+						{
+							Name:  flagHome,
+							Usage: "directory where the blockchain node is initialized",
+							Type:  plugin.FlagTypeString,
+						},
+						{
+							Name:         flagSimulationGasLimit,
+							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
+							DefaultValue: "0",
+							Type:         plugin.FlagTypeUint64,
+						},
+						{
+							Name:         flagSmartQueryGasLimit,
+							Usage:        "the max gas to be used in a smart query contract call",
+							DefaultValue: "3000000",
+							Type:         plugin.FlagTypeUint64,
+						},
+						{
+							Name:         flagMemoryCacheSize,
+							Usage:        "memory cache size in MiB not bytes",
+							DefaultValue: "100",
+							Type:         plugin.FlagTypeUint64,
+						},
+					},
+				},
+			},
+		},
+	}
+}
+
 var (
 	modifyPrefix = colors.Modified("modify ")
 	createPrefix = colors.Success("create ")
@@ -50,63 +121,45 @@ var (
 	}
 )
 
-func flagSetPath(cmd *cobra.Command) {
-	cmd.Flags().StringP(flagPath, "p", ".", "path of the app")
-}
-
-func flagSetHome(cmd *cobra.Command) {
-	cmd.Flags().String(flagHome, "", "directory where the blockchain node is initialized")
-}
-
-func flagSetWasmVersion(cmd *cobra.Command) {
-	cmd.Flags().String(flagVersion, defaultWasmVersion, "wasmd semantic version")
-}
-
-func flagSetWasmConfigs(cmd *cobra.Command) {
-	cmd.Flags().Uint64(flagSimulationGasLimit, 0, "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead")
-	cmd.Flags().Uint64(flagSmartQueryGasLimit, 3_000_000, "the max gas to be used in a smart query contract call")
-	cmd.Flags().Uint64(flagMemoryCacheSize, 100, "memory cache size in MiB not bytes")
-}
-
-func getPath(cmd *cobra.Command) string {
-	path, _ := cmd.Flags().GetString(flagPath)
+func getPath(flags plugin.Flags) string {
+	path, _ := flags.GetString(flagPath)
 	return path
 }
 
-func getHome(cmd *cobra.Command) string {
-	home, _ := cmd.Flags().GetString(flagHome)
+func getHome(flags plugin.Flags) string {
+	home, _ := flags.GetString(flagHome)
 	return home
 }
 
-func getWasmVersion(cmd *cobra.Command) string {
-	version, _ := cmd.Flags().GetString(flagVersion)
+func getWasmVersion(flags plugin.Flags) string {
+	version, _ := flags.GetString(flagVersion)
 	version = strings.Replace(version, "v", "", 1)
 	return version
 }
 
-func getSimulationGasLimit(cmd *cobra.Command) uint64 {
-	simulationGasLimit, _ := cmd.Flags().GetUint64(flagSimulationGasLimit)
+func getSimulationGasLimit(flags plugin.Flags) uint64 {
+	simulationGasLimit, _ := flags.GetUint64(flagSimulationGasLimit)
 	return simulationGasLimit
 }
 
-func getSmartQueryGasLimit(cmd *cobra.Command) uint64 {
-	smartQueryGasLimit, _ := cmd.Flags().GetUint64(flagSmartQueryGasLimit)
+func getSmartQueryGasLimit(flags plugin.Flags) uint64 {
+	smartQueryGasLimit, _ := flags.GetUint64(flagSmartQueryGasLimit)
 	return smartQueryGasLimit
 }
 
-func getMemoryCacheSize(cmd *cobra.Command) uint64 {
-	memoryCacheSize, _ := cmd.Flags().GetUint64(flagMemoryCacheSize)
+func getMemoryCacheSize(flags plugin.Flags) uint64 {
+	memoryCacheSize, _ := flags.GetUint64(flagMemoryCacheSize)
 	return memoryCacheSize
 }
 
 // newChainWithHomeFlags create new *chain.Chain with home and path flags.
-func newChainWithHomeFlags(cmd *cobra.Command, chainOption ...chain.Option) (*chain.Chain, error) {
+func newChainWithHomeFlags(flags plugin.Flags, chainOption ...chain.Option) (*chain.Chain, error) {
 	// Check if custom home is provided
-	if home := getHome(cmd); home != "" {
+	if home := getHome(flags); home != "" {
 		chainOption = append(chainOption, chain.HomePath(home))
 	}
 
-	appPath := getPath(cmd)
+	appPath := getPath(flags)
 	absPath, err := filepath.Abs(appPath)
 	if err != nil {
 		return nil, err

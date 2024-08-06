@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* [#113](https://github.com/ignite/apps/pull/113) Move wasm apps from cobra commands to default cmds.
+
 ### Fixes
 
 * [#99](https://github.com/ignite/apps/pull/99) Fix missing CLI imports
