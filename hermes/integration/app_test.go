@@ -285,12 +285,13 @@ func TestCustomIBCTx(t *testing.T) {
 	require.NoError(t, err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "hermes")
 
-	env.Must(env.Exec("install hermes app locally",
-		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
-			step.Workdir(app.SourcePath()),
-		)),
-	))
+	// We don't need to install Hermes again since it's a builtin extension.
+	// env.Must(env.Exec("install hermes app locally",
+	// 	step.NewSteps(step.New(
+	// 		step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
+	// 		step.Workdir(app.SourcePath()),
+	// 	)),
+	// ))
 
 	// One local plugin expected
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
@@ -630,12 +631,13 @@ func TestTransferIBCTx(t *testing.T) {
 	require.NoError(t, err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "hermes")
 
-	env.Must(env.Exec("install hermes app locally",
-		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
-			step.Workdir(app.SourcePath()),
-		)),
-	))
+	// We don't need to install Hermes again since it's a builtin extension.
+	// env.Must(env.Exec("install hermes app locally",
+	// 	step.NewSteps(step.New(
+	// 		step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
+	// 		step.Workdir(app.SourcePath()),
+	// 	)),
+	// ))
 
 	// One local plugin expected
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
