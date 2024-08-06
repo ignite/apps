@@ -23,10 +23,7 @@ const (
 )
 
 func ConfigHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusAddingConfig))
 	defer session.End()

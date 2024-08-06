@@ -10,7 +10,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/spf13/pflag"
 )
 
 const (
@@ -21,10 +20,7 @@ const (
 	statusScaffolding  = "Scaffolding..."
 	statusAddingConfig = "Adding config..."
 
-	defaultSimulationGasLimit = 0
-	defaultSmartQueryGasLimit = 3_000_000
-	defaultMemoryCacheSize    = 100
-	defaultWasmVersion        = "v0.50.0"
+	defaultWasmVersion = "v0.50.0"
 )
 
 // GetCommands returns the list of extension commands.
@@ -125,51 +121,39 @@ var (
 	}
 )
 
-func getPath(flags *pflag.FlagSet) string {
+func getPath(flags plugin.Flags) string {
 	path, _ := flags.GetString(flagPath)
 	return path
 }
 
-func getHome(flags *pflag.FlagSet) string {
+func getHome(flags plugin.Flags) string {
 	home, _ := flags.GetString(flagHome)
 	return home
 }
 
-func getWasmVersion(flags *pflag.FlagSet) string {
-	version, err := flags.GetString(flagVersion)
-	if err != nil || version == "" {
-		version = defaultWasmVersion
-	}
+func getWasmVersion(flags plugin.Flags) string {
+	version, _ := flags.GetString(flagVersion)
 	version = strings.Replace(version, "v", "", 1)
 	return version
 }
 
-func getSimulationGasLimit(flags *pflag.FlagSet) uint64 {
-	simulationGasLimit, err := flags.GetUint64(flagSimulationGasLimit)
-	if err != nil || simulationGasLimit == 0 {
-		simulationGasLimit = defaultSimulationGasLimit
-	}
+func getSimulationGasLimit(flags plugin.Flags) uint64 {
+	simulationGasLimit, _ := flags.GetUint64(flagSimulationGasLimit)
 	return simulationGasLimit
 }
 
-func getSmartQueryGasLimit(flags *pflag.FlagSet) uint64 {
-	smartQueryGasLimit, err := flags.GetUint64(flagSmartQueryGasLimit)
-	if err != nil || smartQueryGasLimit == 0 {
-		smartQueryGasLimit = defaultSmartQueryGasLimit
-	}
+func getSmartQueryGasLimit(flags plugin.Flags) uint64 {
+	smartQueryGasLimit, _ := flags.GetUint64(flagSmartQueryGasLimit)
 	return smartQueryGasLimit
 }
 
-func getMemoryCacheSize(flags *pflag.FlagSet) uint64 {
-	memoryCacheSize, err := flags.GetUint64(flagMemoryCacheSize)
-	if err != nil || memoryCacheSize == 0 {
-		memoryCacheSize = defaultMemoryCacheSize
-	}
+func getMemoryCacheSize(flags plugin.Flags) uint64 {
+	memoryCacheSize, _ := flags.GetUint64(flagMemoryCacheSize)
 	return memoryCacheSize
 }
 
 // newChainWithHomeFlags create new *chain.Chain with home and path flags.
-func newChainWithHomeFlags(flags *pflag.FlagSet, chainOption ...chain.Option) (*chain.Chain, error) {
+func newChainWithHomeFlags(flags plugin.Flags, chainOption ...chain.Option) (*chain.Chain, error) {
 	// Check if custom home is provided
 	if home := getHome(flags); home != "" {
 		chainOption = append(chainOption, chain.HomePath(home))

@@ -9,8 +9,7 @@ require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.21
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/ignite/cli/v28 v28.5.0
-	github.com/spf13/pflag v1.0.5
+	github.com/ignite/cli/v28 v28.5.1
 	github.com/stretchr/testify v1.9.0
 )
 
@@ -208,6 +207,7 @@ require (
 	github.com/spf13/afero v1.11.0 // indirect
 	github.com/spf13/cast v1.6.0 // indirect
 	github.com/spf13/cobra v1.8.1 // indirect
+	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.18.2 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
