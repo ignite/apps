@@ -28,7 +28,7 @@ func (pw *progressWriter) Write(p []byte) (int, error) {
 }
 
 // Upload uploads a directory recursively to the remote server with a progress callback.
-func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallback ProgressCallback) error {
+func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallback ProgressCallback) ([]string, error) {
 	var (
 		totalFiles    int64
 		totalBytes    int64
@@ -53,12 +53,13 @@ func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallb
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	grp, ctx := errgroup.WithContext(ctx)
 	grp.SetLimit(5)
 
+	uploadedFiles := make([]string, 0)
 	err = filepath.Walk(srcPath, func(path string, info os.FileInfo, err error) error {
 		if err != nil {
 			return err
@@ -76,42 +77,47 @@ func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallb
 			newPath := filepath.Join(dstPath, rel)
 
 			grp.Go(func() error {
-				return s.UploadFile(path, newPath, func(bytesUploaded int64, fileTotalBytes int64) error {
+				file, err := s.UploadFile(path, newPath, func(bytesUploaded int64, fileTotalBytes int64) error {
 					uploadedBytes += bytesUploaded
 					// Call the progress callback with the total uploaded bytes
 					return progressCallback(uploadedBytes, totalBytes)
 				})
+				if err != nil {
+					return err
+				}
+				uploadedFiles = append(uploadedFiles, file)
+				return nil
 			})
 		}
 		return nil
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
-	return grp.Wait()
+	return uploadedFiles, grp.Wait()
 }
 
 // UploadFile uploads a single file to the remote server with progress tracking.
-func (s *SSH) UploadFile(filePath, dstPath string, progressCallback ProgressCallback) error {
+func (s *SSH) UploadFile(filePath, dstPath string, progressCallback ProgressCallback) (string, error) {
 	dstDir := filepath.Dir(dstPath)
 	if err := s.sftpClient.MkdirAll(dstDir); err != nil {
-		return errors.Wrapf(err, "failed to create destination path %s", dstDir)
+		return "", errors.Wrapf(err, "failed to create destination path %s", dstDir)
 	}
 
 	srcPath, err := filepath.Abs(filePath)
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	srcFile, err := os.Open(srcPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to open source file %s", srcPath)
+		return "", errors.Wrapf(err, "failed to open source file %s", srcPath)
 	}
 	defer srcFile.Close()
 
 	fileInfo, err := srcFile.Stat()
 	if err != nil {
-		return errors.Wrapf(err, "failed to get file info for %s", srcPath)
+		return "", errors.Wrapf(err, "failed to get file info for %s", srcPath)
 	}
 	totalBytes := fileInfo.Size()
 	srcReader := io.TeeReader(srcFile, &progressWriter{
@@ -121,15 +127,15 @@ func (s *SSH) UploadFile(filePath, dstPath string, progressCallback ProgressCall
 
 	dstFile, err := s.sftpClient.Create(dstPath)
 	if err != nil {
-		return errors.Wrapf(err, "failed to create destination file %s", dstPath)
+		return "", errors.Wrapf(err, "failed to create destination file %s", dstPath)
 	}
 	defer dstFile.Close()
 
 	_, err = io.Copy(dstFile, srcReader)
 	if err != nil {
-		return errors.Wrapf(err, "failed to upload file %s to %s", srcPath, dstPath)
+		return "", errors.Wrapf(err, "failed to upload file %s to %s", srcPath, dstPath)
 	}
-	return nil
+	return dstPath, nil
 }
 
 // UploadBinary uploads a binary file to the remote server's bin directory
@@ -139,7 +145,7 @@ func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (s
 		filename = filepath.Base(srcPath)
 		binPath  = filepath.Join(s.Bin(), filename)
 	)
-	if err := s.UploadFile(srcPath, binPath, progressCallback); err != nil {
+	if _, err := s.UploadFile(srcPath, binPath, progressCallback); err != nil {
 		return "", err
 	}
 
@@ -154,7 +160,7 @@ func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (s
 // and sets the appropriate permissions.
 func (s *SSH) UploadRunnerScript(srcPath string, progressCallback ProgressCallback) (string, error) {
 	path := s.RunnerScript()
-	if err := s.UploadFile(srcPath, s.RunnerScript(), progressCallback); err != nil {
+	if _, err := s.UploadFile(srcPath, s.RunnerScript(), progressCallback); err != nil {
 		return "", err
 	}
 
@@ -166,7 +172,7 @@ func (s *SSH) UploadRunnerScript(srcPath string, progressCallback ProgressCallba
 }
 
 // UploadHome uploads the home directory to the remote server.
-func (s *SSH) UploadHome(ctx context.Context, srcPath string, progressCallback ProgressCallback) (string, error) {
+func (s *SSH) UploadHome(ctx context.Context, srcPath string, progressCallback ProgressCallback) ([]string, error) {
 	path := s.Home()
-	return path, s.Upload(ctx, srcPath, path, progressCallback)
+	return s.Upload(ctx, srcPath, path, progressCallback)
 }

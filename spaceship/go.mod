@@ -7,6 +7,7 @@ toolchain go1.22.3
 require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.19
+	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.0
 	github.com/ignite/cli/v28 v28.5.1
 	github.com/manifoldco/promptui v0.9.0
@@ -262,6 +263,7 @@ require (
 	github.com/tidwall/btree v1.7.0 // indirect
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
+	github.com/xo/terminfo v0.0.0-20210125001918-ca9a967f8778 // indirect
 	github.com/yuin/goldmark v1.4.13 // indirect
 	github.com/yuin/goldmark-emoji v1.0.1 // indirect
 	github.com/zondax/hid v0.9.2 // indirect
