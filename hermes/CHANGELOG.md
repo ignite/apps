@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* [#111](https://github.com/ignite/apps/pull/111) Use default extensions commands instead of cobra commands
+
 ## [`v0.2.4`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.4)
 
 * [#114](https://github.com/ignite/apps/pull/114) Bump hermes binary to v1.10.0
