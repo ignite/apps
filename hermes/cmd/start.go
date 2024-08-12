@@ -1,30 +1,21 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
-// NewHermesStart start the hermes relayer.
-func NewHermesStart() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "start [chain-a-id] [chain-a-rpc]",
-		Short: "Start the Hermes realyer",
-		Args:  cobra.ExactArgs(2),
-		RunE:  hermesStartHandler,
-	}
-
-	return c
-}
-
-func hermesStartHandler(cmd *cobra.Command, args []string) (err error) {
+func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) {
 	var (
-		customCfg = getConfig(cmd)
+		flags     = cmd.Flags
+		args      = cmd.Args
+		customCfg = getConfig(flags)
 		cfgName   = strings.Join(args, hermes.ConfigNameSeparator)
 	)
 
@@ -47,10 +38,10 @@ func hermesStartHandler(cmd *cobra.Command, args []string) (err error) {
 	defer h.Cleanup()
 
 	return h.Start(
-		cmd.Context(),
+		ctx,
 		hermes.WithConfigFile(cfgPath),
-		hermes.WithStdIn(cmd.InOrStdin()),
-		hermes.WithStdOut(cmd.OutOrStdout()),
-		hermes.WithStdErr(cmd.ErrOrStderr()),
+		hermes.WithStdIn(os.Stdin),
+		hermes.WithStdOut(os.Stdout),
+		hermes.WithStdErr(os.Stderr),
 	)
 }
