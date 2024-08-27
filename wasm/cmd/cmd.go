@@ -20,7 +20,7 @@ const (
 	statusScaffolding  = "Scaffolding..."
 	statusAddingConfig = "Adding config..."
 
-	defaultWasmVersion = "v0.50.0"
+	defaultWasmVersion = "v0.53.0"
 )
 
 // GetCommands returns the list of extension commands.
