@@ -22,21 +22,6 @@ import (
 	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
 )
 
-// allCapabilities returns all capabilities available with the current wasmvm
-// See https://github.com/CosmWasm/cosmwasm/blob/main/docs/CAPABILITIES-BUILT-IN.md
-// This functionality is going to be moved upstream: https://github.com/CosmWasm/wasmvm/issues/425
-func allCapabilities() []string {
-	return []string{
-		"iterator",
-		"staking",
-		"stargate",
-		"cosmwasm_1_1",
-		"cosmwasm_1_2",
-		"cosmwasm_1_3",
-		"cosmwasm_1_4",
-	}
-}
-
 // registerWasmModules register CosmWasm keepers and non dependency inject modules.
 func (app *App) registerWasmModules(
 	appOpts servertypes.AppOptions,
@@ -74,7 +59,7 @@ func (app *App) registerWasmModules(
 		app.GRPCQueryRouter(),
 		DefaultNodeHome,
 		wasmConfig,
-		allCapabilities(),
+		wasmkeeper.BuiltInCapabilities(),
 		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
 		wasmOpts...,
 	)
