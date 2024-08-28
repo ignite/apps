@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   lint:
-    name: "govet | govulncheck | lint"
+    name: "govet | lint"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
