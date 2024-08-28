@@ -10,7 +10,7 @@ This app extends the `ignite scaffold chain` command by adding a `--fee-abstract
 
 ## Prerequisites
 
-- Ignite CLI version v28.5.1 or greater.
+- Ignite CLI version v28.5.2 or greater.
   - Or migrate your chain using the [Ignite migration guides](https://docs.ignite.com/migration).
 - Knowledge of blockchain development and the Fee Abstraction module.
 
