@@ -6,6 +6,9 @@ apps:
   explorer:
     description: Easy to use terminal chain explorer for testing your Ignite blockchains
     path: ./explorer
+  fee-abstraction:
+    description: Integrate the fee abstraction module from osmosis-labs to make it easy for new chains to accept the currencies of existing chains
+    path: ./fee-abstraction
   hermes:
     description: A wrapper around the hermes IBC relayer
     path: ./hermes
