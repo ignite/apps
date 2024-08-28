@@ -4,6 +4,7 @@ import (
 	"context"
 	"os"
 	"path/filepath"
+	"sync"
 	"testing"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
@@ -49,5 +50,14 @@ func TestFeeAbstraction(t *testing.T) {
 			step.Workdir(app.SourcePath()),
 		),
 	)
-	env.Exec("waiting the chain is up", stepUp, envtest.ExecRetry())
+
+	var wg sync.WaitGroup
+	wg.Add(1)
+	go func() {
+		env.Exec("waiting the chain is up", stepUp, envtest.ExecRetry())
+		wg.Done()
+	}()
+
+	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	wg.Wait()
 }
