@@ -1,4 +1,4 @@
-module flags
+module github.com/ignite/apps/examples/flags
 
 go 1.21.1
 

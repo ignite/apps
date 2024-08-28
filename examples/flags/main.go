@@ -7,7 +7,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"flags/cmd"
+	"github.com/ignite/apps/examples/flags/cmd"
 )
 
 type app struct{}

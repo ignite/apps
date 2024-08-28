@@ -1,4 +1,4 @@
-module chain-info
+module github.com/ignite/apps/examples/chain-info
 
 go 1.21.1
 

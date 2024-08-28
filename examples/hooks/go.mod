@@ -1,4 +1,4 @@
-module hooks
+module github.com/ignite/apps/examples/hooks
 
 go 1.21.1
 

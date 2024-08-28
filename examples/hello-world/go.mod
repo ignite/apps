@@ -1,4 +1,4 @@
-module hello-world
+module github.com/ignite/apps/examples/hello-world
 
 go 1.21.1
 

@@ -1,4 +1,4 @@
-module health-monitor
+module github.com/ignite/apps/examples/health-monitor
 
 go 1.21.1
 

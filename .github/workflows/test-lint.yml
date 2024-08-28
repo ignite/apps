@@ -13,7 +13,7 @@ concurrency:
 
 jobs:
   lint:
-    name: "lint"
+    name: "govet | govulncheck | lint"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -35,4 +35,4 @@ jobs:
         env:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
-        run: make lint-ci
+        run: make ci

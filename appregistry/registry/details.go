@@ -61,7 +61,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		return nil, errors.Errorf("app %s not found", appName)
 	}
 
-	repoOwner, repoName, err := validateRepoUrl(appEntry.RepositoryURL)
+	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL)
 	if err != nil {
 		return nil, err
 	}
@@ -138,7 +138,7 @@ func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository) (*p
 	return &conf, nil
 }
 
-func validateRepoUrl(repoURL string) (owner, name string, err error) {
+func validateRepoURL(repoURL string) (owner, name string, err error) {
 	matches := githubRepoPattern.FindStringSubmatch(repoURL)
 	if len(matches) < 4 {
 		return "", "", errors.Errorf("invalid repo URL: %s", repoURL)
@@ -157,7 +157,7 @@ func findCLIVersion(modFile *modfile.File) string {
 	return ""
 }
 
-// stripHttpOrHttpsFromUrl strips http or https scheme from a URL
+// stripHTTPOrHTTPSFromURL strips http or https scheme from a URL.
 func stripHTTPOrHTTPSFromURL(url string) string {
 	if url[:8] == "https://" {
 		url = url[8:]
