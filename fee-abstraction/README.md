@@ -1,6 +1,6 @@
 # Wasm
 
-The Fee Abstraction app is an extension for the [Ignite CLI](https://github.com/ignite/cli), designed to help developers seamlessly integrate the Fee Abstraction module from Osmosis Labs into their blockchain projects.
+The Fee Abstraction app is an extension for the [Ignite CLI](https://github.com/ignite/cli), designed to help developers seamlessly integrate the [Fee Abstraction](https://github.com/osmosis-labs/fee-abstraction) module from Osmosis Labs into their blockchain projects.
 
 This app extends the `ignite scaffold chain` command by adding a `--fee-abstraction` flag, which automatically incorporates the Fee Abstraction module into your chain.
 
