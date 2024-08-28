@@ -11,4 +11,5 @@ use (
 	./appregistry
 	./rollkit
 	./spaceship
+	./wasm
 )

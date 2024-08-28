@@ -20,14 +20,14 @@ func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	return m, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	// Remove the three two elements "ignite" and "wasm" from OsArgs.
 	args := c.OsArgs[2:]
 	switch args[0] {
 	case "add":
-		return cmd.AddHandler(ctx, c)
+		return cmd.AddHandler(ctx, c, api)
 	case "config":
-		return cmd.ConfigHandler(ctx, c)
+		return cmd.ConfigHandler(ctx, c, api)
 	default:
 		return errors.Errorf("unknown command: %s", c.Path)
 	}

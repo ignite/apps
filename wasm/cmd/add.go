@@ -12,7 +12,7 @@ import (
 	"github.com/ignite/apps/wasm/services/scaffolder"
 )
 
-func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
@@ -22,7 +22,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		simulationGasLimit = getSimulationGasLimit(flags)
 		smartQueryGasLimit = getSmartQueryGasLimit(flags)
 		memoryCacheSize    = getMemoryCacheSize(flags)
-		wasmVersion        = getWasmVersion(flags)
+		wasmVersion        = getVersion(flags)
 	)
 
 	wasmSemVer, err := semver.Parse(wasmVersion)
@@ -30,7 +30,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	c, err := newChainWithHomeFlags(flags, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
+	c, err := newChain(ctx, api, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
 	}
