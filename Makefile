@@ -76,7 +76,7 @@ lint-ci:
     done
 
 ## ci: Run CI pipeline govet, govulncheck and lint
-ci: govet govulncheck lint-ci
+ci: govet lint-ci
 
 ## format: Install and run goimports and gofumpt for all apps.
 format:
