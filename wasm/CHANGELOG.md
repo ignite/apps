@@ -2,7 +2,12 @@
 
 ## Unreleased
 
-* [#113](https://github.com/ignite/apps/pull/113) Move wasm apps from cobra commands to default cmds.
+## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.0)
+
+### Features
+
+* [#113](https://github.com/ignite/apps/pull/113) Move wasm apps from cobra commands to default cmds
+* [#128](https://github.com/ignite/apps/pull/128) Bump wasm to `v0.53.0`
 
 ### Fixes
 
