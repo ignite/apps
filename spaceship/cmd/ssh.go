@@ -328,5 +328,5 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 	_ = session.Println("")
 
-	return session.Println(color.Blue.Sprintf(start))
+	return session.Println(color.Blue.Sprint(start))
 }

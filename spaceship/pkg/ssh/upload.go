@@ -56,7 +56,7 @@ func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallb
 		return nil, err
 	}
 
-	grp, ctx := errgroup.WithContext(ctx)
+	grp, _ := errgroup.WithContext(ctx)
 	grp.SetLimit(5)
 
 	uploadedFiles := make([]string, 0)
@@ -77,7 +77,7 @@ func (s *SSH) Upload(ctx context.Context, srcPath, dstPath string, progressCallb
 			newPath := filepath.Join(dstPath, rel)
 
 			grp.Go(func() error {
-				file, err := s.UploadFile(path, newPath, func(bytesUploaded int64, fileTotalBytes int64) error {
+				file, err := s.UploadFile(path, newPath, func(bytesUploaded int64, _ int64) error {
 					uploadedBytes += bytesUploaded
 					// Call the progress callback with the total uploaded bytes
 					return progressCallback(uploadedBytes, totalBytes)

@@ -8,7 +8,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"chain-info/cmd"
+	"github.com/ignite/apps/examples/chain-info/cmd"
 )
 
 type app struct{}
