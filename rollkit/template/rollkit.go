@@ -1,7 +1,6 @@
 package template
 
 import (
-	"errors"
 	"path/filepath"
 	"strings"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/gobuffalo/plush/v4"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/xast"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -32,7 +32,7 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	return g, nil
 }
 
-// commandsModify modifies the application start to use rollkit
+// commandsModify modifies the application start to use rollkit.
 func commandsModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
 	return func(r *genny.Runner) error {
 		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")

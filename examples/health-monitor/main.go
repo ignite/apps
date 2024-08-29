@@ -7,7 +7,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"health-monitor/cmd"
+	"github.com/ignite/apps/examples/health-monitor/cmd"
 )
 
 type app struct{}

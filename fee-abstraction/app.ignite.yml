@@ -1,6 +1,0 @@
-version: 1
-apps:
-  fee-abstraction:
-    description: fee-abstraction is an awesome Ignite application!
-    path: ./
-    

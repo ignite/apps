@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"sort"
@@ -13,8 +14,6 @@ import (
 )
 
 const (
-	flagPath    = "path"
-	flagHome    = "home"
 	flagVersion = "version"
 
 	statusScaffolding  = "Scaffolding..."
@@ -35,17 +34,6 @@ func GetCommands() []*plugin.Command {
 					Use:   "add",
 					Short: "Add wasm support",
 					Flags: []*plugin.Flag{
-						{
-							Name:      flagPath,
-							Usage:     "path of the app",
-							Shorthand: "p",
-							Type:      plugin.FlagTypeString,
-						},
-						{
-							Name:  flagHome,
-							Usage: "directory where the blockchain node is initialized",
-							Type:  plugin.FlagTypeString,
-						},
 						{
 							Name:         flagSimulationGasLimit,
 							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
@@ -77,17 +65,6 @@ func GetCommands() []*plugin.Command {
 					Use:   "config",
 					Short: "Add wasm config support",
 					Flags: []*plugin.Flag{
-						{
-							Name:      flagPath,
-							Usage:     "path of the app",
-							Shorthand: "p",
-							Type:      plugin.FlagTypeString,
-						},
-						{
-							Name:  flagHome,
-							Usage: "directory where the blockchain node is initialized",
-							Type:  plugin.FlagTypeString,
-						},
 						{
 							Name:         flagSimulationGasLimit,
 							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
@@ -121,17 +98,7 @@ var (
 	}
 )
 
-func getPath(flags plugin.Flags) string {
-	path, _ := flags.GetString(flagPath)
-	return path
-}
-
-func getHome(flags plugin.Flags) string {
-	home, _ := flags.GetString(flagHome)
-	return home
-}
-
-func getWasmVersion(flags plugin.Flags) string {
+func getVersion(flags plugin.Flags) string {
 	version, _ := flags.GetString(flagVersion)
 	version = strings.Replace(version, "v", "", 1)
 	return version
@@ -152,15 +119,19 @@ func getMemoryCacheSize(flags plugin.Flags) uint64 {
 	return memoryCacheSize
 }
 
-// newChainWithHomeFlags create new *chain.Chain with home and path flags.
-func newChainWithHomeFlags(flags plugin.Flags, chainOption ...chain.Option) (*chain.Chain, error) {
-	// Check if custom home is provided
-	if home := getHome(flags); home != "" {
-		chainOption = append(chainOption, chain.HomePath(home))
+// newChain create new *chain.Chain with home and path.
+func newChain(ctx context.Context, api plugin.ClientAPI, chainOption ...chain.Option) (*chain.Chain, error) {
+	info, err := api.GetChainInfo(ctx)
+	if err != nil {
+		return nil, err
 	}
 
-	appPath := getPath(flags)
-	absPath, err := filepath.Abs(appPath)
+	// Check if custom home is provided
+	if info.Home != "" {
+		chainOption = append(chainOption, chain.HomePath(info.Home))
+	}
+
+	absPath, err := filepath.Abs(info.AppPath)
 	if err != nil {
 		return nil, err
 	}

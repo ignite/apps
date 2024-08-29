@@ -7,7 +7,7 @@ linters:
   enable:
     - bodyclose
     - decorder
-    #- depguard
+    - depguard
     - dogsled
     - dupword
     - errchkjson
@@ -25,7 +25,6 @@ linters:
     - misspell
     - nakedret
     - nolintlint
-    - exportloopref
     - staticcheck
     - reassign
     - stylecheck
