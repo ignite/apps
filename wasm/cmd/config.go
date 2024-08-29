@@ -22,7 +22,7 @@ const (
 	flagMemoryCacheSize = "memory-cache-size"
 )
 
-func ConfigHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
+func ConfigHandler(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusAddingConfig))
@@ -34,7 +34,7 @@ func ConfigHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
 		memoryCacheSize    = getMemoryCacheSize(flags)
 	)
 
-	c, err := newChainWithHomeFlags(flags, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
+	c, err := newChain(ctx, api, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
 	}

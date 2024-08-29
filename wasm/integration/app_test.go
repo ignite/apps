@@ -49,6 +49,8 @@ func TestWasm(t *testing.T) {
 		)),
 	))
 
+	require.FileExists(filepath.Join(app.SourcePath(), "app/wasm.go"))
+
 	// sign tx to add an item to the list.
 	steps := step.NewSteps(
 		step.New(
