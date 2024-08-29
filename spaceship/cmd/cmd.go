@@ -44,7 +44,7 @@ func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
 			Use:   "spaceship [command]",
-			Short: "spaceship is an awesome Ignite application!",
+			Short: "Deploy a chain remote through SSH using ignite build system",
 			Commands: []*plugin.Command{
 				{
 					Use:   "deploy",
