@@ -1,7 +1,6 @@
 // Package ssh provides functionalities for establishing SSH connections
 // and performing various operations such as file uploads, command execution,
 // and managing remote environments.
-
 package ssh
 
 import (
@@ -9,7 +8,6 @@ import (
 	"fmt"
 	"net/url"
 	"os"
-	"os/exec"
 	"path/filepath"
 	"strings"
 
@@ -275,20 +273,6 @@ func (s *SSH) ensureEnvironment() error {
 	}
 	if err := s.sftpClient.MkdirAll(s.Log()); err != nil {
 		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
-	}
-	return nil
-}
-
-// ensureLocalBin uploads the specified binary to the remote server's bin directory.
-func (s *SSH) ensureLocalBin(name string, progressCallback ProgressCallback) error {
-	// find ignite binary path
-	path, err := exec.LookPath(name)
-	if err != nil {
-		return err
-	}
-	_, err = s.UploadBinary(path, progressCallback)
-	if err != nil {
-		return err
 	}
 	return nil
 }

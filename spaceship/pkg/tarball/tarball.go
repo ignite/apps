@@ -30,7 +30,7 @@ func Extract(ctx context.Context, file, output string, fileList ...string) ([]st
 	}
 
 	extracted := make([]string, 0)
-	err = format.(archiver.Extractor).Extract(ctx, reader, fileList, func(ctx context.Context, f archiver.File) error {
+	err = format.(archiver.Extractor).Extract(ctx, reader, fileList, func(_ context.Context, f archiver.File) error {
 		rc, err := f.Open()
 		if err != nil {
 			return err
