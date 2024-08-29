@@ -17,6 +17,7 @@ const (
 	errOldCosmosSDKVersionStr = `Your chain has been scaffolded with an older version of Cosmos SDK: %s
 
 Please, follow the migration guide to upgrade your chain to the latest version at https://docs.ignite.com/migration`
+	errNewCosmosSDKVersionStr = "Your chain has been scaffolded with the new version (%s) of Cosmos SDK greater than %s"
 )
 
 // Scaffolder is fee abstraction app scaffolder.
@@ -38,8 +39,16 @@ func New(c *chain.Chain, session *cliui.Session) (Scaffolder, error) {
 
 // assertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by Ignite CLI.
 func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
-	if v.LT(cosmosver.StargateFiftyVersion) {
-		return errors.Errorf(errOldCosmosSDKVersionStr, v)
+	v0501 := cosmosver.StargateFiftyVersion
+	v0510, err := cosmosver.Parse("0.51.0")
+	if err != nil {
+		return err
+	}
+	switch {
+	case v.LT(v0501):
+		return errors.Errorf(errOldCosmosSDKVersionStr, v.String())
+	case v.GTE(v0510):
+		return errors.Errorf(errNewCosmosSDKVersionStr, v.String(), v0510.String())
 	}
 	return nil
 }
