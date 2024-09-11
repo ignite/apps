@@ -101,11 +101,11 @@ func (s Scaffolder) AddWasm(
 		return xgenny.SourceModification{}, err
 	}
 
-	configTOML, err := s.chain.ConfigTOMLPath()
+	appTOMLPath, err := s.chain.AppTOMLPath()
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
-	if _, err := os.Stat(configTOML); os.IsNotExist(err) {
+	if _, err := os.Stat(appTOMLPath); os.IsNotExist(err) {
 		s.session.Printf(`Cannot find the chain config. If the chain %[1]v is not initialized yet, run "%[1]vd init" or "ignite chain serve" to init the chain. 
 After, run the "ignite wasm config" command to add the wasm config
 
@@ -115,7 +115,7 @@ After, run the "ignite wasm config" command to add the wasm config
 	} else if err == nil {
 		// Add wasm options to the chain config.
 		if err := config.AddWasm(
-			configTOML,
+			appTOMLPath,
 			config.WithSimulationGasLimit(scaffoldingOpts.simulationGasLimit),
 			config.WithSmartQueryGasLimit(scaffoldingOpts.smartQueryGasLimit),
 			config.WithMemoryCacheSize(scaffoldingOpts.memoryCacheSize),
