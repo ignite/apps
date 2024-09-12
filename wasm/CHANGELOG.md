@@ -2,6 +2,12 @@
 
 ## Unreleased
 
+## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.1)
+
+### Fixes
+
+* [#134](https://github.com/ignite/apps/pull/134) Fix the wasm config path
+
 ## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.0)
 
 ### Features
