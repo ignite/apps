@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
@@ -13,15 +14,22 @@ import (
 	"github.com/ignite/apps/fee-abstraction/services/scaffolder"
 )
 
+const feeAbsModuleName = "feeabs"
+
 // ExecuteScaffoldChainHook executes the scaffold chain hook.
 func ExecuteScaffoldChainHook(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
 	var (
 		flags           = plugin.Flags(h.Hook.Flags)
 		feeAbsModule, _ = flags.GetBool(flagFeeAbsModule)
+		noModule, _     = flags.GetBool(flagNoModule)
 		name            = h.ExecutedCommand.Args[0]
 	)
 	if !feeAbsModule {
 		return nil
+	}
+
+	if !noModule && name == feeAbsModuleName {
+		return errors.Errorf("cannot scaffold module with name %s", feeAbsModuleName)
 	}
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))

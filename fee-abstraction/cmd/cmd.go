@@ -15,6 +15,7 @@ import (
 const (
 	flagVersion      = "fee-abstraction-version"
 	flagFeeAbsModule = "fee-abstraction"
+	flagNoModule     = "no-module"
 	flagPath         = "path"
 	flagHome         = "home"
 
