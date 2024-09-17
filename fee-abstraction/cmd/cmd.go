@@ -17,11 +17,14 @@ const (
 	flagFeeAbsModule = "fee-abstraction"
 	flagNoModule     = "no-module"
 	flagPath         = "path"
-	flagHome         = "home"
 
 	statusScaffolding = "Scaffolding..."
 
 	defaultFeeAbsVersion = "v8.0.2"
+	feeAbsModuleName     = "feeabs"
+
+	ScaffoldChainHook  = "scaffold-chain"
+	ScaffoldModuleHook = "scaffold-module"
 )
 
 var (
@@ -47,7 +50,7 @@ func GetCommands() []*plugin.Command {
 func GetHooks() []*plugin.Hook {
 	return []*plugin.Hook{
 		{
-			Name:        "scaffold-chain",
+			Name:        ScaffoldChainHook,
 			PlaceHookOn: "ignite scaffold chain",
 			Flags: []*plugin.Flag{
 				{
@@ -65,6 +68,10 @@ func GetHooks() []*plugin.Hook {
 					Type:         plugin.FlagTypeString,
 				},
 			},
+		},
+		{
+			Name:        ScaffoldModuleHook,
+			PlaceHookOn: "ignite scaffold module",
 		},
 	}
 }

@@ -28,7 +28,7 @@ func TestFeeAbstraction(t *testing.T) {
 	))
 
 	var (
-		app         = env.Scaffold("github.com/apps/feeabs", "--fee-abstraction")
+		app         = env.Scaffold("github.com/apps/feeapp", "--fee-abstraction")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)

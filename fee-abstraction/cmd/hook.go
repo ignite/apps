@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"context"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
 
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/gomodulepath"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -14,22 +14,28 @@ import (
 	"github.com/ignite/apps/fee-abstraction/services/scaffolder"
 )
 
-const feeAbsModuleName = "feeabs"
+// ExecuteScaffoldPreHook executes the scaffold pre hook.
+func ExecuteScaffoldPreHook(h *plugin.ExecutedHook) error {
+	var (
+		flags       = plugin.Flags(h.Hook.Flags)
+		noModule, _ = flags.GetBool(flagNoModule)
+		name        = h.ExecutedCommand.Args[0]
+	)
+	if !noModule && name == feeAbsModuleName {
+		return errors.Errorf("cannot scaffold module with name %s", feeAbsModuleName)
+	}
+	return nil
+}
 
-// ExecuteScaffoldChainHook executes the scaffold chain hook.
-func ExecuteScaffoldChainHook(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
+// ExecuteScaffoldChainPostHook executes the scaffold chain post hook.
+func ExecuteScaffoldChainPostHook(ctx context.Context, h *plugin.ExecutedHook) error {
 	var (
 		flags           = plugin.Flags(h.Hook.Flags)
 		feeAbsModule, _ = flags.GetBool(flagFeeAbsModule)
-		noModule, _     = flags.GetBool(flagNoModule)
 		name            = h.ExecutedCommand.Args[0]
 	)
 	if !feeAbsModule {
 		return nil
-	}
-
-	if !noModule && name == feeAbsModuleName {
-		return errors.Errorf("cannot scaffold module with name %s", feeAbsModuleName)
 	}
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))

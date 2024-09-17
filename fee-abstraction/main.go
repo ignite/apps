@@ -23,12 +23,15 @@ func (app) Execute(_ context.Context, _ *plugin.ExecutedCommand, _ plugin.Client
 	return nil
 }
 
-func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
-	return nil
+func (app) ExecuteHookPre(_ context.Context, h *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+	return cmd.ExecuteScaffoldPreHook(h)
 }
 
-func (app) ExecuteHookPost(ctx context.Context, h *plugin.ExecutedHook, api plugin.ClientAPI) error {
-	return cmd.ExecuteScaffoldChainHook(ctx, h, api)
+func (app) ExecuteHookPost(ctx context.Context, h *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+	if h.Hook.Name == cmd.ScaffoldChainHook {
+		return cmd.ExecuteScaffoldChainPostHook(ctx, h)
+	}
+	return nil
 }
 
 func (app) ExecuteHookCleanUp(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
