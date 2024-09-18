@@ -1,6 +1,7 @@
 package integration_test
 
 import (
+	"context"
 	"os"
 	"path/filepath"
 	"testing"
@@ -25,9 +26,24 @@ func TestFeeAbstraction(t *testing.T) {
 		)),
 	))
 
-	app := env.Scaffold("github.com/apps/feeapp", "--fee-abstraction")
+	var (
+		app     = env.Scaffold("github.com/apps/feeapp", "--fee-abstraction")
+		servers = app.RandomizeServerPorts()
+	)
+
+	// check if fee abstraction file was scaffolded
 	require.FileExists(filepath.Join(app.SourcePath(), "app/feeabs.go"))
 
 	// check the chains is up
 	app.EnsureSteady()
+
+	ctx, cancel := context.WithTimeout(env.Ctx(), envtest.ServeTimeout)
+	defer cancel()
+
+	go func() {
+		app.Serve("serve app", envtest.ExecCtx(ctx))
+	}()
+
+	// Wait for the server to be up before running the client tests
+	require.NoError(env.IsAppServed(ctx, servers.API))
 }
