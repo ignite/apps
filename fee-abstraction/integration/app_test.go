@@ -1,10 +1,8 @@
 package integration_test
 
 import (
-	"context"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
@@ -27,37 +25,9 @@ func TestFeeAbstraction(t *testing.T) {
 		)),
 	))
 
-	var (
-		app         = env.Scaffold("github.com/apps/feeapp", "--fee-abstraction")
-		servers     = app.RandomizeServerPorts()
-		ctx, cancel = context.WithCancel(env.Ctx())
-	)
-	defer cancel()
-
+	app := env.Scaffold("github.com/apps/feeapp", "--fee-abstraction")
 	require.FileExists(filepath.Join(app.SourcePath(), "app/feeabs.go"))
 
 	// check the chains is up
-	stepUp := step.NewSteps(
-		step.New(
-			step.Exec(
-				app.Binary(),
-				"config",
-				"output", "json",
-			),
-			step.PreExec(func() error {
-				return env.IsAppServed(ctx, servers.API)
-			}),
-			step.Workdir(app.SourcePath()),
-		),
-	)
-
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
-		env.Exec("waiting the chain is up", stepUp, envtest.ExecRetry())
-		wg.Done()
-	}()
-
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-	wg.Wait()
+	app.EnsureSteady()
 }
