@@ -9,7 +9,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.9
 	github.com/cosmos/ibc-go/v8 v8.5.1
 	github.com/cosmos/interchain-security/v5 v5.0.0
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/stretchr/testify v1.9.0
 )

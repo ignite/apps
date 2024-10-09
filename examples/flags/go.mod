@@ -6,7 +6,7 @@ toolchain go1.21.3
 
 require (
 	github.com/Code-Hex/Neo-cowsay/v2 v2.0.4
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/stretchr/testify v1.9.0
 )

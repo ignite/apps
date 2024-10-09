@@ -4,7 +4,7 @@ go 1.21.1
 
 require (
 	github.com/cometbft/cometbft v0.38.12
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/inancgumus/screen v0.0.0-20190314163918-06e984b86ed3
 	github.com/stretchr/testify v1.9.0

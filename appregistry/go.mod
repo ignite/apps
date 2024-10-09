@@ -6,7 +6,7 @@ require (
 	github.com/charmbracelet/lipgloss v0.9.1
 	github.com/goccy/go-yaml v1.11.2
 	github.com/google/go-github/v56 v56.0.0
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/muesli/termenv v0.15.2
 	github.com/spf13/cobra v1.8.1

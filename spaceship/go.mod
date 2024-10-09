@@ -8,7 +8,7 @@ require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.19
 	github.com/gookit/color v1.5.4
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/manifoldco/promptui v0.9.0
 	github.com/melbahja/goph v1.4.0

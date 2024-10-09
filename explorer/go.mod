@@ -3,7 +3,7 @@ module github.com/ignite/apps/explorer
 go 1.21.1
 
 require (
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.3
 	github.com/ignite/gex v1.0.0
 	github.com/stretchr/testify v1.9.0
