@@ -8,7 +8,7 @@ require (
 	github.com/cosmos/cosmos-sdk v0.50.8
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.19
-	github.com/hashicorp/go-plugin v1.6.0
+	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.5.1
 	github.com/stretchr/testify v1.9.0
 )
