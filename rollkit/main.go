@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strings"
 
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
@@ -34,7 +35,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	case "init":
 		return cmd.InitHandler(ctx, c)
 	default:
-		return errors.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}
 }
 
