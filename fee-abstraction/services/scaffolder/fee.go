@@ -20,7 +20,6 @@ const (
 
 var versionMap = map[uint64]string{
 	8: "github.com/osmosis-labs/fee-abstraction/v8",
-	7: "github.com/osmosis-labs/fee-abstraction/v7",
 }
 
 type (
