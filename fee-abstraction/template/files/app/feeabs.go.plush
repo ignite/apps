@@ -1,0 +1,49 @@
+package app
+
+import (
+	storetypes "cosmossdk.io/store/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
+	porttypes "github.com/cosmos/ibc-go/v8/modules/core/05-port/types"
+	feeabsmodule "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs"
+	feeabskeeper "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/keeper"
+	feeabstypes "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/types"
+)
+
+// registerFeeAbstractionModules register Fee Abstraction keepers and non dependency inject modules.
+func (app *App) registerFeeAbstractionModules() (porttypes.IBCModule, error) {
+	// set up non depinject support modules store keys
+	if err := app.RegisterStores(
+		storetypes.NewKVStoreKey(feeabstypes.StoreKey),
+	); err != nil {
+		return nil, err
+	}
+
+	// register the key tables for legacy param subspaces
+	app.ParamsKeeper.Subspace(feeabstypes.ModuleName)
+
+	scopedFeeAbsKeeper := app.CapabilityKeeper.ScopeToModule(feeabstypes.ModuleName)
+
+	// Create fee abstraction keeper
+	app.FeeAbsKeeper = feeabskeeper.NewKeeper(
+		app.appCodec,
+		app.GetKey(feeabstypes.StoreKey),
+		app.GetSubspace(feeabstypes.ModuleName),
+		app.StakingKeeper,
+		app.AccountKeeper,
+		app.BankKeeper,
+		app.TransferKeeper,
+		app.IBCKeeper.ChannelKeeper,
+		app.IBCKeeper.PortKeeper,
+		scopedFeeAbsKeeper,
+		authtypes.NewModuleAddress(govtypes.ModuleName).String(),
+	)
+
+	// register IBC modules
+	if err := app.RegisterModules(feeabsmodule.NewAppModule(app.appCodec, app.FeeAbsKeeper)); err != nil {
+		return nil, err
+	}
+	app.ScopedFeeAbsKeeper = scopedFeeAbsKeeper
+
+	return feeabsmodule.NewIBCModule(app.appCodec, app.FeeAbsKeeper), nil
+}
