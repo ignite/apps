@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"strings"
 
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/pkg/errors"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 )
 
 func PeerAddress(peer launchtypes.Peer) (string, error) {

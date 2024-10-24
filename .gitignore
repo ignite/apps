@@ -5,3 +5,4 @@
 *.ign
 go.work
 go.work.sum
+bin/*

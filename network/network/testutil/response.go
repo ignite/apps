@@ -6,7 +6,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"google.golang.org/protobuf/runtime/protoiface"
 )
 

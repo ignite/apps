@@ -6,7 +6,7 @@ import (
 	"context"
 	"testing"
 
-	types "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
+	types "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	"github.com/stretchr/testify/mock"
 	"google.golang.org/grpc"
 )

@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
-	"github.com/ignite/cli/ignite/pkg/cosmosutil"
-	"github.com/ignite/cli/ignite/pkg/xtime"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v28/ignite/pkg/xtime"
+	launchtypes "github.com/ignite/network/x/launch/types"
 )
 
 // Request action descriptions.
@@ -43,8 +43,8 @@ type (
 // ToRequest converts a request data from SPN and returns a Request object.
 func ToRequest(request launchtypes.Request) Request {
 	return Request{
-		LaunchID:  request.LaunchID,
-		RequestID: request.RequestID,
+		LaunchID:  request.LaunchId,
+		RequestID: request.RequestId,
 		Creator:   request.Creator,
 		CreatedAt: xtime.FormatUnixInt(request.CreatedAt),
 		Content:   request.Content,
@@ -162,7 +162,7 @@ func VerifyAddValidatorRequest(req *launchtypes.RequestContent_GenesisValidator)
 
 	// Check self delegation
 	if selfDelegation.Denom != info.SelfDelegation.Denom ||
-		!selfDelegation.IsEqual(info.SelfDelegation) {
+		!selfDelegation.Equal(info.SelfDelegation) {
 		return fmt.Errorf(
 			"the self delegation %s doesn't match the one inside the gentx %s",
 			selfDelegation.String(),

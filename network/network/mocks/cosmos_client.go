@@ -9,9 +9,9 @@ import (
 
 	coretypes "github.com/cometbft/cometbft/rpc/core/types"
 
-	cosmosaccount "github.com/ignite/cli/ignite/pkg/cosmosaccount"
+	cosmosaccount "github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 
-	cosmosclient "github.com/ignite/cli/ignite/pkg/cosmosclient"
+	cosmosclient "github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 
 	mock "github.com/stretchr/testify/mock"
 

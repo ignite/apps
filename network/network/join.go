@@ -4,9 +4,9 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cosmosutil"
-	"github.com/ignite/cli/ignite/pkg/xurl"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v28/ignite/pkg/xurl"
+	launchtypes "github.com/ignite/network/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networkchain"
 	"github.com/ignite/apps/network/network/networktypes"

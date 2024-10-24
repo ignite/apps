@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/events"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	launchtypes "github.com/ignite/network/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -35,8 +35,8 @@ func RejectRequest(requestID uint64) Reviewal {
 
 // Requests fetches all the chain requests from SPN by launch id.
 func (n Network) Requests(ctx context.Context, launchID uint64) ([]networktypes.Request, error) {
-	res, err := n.launchQuery.RequestAll(ctx, &launchtypes.QueryAllRequestRequest{
-		LaunchID: launchID,
+	res, err := n.launchQuery.ListRequest(ctx, &launchtypes.QueryAllRequestRequest{
+		LaunchId: launchID,
 	})
 	if err != nil {
 		return nil, err
@@ -50,9 +50,9 @@ func (n Network) Requests(ctx context.Context, launchID uint64) ([]networktypes.
 
 // Request fetches the chain request from SPN by launch and request id.
 func (n Network) Request(ctx context.Context, launchID, requestID uint64) (networktypes.Request, error) {
-	res, err := n.launchQuery.Request(ctx, &launchtypes.QueryGetRequestRequest{
-		LaunchID:  launchID,
-		RequestID: requestID,
+	res, err := n.launchQuery.GetRequest(ctx, &launchtypes.QueryGetRequestRequest{
+		LaunchId:  launchID,
+		RequestId: requestID,
 	})
 	if err != nil {
 		return networktypes.Request{}, err
@@ -61,7 +61,7 @@ func (n Network) Request(ctx context.Context, launchID, requestID uint64) (netwo
 }
 
 // RequestFromIDs fetches the chain requested from SPN by launch and provided request IDs
-// TODO: once implemented, use the SPN query from https://github.com/tendermint/spn/issues/420
+// TODO: once implemented, use the SPN query from https://github.com/ignite/network/issues/420
 func (n Network) RequestFromIDs(ctx context.Context, launchID uint64, requestIDs ...uint64) (reqs []networktypes.Request, err error) {
 	for _, id := range requestIDs {
 		req, err := n.Request(ctx, launchID, id)
@@ -139,7 +139,7 @@ func (n Network) SendRequest(
 		n.ev.Send(
 			fmt.Sprintf(
 				"Request %d to %s has been submitted!",
-				requestRes.RequestID,
+				requestRes.RequestId,
 				networktypes.RequestActionDescriptionFromContent(content),
 			),
 			events.ProgressFinish(),

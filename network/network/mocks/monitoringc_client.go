@@ -6,8 +6,8 @@ import (
 	"context"
 	"testing"
 
+	"github.com/ignite/network/x/monitoringc/types"
 	"github.com/stretchr/testify/mock"
-	"github.com/tendermint/spn/x/monitoringc/types"
 	"google.golang.org/grpc"
 )
 

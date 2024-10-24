@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoserror"
-	"github.com/ignite/cli/ignite/pkg/events"
-	projecttypes "github.com/tendermint/spn/x/project/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	projecttypes "github.com/ignite/network/x/project/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -49,8 +49,8 @@ func WithProjectTotalSupply(totalSupply sdk.Coins) Prop {
 // Project fetches the project from Network.
 func (n Network) Project(ctx context.Context, projectID uint64) (networktypes.Project, error) {
 	n.ev.Send("Fetching project information", events.ProgressStart())
-	res, err := n.projectQuery.Project(ctx, &projecttypes.QueryGetProjectRequest{
-		ProjectID: projectID,
+	res, err := n.projectQuery.GetProject(ctx, &projecttypes.QueryGetProjectRequest{
+		ProjectId: projectID,
 	})
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
 		return networktypes.Project{}, ErrObjectNotFound
@@ -65,7 +65,7 @@ func (n Network) Projects(ctx context.Context) ([]networktypes.Project, error) {
 	var projects []networktypes.Project
 
 	n.ev.Send("Fetching projects information", events.ProgressStart())
-	res, err := n.projectQuery.ProjectAll(ctx, &projecttypes.QueryAllProjectRequest{})
+	res, err := n.projectQuery.ListProject(ctx, &projecttypes.QueryAllProjectRequest{})
 	if err != nil {
 		return projects, err
 	}
@@ -102,7 +102,7 @@ func (n Network) CreateProject(ctx context.Context, name, metadata string, total
 		return 0, err
 	}
 
-	return createProjectRes.ProjectID, nil
+	return createProjectRes.ProjectId, nil
 }
 
 // InitializeMainnet Initialize the mainnet of the project.
@@ -139,7 +139,7 @@ func (n Network) InitializeMainnet(
 
 	n.ev.Send(fmt.Sprintf("Project %d initialized on mainnet", projectID), events.ProgressFinish())
 
-	return initMainnetRes.MainnetID, nil
+	return initMainnetRes.MainnetId, nil
 }
 
 // UpdateProject updates the project name or metadata.

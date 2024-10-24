@@ -7,9 +7,9 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"

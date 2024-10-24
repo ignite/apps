@@ -7,12 +7,12 @@ import (
 	hplugin "github.com/hashicorp/go-plugin"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"hooks/cmd"
+	"github.com/ignite/apps/examples/hooks/cmd"
 )
 
 type app struct{}
 
-func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
+func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
 		Name: "hooks",
 		Hooks: []*plugin.Hook{
@@ -29,7 +29,7 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	}, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+func (app) Execute(context.Context, *plugin.ExecutedCommand, plugin.ClientAPI) error {
 	fmt.Println(`To use either run "ignite chain build" or "ignite chain serve" and see the output.`)
 	return nil
 }

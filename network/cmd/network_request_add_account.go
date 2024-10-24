@@ -5,10 +5,10 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/spf13/cobra"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"

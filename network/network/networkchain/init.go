@@ -7,11 +7,11 @@ import (
 	"os"
 	"path/filepath"
 
-	chainconfig "github.com/ignite/cli/ignite/config/chain"
-	"github.com/ignite/cli/ignite/pkg/cache"
-	cosmosgenesis "github.com/ignite/cli/ignite/pkg/cosmosutil/genesis"
-	"github.com/ignite/cli/ignite/pkg/events"
-	"github.com/ignite/cli/ignite/services/chain"
+	chainconfig "github.com/ignite/cli/v28/ignite/config/chain"
+	"github.com/ignite/cli/v28/ignite/pkg/cache"
+	cosmosgenesis "github.com/ignite/cli/v28/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	"github.com/ignite/cli/v28/ignite/services/chain"
 )
 
 // Init initializes blockchain by building the binaries and running the init command,

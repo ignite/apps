@@ -7,8 +7,8 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	rewardtypes "github.com/ignite/network/x/reward/types"
 	"github.com/stretchr/testify/require"
-	rewardtypes "github.com/tendermint/spn/x/reward/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
@@ -33,7 +33,7 @@ func TestSetReward(t *testing.T) {
 				account,
 				&rewardtypes.MsgSetRewards{
 					Provider:         addr,
-					LaunchID:         testutil.LaunchID,
+					LaunchId:         testutil.LaunchID,
 					Coins:            coins,
 					LastRewardHeight: lastRewardHeight,
 				},
@@ -69,7 +69,7 @@ func TestSetReward(t *testing.T) {
 				account,
 				&rewardtypes.MsgSetRewards{
 					Provider:         addr,
-					LaunchID:         testutil.LaunchID,
+					LaunchId:         testutil.LaunchID,
 					Coins:            coins,
 					LastRewardHeight: lastRewardHeight,
 				},

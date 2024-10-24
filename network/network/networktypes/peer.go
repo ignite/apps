@@ -3,9 +3,9 @@ package networktypes
 import (
 	"strings"
 
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	launchtypes "github.com/ignite/network/x/launch/types"
 
-	"github.com/ignite/cli/ignite/pkg/xurl"
+	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 )
 
 // VerifyPeerFormat checks if the peer address format is valid.

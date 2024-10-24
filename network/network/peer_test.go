@@ -4,8 +4,8 @@ import (
 	"errors"
 	"testing"
 
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 )
 
 func TestPeerAddress(t *testing.T) {

@@ -4,8 +4,8 @@ import (
 	"context"
 	"errors"
 
-	"github.com/ignite/cli/ignite/pkg/cosmoserror"
-	monitoringctypes "github.com/tendermint/spn/x/monitoringc/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	monitoringctypes "github.com/ignite/network/x/monitoringc/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -40,24 +40,23 @@ func (n Network) CreateClient(
 	if err := res.Decode(&createClientRes); err != nil {
 		return "", err
 	}
-	return createClientRes.ClientID, nil
+	return createClientRes.ClientId, nil
 }
 
 // verifiedClientIDs fetches the verified client ids from SPN by launch id.
 func (n Network) verifiedClientIDs(ctx context.Context, launchID uint64) ([]string, error) {
-	res, err := n.monitoringConsumerQuery.
-		VerifiedClientIds(ctx,
-			&monitoringctypes.QueryGetVerifiedClientIdsRequest{
-				LaunchID: launchID,
-			},
-		)
+	res, err := n.monitoringConsumerQuery.GetVerifiedClientID(ctx,
+		&monitoringctypes.QueryGetVerifiedClientIDRequest{
+			LaunchId: launchID,
+		},
+	)
 
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
 		return nil, ErrObjectNotFound
 	} else if err != nil {
 		return nil, err
 	}
-	return res.ClientIds, nil
+	return res.VerifiedClientId.ClientIdList, nil
 }
 
 // RewardIBCInfo returns IBC info to relay packets for a chain to claim rewards.

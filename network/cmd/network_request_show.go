@@ -3,8 +3,8 @@ package cmd
 import (
 	"strconv"
 
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/yaml"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/yaml"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 

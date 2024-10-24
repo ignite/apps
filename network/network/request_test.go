@@ -4,8 +4,8 @@ import (
 	"context"
 	"testing"
 
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
@@ -41,7 +41,7 @@ func TestSendRequest(t *testing.T) {
 				),
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgSendRequestResponse{
-				RequestID:    0,
+				RequestId:    0,
 				AutoApproved: false,
 			}), nil).
 			Once()

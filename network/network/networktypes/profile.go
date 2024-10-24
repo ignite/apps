@@ -2,8 +2,8 @@ package networktypes
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	profiletypes "github.com/tendermint/spn/x/profile/types"
-	projecttypes "github.com/tendermint/spn/x/project/types"
+	profiletypes "github.com/ignite/network/x/profile/types"
+	projecttypes "github.com/ignite/network/x/project/types"
 )
 
 // Validator represents the Validator profile on SPN.
@@ -77,7 +77,7 @@ func (c Coordinator) ToProfile(
 // ToCoordinator converts a Coordinator data from SPN and returns a Coordinator object.
 func ToCoordinator(coord profiletypes.Coordinator) Coordinator {
 	return Coordinator{
-		CoordinatorID: coord.CoordinatorID,
+		CoordinatorID: coord.CoordinatorId,
 		Address:       coord.Address,
 		Active:        coord.Active,
 		Identity:      coord.Description.Identity,

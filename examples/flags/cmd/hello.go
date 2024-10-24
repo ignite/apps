@@ -8,13 +8,10 @@ import (
 )
 
 // ExecuteHello executes the hello subcommand.
-func ExecuteHello(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+func ExecuteHello(_ context.Context, cmd *plugin.ExecutedCommand) error {
+	flags := plugin.Flags(cmd.Flags)
 
-	name, err := getNameFlag(flags)
+	name, err := flags.GetString(flagName)
 	if err != nil {
 		return err
 	}

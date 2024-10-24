@@ -1,0 +1,30 @@
+{
+  "appName": "wasm",
+  "appDescription": "Scaffold a CosmosWasm-enabled chain with ease",
+  "ignite": ">28.3.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.4",
+  "authors": [
+    {
+      "name": "Danilo Pantani",
+      "github": "pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/wasm/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "scaffolder",
+    "wasm",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ]
+}

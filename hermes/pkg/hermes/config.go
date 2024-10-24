@@ -2,7 +2,6 @@ package hermes
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"math/big"
 	"net/url"
@@ -15,6 +14,7 @@ import (
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosfaucet"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -97,28 +97,31 @@ type (
 
 	// Chain represents the chain into the Hermes config struct.
 	Chain struct {
-		ID               string         `toml:"id" json:"id"`
-		CCVConsumerChain bool           `toml:"ccv_consumer_chain" json:"ccv_consumer_chain"`
-		RPCAddr          string         `toml:"rpc_addr" json:"rpc_addr"`
-		GRPCAddr         string         `toml:"grpc_addr" json:"grpc_addr"`
-		EventSource      EventSource    `toml:"event_source,inline" json:"event_source"`
-		RPCTimeout       string         `toml:"rpc_timeout" json:"rpc_timeout"`
-		TrustedNode      bool           `toml:"trusted_node" json:"trusted_node"`
-		AccountPrefix    string         `toml:"account_prefix" json:"account_prefix"`
-		KeyName          string         `toml:"key_name" json:"key_name"`
-		AddressType      AddressType    `toml:"address_type,inline" json:"address_type"`
-		StorePrefix      string         `toml:"store_prefix" json:"store_prefix"`
-		DefaultGas       uint64         `toml:"default_gas" json:"default_gas"`
-		MaxGas           uint64         `toml:"max_gas" json:"max_gas"`
-		GasPrice         GasPrice       `toml:"gas_price,inline" json:"gas_price"`
-		GasMultiplier    float64        `toml:"gas_multiplier" json:"gas_multiplier"`
-		MaxMsgNum        uint64         `toml:"max_msg_num" json:"max_msg_num"`
-		MaxTxSize        uint64         `toml:"max_tx_size" json:"max_tx_size"`
-		ClockDrift       string         `toml:"clock_drift" json:"clock_drift"`
-		MaxBlockTime     string         `toml:"max_block_time" json:"max_block_time"`
-		TrustingPeriod   string         `toml:"trusting_period" json:"trusting_period"`
-		TrustThreshold   TrustThreshold `toml:"trust_threshold,inline" json:"trust_threshold"`
-		MemoPrefix       string         `toml:"memo_prefix" json:"memo_prefix"`
+		ID                string         `toml:"id" json:"id"`
+		ChainType         string         `toml:"type" json:"type"`
+		CCVConsumerChain  bool           `toml:"ccv_consumer_chain" json:"ccv_consumer_chain"`
+		RPCAddr           string         `toml:"rpc_addr" json:"rpc_addr"`
+		GRPCAddr          string         `toml:"grpc_addr" json:"grpc_addr"`
+		EventSource       EventSource    `toml:"event_source,inline" json:"event_source"`
+		RPCTimeout        string         `toml:"rpc_timeout" json:"rpc_timeout"`
+		TrustedNode       bool           `toml:"trusted_node" json:"trusted_node"`
+		AccountPrefix     string         `toml:"account_prefix" json:"account_prefix"`
+		KeyName           string         `toml:"key_name" json:"key_name"`
+		AddressType       AddressType    `toml:"address_type,inline" json:"address_type"`
+		KeyStoreType      string         `toml:"key_store_type" json:"key_store_type"`
+		StorePrefix       string         `toml:"store_prefix" json:"store_prefix"`
+		DefaultGas        uint64         `toml:"default_gas" json:"default_gas"`
+		MaxGas            uint64         `toml:"max_gas" json:"max_gas"`
+		GasPrice          GasPrice       `toml:"gas_price,inline" json:"gas_price"`
+		GasMultiplier     float64        `toml:"gas_multiplier" json:"gas_multiplier"`
+		MaxMsgNum         uint64         `toml:"max_msg_num" json:"max_msg_num"`
+		MaxTxSize         uint64         `toml:"max_tx_size" json:"max_tx_size"`
+		ClockDrift        string         `toml:"clock_drift" json:"clock_drift"`
+		MaxBlockTime      string         `toml:"max_block_time" json:"max_block_time"`
+		TrustingPeriod    string         `toml:"trusting_period" json:"trusting_period"`
+		TrustThreshold    TrustThreshold `toml:"trust_threshold,inline" json:"trust_threshold"`
+		MemoPrefix        string         `toml:"memo_prefix" json:"memo_prefix"`
+		SequentialBatchTx bool           `toml:"sequential_batch_tx" json:"sequential_batch_tx"`
 	}
 
 	// EventSource represents the chain event source into the Hermes config struct.
@@ -158,7 +161,7 @@ func (c Chains) Get(chainID string) (Chain, error) {
 			return chain, nil
 		}
 	}
-	return Chain{}, fmt.Errorf("chain %s not exist", chainID)
+	return Chain{}, errors.Errorf("chain %s not exist", chainID)
 }
 
 // Remove delete the Hermes config file.
@@ -439,6 +442,13 @@ func WithChainTrustedNode(trustedNode bool) ChainOption {
 	}
 }
 
+// WithChainSequentialBatchTx set if chain use sequential batch transaction into the Hermes config.
+func WithChainSequentialBatchTx(sequentialBatchTx bool) ChainOption {
+	return func(c *Chain) {
+		c.SequentialBatchTx = sequentialBatchTx
+	}
+}
+
 // WithChainMemoPrefix set the chain memo prefix name into the Hermes config.
 func WithChainMemoPrefix(memoPrefix string) ChainOption {
 	return func(c *Chain) {
@@ -446,10 +456,24 @@ func WithChainMemoPrefix(memoPrefix string) ChainOption {
 	}
 }
 
+// WithChainType set the chain type into the Hermes config.
+func WithChainType(chainType string) ChainOption {
+	return func(c *Chain) {
+		c.ChainType = chainType
+	}
+}
+
 // WithChainKeyName set the chain key name into the Hermes config.
 func WithChainKeyName(key string) ChainOption {
 	return func(c *Chain) {
 		c.KeyName = key
+	}
+}
+
+// WithChainKeyStoreType set the chain key store type into the Hermes config.
+func WithChainKeyStoreType(keyStoreType string) ChainOption {
+	return func(c *Chain) {
+		c.KeyStoreType = keyStoreType
 	}
 }
 

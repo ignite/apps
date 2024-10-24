@@ -7,8 +7,8 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
@@ -50,7 +50,7 @@ func TestTriggerLaunch(t *testing.T) {
 				account,
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
-					LaunchID:    testutil.LaunchID,
+					LaunchId:    testutil.LaunchID,
 					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgTriggerLaunchResponse{}), nil).
@@ -154,7 +154,7 @@ func TestTriggerLaunch(t *testing.T) {
 				account,
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
-					LaunchID:    testutil.LaunchID,
+					LaunchId:    testutil.LaunchID,
 					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgTriggerLaunch{}), expectedError).
@@ -195,7 +195,7 @@ func TestTriggerLaunch(t *testing.T) {
 				account,
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
-					LaunchID:    testutil.LaunchID,
+					LaunchId:    testutil.LaunchID,
 					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{}), expectedError).
@@ -251,7 +251,7 @@ func TestRevertLaunch(t *testing.T) {
 				account,
 				&launchtypes.MsgRevertLaunch{
 					Coordinator: addr,
-					LaunchID:    testutil.LaunchID,
+					LaunchId:    testutil.LaunchID,
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgRevertLaunchResponse{}), nil).
 			Once()
@@ -277,7 +277,7 @@ func TestRevertLaunch(t *testing.T) {
 				account,
 				&launchtypes.MsgRevertLaunch{
 					Coordinator: addr,
-					LaunchID:    testutil.LaunchID,
+					LaunchId:    testutil.LaunchID,
 				}).
 			Return(
 				testutil.NewResponse(&launchtypes.MsgRevertLaunchResponse{}),

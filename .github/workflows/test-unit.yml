@@ -1,0 +1,64 @@
+name: Test Unit
+on:
+  pull_request:
+    paths-ignore:
+      - '**.md'
+  push:
+    paths-ignore:
+      - '**.md'
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  pre-test:
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.set-matrix.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Finding files and store to output
+        id: set-matrix
+        run: echo "matrix=$(find . -type f -name "go.mod" -exec sh -c 'dirname "{}" | cut -c 3-' \; | sort -u | jq -R . | jq -cs .)" >> $GITHUB_OUTPUT
+
+  unit:
+    name: ${{ matrix.test-path }}
+    runs-on: ubuntu-latest
+    needs: pre-test
+    if: fromJSON(needs.pre-test.outputs.matrix)[0] != null
+    continue-on-error: false
+    strategy:
+      fail-fast: true
+      matrix:
+        test-path: ${{fromJson(needs.pre-test.outputs.matrix)}}
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: technote-space/get-diff-action@v6.1.2
+        with:
+          RELATIVE: ${{ matrix.test-path }}
+          PATTERNS: |
+            **/*.go
+            **/*.plush
+            **/*.tpl
+            go.mod
+            go.sum
+            **/testdata/**
+
+      - uses: actions/setup-go@v5
+        if: env.GIT_DIFF
+        with:
+          go-version: 'stable'
+
+      - name: Run Unit Tests
+        if: env.GIT_DIFF
+        env:
+          GOTOOLCHAIN: local+path
+          GOSUMDB: off
+        run: go test -race -failfast -v -timeout 120m $(go list ./... | grep -v integration)
+        working-directory: ${{ matrix.test-path }}

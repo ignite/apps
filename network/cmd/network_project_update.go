@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/yaml"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/yaml"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"

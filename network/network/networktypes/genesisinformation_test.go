@@ -6,8 +6,8 @@ import (
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -117,7 +117,7 @@ func TestToParamChange(t *testing.T) {
 		{
 			name: "param change",
 			fetched: launchtypes.ParamChange{
-				LaunchID: 0,
+				LaunchId: 0,
 				Module:   "foo",
 				Param:    "bar",
 				Value:    []byte("value"),

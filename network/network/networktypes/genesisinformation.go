@@ -2,8 +2,8 @@ package networktypes
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/pkg/errors"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 )
 
 // GenesisInformation represents all information for a chain to construct the genesis.

@@ -9,9 +9,9 @@ import (
 	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto/ed25519"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	spnsample "github.com/ignite/network/testutil/sample"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	spnsample "github.com/tendermint/spn/testutil/sample"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

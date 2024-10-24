@@ -1,11 +1,16 @@
-go 1.21.0
-
-toolchain go1.21.3
+go 1.21.1
 
 use (
+	./examples/chain-info
+	./examples/flags
+	./examples/health-monitor
+	./examples/hello-world
+	./examples/hooks
+	./appregistry
 	./explorer
 	./hermes
-	./integration
 	./network
-	./official/marketplace
+	./rollkit
+	./spaceship
+	./wasm
 )

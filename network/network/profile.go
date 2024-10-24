@@ -6,10 +6,10 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoserror"
-	"github.com/ignite/cli/ignite/pkg/events"
-	profiletypes "github.com/tendermint/spn/x/profile/types"
-	projecttypes "github.com/tendermint/spn/x/project/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	profiletypes "github.com/ignite/network/x/profile/types"
+	projecttypes "github.com/ignite/network/x/project/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -17,19 +17,18 @@ import (
 // CoordinatorIDByAddress returns the CoordinatorByAddress from SPN.
 func (n Network) CoordinatorIDByAddress(ctx context.Context, address string) (uint64, error) {
 	n.ev.Send("Fetching coordinator by address", events.ProgressStart())
-	resCoordByAddr, err := n.profileQuery.
-		CoordinatorByAddress(ctx,
-			&profiletypes.QueryGetCoordinatorByAddressRequest{
-				Address: address,
-			},
-		)
+	resCoordByAddr, err := n.profileQuery.GetCoordinatorByAddress(ctx,
+		&profiletypes.QueryGetCoordinatorByAddressRequest{
+			Address: address,
+		},
+	)
 
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
 		return 0, ErrObjectNotFound
 	} else if err != nil {
 		return 0, err
 	}
-	return resCoordByAddr.CoordinatorByAddress.CoordinatorID, nil
+	return resCoordByAddr.Coordinator.CoordinatorId, nil
 }
 
 // SetCoordinatorDescription set the description of a coordinator
@@ -83,12 +82,11 @@ func (n Network) Coordinator(ctx context.Context, address string) (networktypes.
 	if err != nil {
 		return networktypes.Coordinator{}, err
 	}
-	resCoord, err := n.profileQuery.
-		Coordinator(ctx,
-			&profiletypes.QueryGetCoordinatorRequest{
-				CoordinatorID: coordinatorID,
-			},
-		)
+	resCoord, err := n.profileQuery.GetCoordinator(ctx,
+		&profiletypes.QueryGetCoordinatorRequest{
+			CoordinatorId: coordinatorID,
+		},
+	)
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
 		return networktypes.Coordinator{}, ErrObjectNotFound
 	} else if err != nil {
@@ -127,12 +125,9 @@ func (n Network) SetValidatorDescription(ctx context.Context, validator profilet
 // Validator returns the Validator by address from SPN.
 func (n Network) Validator(ctx context.Context, address string) (networktypes.Validator, error) {
 	n.ev.Send("Fetching validator description", events.ProgressStart())
-	res, err := n.profileQuery.
-		Validator(ctx,
-			&profiletypes.QueryGetValidatorRequest{
-				Address: address,
-			},
-		)
+	res, err := n.profileQuery.GetValidator(ctx, &profiletypes.QueryGetValidatorRequest{
+		Address: address,
+	})
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
 		return networktypes.Validator{}, ErrObjectNotFound
 	} else if err != nil {

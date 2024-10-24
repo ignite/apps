@@ -4,8 +4,8 @@ import (
 	"testing"
 	"time"
 
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -19,12 +19,12 @@ func TestToChainLaunch(t *testing.T) {
 		{
 			name: "chain with default genesis",
 			fetched: launchtypes.Chain{
-				LaunchID:       1,
-				GenesisChainID: "foo-1",
-				SourceURL:      "foo.com",
+				LaunchId:       1,
+				GenesisChainId: "foo-1",
+				SourceUrl:      "foo.com",
 				SourceHash:     "0xaaa",
 				HasProject:     true,
-				ProjectID:      1,
+				ProjectId:      1,
 				InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 			},
 			expected: networktypes.ChainLaunch{
@@ -42,9 +42,9 @@ func TestToChainLaunch(t *testing.T) {
 		{
 			name: "launched chain with custom genesis url and no project",
 			fetched: launchtypes.Chain{
-				LaunchID:        1,
-				GenesisChainID:  "bar-1",
-				SourceURL:       "bar.com",
+				LaunchId:        1,
+				GenesisChainId:  "bar-1",
+				SourceUrl:       "bar.com",
 				SourceHash:      "0xbbb",
 				LaunchTriggered: true,
 				LaunchTime:      time.Unix(100, 100).UTC(),

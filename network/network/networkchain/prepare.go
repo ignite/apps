@@ -8,14 +8,14 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ignite/cli/ignite/pkg/cache"
-	"github.com/ignite/cli/ignite/pkg/cosmosutil"
-	cosmosgenesis "github.com/ignite/cli/ignite/pkg/cosmosutil/genesis"
-	"github.com/ignite/cli/ignite/pkg/events"
-	"github.com/ignite/cli/ignite/pkg/jsonfile"
+	"github.com/ignite/cli/v28/ignite/pkg/cache"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
+	cosmosgenesis "github.com/ignite/cli/v28/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	"github.com/ignite/cli/v28/ignite/pkg/jsonfile"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

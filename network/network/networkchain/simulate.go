@@ -8,11 +8,11 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
-	"github.com/ignite/cli/ignite/pkg/availableport"
-	"github.com/ignite/cli/ignite/pkg/cache"
-	"github.com/ignite/cli/ignite/pkg/events"
-	"github.com/ignite/cli/ignite/pkg/httpstatuschecker"
-	"github.com/ignite/cli/ignite/pkg/xurl"
+	"github.com/ignite/cli/v28/ignite/pkg/availableport"
+	"github.com/ignite/cli/v28/ignite/pkg/cache"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	"github.com/ignite/cli/v28/ignite/pkg/httpstatuschecker"
+	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
 
@@ -132,7 +132,7 @@ func (c Chain) setSimulationConfig() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	genAddr := func(port int) string {
+	genAddr := func(port uint) string {
 		return fmt.Sprintf("localhost:%d", port)
 	}
 

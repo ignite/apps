@@ -4,8 +4,8 @@ import (
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	yaml "github.com/goccy/go-yaml"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	"github.com/goccy/go-yaml"
+	launchtypes "github.com/ignite/network/x/launch/types"
 )
 
 type (
@@ -53,13 +53,13 @@ func ToChainLaunch(chain launchtypes.Chain) ChainLaunch {
 	}
 
 	launch := ChainLaunch{
-		ID:                     chain.LaunchID,
+		ID:                     chain.LaunchId,
 		ConsumerRevisionHeight: chain.ConsumerRevisionHeight,
-		ChainID:                chain.GenesisChainID,
-		SourceURL:              chain.SourceURL,
+		ChainID:                chain.GenesisChainId,
+		SourceURL:              chain.SourceUrl,
 		SourceHash:             chain.SourceHash,
 		LaunchTime:             launchTime,
-		ProjectID:              chain.ProjectID,
+		ProjectID:              chain.ProjectId,
 		LaunchTriggered:        chain.LaunchTriggered,
 		Network:                network,
 		AccountBalance:         chain.AccountBalance,
@@ -73,7 +73,7 @@ func ToChainLaunch(chain launchtypes.Chain) ChainLaunch {
 	}
 
 	// check if custom genesis URL is provided.
-	if customGenesisURL := chain.InitialGenesis.GetGenesisURL(); customGenesisURL != nil {
+	if customGenesisURL := chain.InitialGenesis.GetGenesisUrl(); customGenesisURL != nil {
 		launch.GenesisURL = customGenesisURL.Url
 		launch.GenesisHash = customGenesisURL.Hash
 	}

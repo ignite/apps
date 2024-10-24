@@ -9,12 +9,12 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoserror"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	launchtypes "github.com/ignite/network/x/launch/types"
+	profiletypes "github.com/ignite/network/x/profile/types"
+	projecttypes "github.com/ignite/network/x/project/types"
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
-	profiletypes "github.com/tendermint/spn/x/profile/types"
-	projecttypes "github.com/tendermint/spn/x/project/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
@@ -59,9 +59,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -72,17 +72,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -118,9 +118,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -131,18 +131,18 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					AccountBalance: accountBalance,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -179,9 +179,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -190,7 +190,7 @@ func TestPublish(t *testing.T) {
 				"Project",
 				context.Background(),
 				&projecttypes.QueryGetProjectRequest{
-					ProjectID: testutil.ProjectID,
+					ProjectId: testutil.ProjectID,
 				},
 			).
 			Return(nil, nil).
@@ -202,17 +202,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     true,
-					ProjectID:      testutil.ProjectID,
+					ProjectId:      testutil.ProjectID,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -245,9 +245,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -256,7 +256,7 @@ func TestPublish(t *testing.T) {
 				"Project",
 				context.Background(),
 				&projecttypes.QueryGetProjectRequest{
-					ProjectID: testutil.ProjectID,
+					ProjectId: testutil.ProjectID,
 				},
 			).
 			Return(nil, nil).
@@ -291,17 +291,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     true,
-					ProjectID:      testutil.ProjectID,
+					ProjectId:      testutil.ProjectID,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -343,9 +343,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -356,20 +356,20 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: customGenesisChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: customGenesisChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewGenesisURL(
 						gts.URL,
 						customGenesisHash,
 					),
 					HasProject: false,
-					ProjectID:  0,
+					ProjectId:  0,
 					Metadata:   metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -405,9 +405,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -418,17 +418,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -460,9 +460,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -473,19 +473,19 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewGenesisConfig(
 						testutil.ChainConfigYML,
 					),
 					HasProject: false,
-					ProjectID:  0,
+					ProjectId:  0,
 					Metadata:   metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -522,9 +522,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -535,17 +535,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -579,9 +579,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -597,7 +597,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(testutil.NewResponse(&projecttypes.MsgCreateProjectResponse{
-				ProjectID: testutil.ProjectID,
+				ProjectId: testutil.ProjectID,
 			}), nil).
 			Once()
 		suite.CosmosClientMock.
@@ -607,8 +607,8 @@ func TestPublish(t *testing.T) {
 				account,
 				&projecttypes.MsgInitializeMainnet{
 					Coordinator:    addr,
-					ProjectID:      testutil.ProjectID,
-					SourceURL:      testutil.ChainSourceURL,
+					ProjectId:      testutil.ProjectID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					MainnetChainID: testutil.ChainID,
 				},
@@ -649,9 +649,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -667,7 +667,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(testutil.NewResponse(&projecttypes.MsgCreateProjectResponse{
-				ProjectID: testutil.ProjectID,
+				ProjectId: testutil.ProjectID,
 			}), nil).
 			Once()
 		suite.CosmosClientMock.
@@ -677,8 +677,8 @@ func TestPublish(t *testing.T) {
 				account,
 				&projecttypes.MsgInitializeMainnet{
 					Coordinator:    addr,
-					ProjectID:      testutil.ProjectID,
-					SourceURL:      testutil.ChainSourceURL,
+					ProjectId:      testutil.ProjectID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					MainnetChainID: testutil.ChainID,
 				},
@@ -739,17 +739,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.CosmosClientMock.
@@ -835,15 +835,15 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
 		suite.ProjectQueryMock.
 			On("Project", mock.Anything, &projecttypes.QueryGetProjectRequest{
-				ProjectID: testutil.ProjectID,
+				ProjectId: testutil.ProjectID,
 			}).
 			Return(nil, cosmoserror.ErrNotFound).
 			Once()
@@ -874,9 +874,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -887,17 +887,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), expectedError).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -929,9 +929,9 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				CoordinatorByAddress: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.CoordinatorByAddress{
 					Address:       addr,
-					CoordinatorID: 1,
+					CoordinatorId: 1,
 				},
 			}, nil).
 			Once()
@@ -942,17 +942,17 @@ func TestPublish(t *testing.T) {
 				account,
 				&launchtypes.MsgCreateChain{
 					Coordinator:    addr,
-					GenesisChainID: testutil.ChainID,
-					SourceURL:      testutil.ChainSourceURL,
+					GenesisChainId: testutil.ChainID,
+					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
 					InitialGenesis: launchtypes.NewDefaultInitialGenesis(),
 					HasProject:     false,
-					ProjectID:      0,
+					ProjectId:      0,
 					Metadata:       metadata,
 				},
 			).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{
-				LaunchID: testutil.LaunchID,
+				LaunchId: testutil.LaunchID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()

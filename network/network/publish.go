@@ -8,11 +8,11 @@ import (
 	"path/filepath"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	cosmosgenesis "github.com/ignite/cli/ignite/pkg/cosmosutil/genesis"
-	"github.com/ignite/cli/ignite/pkg/events"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
-	profiletypes "github.com/tendermint/spn/x/profile/types"
-	projecttypes "github.com/tendermint/spn/x/project/types"
+	cosmosgenesis "github.com/ignite/cli/v28/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	launchtypes "github.com/ignite/network/x/launch/types"
+	profiletypes "github.com/ignite/network/x/profile/types"
+	projecttypes "github.com/ignite/network/x/project/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -163,10 +163,9 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 
 	// check if a project associated to the chain is provided
 	if projectID != 0 {
-		_, err = n.projectQuery.
-			Project(ctx, &projecttypes.QueryGetProjectRequest{
-				ProjectID: o.projectID,
-			})
+		_, err = n.projectQuery.GetProject(ctx, &projecttypes.QueryGetProjectRequest{
+			ProjectId: o.projectID,
+		})
 		if err != nil {
 			return 0, 0, err
 		}
@@ -265,7 +264,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 		if err := res.Decode(&createChainRes); err != nil {
 			return 0, 0, err
 		}
-		launchID = createChainRes.LaunchID
+		launchID = createChainRes.LaunchId
 	}
 	if err := c.CacheBinary(launchID); err != nil {
 		return 0, 0, err

@@ -5,13 +5,13 @@ import (
 	"os"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/ignite/pkg/xurl"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v28/ignite/pkg/xurl"
+	"github.com/ignite/network/pkg/chainid"
+	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
-	"github.com/tendermint/spn/pkg/chainid"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"

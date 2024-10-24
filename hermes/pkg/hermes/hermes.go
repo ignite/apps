@@ -6,13 +6,13 @@ import (
 	"compress/gzip"
 	"context"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"os"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/localfs"
 	"github.com/ignite/ignite-files/hermes"
 )
@@ -31,6 +31,7 @@ const (
 	FlagMnemonicFile     = "mnemonic-file"
 	FlagKeyName          = "key-name"
 	FlagConfig           = "config"
+	FlagFullScan         = "full-scan"
 )
 
 const (
@@ -180,17 +181,29 @@ type (
 	}
 )
 
+func defaultConfig() configs {
+	return configs{
+		flags:  make(Flags),
+		args:   make([]string, 0),
+		stdin:  os.Stdin,
+		stdout: os.Stdout,
+		stderr: os.Stderr,
+	}
+}
+
 // WithArgs assigns the command args.
 func WithArgs(args ...string) Option {
 	return func(c *configs) {
-		c.args = args
+		c.args = append(c.args, args...)
 	}
 }
 
 // WithFlags assigns the command flags.
 func WithFlags(flags Flags) Option {
 	return func(c *configs) {
-		c.flags = flags
+		for k, v := range flags {
+			c.flags[k] = v
+		}
 	}
 }
 
@@ -372,23 +385,19 @@ func (h *Hermes) QueryChannels(ctx context.Context, showCounterparty bool, chain
 	if showCounterparty {
 		flags[FlagShowCounterparty] = true
 	}
-	options = append(
-		options,
-		WithFlags(flags),
-		WithArgs(string(cmdQuery), string(cmdChannels)),
-	)
+	options = append(options, WithArgs(string(cmdQuery), string(cmdChannels)), WithFlags(flags))
 	return h.Run(ctx, options...)
 }
 
 // Start starts the Hermes relayer.
 func (h *Hermes) Start(ctx context.Context, options ...Option) error {
-	options = append(options, WithArgs(string(cmdStart)))
+	options = append(options, WithArgs(string(cmdStart)), WithFlags(Flags{FlagFullScan: true}))
 	return h.Run(ctx, options...)
 }
 
 // Run runs a Hermes command using the options.
 func (h *Hermes) Run(ctx context.Context, options ...Option) error {
-	c := configs{}
+	c := defaultConfig()
 	for _, o := range options {
 		o(&c)
 	}
@@ -455,7 +464,7 @@ func UnmarshalResult(data []byte, v any) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("error result (%T) error: %v", v, string(r.Result))
+		return errors.Errorf("error result (%T) error: %v", v, string(r.Result))
 	}
 	return json.Unmarshal(r.Result, v)
 }
@@ -467,7 +476,7 @@ func ValidateResult(data []byte) error {
 		return err
 	}
 	if r.Status != ResultSuccess {
-		return fmt.Errorf("%w: %v", ErrResult, string(r.Result))
+		return errors.Errorf("%s: %v", ErrResult, string(r.Result))
 	}
 	return nil
 }

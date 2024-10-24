@@ -1,0 +1,33 @@
+"ci":
+  - "!.github/labeler.yml"
+  - "!.github/labels.json"
+  - .github/**/*
+
+"app:consumer":
+  - consumer/**/*
+
+"app:examples":
+  - examples/**/*
+
+"app:explorer":
+  - explorer/**/*
+
+"app:hermes":
+  - hermes/**/*
+
+"app:appregistry":
+  - appregistry/**/*
+
+"app:wasm":
+  - wasm/**/*
+
+"configs":
+  - .gitignore
+  - .golangci.yml
+  - app.ignite.yml
+  - CODE_OF_CONDUCT.md
+  - CONTRIBUTING.md
+  - go.work.example
+  - LICENSE
+  - Makefile
+  - README.md

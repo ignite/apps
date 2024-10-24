@@ -1,9 +1,9 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/ignite/pkg/numbers"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v28/ignite/pkg/numbers"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 

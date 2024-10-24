@@ -1,0 +1,34 @@
+{
+  "appName": "appregistry",
+  "appDescription": "Explore the world of Ignite applications and more!",
+  "ignite": ">28.0.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.1",
+  "authors": [
+    {
+      "name": "Ehsan Saradar",
+      "github": "Ehsan-saradar"
+    },
+    {
+      "name": "Julien Robert",
+      "github": "julienrbrt"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/appregistry/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "appregistry",
+    "registry",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ]
+}

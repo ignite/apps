@@ -3,10 +3,10 @@ package cmd
 import (
 	"path/filepath"
 
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/colors"
-	"github.com/ignite/cli/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/ignite/pkg/goenv"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v28/ignite/pkg/goenv"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"

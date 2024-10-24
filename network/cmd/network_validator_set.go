@@ -3,11 +3,11 @@ package cmd
 import (
 	"errors"
 
+	profiletypes "github.com/ignite/network/x/profile/types"
 	"github.com/spf13/cobra"
-	profiletypes "github.com/tendermint/spn/x/profile/types"
 
-	"github.com/ignite/cli/ignite/pkg/cliui"
-	"github.com/ignite/cli/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
 )
 
 // NewNetworkValidatorSet creates a command to set an information in a validator profile.

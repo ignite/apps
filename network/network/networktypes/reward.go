@@ -1,7 +1,7 @@
 package networktypes
 
 import (
-	spntypes "github.com/tendermint/spn/pkg/types"
+	spntypes "github.com/ignite/network/pkg/types"
 )
 
 type (

@@ -1,0 +1,37 @@
+# Default state for all rules
+default: true
+
+# MD013/line-length: Line length
+# Enabled to enforce line length limits.
+line-length: false
+
+# MD047/single-trailing-newline: Files should end with a single newline character
+single-trailing-newline: true
+
+# MD025/single-title/single-h1: Multiple top-level headings in the same document
+# Allows for metadata and an H1 in the same document.
+single-title: false
+
+# MD032/blanks-around-lists: Blanks around lists
+# Requires blank lines around lists for clarity.
+blanks-around-lists: true
+
+# MD036/no-emphasis-as-heading: No emphasis as heading
+# Prevents using emphasis in place of headings.
+no-emphasis-as-heading: true
+
+# MD040/fenced-code-language: Fenced code blocks should have a language specified
+# Encourages specifying languages in code blocks for syntax highlighting.
+fenced-code-language: true
+
+# MD026/no-trailing-punctuation: No trailing punctuation in headings
+# Avoids trailing punctuation in headings.
+no-trailing-punctuation: true
+
+# MD022/blanks-around-headings: Blanks around headings
+# Ensures there is at least one blank line above and below headings.
+blanks-around-headings: true
+
+# MD031/blanks-around-fences: Blanks around fenced code blocks
+# Requires at least one blank line before and after fenced code blocks.
+blanks-around-fences: true

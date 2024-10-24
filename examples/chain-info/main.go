@@ -2,18 +2,18 @@ package main
 
 import (
 	"context"
-	"fmt"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
-	"chain-info/cmd"
+	"github.com/ignite/apps/examples/chain-info/cmd"
 )
 
 type app struct{}
 
-func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
+func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
 		Name:     "chain-info",
 		Commands: cmd.GetCommands(),
@@ -26,12 +26,12 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 
 	chainInfo, err := api.GetChainInfo(ctx)
 	if err != nil {
-		return fmt.Errorf("failed to get chain info: %w", err)
+		return errors.Errorf("failed to get chain info: %s", err)
 	}
 
 	ch, err := chain.New(chainInfo.AppPath)
 	if err != nil {
-		return fmt.Errorf("failed to create a new chain object from app path: %w", err)
+		return errors.Errorf("failed to create a new chain object from app path: %s", err)
 	}
 
 	switch args[0] {
@@ -40,19 +40,19 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	case "build":
 		return cmd.ExecuteBuild(ctx, c, ch)
 	default:
-		return fmt.Errorf("unknown command: %s", c.Path)
+		return errors.Errorf("unknown command: %s", c.Path)
 	}
 }
 
-func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
-func (app) ExecuteHookPost(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+func (app) ExecuteHookPost(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 
-func (app) ExecuteHookCleanUp(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
+func (app) ExecuteHookCleanUp(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {
 	return nil
 }
 

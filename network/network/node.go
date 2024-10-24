@@ -6,12 +6,12 @@ import (
 	"errors"
 
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
-	ibcclienttypes "github.com/cosmos/ibc-go/v7/modules/core/02-client/types"
-	ibcconntypes "github.com/cosmos/ibc-go/v7/modules/core/03-connection/types"
-	ibcchanneltypes "github.com/cosmos/ibc-go/v7/modules/core/04-channel/types"
-	"github.com/ignite/cli/ignite/pkg/cosmoserror"
-	spntypes "github.com/tendermint/spn/pkg/types"
-	monitoringptypes "github.com/tendermint/spn/x/monitoringp/types"
+	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
+	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
+	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	spntypes "github.com/ignite/network/pkg/types"
+	monitoringptypes "github.com/ignite/network/x/monitoringp/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -167,7 +167,7 @@ func (n Node) stakingParams(ctx context.Context) (stakingtypes.Params, error) {
 
 // consumerClientID fetches the consumer client id from the monitoring provider.
 func (n Node) consumerClientID(ctx context.Context) (string, error) {
-	res, err := n.monitoringProviderQuery.ConsumerClientID(
+	res, err := n.monitoringProviderQuery.GetConsumerClientID(
 		ctx, &monitoringptypes.QueryGetConsumerClientIDRequest{},
 	)
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
@@ -175,12 +175,12 @@ func (n Node) consumerClientID(ctx context.Context) (string, error) {
 	} else if err != nil {
 		return "", err
 	}
-	return res.ConsumerClientID.ClientID, nil
+	return res.ConsumerClientId.ClientId, nil
 }
 
 // connectionChannelID fetches the consumer connection chnnael id from the monitoring provider.
 func (n Node) connectionChannelID(ctx context.Context) (string, error) {
-	res, err := n.monitoringProviderQuery.ConnectionChannelID(
+	res, err := n.monitoringProviderQuery.GetConnectionChannelID(
 		ctx, &monitoringptypes.QueryGetConnectionChannelIDRequest{},
 	)
 	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
@@ -188,5 +188,5 @@ func (n Node) connectionChannelID(ctx context.Context) (string, error) {
 	} else if err != nil {
 		return "", err
 	}
-	return res.ConnectionChannelID.ChannelID, nil
+	return res.ConnectionChannelId.ChannelId, nil
 }

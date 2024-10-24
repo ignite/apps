@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/ignite/cli/ignite/pkg/events"
-	launchtypes "github.com/tendermint/spn/x/launch/types"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	launchtypes "github.com/ignite/network/x/launch/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

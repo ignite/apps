@@ -5,8 +5,8 @@ package mocks
 import (
 	"context"
 
+	"github.com/ignite/network/x/monitoringp/types"
 	"github.com/stretchr/testify/mock"
-	"github.com/tendermint/spn/x/monitoringp/types"
 	"google.golang.org/grpc"
 )
 

@@ -6,9 +6,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/ignite/pkg/events"
-	rewardtypes "github.com/tendermint/spn/x/reward/types"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v28/ignite/pkg/events"
+	rewardtypes "github.com/ignite/network/x/reward/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -28,8 +28,8 @@ func (n Network) SetReward(ctx context.Context, launchID uint64, lastRewardHeigh
 	msg := rewardtypes.NewMsgSetRewards(
 		addr,
 		launchID,
-		lastRewardHeight,
 		coins,
+		lastRewardHeight,
 	)
 	res, err := n.cosmos.BroadcastTx(ctx, n.account, msg)
 	if err != nil {

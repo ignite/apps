@@ -2,7 +2,7 @@ package networktypes
 
 import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	projecttypes "github.com/tendermint/spn/x/project/types"
+	projecttypes "github.com/ignite/network/x/project/types"
 )
 
 // Project represents the project of a chain on SPN.
@@ -20,10 +20,10 @@ type Project struct {
 // ToProject converts a project data from SPN and returns a Project object.
 func ToProject(project projecttypes.Project) Project {
 	return Project{
-		ID:                 project.ProjectID,
+		ID:                 project.ProjectId,
 		Name:               project.ProjectName,
-		CoordinatorID:      project.CoordinatorID,
-		MainnetID:          project.MainnetID,
+		CoordinatorID:      project.CoordinatorId,
+		MainnetID:          project.MainnetId,
 		MainnetInitialized: project.MainnetInitialized,
 		TotalSupply:        project.TotalSupply,
 		AllocatedShares:    project.AllocatedShares.String(),
@@ -54,7 +54,7 @@ type ProjectChains struct {
 // ToProjectChains converts a project chains data from SPN and returns a ProjectChains object.
 func ToProjectChains(c projecttypes.ProjectChains) ProjectChains {
 	return ProjectChains{
-		ProjectID: c.ProjectID,
+		ProjectID: c.ProjectId,
 		Chains:    c.Chains,
 	}
 }
