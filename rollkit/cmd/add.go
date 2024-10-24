@@ -54,7 +54,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	return session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
+	return session.Printf("🎉 RollKit added from custom fork (`%[1]v`).\n", c.AppPath(), c.Name())
 }
 
 // finish finalize the scaffolded code (formating, dependencies).
