@@ -50,7 +50,7 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 			return errors.New("rollkit requires Ignite v28+ / Cosmos SDK v0.50+")
 		}
 		DefaultRollkitServerVersion := "v0.1.0"
-		DefaultRollkitConfigVersion := "v0.13.7"
+		DefaultRollkitConfigVersion := "v0.13.6"
 		content, err := xast.AppendImports(
 			f.String(),
 			xast.WithLastNamedImport("rollserv", fmt.Sprintf("github.com/rollkit/cosmos-sdk-starter/server@%s", DefaultRollkitServerVersion)),
