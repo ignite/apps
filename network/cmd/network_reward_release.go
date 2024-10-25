@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"text/tabwriter"
 
-	"github.com/ignite/cli/ignite/pkg/relayer"
-	relayerconf "github.com/ignite/cli/ignite/pkg/relayer/config"
 	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"

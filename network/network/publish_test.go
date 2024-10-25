@@ -118,7 +118,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -179,7 +179,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -245,7 +245,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -343,7 +343,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -405,7 +405,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -460,7 +460,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -522,7 +522,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -579,7 +579,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -610,11 +610,11 @@ func TestPublish(t *testing.T) {
 					ProjectId:      testutil.ProjectID,
 					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
-					MainnetChainID: testutil.ChainID,
+					MainnetChainId: testutil.ChainID,
 				},
 			).
 			Return(testutil.NewResponse(&projecttypes.MsgInitializeMainnetResponse{
-				MainnetID: testutil.MainnetID,
+				MainnetId: testutil.MainnetID,
 			}), nil).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -649,7 +649,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -680,11 +680,11 @@ func TestPublish(t *testing.T) {
 					ProjectId:      testutil.ProjectID,
 					SourceUrl:      testutil.ChainSourceURL,
 					SourceHash:     testutil.ChainSourceHash,
-					MainnetChainID: testutil.ChainID,
+					MainnetChainId: testutil.ChainID,
 				},
 			).
 			Return(testutil.NewResponse(&projecttypes.MsgInitializeMainnetResponse{
-				MainnetID: testutil.MainnetID,
+				MainnetId: testutil.MainnetID,
 			}), expectedError).
 			Once()
 		suite.ChainMock.On("SourceHash").Return(testutil.ChainSourceHash).Once()
@@ -835,7 +835,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -874,7 +874,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},
@@ -929,7 +929,7 @@ func TestPublish(t *testing.T) {
 				},
 			).
 			Return(&profiletypes.QueryGetCoordinatorByAddressResponse{
-				Coordinator: profiletypes.CoordinatorByAddress{
+				Coordinator: profiletypes.Coordinator{
 					Address:       addr,
 					CoordinatorId: 1,
 				},

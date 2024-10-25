@@ -51,7 +51,7 @@ func TestTriggerLaunch(t *testing.T) {
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
 					LaunchId:    testutil.LaunchID,
-					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
+					LaunchTime:  TestMaxRemainingTime,
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgTriggerLaunchResponse{}), nil).
 			Once()
@@ -155,7 +155,7 @@ func TestTriggerLaunch(t *testing.T) {
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
 					LaunchId:    testutil.LaunchID,
-					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
+					LaunchTime:  TestMaxRemainingTime,
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgTriggerLaunch{}), expectedError).
 			Once()
@@ -196,7 +196,7 @@ func TestTriggerLaunch(t *testing.T) {
 				&launchtypes.MsgTriggerLaunch{
 					Coordinator: addr,
 					LaunchId:    testutil.LaunchID,
-					LaunchTime:  sampleTime.Add(TestMaxRemainingTime),
+					LaunchTime:  TestMaxRemainingTime,
 				}).
 			Return(testutil.NewResponse(&launchtypes.MsgCreateChainResponse{}), expectedError).
 			Once()

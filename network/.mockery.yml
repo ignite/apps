@@ -1,0 +1,11 @@
+inpackage: False
+with-expecter: True
+filename: "{{.InterfaceNameSnake}}.go"
+dir: "./mocks"
+mockname: "Mock{{.InterfaceName}}"
+outpkg: "mocks"
+packages:
+  github.com/ignite/apps/network:
+    config:
+      recursive: true
+      with-expecter: true

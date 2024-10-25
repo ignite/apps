@@ -1,7 +1,7 @@
 package main
 
 import (
-	"encoding/gob"
+	"context"
 	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
@@ -10,51 +10,44 @@ import (
 	"github.com/ignite/apps/network/cmd"
 )
 
-func init() {
-	gob.Register(plugin.Manifest{})
-	gob.Register(plugin.ExecutedCommand{})
-	gob.Register(plugin.ExecutedHook{})
-}
+type app struct{}
 
-type p struct{}
-
-func (p) Manifest() (plugin.Manifest, error) {
-	m := plugin.Manifest{
+func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
+	m := &plugin.Manifest{
 		Name: "network",
 	}
 	m.ImportCobraCommand(cmd.NewNetwork(), "ignite")
 	return m, nil
 }
 
-func (p) Execute(c plugin.ExecutedCommand) error {
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.ClientAPI) error {
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.
 	// Remove the first arg "ignite" from OSArgs because our network
 	// command root is "network" not "ignite".
-	os.Args = c.OSArgs[1:]
+	os.Args = c.OsArgs[1:]
 	return cmd.NewNetwork().Execute()
 }
 
-func (p) ExecuteHookPre(plugin.ExecutedHook) error {
+func (app) ExecuteHookPre(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 
-func (p) ExecuteHookPost(plugin.ExecutedHook) error {
+func (app) ExecuteHookPost(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 
-func (p) ExecuteHookCleanUp(plugin.ExecutedHook) error {
+func (app) ExecuteHookCleanUp(_ context.Context, _ *plugin.ExecutedHook, _ plugin.ClientAPI) error {
 	return nil
 }
 
 func main() {
-	pluginMap := map[string]hplugin.Plugin{
-		"network": &plugin.InterfacePlugin{Impl: &p{}},
-	}
-
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
-		Plugins:         pluginMap,
+		Plugins: map[string]hplugin.Plugin{
+			"spaceship": plugin.NewGRPC(&app{}),
+		},
+		GRPCServer: hplugin.DefaultGRPCServer,
 	})
 }

@@ -24,7 +24,7 @@ func NewNetworkTool() *cobra.Command {
 
 func NewNetworkToolProxyTunnel() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "proxy-tunnel SPN_CONFIG_FILE",
+		Use:   "proxy-tunnel [config-file]",
 		Short: "Setup a proxy tunnel via HTTP",
 		Long: `Starts an HTTP proxy server and HTTP proxy clients for each node that
 needs HTTP tunneling.
