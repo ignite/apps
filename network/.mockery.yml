@@ -1,13 +1,12 @@
-quiet: False
-disable-version-string: True
-with-expecter: True
 all: False
-mockname: "{{.InterfaceName}}"
-filename: "{{.InterfaceNameSnake}}.go"
-dir: "network/mocks"
-outpkg: "mocks"
+quiet: False
 log-level: debug
 recursive: True
+with-expecter: True
+outpkg: "mocks"
+dir: "network/mocks"
+mockname: "{{.InterfaceName}}"
+filename: "{{.InterfaceNameSnake}}.go"
 packages:
   github.com/ignite/apps/network/network:
     interfaces:
@@ -24,4 +23,3 @@ packages:
       MonitoringcClient:
       MonitoringpClient:
       AccountInfo:
-#      IBCClient:

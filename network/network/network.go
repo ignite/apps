@@ -23,6 +23,7 @@ import (
 	"github.com/ignite/apps/network/network/networktypes"
 )
 
+//go:generate mockery --name CosmosClient
 type CosmosClient interface {
 	Context() client.Context
 	Status(ctx context.Context) (*ctypes.ResultStatus, error)
