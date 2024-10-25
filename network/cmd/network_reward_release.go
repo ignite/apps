@@ -1,20 +1,9 @@
 package cmd
 
 import (
-	"bytes"
-	"fmt"
-	"text/tabwriter"
-
-	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/ignite/cli/v28/ignite/pkg/xurl"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networktypes"
 )
 
@@ -57,6 +46,11 @@ func NewNetworkRewardRelease() *cobra.Command {
 	return c
 }
 
+func networkRewardRelease(cmd *cobra.Command, args []string) (err error) {
+	return err
+}
+
+/*
 func networkRewardRelease(cmd *cobra.Command, args []string) (err error) {
 	defer func() {
 		var accountErr *cosmosaccount.AccountDoesNotExistError
@@ -317,3 +311,4 @@ func spnRelayerConfig(
 	}
 	return pathID, conf, errors.New("connection was already established and is missing in one of the chains")
 }
+*/

@@ -15,7 +15,6 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/chaincmd"
 	"github.com/ignite/cli/v28/ignite/pkg/checksum"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v28/ignite/pkg/events"
 	"github.com/ignite/cli/v28/ignite/pkg/gitpod"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -333,7 +332,8 @@ func (c *Chain) Build(ctx context.Context, cacheStorage cache.Storage) (binaryNa
 	if binaryName, err = c.chain.Build(
 		ctx,
 		cacheStorage,
-		[]string{cosmosver.DefaultVersion().String()},
+		// []string{cosmosver.DefaultVersion().String()}, // TODO check why this build tag was set
+		[]string{},
 		"",
 		true,
 		false,

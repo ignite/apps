@@ -16,8 +16,8 @@ type MonitoringcClient struct {
 	mock.Mock
 }
 
-// LaunchIDFromChannelID provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) LaunchIDFromChannelID(ctx context.Context, in *types.QueryGetLaunchIDFromChannelIDRequest, opts ...grpc.CallOption) (*types.QueryGetLaunchIDFromChannelIDResponse, error) {
+// GetLaunchIDFromChannelID provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) GetLaunchIDFromChannelID(ctx context.Context, in *types.QueryGetLaunchIDFromChannelIDRequest, opts ...grpc.CallOption) (*types.QueryGetLaunchIDFromChannelIDResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -46,8 +46,8 @@ func (_m *MonitoringcClient) LaunchIDFromChannelID(ctx context.Context, in *type
 	return r0, r1
 }
 
-// LaunchIDFromChannelIDAll provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) LaunchIDFromChannelIDAll(ctx context.Context, in *types.QueryAllLaunchIDFromChannelIDRequest, opts ...grpc.CallOption) (*types.QueryAllLaunchIDFromChannelIDResponse, error) {
+// ListLaunchIDFromChannelID provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) ListLaunchIDFromChannelID(ctx context.Context, in *types.QueryAllLaunchIDFromChannelIDRequest, opts ...grpc.CallOption) (*types.QueryAllLaunchIDFromChannelIDResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -76,8 +76,8 @@ func (_m *MonitoringcClient) LaunchIDFromChannelIDAll(ctx context.Context, in *t
 	return r0, r1
 }
 
-// MonitoringHistory provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) MonitoringHistory(ctx context.Context, in *types.QueryGetMonitoringHistoryRequest, opts ...grpc.CallOption) (*types.QueryGetMonitoringHistoryResponse, error) {
+// GetMonitoringHistory provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) GetMonitoringHistory(ctx context.Context, in *types.QueryGetMonitoringHistoryRequest, opts ...grpc.CallOption) (*types.QueryGetMonitoringHistoryResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -136,8 +136,8 @@ func (_m *MonitoringcClient) Params(ctx context.Context, in *types.QueryParamsRe
 	return r0, r1
 }
 
-// ProviderClientID provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) ProviderClientID(ctx context.Context, in *types.QueryGetProviderClientIDRequest, opts ...grpc.CallOption) (*types.QueryGetProviderClientIDResponse, error) {
+// GetProviderClientID provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) GetProviderClientID(ctx context.Context, in *types.QueryGetProviderClientIDRequest, opts ...grpc.CallOption) (*types.QueryGetProviderClientIDResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -166,8 +166,8 @@ func (_m *MonitoringcClient) ProviderClientID(ctx context.Context, in *types.Que
 	return r0, r1
 }
 
-// ProviderClientIDAll provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) ProviderClientIDAll(ctx context.Context, in *types.QueryAllProviderClientIDRequest, opts ...grpc.CallOption) (*types.QueryAllProviderClientIDResponse, error) {
+// ListProviderClientID provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) ListProviderClientID(ctx context.Context, in *types.QueryAllProviderClientIDRequest, opts ...grpc.CallOption) (*types.QueryAllProviderClientIDResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -196,8 +196,8 @@ func (_m *MonitoringcClient) ProviderClientIDAll(ctx context.Context, in *types.
 	return r0, r1
 }
 
-// VerifiedClientIds provides a mock function with given fields: ctx, in, opts
-func (_m *MonitoringcClient) VerifiedClientIds(ctx context.Context, in *types.QueryGetVerifiedClientIdsRequest, opts ...grpc.CallOption) (*types.QueryGetVerifiedClientIdsResponse, error) {
+// GetVerifiedClientID provides a mock function with given fields: ctx, in, opts
+func (_m *MonitoringcClient) GetVerifiedClientID(ctx context.Context, in *types.QueryGetVerifiedClientIDRequest, opts ...grpc.CallOption) (*types.QueryGetVerifiedClientIDResponse, error) {
 	_va := make([]interface{}, len(opts))
 	for _i := range opts {
 		_va[_i] = opts[_i]
@@ -207,17 +207,17 @@ func (_m *MonitoringcClient) VerifiedClientIds(ctx context.Context, in *types.Qu
 	_ca = append(_ca, _va...)
 	ret := _m.Called(_ca...)
 
-	var r0 *types.QueryGetVerifiedClientIdsResponse
-	if rf, ok := ret.Get(0).(func(context.Context, *types.QueryGetVerifiedClientIdsRequest, ...grpc.CallOption) *types.QueryGetVerifiedClientIdsResponse); ok {
+	var r0 *types.QueryGetVerifiedClientIDResponse
+	if rf, ok := ret.Get(0).(func(context.Context, *types.QueryGetVerifiedClientIDRequest, ...grpc.CallOption) *types.QueryGetVerifiedClientIDResponse); ok {
 		r0 = rf(ctx, in, opts...)
 	} else {
 		if ret.Get(0) != nil {
-			r0 = ret.Get(0).(*types.QueryGetVerifiedClientIdsResponse)
+			r0 = ret.Get(0).(*types.QueryGetVerifiedClientIDResponse)
 		}
 	}
 
 	var r1 error
-	if rf, ok := ret.Get(1).(func(context.Context, *types.QueryGetVerifiedClientIdsRequest, ...grpc.CallOption) error); ok {
+	if rf, ok := ret.Get(1).(func(context.Context, *types.QueryGetVerifiedClientIDRequest, ...grpc.CallOption) error); ok {
 		r1 = rf(ctx, in, opts...)
 	} else {
 		r1 = ret.Error(1)

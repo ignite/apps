@@ -23,7 +23,6 @@ import (
 	"github.com/ignite/apps/network/network/networktypes"
 )
 
-//go:generate mockery --name CosmosClient
 type CosmosClient interface {
 	Context() client.Context
 	BroadcastTx(ctx context.Context, account cosmosaccount.Account, msgs ...sdktypes.Msg) (cosmosclient.Response, error)
@@ -47,7 +46,6 @@ type Network struct {
 	clock                   xtime.Clock
 }
 
-//go:generate mockery --name Chain
 type Chain interface {
 	ID() (string, error)
 	ChainID() (string, error)

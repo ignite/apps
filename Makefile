@@ -10,7 +10,7 @@ mocks:
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
         if [ -e "$$dir/go.mod" ]; then \
             echo "Running go generate in $$dir"; \
-			cd "$$dir" && go generate ./...; \
+			cd "$$dir" && mockery; \
         fi \
     done
 

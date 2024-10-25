@@ -16,6 +16,7 @@ import (
 const (
 	passphraseLength = 32
 	sampleAccount    = "alice"
+	gentxFilename    = "gentx.json"
 )
 
 // InitAccount initializes an account for the blockchain and issue a gentx in config/gentx/gentx.json.
@@ -48,7 +49,7 @@ func (c Chain) InitAccount(ctx context.Context, v chain.Validator, accountName s
 	}
 
 	// rename the issued gentx into gentx.json
-	gentxPath := filepath.Join(filepath.Dir(issuedGentxPath), cosmosutil.GentxFilename)
+	gentxPath := filepath.Join(filepath.Dir(issuedGentxPath), gentxFilename)
 	return gentxPath, xos.Rename(issuedGentxPath, gentxPath)
 }
 
