@@ -1,11 +1,10 @@
 quiet: False
-keeptree: True
 disable-version-string: True
 with-expecter: True
 all: False
 mockname: "{{.InterfaceName}}"
 filename: "{{.InterfaceNameSnake}}.go"
-dir: "mocks"
+dir: "network/mocks"
 outpkg: "mocks"
 log-level: debug
 recursive: True
@@ -13,14 +12,16 @@ packages:
   github.com/ignite/apps/network/network:
     interfaces:
       Chain:
-      CosmosClient:
+  #      CosmosClient:
   github.com/ignite/apps/network/network/testutil:
     interfaces:
-      AccountInfo:
-      BankClient:
-      IBCClient:
-      LaunchClient:
-      ProfileClient:
       ProjectClient:
+      ProfileClient:
+      LaunchClient:
+      BankClient:
       RewardClient:
       StakingClient:
+      MonitoringcClient:
+      MonitoringpClient:
+      AccountInfo:
+#      IBCClient:

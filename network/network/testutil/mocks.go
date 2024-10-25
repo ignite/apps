@@ -12,38 +12,47 @@ import (
 	rewardtypes "github.com/ignite/network/x/reward/types"
 )
 
+//go:generate mockery --name ProjectClient
 type ProjectClient interface {
 	projecttypes.QueryClient
 }
 
+//go:generate mockery --name ProfileClient
 type ProfileClient interface {
 	profiletypes.QueryClient
 }
 
+//go:generate mockery --name LaunchClient
 type LaunchClient interface {
 	launchtypes.QueryClient
 }
 
+//go:generate mockery --name RewardClient
 type RewardClient interface {
 	rewardtypes.QueryClient
 }
 
+//go:generate mockery --name BankClient
 type BankClient interface {
 	banktypes.QueryClient
 }
 
+//go:generate mockery --name StakingClient
 type StakingClient interface {
 	stakingtypes.QueryClient
 }
 
+//go:generate mockery --name MonitoringcClient
 type MonitoringcClient interface {
 	monitoringctypes.QueryClient
 }
 
+//go:generate mockery --name MonitoringpClient
 type MonitoringpClient interface {
 	monitoringptypes.QueryClient
 }
 
+//go:generate mockery --name AccountInfo
 type AccountInfo interface {
 	keyring.Record
 }

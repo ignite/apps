@@ -25,9 +25,9 @@ import (
 
 type CosmosClient interface {
 	Context() client.Context
-	BroadcastTx(ctx context.Context, account cosmosaccount.Account, msgs ...sdktypes.Msg) (cosmosclient.Response, error)
 	Status(ctx context.Context) (*ctypes.ResultStatus, error)
 	ConsensusInfo(ctx context.Context, height int64) (cosmosclient.ConsensusInfo, error)
+	BroadcastTx(ctx context.Context, account cosmosaccount.Account, msgs ...sdktypes.Msg) (cosmosclient.Response, error)
 }
 
 // Network is network builder.
@@ -46,6 +46,7 @@ type Network struct {
 	clock                   xtime.Clock
 }
 
+//go:generate mockery --name Chain
 type Chain interface {
 	ID() (string, error)
 	ChainID() (string, error)
