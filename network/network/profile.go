@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
 	"github.com/ignite/cli/v28/ignite/pkg/events"
@@ -23,7 +24,7 @@ func (n Network) CoordinatorIDByAddress(ctx context.Context, address string) (ui
 		},
 	)
 
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return 0, ErrObjectNotFound
 	} else if err != nil {
 		return 0, err
@@ -87,7 +88,7 @@ func (n Network) Coordinator(ctx context.Context, address string) (networktypes.
 			CoordinatorId: coordinatorID,
 		},
 	)
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.Coordinator{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.Coordinator{}, err
@@ -128,7 +129,7 @@ func (n Network) Validator(ctx context.Context, address string) (networktypes.Va
 	res, err := n.profileQuery.GetValidator(ctx, &profiletypes.QueryGetValidatorRequest{
 		Address: address,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.Validator{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.Validator{}, err
@@ -144,7 +145,7 @@ func (n Network) Balances(ctx context.Context, address string) (sdk.Coins, error
 			Address: address,
 		},
 	)
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return sdk.Coins{}, ErrObjectNotFound
 	} else if err != nil {
 		return sdk.Coins{}, err

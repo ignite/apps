@@ -6,6 +6,7 @@ import (
 	"sort"
 	"sync"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/cosmos/cosmos-sdk/types/query"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
 	"github.com/ignite/cli/v28/ignite/pkg/events"
@@ -189,7 +190,7 @@ func (n Network) MainnetAccount(
 		ProjectId: projectID,
 		Address:   address,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.MainnetAccount{}, ErrObjectNotFound
 	} else if err != nil {
 		return acc, err
@@ -221,7 +222,7 @@ func (n Network) GenesisAccount(ctx context.Context, launchID uint64, address st
 		LaunchId: launchID,
 		Address:  address,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.GenesisAccount{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.GenesisAccount{}, err
@@ -235,7 +236,7 @@ func (n Network) VestingAccount(ctx context.Context, launchID uint64, address st
 		LaunchId: launchID,
 		Address:  address,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.VestingAccount{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.VestingAccount{}, err
@@ -249,7 +250,7 @@ func (n Network) GenesisValidator(ctx context.Context, launchID uint64, address 
 		LaunchId: launchID,
 		Address:  address,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return networktypes.GenesisValidator{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.GenesisValidator{}, err
@@ -262,7 +263,7 @@ func (n Network) ChainReward(ctx context.Context, launchID uint64) (rewardtypes.
 	res, err := n.rewardQuery.GetRewardPool(ctx, &rewardtypes.QueryGetRewardPoolRequest{
 		LaunchId: launchID,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return rewardtypes.RewardPool{}, ErrObjectNotFound
 	} else if err != nil {
 		return rewardtypes.RewardPool{}, err

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
 	monitoringctypes "github.com/ignite/network/x/monitoringc/types"
 
@@ -51,7 +52,7 @@ func (n Network) verifiedClientIDs(ctx context.Context, launchID uint64) ([]stri
 		},
 	)
 
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return nil, ErrObjectNotFound
 	} else if err != nil {
 		return nil, err

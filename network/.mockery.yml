@@ -11,7 +11,7 @@ packages:
   github.com/ignite/apps/network/network:
     interfaces:
       Chain:
-  #      CosmosClient:
+      CosmosClient:
   github.com/ignite/apps/network/network/testutil:
     interfaces:
       ProjectClient:

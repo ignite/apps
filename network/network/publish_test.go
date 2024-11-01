@@ -9,7 +9,7 @@ import (
 	"testing"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	launchtypes "github.com/ignite/network/x/launch/types"
 	profiletypes "github.com/ignite/network/x/profile/types"
 	projecttypes "github.com/ignite/network/x/project/types"
@@ -52,7 +52,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -111,7 +111,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -172,7 +172,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -187,7 +187,7 @@ func TestPublish(t *testing.T) {
 			Once()
 		suite.ProjectQueryMock.
 			On(
-				"Project",
+				"GetProject",
 				context.Background(),
 				&projecttypes.QueryGetProjectRequest{
 					ProjectId: testutil.ProjectID,
@@ -238,7 +238,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -253,7 +253,7 @@ func TestPublish(t *testing.T) {
 			Once()
 		suite.ProjectQueryMock.
 			On(
-				"Project",
+				"GetProject",
 				context.Background(),
 				&projecttypes.QueryGetProjectRequest{
 					ProjectId: testutil.ProjectID,
@@ -336,7 +336,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -398,7 +398,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -453,7 +453,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -515,7 +515,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -572,7 +572,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -642,7 +642,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -727,10 +727,10 @@ func TestPublish(t *testing.T) {
 		require.NoError(t, err)
 
 		suite.ProfileQueryMock.
-			On("CoordinatorByAddress", mock.Anything, &profiletypes.QueryGetCoordinatorByAddressRequest{
+			On("GetCoordinatorByAddress", mock.Anything, &profiletypes.QueryGetCoordinatorByAddressRequest{
 				Address: addr,
 			}).
-			Return(nil, cosmoserror.ErrNotFound).
+			Return(nil, sdkerrors.ErrNotFound).
 			Once()
 		suite.CosmosClientMock.
 			On(
@@ -786,7 +786,7 @@ func TestPublish(t *testing.T) {
 		require.NoError(t, err)
 
 		suite.ProfileQueryMock.
-			On("CoordinatorByAddress", mock.Anything, &profiletypes.QueryGetCoordinatorByAddressRequest{
+			On("GetCoordinatorByAddress", mock.Anything, &profiletypes.QueryGetCoordinatorByAddressRequest{
 				Address: addr,
 			}).
 			Return(nil, expectedError).
@@ -828,7 +828,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -842,16 +842,16 @@ func TestPublish(t *testing.T) {
 			}, nil).
 			Once()
 		suite.ProjectQueryMock.
-			On("Project", mock.Anything, &projecttypes.QueryGetProjectRequest{
+			On("GetProject", mock.Anything, &projecttypes.QueryGetProjectRequest{
 				ProjectId: testutil.ProjectID,
 			}).
-			Return(nil, cosmoserror.ErrNotFound).
+			Return(nil, sdkerrors.ErrNotFound).
 			Once()
 		suite.ChainMock.On("ChainID").Return(testutil.ChainID, nil).Once()
 
 		_, _, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(testutil.ProjectID))
 		require.Error(t, publishError)
-		require.ErrorIs(t, publishError, cosmoserror.ErrNotFound)
+		require.ErrorIs(t, publishError, sdkerrors.ErrNotFound)
 		suite.AssertAllMocks(t)
 	})
 
@@ -867,7 +867,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,
@@ -922,7 +922,7 @@ func TestPublish(t *testing.T) {
 
 		suite.ProfileQueryMock.
 			On(
-				"CoordinatorByAddress",
+				"GetCoordinatorByAddress",
 				context.Background(),
 				&profiletypes.QueryGetCoordinatorByAddressRequest{
 					Address: addr,

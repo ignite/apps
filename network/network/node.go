@@ -5,6 +5,7 @@ import (
 	"encoding/base64"
 	"errors"
 
+	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
@@ -132,7 +133,7 @@ func (n Node) connectionChannels(ctx context.Context, connectionID string) (chan
 	res, err := n.ibcChannelQuery.ConnectionChannels(ctx, &ibcchanneltypes.QueryConnectionChannelsRequest{
 		Connection: connectionID,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return channels, nil
 	} else if err != nil {
 		return nil, err
@@ -148,7 +149,7 @@ func (n Node) clientConnections(ctx context.Context, clientID string) ([]string,
 	res, err := n.ibcConnQuery.ClientConnections(ctx, &ibcconntypes.QueryClientConnectionsRequest{
 		ClientId: clientID,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return []string{}, nil
 	} else if err != nil {
 		return nil, err
@@ -170,7 +171,7 @@ func (n Node) consumerClientID(ctx context.Context) (string, error) {
 	res, err := n.monitoringProviderQuery.GetConsumerClientID(
 		ctx, &monitoringptypes.QueryGetConsumerClientIDRequest{},
 	)
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return "", ErrObjectNotFound
 	} else if err != nil {
 		return "", err
@@ -183,7 +184,7 @@ func (n Node) connectionChannelID(ctx context.Context) (string, error) {
 	res, err := n.monitoringProviderQuery.GetConnectionChannelID(
 		ctx, &monitoringptypes.QueryGetConnectionChannelIDRequest{},
 	)
-	if errors.Is(cosmoserror.Unwrap(err), cosmoserror.ErrNotFound) {
+	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
 		return "", ErrObjectNotFound
 	} else if err != nil {
 		return "", err

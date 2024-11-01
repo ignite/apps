@@ -267,7 +267,7 @@ func TestVerifyAddValidatorRequest(t *testing.T) {
 					Peer:           launchtypes.NewPeerConn("nodeid", "122.114.800.11"),
 				},
 			},
-			want: fmt.Errorf("the peer address id:\"nodeid\" tcpAddress:\"122.114.800.11\"  doesn't match the peer format <host>:<port>"),
+			want: fmt.Errorf("the peer address id:\"nodeid\" tcp_address:\"122.114.800.11\"  doesn't match the peer format <host>:<port>"),
 		},
 		{
 			name: "invalid gentx",
