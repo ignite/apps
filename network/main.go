@@ -24,9 +24,9 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.
-	// Remove the first arg "ignite" from OSArgs because our network
+	// Remove the first arg "ignite" and "network" from OSArgs because our network
 	// command root is "network" not "ignite".
-	os.Args = c.OsArgs[1:]
+	os.Args = c.OsArgs[2:]
 	return cmd.NewNetwork().Execute()
 }
 
