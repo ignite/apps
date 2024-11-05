@@ -58,11 +58,7 @@ func finish(ctx context.Context, session *cliui.Session, path string, version se
 	// Add fee-abstraction module to the go.mod
 	session.StartSpinner("Downloading fee abstraction module...")
 
-	pkgVersion, ok := versionMap[version.Major]
-	if !ok {
-		return errors.Errorf("version %d not supported", version.Major)
-	}
-	URL := fmt.Sprintf("%s@v%s", pkgVersion, version.String())
+	URL := fmt.Sprintf("%s@v%s", feeAbsPkg, version.String())
 	if err := gocmd.Get(ctx, path, []string{URL}); err != nil {
 		return err
 	}

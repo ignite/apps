@@ -16,11 +16,8 @@ import (
 
 const (
 	feeAbsRepo = "github.com/osmosis-labs/fee-abstraction"
+	feeAbsPkg  = "github.com/osmosis-labs/fee-abstraction/v8"
 )
-
-var versionMap = map[uint64]string{
-	8: "github.com/osmosis-labs/fee-abstraction/v8",
-}
 
 type (
 	// options represents configuration for the message scaffolding.
