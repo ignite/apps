@@ -102,7 +102,7 @@ func Mainnet() PublishOption {
 }
 
 // Publish submits Genesis to SPN to announce a new network.
-func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption) (launchID, projectID uint64, err error) {
+func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption) (launchID uint64, projectID int64, err error) {
 	o := publishOptions{projectID: -1}
 	for _, apply := range options {
 		apply(&o)
@@ -146,7 +146,11 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	if err != nil {
 		return 0, 0, err
 	}
-	projectID = uint64(o.projectID)
+	projectID = o.projectID
+	pID := uint64(0)
+	if o.hasProject() {
+		pID = uint64(o.projectID)
+	}
 
 	n.ev.Send("Publishing the network", events.ProgressStart())
 
@@ -169,7 +173,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	// check if a project associated to the chain is provided
 	if o.hasProject() {
 		_, err = n.projectQuery.GetProject(ctx, &projecttypes.QueryGetProjectRequest{
-			ProjectId: projectID,
+			ProjectId: pID,
 		})
 		if err != nil {
 			return 0, 0, err
@@ -209,7 +213,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 
 		msgMintVouchers := projecttypes.NewMsgMintVouchers(
 			addr,
-			projectID,
+			pID,
 			projecttypes.NewSharesFromCoins(sdk.NewCoins(coins...)),
 		)
 		_, err = n.cosmos.BroadcastTx(ctx, n.account, msgMintVouchers)
@@ -220,7 +224,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 
 	// depending on mainnet flag initialize mainnet or testnet
 	if o.mainnet {
-		launchID, err = n.InitializeMainnet(ctx, projectID, c.SourceURL(), c.SourceHash(), chainID)
+		launchID, err = n.InitializeMainnet(ctx, pID, c.SourceURL(), c.SourceHash(), chainID)
 		if err != nil {
 			return 0, 0, err
 		}
@@ -257,7 +261,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 			c.SourceHash(),
 			initialGenesis,
 			o.hasProject(),
-			projectID,
+			pID,
 			o.accountBalance,
 			metadata,
 		)

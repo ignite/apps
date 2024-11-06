@@ -77,7 +77,7 @@ func (n Network) Projects(ctx context.Context) ([]networktypes.Project, error) {
 }
 
 // CreateProject creates a project in Network.
-func (n Network) CreateProject(ctx context.Context, name, metadata string, totalSupply sdk.Coins) (uint64, error) {
+func (n Network) CreateProject(ctx context.Context, name, metadata string, totalSupply sdk.Coins) (int64, error) {
 	n.ev.Send(fmt.Sprintf("Creating project %s", name), events.ProgressStart())
 	addr, err := n.account.Address(networktypes.SPN)
 	if err != nil {
@@ -100,7 +100,7 @@ func (n Network) CreateProject(ctx context.Context, name, metadata string, total
 		return 0, err
 	}
 
-	return createProjectRes.ProjectId, nil
+	return int64(createProjectRes.ProjectId), nil
 }
 
 // InitializeMainnet Initialize the mainnet of the project.

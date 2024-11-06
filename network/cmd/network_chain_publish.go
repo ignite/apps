@@ -358,7 +358,9 @@ func networkChainPublishHandler(cmd *cobra.Command, args []string) error {
 	} else {
 		session.Printf("%s Launch ID: %d \n", icons.Bullet, launchID)
 	}
-	session.Printf("%s Project ID: %d \n", icons.Bullet, projectID)
+	if projectID > -1 {
+		session.Printf("%s Project ID: %d \n", icons.Bullet, projectID)
+	}
 
 	return nil
 }

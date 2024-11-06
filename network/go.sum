@@ -586,10 +586,10 @@ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSAS
 github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
 github.com/ignite/cli/v28 v28.5.3 h1:UHB/Ds9Yw5Oqrh+WdS92z2PEoQuMDTid+M86cVpy6uQ=
 github.com/ignite/cli/v28 v28.5.3/go.mod h1:TXv/JEkao4H0wrM8r3VHasIndPV9+yJLdDo4IYRbPis=
-github.com/ignite/modules v0.0.3-0.20241105050027-482388061bf0 h1:qvonR8WK2qH4Le87Y1qt6d6U2E4I09mCDE0BgCCfok4=
-github.com/ignite/modules v0.0.3-0.20241105050027-482388061bf0/go.mod h1:Rmv2KTn5jfXL/qkKdaHD4ExJ1eaH1iVQDs+YD4eTV+o=
-github.com/ignite/network v0.0.0-20241105052028-9f666bbc6499 h1:leyZPtXz2/mAL9UzBATcteSdRWtj7MlSaL7Gvxta2Z8=
-github.com/ignite/network v0.0.0-20241105052028-9f666bbc6499/go.mod h1:U7Hu3+N1jsxLavP5zMrUUgVfRwbGqtM3WcO7NStzV3A=
+github.com/ignite/modules v0.0.3-0.20241106034624-8a3f18117729 h1:T3e1/0qilW8g8xIQYlhWdegT3txToTCcWNjnghrfma8=
+github.com/ignite/modules v0.0.3-0.20241106034624-8a3f18117729/go.mod h1:Rmv2KTn5jfXL/qkKdaHD4ExJ1eaH1iVQDs+YD4eTV+o=
+github.com/ignite/network v0.0.0-20241106044344-0a82c3e356fb h1:BVMdDc3z1ZNQVYNzvre1eCPlL54184rf85caEM1ZDZI=
+github.com/ignite/network v0.0.0-20241106044344-0a82c3e356fb/go.mod h1:brUUj6kxI2xg5D5IWowRGCLtkHMqPPx+937wnoeqTDk=
 github.com/ignite/web v0.6.1 h1:kHG+T7NnR8cCPjAGxEFQD+njVYM08toeG57iYRXzpwo=
 github.com/ignite/web v0.6.1/go.mod h1:WZWBaBYF8RazN7dE462BLpvXDY8ScacxcJ07BKwX/jY=
 github.com/imdario/mergo v0.3.12/go.mod h1:jmQim1M+e3UYxmgPu/WyfjB3N3VflVyUjjjwH0dnCYA=

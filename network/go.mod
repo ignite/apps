@@ -17,7 +17,7 @@ require (
 	github.com/goccy/go-yaml v1.11.3
 	github.com/hashicorp/go-plugin v1.6.2
 	github.com/ignite/cli/v28 v28.5.3
-	github.com/ignite/network v0.0.0-20241105052028-9f666bbc6499
+	github.com/ignite/network v0.0.0-20241106044344-0a82c3e356fb
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml v1.9.5
 	github.com/pkg/errors v0.9.1
@@ -162,7 +162,7 @@ require (
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
 	github.com/huandu/skiplist v1.2.0 // indirect
 	github.com/iancoleman/strcase v0.3.0 // indirect
-	github.com/ignite/modules v0.0.3-0.20241105050027-482388061bf0 // indirect
+	github.com/ignite/modules v0.0.3-0.20241106034624-8a3f18117729 // indirect
 	github.com/ignite/web v0.6.1 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
