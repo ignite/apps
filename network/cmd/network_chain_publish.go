@@ -85,7 +85,7 @@ the "--account-balance" flag with a list of coins.
 	c.Flags().String(flagGenesisURL, "", "URL to a custom Genesis")
 	c.Flags().String(flagGenesisConfig, "", "name of an Ignite config file in the repo for custom Genesis")
 	c.Flags().String(flagChainID, "", "chain ID to use for this network")
-	c.Flags().Uint64(flagProject, 0, "project ID to use for this network")
+	c.Flags().Int64(flagProject, -1, "project ID to use for this network")
 	c.Flags().Bool(flagNoCheck, false, "skip verifying chain's integrity")
 	c.Flags().String(flagMetadata, "", "add chain metadata")
 	c.Flags().String(flagProjectTotalSupply, "", "add a total of the mainnet of a project")
@@ -116,7 +116,7 @@ func networkChainPublishHandler(cmd *cobra.Command, args []string) error {
 		genesisURL, _            = cmd.Flags().GetString(flagGenesisURL)
 		genesisConfig, _         = cmd.Flags().GetString(flagGenesisConfig)
 		chainID, _               = cmd.Flags().GetString(flagChainID)
-		project, _               = cmd.Flags().GetUint64(flagProject)
+		project, _               = cmd.Flags().GetInt64(flagProject)
 		noCheck, _               = cmd.Flags().GetBool(flagNoCheck)
 		metadata, _              = cmd.Flags().GetString(flagMetadata)
 		projectTotalSupplyStr, _ = cmd.Flags().GetString(flagProjectTotalSupply)
@@ -149,11 +149,11 @@ func networkChainPublishHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if project != 0 && projectTotalSupplyStr != "" {
+	if project > -1 && projectTotalSupplyStr != "" {
 		return fmt.Errorf("%s and %s flags cannot be set together", flagProject, flagProjectTotalSupply)
 	}
 	if isMainnet {
-		if project == 0 && projectTotalSupplyStr == "" {
+		if project < 0 && projectTotalSupplyStr == "" {
 			return fmt.Errorf(
 				"%s flag requires one of the %s or %s flags to be set",
 				flagMainnet,
@@ -248,7 +248,7 @@ func networkChainPublishHandler(cmd *cobra.Command, args []string) error {
 
 	}
 
-	if project != 0 {
+	if project > -1 {
 		publishOptions = append(publishOptions, network.WithProject(project))
 	} else if projectTotalSupplyStr != "" {
 		totalSupply, err := sdk.ParseCoinsNormalized(projectTotalSupplyStr)
@@ -358,9 +358,7 @@ func networkChainPublishHandler(cmd *cobra.Command, args []string) error {
 	} else {
 		session.Printf("%s Launch ID: %d \n", icons.Bullet, launchID)
 	}
-	if projectID != 0 {
-		session.Printf("%s Project ID: %d \n", icons.Bullet, projectID)
-	}
+	session.Printf("%s Project ID: %d \n", icons.Bullet, projectID)
 
 	return nil
 }

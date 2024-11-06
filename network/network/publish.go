@@ -22,7 +22,7 @@ type publishOptions struct {
 	genesisURL       string
 	genesisConfig    string
 	chainID          string
-	projectID        uint64
+	projectID        int64
 	metadata         string
 	totalSupply      sdk.Coins
 	sharePercentages SharePercents
@@ -30,11 +30,16 @@ type publishOptions struct {
 	accountBalance   sdk.Coins
 }
 
+// hasProject check if the option has a project set.
+func (o publishOptions) hasProject() bool {
+	return o.projectID >= 0
+}
+
 // PublishOption configures chain creation.
 type PublishOption func(*publishOptions)
 
 // WithProject add a project id.
-func WithProject(id uint64) PublishOption {
+func WithProject(id int64) PublishOption {
 	return func(o *publishOptions) {
 		o.projectID = id
 	}
@@ -98,7 +103,7 @@ func Mainnet() PublishOption {
 
 // Publish submits Genesis to SPN to announce a new network.
 func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption) (launchID, projectID uint64, err error) {
-	o := publishOptions{}
+	o := publishOptions{projectID: -1}
 	for _, apply := range options {
 		apply(&o)
 	}
@@ -141,7 +146,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	if err != nil {
 		return 0, 0, err
 	}
-	projectID = o.projectID
+	projectID = uint64(o.projectID)
 
 	n.ev.Send("Publishing the network", events.ProgressStart())
 
@@ -162,9 +167,9 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	}
 
 	// check if a project associated to the chain is provided
-	if projectID != 0 {
+	if o.hasProject() {
 		_, err = n.projectQuery.GetProject(ctx, &projecttypes.QueryGetProjectRequest{
-			ProjectId: o.projectID,
+			ProjectId: projectID,
 		})
 		if err != nil {
 			return 0, 0, err
@@ -179,7 +184,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 	}
 
 	// mint vouchers
-	if projectID != 0 && !o.sharePercentages.Empty() {
+	if o.hasProject() && !o.sharePercentages.Empty() {
 		totalSharesResp, err := n.projectQuery.TotalShares(ctx, &projecttypes.QueryTotalSharesRequest{})
 		if err != nil {
 			return 0, 0, err
@@ -251,7 +256,7 @@ func (n Network) Publish(ctx context.Context, c Chain, options ...PublishOption)
 			c.SourceURL(),
 			c.SourceHash(),
 			initialGenesis,
-			projectID != 0,
+			o.hasProject(),
 			projectID,
 			o.accountBalance,
 			metadata,

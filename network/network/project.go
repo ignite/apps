@@ -2,12 +2,9 @@ package network
 
 import (
 	"context"
-	"errors"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmoserror"
 	"github.com/ignite/cli/v28/ignite/pkg/events"
 	projecttypes "github.com/ignite/network/x/project/types"
 
@@ -53,7 +50,7 @@ func (n Network) Project(ctx context.Context, projectID uint64) (networktypes.Pr
 	res, err := n.projectQuery.GetProject(ctx, &projecttypes.QueryGetProjectRequest{
 		ProjectId: projectID,
 	})
-	if errors.Is(cosmoserror.Unwrap(err), sdkerrors.ErrNotFound) {
+	if isNotFoundErr(err) {
 		return networktypes.Project{}, ErrObjectNotFound
 	} else if err != nil {
 		return networktypes.Project{}, err
