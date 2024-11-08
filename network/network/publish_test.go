@@ -93,7 +93,7 @@ func TestPublish(t *testing.T) {
 		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -157,7 +157,7 @@ func TestPublish(t *testing.T) {
 		)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -220,10 +220,10 @@ func TestPublish(t *testing.T) {
 		suite.ChainMock.On("ChainID").Return(testutil.ChainID, nil).Once()
 		suite.ChainMock.On("CacheBinary", testutil.LaunchID).Return(nil).Once()
 
-		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(testutil.ProjectID))
+		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(int64(testutil.ProjectID)))
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, testutil.ProjectID, projectID)
+		require.Equal(t, testutil.ProjectID, uint64(projectID))
 		suite.AssertAllMocks(t)
 	})
 
@@ -309,7 +309,7 @@ func TestPublish(t *testing.T) {
 		suite.ChainMock.On("ChainID").Return(testutil.ChainID, nil).Once()
 		suite.ChainMock.On("CacheBinary", testutil.LaunchID).Return(nil).Once()
 
-		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(testutil.ProjectID),
+		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(int64(testutil.ProjectID)),
 			WithPercentageShares([]SharePercent{
 				SampleSharePercent(t, "foo", 2, 100),
 				SampleSharePercent(t, "staking", 50, 100),
@@ -317,7 +317,7 @@ func TestPublish(t *testing.T) {
 		)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, testutil.ProjectID, projectID)
+		require.Equal(t, testutil.ProjectID, uint64(projectID))
 		suite.AssertAllMocks(t)
 	})
 
@@ -383,7 +383,7 @@ func TestPublish(t *testing.T) {
 		)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -438,7 +438,7 @@ func TestPublish(t *testing.T) {
 		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithChainID(testutil.ChainID))
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -500,7 +500,7 @@ func TestPublish(t *testing.T) {
 		)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -555,7 +555,7 @@ func TestPublish(t *testing.T) {
 		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, WithChainID(testutil.ChainID))
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -626,7 +626,7 @@ func TestPublish(t *testing.T) {
 		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock, Mainnet())
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, testutil.ProjectID, projectID)
+		require.Equal(t, testutil.ProjectID, uint64(projectID))
 		suite.AssertAllMocks(t)
 	})
 
@@ -771,7 +771,7 @@ func TestPublish(t *testing.T) {
 		launchID, projectID, publishError := network.Publish(context.Background(), suite.ChainMock)
 		require.NoError(t, publishError)
 		require.Equal(t, testutil.LaunchID, launchID)
-		require.Equal(t, uint64(0), projectID)
+		require.Equal(t, int64(-1), projectID)
 		suite.AssertAllMocks(t)
 	})
 
@@ -849,7 +849,7 @@ func TestPublish(t *testing.T) {
 			Once()
 		suite.ChainMock.On("ChainID").Return(testutil.ChainID, nil).Once()
 
-		_, _, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(testutil.ProjectID))
+		_, _, publishError := network.Publish(context.Background(), suite.ChainMock, WithProject(int64(testutil.ProjectID)))
 		require.Error(t, publishError)
 		require.ErrorIs(t, publishError, sdkerrors.ErrNotFound)
 		suite.AssertAllMocks(t)

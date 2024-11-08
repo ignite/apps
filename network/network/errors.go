@@ -1,6 +1,8 @@
 package network
 
 import (
+	"strings"
+
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
 )
@@ -12,7 +14,7 @@ func isNotFoundErr(err error) bool {
 		case codes.NotFound:
 			return true
 		case codes.Unknown:
-			if s.Message() == "not found: unknown request" {
+			if strings.Contains(s.Message(), "not found") {
 				return true
 			}
 			return false
