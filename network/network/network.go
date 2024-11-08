@@ -146,9 +146,6 @@ func ParseID(id string) (uint64, error) {
 	if err != nil {
 		return 0, errors.Wrap(err, "error parsing ID")
 	}
-	if objID == 0 {
-		return 0, errors.New("ID must be greater than 0")
-	}
 	return objID, nil
 }
 

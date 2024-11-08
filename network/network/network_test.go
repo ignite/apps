@@ -52,11 +52,6 @@ func TestParseID(t *testing.T) {
 			id:   "test",
 			err:  errors.New("error parsing ID: strconv.ParseUint: parsing \"test\": invalid syntax"),
 		},
-		{
-			name: "invalid launch id",
-			id:   "0",
-			err:  errors.New("ID must be greater than 0"),
-		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
