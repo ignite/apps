@@ -26,5 +26,8 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ]
+  ],
+  "icon": "https://URL.to/icon",
+  "cover": "https://URL.to/cover",
+  "sha": "003d64525eafbc7265f11f269f9131ffd8d07d71"
 }
