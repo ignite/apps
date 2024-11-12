@@ -27,5 +27,8 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ]
+  ],
+  "icon": "",
+  "cover": "",
+  "sha": ""
 }
