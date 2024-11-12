@@ -41,5 +41,7 @@
       "otherSupportedCryptos": "address"
     },
     "fiatDonationLinks": "URL to Patreon, Ko-fi, etc."
-  }
+  },
+  "icon": "https://URL.to/icon",
+  "cover": "https://URL.to/cover"
 }
