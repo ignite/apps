@@ -8,6 +8,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	launchtypes "github.com/ignite/network/x/launch/types"
 
+	"github.com/ignite/apps/network/network/gentx"
 	"github.com/ignite/apps/network/network/networkchain"
 	"github.com/ignite/apps/network/network/networktypes"
 )
@@ -52,7 +53,7 @@ func (n Network) GetJoinRequestContents(
 	)
 
 	// parse the gentx content
-	gentxInfo, gentx, err := cosmosutil.GentxFromPath(gentxPath)
+	gentxInfo, gentx, err := gentx.GentxFromPath(gentxPath)
 	if err != nil {
 		return reqs, err
 	}
@@ -76,7 +77,7 @@ func (n Network) GetJoinRequestContents(
 	}
 
 	// change the chain address prefix to spn
-	accountAddress, err := cosmosutil.ChangeAddressPrefix(gentxInfo.DelegatorAddress, networktypes.SPN)
+	accountAddress, err := cosmosutil.ChangeAddressPrefix(gentxInfo.ValidatorAddress, networktypes.SPN)
 	if err != nil {
 		return reqs, err
 	}

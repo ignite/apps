@@ -20,7 +20,6 @@ type (
 	}
 
 	Message struct {
-		DelegatorAddress string        `json:"delegator_address"`
 		ValidatorAddress string        `json:"validator_address"`
 		PubKey           MessagePubKey `json:"pubkey"`
 		Value            MessageValue  `json:"value"`
@@ -42,7 +41,7 @@ func NewGentx(address, denom, amount, pubkey, memo string) *Gentx {
 		Memo: memo,
 		Messages: []Message{
 			{
-				DelegatorAddress: address,
+				ValidatorAddress: address,
 				PubKey:           MessagePubKey{Key: pubkey},
 				Value:            MessageValue{Denom: denom, Amount: amount},
 			},
