@@ -162,6 +162,7 @@ func initializeSimulationEnvironment(
 		return c, n, gi, cleanup, err
 	}
 
+	// TODO avoid init chain two times with the prepare command
 	c, err = nb.Chain(
 		networkchain.SourceLaunch(chainLaunch),
 		networkchain.WithHome(homeDir),

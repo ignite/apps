@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/cenkalti/backoff"
+	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	"github.com/ignite/cli/v28/ignite/pkg/availableport"
 	"github.com/ignite/cli/v28/ignite/pkg/cache"
 	"github.com/ignite/cli/v28/ignite/pkg/events"
@@ -133,7 +134,7 @@ func (c Chain) setSimulationConfig() (string, error) {
 		return "", err
 	}
 	genAddr := func(port uint) string {
-		return fmt.Sprintf("localhost:%d", port)
+		return fmt.Sprintf("0.0.0.0:%d", port)
 	}
 
 	// updating app toml
@@ -156,6 +157,8 @@ func (c Chain) setSimulationConfig() (string, error) {
 	config.Set("rpc.cors_allowed_origins", []string{"*"})
 	config.Set("api.address", apiAddr)
 	config.Set("grpc.address", genAddr(ports[1]))
+	gas := sdktypes.NewInt64Coin(networktypes.SPNDenom, 0)
+	config.Set("minimum-gas-prices", gas.String())
 
 	file, err := os.OpenFile(appPath, os.O_RDWR|os.O_TRUNC, 0o644)
 	if err != nil {
