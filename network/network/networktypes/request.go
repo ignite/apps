@@ -4,9 +4,11 @@ import (
 	"fmt"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
 	"github.com/ignite/cli/v28/ignite/pkg/xtime"
 	launchtypes "github.com/ignite/network/x/launch/types"
+
+	"github.com/ignite/apps/network/network/address"
+	"github.com/ignite/apps/network/network/gentx"
 )
 
 // Request action descriptions.
@@ -130,14 +132,14 @@ func VerifyAddValidatorRequest(req *launchtypes.RequestContent_GenesisValidator)
 	)
 
 	// Check values inside the gentx are correct
-	info, err := cosmosutil.ParseGentx(req.GenesisValidator.GenTx)
+	info, err := gentx.ParseGentx(req.GenesisValidator.GenTx)
 	if err != nil {
 		return fmt.Errorf("cannot parse gentx %w", err)
 	}
 
 	// Change the address prefix fetched from the gentx to the one used on SPN
 	// Because all on-chain stored address on SPN uses the SPN prefix
-	spnFetchedAddress, err := cosmosutil.ChangeAddressPrefix(info.DelegatorAddress, SPN)
+	spnFetchedAddress, err := address.ChangeValidatorAddressPrefix(info.ValidatorAddress, SPN)
 	if err != nil {
 		return err
 	}

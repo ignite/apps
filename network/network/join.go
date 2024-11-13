@@ -4,10 +4,10 @@ import (
 	"context"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
 	"github.com/ignite/cli/v28/ignite/pkg/xurl"
 	launchtypes "github.com/ignite/network/x/launch/types"
 
+	"github.com/ignite/apps/network/network/address"
 	"github.com/ignite/apps/network/network/gentx"
 	"github.com/ignite/apps/network/network/networkchain"
 	"github.com/ignite/apps/network/network/networktypes"
@@ -77,7 +77,7 @@ func (n Network) GetJoinRequestContents(
 	}
 
 	// change the chain address prefix to spn
-	accountAddress, err := cosmosutil.ChangeAddressPrefix(gentxInfo.ValidatorAddress, networktypes.SPN)
+	accountAddress, err := address.ChangeValidatorAddressPrefix(gentxInfo.ValidatorAddress, networktypes.SPN)
 	if err != nil {
 		return reqs, err
 	}
