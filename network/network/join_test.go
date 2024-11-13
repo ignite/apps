@@ -11,6 +11,7 @@ import (
 	"github.com/stretchr/testify/mock"
 	"github.com/stretchr/testify/require"
 
+	"github.com/ignite/apps/network/network/address"
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
 )
@@ -27,10 +28,10 @@ func TestJoin(t *testing.T) {
 	t.Run("successfully get join request with custom public address", func(t *testing.T) {
 		account := testutil.NewTestAccount(t, testutil.TestAccountName)
 		tmp := t.TempDir()
-		addr, err := account.Address(networktypes.SPN)
+		valAddr, err := account.Address("cosmosvaloper")
 		require.NoError(t, err)
 		gentx := testutil.NewGentx(
-			addr,
+			valAddr,
 			TestDenom,
 			TestAmountString,
 			"",
@@ -38,6 +39,9 @@ func TestJoin(t *testing.T) {
 		)
 		gentxPath := gentx.SaveTo(t, tmp)
 		suite, network := newSuite(account)
+
+		addr, err := address.ChangeValidatorAddressPrefix(valAddr, networktypes.SPN)
+		require.NoError(t, err)
 
 		expectedReqs := []launchtypes.RequestContent{
 			launchtypes.NewGenesisValidator(
@@ -70,10 +74,10 @@ func TestJoin(t *testing.T) {
 	t.Run("successfully get join request with public address read from the gentx", func(t *testing.T) {
 		account := testutil.NewTestAccount(t, testutil.TestAccountName)
 		tmp := t.TempDir()
-		addr, err := account.Address(networktypes.SPN)
+		valAddr, err := account.Address("cosmosvaloper")
 		require.NoError(t, err)
 		gentx := testutil.NewGentx(
-			addr,
+			valAddr,
 			TestDenom,
 			TestAmountString,
 			"",
@@ -81,6 +85,9 @@ func TestJoin(t *testing.T) {
 		)
 		gentxPath := gentx.SaveTo(t, tmp)
 		suite, network := newSuite(account)
+
+		addr, err := address.ChangeValidatorAddressPrefix(valAddr, networktypes.SPN)
+		require.NoError(t, err)
 
 		expectedReqs := []launchtypes.RequestContent{
 			launchtypes.NewGenesisValidator(
@@ -111,10 +118,10 @@ func TestJoin(t *testing.T) {
 	t.Run("successfully get join request with account request", func(t *testing.T) {
 		account := testutil.NewTestAccount(t, testutil.TestAccountName)
 		tmp := t.TempDir()
-		addr, err := account.Address(networktypes.SPN)
+		valAddr, err := account.Address("cosmosvaloper")
 		require.NoError(t, err)
 		gentx := testutil.NewGentx(
-			addr,
+			valAddr,
 			TestDenom,
 			TestAmountString,
 			"",
@@ -122,6 +129,9 @@ func TestJoin(t *testing.T) {
 		)
 		gentxPath := gentx.SaveTo(t, tmp)
 		suite, network := newSuite(account)
+
+		addr, err := address.ChangeValidatorAddressPrefix(valAddr, networktypes.SPN)
+		require.NoError(t, err)
 
 		expectedReqs := []launchtypes.RequestContent{
 			launchtypes.NewGenesisValidator(
@@ -160,10 +170,10 @@ func TestJoin(t *testing.T) {
 	t.Run("failed to get join request, failed to read node id", func(t *testing.T) {
 		account := testutil.NewTestAccount(t, testutil.TestAccountName)
 		tmp := t.TempDir()
-		addr, err := account.Address(networktypes.SPN)
+		valAddr, err := account.Address("cosmosvaloper")
 		require.NoError(t, err)
 		gentx := testutil.NewGentx(
-			addr,
+			valAddr,
 			TestDenom,
 			TestAmountString,
 			"",
