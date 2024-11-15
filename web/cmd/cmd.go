@@ -7,11 +7,12 @@ func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
 			Use:   "web [command]",
-			Short: "web is an awesome Ignite application!",
+			Short: "Ignite chain dashboard",
 			Commands: []*plugin.Command{
 				{
-					Use:   "hello",
-					Short: "Say hello to the world of ignite!",
+					Use:   "add",
+					Short: "Add the chain-admin dashboard on your app",
+					Long:  "Scaffold the chain-admin dashboard, and easily deploy a frontend using Next.js and Cosmos Kit",
 				},
 			},
 		},
