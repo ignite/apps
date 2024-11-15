@@ -13,4 +13,5 @@ use (
 	./rollkit
 	./spaceship
 	./wasm
+	./web
 )
