@@ -6,13 +6,16 @@ import "github.com/ignite/cli/v28/ignite/services/plugin"
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
-			Use:   "web [command]",
-			Short: "Ignite chain dashboard",
-			Commands: []*plugin.Command{
+			PlaceCommandUnder: "scaffold",
+			Use:               "web",
+			Short:             "Ignite chain-admin dashboard",
+			Long:              "Scaffolds the chain-admin dashboard, an easy to use frontend powered by Next.js and Cosmos Kit",
+			Flags: []*plugin.Flag{
 				{
-					Use:   "add",
-					Short: "Add the chain-admin dashboard on your app",
-					Long:  "Scaffold the chain-admin dashboard, and easily deploy a frontend using Next.js and Cosmos Kit",
+					Name:      flagPath,
+					Usage:     "path of the app",
+					Shorthand: "p",
+					Type:      plugin.FlagTypeString,
 				},
 			},
 		},

@@ -17,8 +17,8 @@ const (
 	flagPath = "path"
 )
 
-// ExecuteAdd executes the add subcommand.
-func ExecuteAdd(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+// ExecuteWeb executes the web subcommand.
+func ExecuteWeb(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
