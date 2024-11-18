@@ -56,6 +56,19 @@ func GetCommands() []*plugin.Command {
 							Usage:     "run init chain and create the home folder",
 							Type:      plugin.FlagTypeBool,
 						},
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "create a chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "true",
+						},
+						&plugin.Flag{
+							Name:         flagFaucetPort,
+							Usage:        "chain faucet port",
+							Type:         plugin.FlagTypeUint64,
+							DefaultValue: "8009",
+						},
 					),
 				},
 				{

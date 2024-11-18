@@ -30,6 +30,8 @@ const (
 	flagRawKey      = "raw-key"
 	flagKeyPassword = "key-password"
 	flagInitChain   = "init-chain"
+	flagFaucet      = "faucet"
+	flagFaucetPort  = "faucet-port"
 	flagLines       = "lines"
 	flagRealTime    = "real-time"
 
@@ -215,7 +217,9 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}()
 
 	var (
-		initChain, _ = flags.GetBool(flagInitChain)
+		initChain, _  = flags.GetBool(flagInitChain)
+		faucet, _     = flags.GetBool(flagFaucet)
+		faucetPort, _ = flags.GetUint64(flagFaucetPort)
 
 		localChainHome = filepath.Join(localDir, "home")
 		localBinOutput = filepath.Join(localDir, "bin")

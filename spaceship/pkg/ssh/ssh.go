@@ -382,7 +382,7 @@ func (s *SSH) Arch(ctx context.Context) (string, error) {
 
 // Target returns the build target for the remote server based on its OS and architecture.
 func (s *SSH) Target(ctx context.Context) (string, error) {
-	os, err := s.OS(ctx)
+	osType, err := s.OS(ctx)
 	if err != nil {
 		return "", err
 	}
@@ -392,7 +392,7 @@ func (s *SSH) Target(ctx context.Context) (string, error) {
 		return "", err
 	}
 
-	return gocmd.BuildTarget(os, arch), nil
+	return gocmd.BuildTarget(osType, arch), nil
 }
 
 // Uname runs the "uname" command with the specified arguments on the remote server.
