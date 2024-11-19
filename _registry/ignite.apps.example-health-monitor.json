@@ -1,9 +1,11 @@
 {
-  "appName": "hermes",
-  "appDescription": "A wrapper around the hermes IBC relayer",
-  "ignite": ">0.27.0",
-  "dependencies": {},
-  "cosmosSDK": ">0.50.1",
+  "appName": "example-health-monitor",
+  "appDescription": "A simple health monitor application",
+  "ignite": ">28.3.0",
+  "dependencies": {
+    "docker": ">23.0.5"
+  },
+  "cosmosSDK": ">0.50.4",
   "authors": [
     {
       "name": "Danilo Pantani",
@@ -11,13 +13,14 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/hermes/README.md",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/examples/health-monitor/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
-    "relayer",
+    "health-monitor",
+    "example",
     "cli",
     "cosmos-sdk",
     "ignite app"
