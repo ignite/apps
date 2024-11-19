@@ -26,7 +26,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	// correctly.
 	// Remove the first arg "ignite" and "network" from OSArgs because our network
 	// command root is "network" not "ignite".
-	os.Args = c.OsArgs[2:]
+	os.Args = c.OsArgs[1:]
 	return cmd.NewNetwork().Execute()
 }
 
