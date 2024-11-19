@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ignite/apps/web/templates"
+	"github.com/ignite/apps/cca/templates"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
@@ -17,8 +17,8 @@ const (
 	flagPath = "path"
 )
 
-// ExecuteWeb executes the web subcommand.
-func ExecuteWeb(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+// ExecuteScaffold executes the scaffold cca subcommand.
+func ExecuteScaffold(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
@@ -39,8 +39,8 @@ func ExecuteWeb(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 
 	if err := templates.Write(c.AppPath()); err != nil {
-		return fmt.Errorf("failed to write chain-admin: %w", err)
+		return fmt.Errorf("failed to write CCA: %w", err)
 	}
 
-	return session.Printf("🎉 Ignite chain-admin added (`%[1]v`).\n", c.AppPath(), c.Name())
+	return session.Printf("🎉 Ignite CCA added (`%[1]v`).\n", c.AppPath(), c.Name())
 }

@@ -7,9 +7,8 @@ func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
 			PlaceCommandUnder: "scaffold",
-			Use:               "web",
-			Short:             "Ignite chain-admin dashboard",
-			Long:              "Scaffolds the chain-admin dashboard, an easy to use frontend powered by Next.js and Cosmos Kit",
+			Use:               "cca",
+			Short:             "Ignite CCA scaffolds a Cosmos SDK chain frontend using a `create-cosmos-app` template",
 			Flags: []*plugin.Flag{
 				{
 					Name:      flagPath,

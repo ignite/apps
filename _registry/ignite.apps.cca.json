@@ -1,5 +1,5 @@
 {
-  "appName": "web",
+  "appName": "cca",
   "appDescription": "Scaffold a blockchain frontend in seconds with Ignite",
   "ignite": ">28.0.0",
   "dependencies": {},
@@ -11,13 +11,14 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/web/README.md",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/cca/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
   },
   "keywords": [
-    "web",
+    "cca",
+    "create-cosmos-app",
     "telescope",
     "cosmjs",
     "interchain-js",

@@ -14,18 +14,18 @@ import (
 	envtest "github.com/ignite/cli/v28/integration"
 )
 
-func TestWeb(t *testing.T) {
+func TestCCA(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("web-app")
+		app     = env.Scaffold("cca-app")
 	)
 
 	dir, err := os.Getwd()
 	require.NoError(err)
-	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "web")
+	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "cca")
 
-	env.Must(env.Exec("install web app locally",
+	env.Must(env.Exec("install cca app locally",
 		step.NewSteps(step.New(
 			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
 			step.Workdir(app.SourcePath()),
@@ -41,19 +41,20 @@ func TestWeb(t *testing.T) {
 	assertGlobalPlugins(t, nil)
 
 	buf := &bytes.Buffer{}
-	env.Must(env.Exec("run web",
+	env.Must(env.Exec("run cca",
 		step.NewSteps(step.New(
 			step.Exec(
 				envtest.IgniteApp,
-				"web",
-				"hello",
+				"scaffold",
+				"cca",
 			),
 			step.Workdir(app.SourcePath()),
 			step.Stdout(buf),
 			step.Stderr(buf),
 		)),
 	))
-	require.Equal("Hello, world!\n", buf.String())
+
+	require.Contains("Ignite CCA added", buf.String())
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {

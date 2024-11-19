@@ -1,4 +1,4 @@
-module github.com/ignite/apps/web
+module github.com/ignite/apps/cca
 
 go 1.23.1
 

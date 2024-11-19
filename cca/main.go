@@ -6,7 +6,7 @@ import (
 
 	hplugin "github.com/hashicorp/go-plugin"
 
-	"github.com/ignite/apps/web/cmd"
+	"github.com/ignite/apps/cca/cmd"
 
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
@@ -15,18 +15,18 @@ type app struct{}
 
 func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
-		Name:     "web",
+		Name:     "cca",
 		Commands: cmd.GetCommands(),
 	}, nil
 }
 
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Remove the first two elements "ignite" and "web" from OsArgs.
+	// Remove the first two elements "ignite" and "scaffold" from OsArgs.
 	args := c.OsArgs[2:]
 
 	switch args[0] {
-	case "web":
-		return cmd.ExecuteWeb(ctx, c)
+	case "cca":
+		return cmd.ExecuteScaffold(ctx, c)
 	default:
 		return fmt.Errorf("unknown command: %s", c.Path)
 	}
@@ -48,7 +48,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"web": plugin.NewGRPC(&app{}),
+			"cca": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})
