@@ -11,7 +11,7 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/hermes/README.md",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/hermes/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
