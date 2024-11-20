@@ -71,7 +71,7 @@ app-name/
 ├── go.mod
 ├── go.sum
 ├── main.go
-└── readme.md
+└── README.md
 
 The actual implementation of the app is in the root directory, while the `cmd` directory contains the commands that are exposed to the user.
 

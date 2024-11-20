@@ -13,7 +13,7 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/cosmos/gex",
+  "documentationUrl": "https://github.com/ignite/gex/blob/main/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"

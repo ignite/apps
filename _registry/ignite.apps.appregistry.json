@@ -15,7 +15,7 @@
     }
   ],
   "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/appregistry/README.md",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/appregistry/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
