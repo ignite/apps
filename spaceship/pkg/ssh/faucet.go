@@ -9,18 +9,25 @@ import (
 	"os"
 	"path/filepath"
 
+	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-const faucetRepo = "https://github.com/ignite/faucet"
+const faucetLastRelease = "https://github.com/ignite/faucet/releases/latest/download"
 
-func faucetBinary(target string) (string, error) {
+var faucetVersion = semver.MustParse("0.0.1")
+
+func faucetReleaseName(target string) string {
+	return fmt.Sprintf("%s/faucet_%s_%s.tar.gz", faucetLastRelease, faucetVersion.String(), target)
+}
+
+func fetchFaucetBinary(target string) (string, error) {
 	tempDir, err := os.MkdirTemp("", "faucet")
 	if err != nil {
 		return "", errors.Errorf("failed to create temp dir: %w", err)
 	}
 
-	binaryURL := fmt.Sprintf("%s/releases/latest/download/faucet-%s.tar.gz", faucetRepo, target)
+	binaryURL := faucetReleaseName(target)
 	resp, err := http.Get(binaryURL)
 	if err != nil {
 		return "", errors.Errorf("failed to download faucet binary: %w", err)
@@ -39,8 +46,7 @@ func faucetBinary(target string) (string, error) {
 
 	tarReader := tar.NewReader(gzipReader)
 	var binaryPath string
-
-	for {
+	for binaryPath == "" {
 		header, err := tarReader.Next()
 		if err == io.EOF {
 			break
@@ -62,7 +68,6 @@ func faucetBinary(target string) (string, error) {
 			}
 		}
 	}
-
 	if binaryPath == "" {
 		return "", errors.Errorf("faucet binary not found in the tar file")
 	}
