@@ -9,6 +9,8 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"golang.org/x/sync/errgroup"
+
+	"github.com/ignite/apps/spaceship/pkg/faucet"
 )
 
 // ProgressCallback is a type for the callback function to update the progress.
@@ -143,7 +145,7 @@ func (s *SSH) UploadFile(filePath, dstPath string, progressCallback ProgressCall
 func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (string, error) {
 	var (
 		filename = filepath.Base(srcPath)
-		binPath  = filepath.Join(s.Bin(), filename)
+		binPath  = filepath.Join(s.bin(), filename)
 	)
 	if _, err := s.UploadFile(srcPath, binPath, progressCallback); err != nil {
 		return "", err
@@ -159,8 +161,8 @@ func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (s
 // UploadRunnerScript uploads a runner script to the remote server
 // and sets the appropriate permissions.
 func (s *SSH) UploadRunnerScript(srcPath string, progressCallback ProgressCallback) (string, error) {
-	path := s.RunnerScript()
-	if _, err := s.UploadFile(srcPath, s.RunnerScript(), progressCallback); err != nil {
+	path := s.runnerScript()
+	if _, err := s.UploadFile(srcPath, s.runnerScript(), progressCallback); err != nil {
 		return "", err
 	}
 
@@ -179,7 +181,7 @@ func (s *SSH) UploadHome(ctx context.Context, srcPath string, progressCallback P
 
 // UploadFaucetBinary uploads the faucet binary to the remote server.
 func (s *SSH) UploadFaucetBinary(ctx context.Context, target string, progressCallback ProgressCallback) (string, error) {
-	bin, err := fetchFaucetBinary(ctx, target)
+	bin, err := faucet.FetchBinary(ctx, target)
 	if err != nil {
 		return "", err
 	}

@@ -217,9 +217,9 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}()
 
 	var (
-		initChain, _  = flags.GetBool(flagInitChain)
-		faucet, _     = flags.GetBool(flagFaucet)
-		faucetPort, _ = flags.GetUint64(flagFaucetPort)
+		initChain, _ = flags.GetBool(flagInitChain)
+		// faucet, _     = flags.GetBool(flagFaucet)
+		// faucetPort, _ = flags.GetUint64(flagFaucetPort)
 
 		localChainHome = filepath.Join(localDir, "home")
 		localBinOutput = filepath.Join(localDir, "bin")
@@ -323,6 +323,11 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 
 	bar.Describe("Uploading runner script")
 	if _, err := c.UploadRunnerScript(localRunScriptPath, progressCallback); err != nil {
+		return err
+	}
+
+	bar.Describe("Uploading faucet binary")
+	if _, err := c.UploadFaucetBinary(ctx, target, progressCallback); err != nil {
 		return err
 	}
 

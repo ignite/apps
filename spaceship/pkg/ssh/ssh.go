@@ -208,19 +208,9 @@ func (s *SSH) Workspace() string {
 	return filepath.Join(workdir, s.workspace)
 }
 
-// Bin returns the binary directory within the workspace.
-func (s *SSH) Bin() string {
-	return filepath.Join(s.Workspace(), "bin")
-}
-
 // Home returns the home directory within the workspace.
 func (s *SSH) Home() string {
 	return filepath.Join(s.Workspace(), "home")
-}
-
-// Genesis returns the path to the genesis.json file within the home directory.
-func (s *SSH) Genesis() string {
-	return filepath.Join(s.Home(), "config", "genesis.json")
 }
 
 // Log returns the log directory within the workspace.
@@ -228,8 +218,18 @@ func (s *SSH) Log() string {
 	return filepath.Join(s.Workspace(), "log")
 }
 
-// RunnerScript returns the path to the runner script within the workspace.
-func (s *SSH) RunnerScript() string {
+// bin returns the binary directory within the workspace.
+func (s *SSH) bin() string {
+	return filepath.Join(s.Workspace(), "bin")
+}
+
+// genesis returns the path to the genesis.json file within the home directory.
+func (s *SSH) genesis() string {
+	return filepath.Join(s.Home(), "config", "genesis.json")
+}
+
+// runnerScript returns the path to the runner script within the workspace.
+func (s *SSH) runnerScript() string {
 	return filepath.Join(s.Workspace(), "run.sh")
 }
 
@@ -265,8 +265,8 @@ func (s *SSH) auth() (goph.Auth, error) {
 
 // ensureEnvironment ensures that the necessary directories exist on the remote server.
 func (s *SSH) ensureEnvironment() error {
-	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
-		return errors.Wrapf(err, "failed to create bin dir %s", s.Bin())
+	if err := s.sftpClient.MkdirAll(s.bin()); err != nil {
+		return errors.Wrapf(err, "failed to create bin dir %s", s.bin())
 	}
 	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
 		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
@@ -319,17 +319,17 @@ func (s *SSH) Status(ctx context.Context) (string, error) {
 
 // runScript runs the specified script with arguments on the remote server.
 func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
-	return s.RunCommand(ctx, s.RunnerScript(), args...)
+	return s.RunCommand(ctx, s.runnerScript(), args...)
 }
 
 // HasGenesis checks if the genesis file exists on the remote server.
 func (s *SSH) HasGenesis(ctx context.Context) bool {
-	return s.FileExist(ctx, s.Genesis())
+	return s.FileExist(ctx, s.genesis())
 }
 
 // HasRunnerScript checks if the runner script file exists on the remote server.
 func (s *SSH) HasRunnerScript(ctx context.Context) bool {
-	return s.FileExist(ctx, s.RunnerScript())
+	return s.FileExist(ctx, s.runnerScript())
 }
 
 // FolderExist checks if a directory exists at the specified path on the remote server.
