@@ -1,19 +1,19 @@
 package ssh
 
 import (
-	"archive/tar"
-	"compress/gzip"
+	"context"
 	"fmt"
-	"io"
+	"github.com/blang/semver/v4"
+	"github.com/ignite/apps/spaceship/pkg/tarball"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"net/http"
 	"os"
-	"path/filepath"
-
-	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-const faucetLastRelease = "https://github.com/ignite/faucet/releases/latest/download"
+const (
+	faucetBinName     = "faucet"
+	faucetLastRelease = "https://github.com/ignite/faucet/releases/latest/download"
+)
 
 var faucetVersion = semver.MustParse("0.0.1")
 
@@ -21,7 +21,7 @@ func faucetReleaseName(target string) string {
 	return fmt.Sprintf("%s/faucet_%s_%s.tar.gz", faucetLastRelease, faucetVersion.String(), target)
 }
 
-func fetchFaucetBinary(target string) (string, error) {
+func fetchFaucetBinary(ctx context.Context, target string) (string, error) {
 	tempDir, err := os.MkdirTemp("", "faucet")
 	if err != nil {
 		return "", errors.Errorf("failed to create temp dir: %w", err)
@@ -35,47 +35,16 @@ func fetchFaucetBinary(target string) (string, error) {
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return "", errors.Errorf("failed to fetch faucet binary, status: %s", resp.Status)
+		return "", errors.Errorf("failed to fetch faucet binary: %s status", resp.Status)
 	}
 
-	gzipReader, err := gzip.NewReader(resp.Body)
+	extracted, err := tarball.ExtractData(ctx, resp.Body, tempDir, faucetBinName)
 	if err != nil {
-		return "", errors.Errorf("failed to create gzip reader: %w", err)
+		return "", err
 	}
-	defer gzipReader.Close()
-
-	tarReader := tar.NewReader(gzipReader)
-	var binaryPath string
-	for binaryPath == "" {
-		header, err := tarReader.Next()
-		if err == io.EOF {
-			break
-		}
-		if err != nil {
-			return "", errors.Errorf("failed to read tar file: %w", err)
-		}
-
-		if header.Typeflag == tar.TypeReg && header.Name == "faucet" {
-			binaryPath = filepath.Join(tempDir, header.Name)
-			outFile, err := os.Create(binaryPath)
-			if err != nil {
-				return "", errors.Errorf("failed to create binary file: %w", err)
-			}
-			defer outFile.Close()
-
-			if _, err := io.Copy(outFile, tarReader); err != nil {
-				return "", errors.Errorf("failed to write binary file: %w", err)
-			}
-		}
-	}
-	if binaryPath == "" {
-		return "", errors.Errorf("faucet binary not found in the tar file")
+	if len(extracted) == 0 {
+		return "", errors.Errorf("zero files extracted from %s faucet the tarball: %s", target, binaryURL)
 	}
 
-	// Make the binary executable
-	if err := os.Chmod(binaryPath, 0o755); err != nil {
-		return "", errors.Errorf("failed to make binary executable: %w", err)
-	}
-
-	return binaryPath, nil
+	return "", nil
 }

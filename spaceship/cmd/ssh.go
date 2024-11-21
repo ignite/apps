@@ -282,7 +282,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 			strings.ReplaceAll(target, ":", "_"),
 		)
 	)
-	extracted, err := tarball.Extract(ctx, localChainTarball, localBinOutput, binName)
+	extracted, err := tarball.ExtractFile(ctx, localChainTarball, localBinOutput, binName)
 	if err != nil {
 		return err
 	}
