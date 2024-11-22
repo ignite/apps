@@ -25,7 +25,7 @@ func (s *SSH) HasFaucetScript(ctx context.Context) bool {
 
 // FaucetStart runs the faucet "start" script on the remote server.
 func (s *SSH) FaucetStart(ctx context.Context, port uint64) (string, error) {
-	return s.runScript(ctx, "start", strconv.FormatUint(port, 10))
+	return s.runFaucetScript(ctx, "start", strconv.FormatUint(port, 10))
 }
 
 // FaucetRestart runs the faucet "restart" script on the remote server.
