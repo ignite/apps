@@ -192,8 +192,8 @@ func (s *SSH) auth() (goph.Auth, error) {
 
 // ensureEnvironment ensures that the necessary directories exist on the remote server.
 func (s *SSH) ensureEnvironment() error {
-	if err := s.sftpClient.MkdirAll(s.bin()); err != nil {
-		return errors.Wrapf(err, "failed to create bin dir %s", s.bin())
+	if err := s.sftpClient.MkdirAll(s.Bin()); err != nil {
+		return errors.Wrapf(err, "failed to create bin dir %s", s.Bin())
 	}
 	if err := s.sftpClient.MkdirAll(s.Home()); err != nil {
 		return errors.Wrapf(err, "failed to create home dir %s", s.Home())
@@ -204,8 +204,8 @@ func (s *SSH) ensureEnvironment() error {
 	return nil
 }
 
-// bin returns the binary directory within the workspace.
-func (s *SSH) bin() string {
+// Bin returns the binary directory within the workspace.
+func (s *SSH) Bin() string {
 	return filepath.Join(s.Workspace(), "bin")
 }
 

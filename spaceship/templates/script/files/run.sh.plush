@@ -1,8 +1,11 @@
 #!/bin/bash
 
 HOME_PATH="$HOME/<%= home %>"
-COMMAND="$HOME/<%= binaryPath %> start --home $HOME_PATH"
+BINARY="<%= binary %>"
+COMMAND="$HOME/<%= chainBinPath %> start --home $HOME_PATH"
 PID_FILE="$HOME/<%= path %>/spaceship.pid"
+
+export PATH="$PATH:$HOME/<%= binDirPath %>"
 
 # Function to get the current date and time formatted for the log file
 get_log_file_name() {
@@ -25,19 +28,19 @@ start() {
     echo "Starting $COMMAND..."
     nohup $COMMAND > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
-    echo "$COMMAND started with PID $(cat $PID_FILE)."
+    echo "$BINARY started with PID $(cat $PID_FILE)."
     echo "Logs are being written to $LOG_FILE"
 }
 
 stop() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
-        echo "Stopping $COMMAND with PID $PID..."
+        echo "Stopping $BINARY with PID $PID..."
         kill "$PID"
         rm "$PID_FILE"
-        echo "$COMMAND stopped."
+        echo "$BINARY stopped."
     else
-        echo "$COMMAND is not running."
+        echo "$BINARY is not running."
     fi
 }
 
@@ -45,12 +48,12 @@ status() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
         if ps -p "$PID" > /dev/null; then
-            echo "$COMMAND is running with PID $PID."
+            echo "$BINARY is running with PID $PID."
         else
-            echo "$COMMAND is not running, but PID file exists."
+            echo "$BINARY is not running, but PID file exists."
         fi
     else
-        echo "$COMMAND is not running."
+        echo "$BINARY is not running."
     fi
 }
 

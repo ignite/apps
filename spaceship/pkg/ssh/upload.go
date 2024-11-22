@@ -140,12 +140,12 @@ func (s *SSH) UploadFile(filePath, dstPath string, progressCallback ProgressCall
 	return dstPath, nil
 }
 
-// UploadBinary uploads a binary file to the remote server's bin directory
+// UploadBinary uploads a binary file to the remote server's Bin directory
 // and sets the appropriate permissions.
 func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (string, error) {
 	var (
 		filename = filepath.Base(srcPath)
-		binPath  = filepath.Join(s.bin(), filename)
+		binPath  = filepath.Join(s.Bin(), filename)
 	)
 	if _, err := s.UploadFile(srcPath, binPath, progressCallback); err != nil {
 		return "", err

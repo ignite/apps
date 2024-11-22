@@ -41,6 +41,10 @@ func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 	_ = session.Println(chainStatus)
 
+	if !c.HasFaucetScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	stopStatus, err := c.FaucetStatus(ctx)
 	if err != nil {
 		return err
@@ -70,7 +74,15 @@ func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *
 	}
 	_ = session.Println(chainRestart)
 
-	faucetRestart, err := c.FaucetRestart(ctx)
+	if !c.HasFaucetScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
+	faucetPort, err := faucetPort(cmd.Flags)
+	if err != nil {
+		return err
+	}
+	faucetRestart, err := c.FaucetRestart(ctx, faucetPort)
 	if err != nil {
 		return err
 	}
@@ -99,6 +111,10 @@ func ExecuteSSHSStop(ctx context.Context, cmd *plugin.ExecutedCommand, chain *pl
 	}
 	_ = session.Println(chainStop)
 
+	if !c.HasFaucetScript(ctx) {
+		return ErrServerNotInitialized
+	}
+
 	faucetStop, err := c.FaucetStop(ctx)
 	if err != nil {
 		return err
@@ -123,9 +139,8 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}()
 
 	var (
-		initChain, _  = flags.GetBool(flagInitChain)
-		faucet, _     = flags.GetBool(flagFaucet)
-		faucetPort, _ = flags.GetUint64(flagFaucetPort)
+		initChain, _ = flags.GetBool(flagInitChain)
+		faucet, _    = flags.GetBool(flagFaucet)
 
 		localChainHome = filepath.Join(localDir, "home")
 		localBinOutput = filepath.Join(localDir, "bin")
@@ -198,12 +213,12 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 
 	bar.Describe("Uploading chain binary")
-	binPath, err := c.UploadBinary(extracted[0], progressCallback)
+	chainBinPath, err := c.UploadBinary(extracted[0], progressCallback)
 	if err != nil {
 		return err
 	}
 	_ = session.Println()
-	_ = session.Println(color.Yellow.Sprintf("Chain binary uploaded to '%s'\n", binPath))
+	_ = session.Println(color.Yellow.Sprintf("Chain binary uploaded to '%s'\n", chainBinPath))
 
 	bar.Describe("Uploading faucet binary")
 	faucetBin, err := c.UploadFaucetBinary(ctx, targetName, progressCallback)
@@ -252,7 +267,8 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		c.Workspace(),
 		c.Log(),
 		home,
-		binPath,
+		c.Bin(),
+		chainBinPath,
 		faucetBin,
 		*chainCfg.Faucet.Name,
 		denom,
@@ -276,6 +292,10 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 
 	if faucet {
 		_ = session.Println(color.Yellow.Sprintf("Running chain %s faucet", chain.ChainId))
+		faucetPort, err := faucetPort(cmd.Flags)
+		if err != nil {
+			return err
+		}
 		faucetStart, err := c.FaucetStart(ctx, faucetPort)
 		if err != nil {
 			return err

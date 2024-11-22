@@ -3,9 +3,38 @@ package cmd
 import (
 	"context"
 
+	"github.com/ignite/cli/v28/ignite/pkg/availableport"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
+
+func faucetPort(f []*plugin.Flag) (uint64, error) {
+	flags := plugin.Flags(f)
+	port, err := flags.GetUint64(flagFaucetPort)
+	if err != nil {
+		return 0, err
+	}
+	if port == 0 {
+		return availablePort()
+	}
+	return port, nil
+}
+
+func availablePort() (uint64, error) {
+	ports, err := availableport.Find(
+		1,
+		availableport.WithMinPort(8000),
+		availableport.WithMaxPort(9000),
+	)
+	if err != nil {
+		return 0, err
+	}
+	if len(ports) == 0 {
+		return 0, errors.New("no available ports")
+	}
+	return uint64(ports[0]), nil
+}
 
 // ExecuteSSHFaucetStatus executes the ssh faucet status subcommand.
 func ExecuteSSHFaucetStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
@@ -45,8 +74,10 @@ func ExecuteSSHFaucetStart(ctx context.Context, cmd *plugin.ExecutedCommand, cha
 		return ErrServerNotInitialized
 	}
 
-	flags := plugin.Flags(cmd.Flags)
-	faucetPort, _ := flags.GetUint64(flagFaucetPort)
+	faucetPort, err := faucetPort(cmd.Flags)
+	if err != nil {
+		return err
+	}
 	faucetRestart, err := c.FaucetStart(ctx, faucetPort)
 	if err != nil {
 		return err
@@ -70,7 +101,11 @@ func ExecuteSSHFaucetRestart(ctx context.Context, cmd *plugin.ExecutedCommand, c
 		return ErrServerNotInitialized
 	}
 
-	faucetRestart, err := c.FaucetRestart(ctx)
+	faucetPort, err := faucetPort(cmd.Flags)
+	if err != nil {
+		return err
+	}
+	faucetRestart, err := c.FaucetRestart(ctx, faucetPort)
 	if err != nil {
 		return err
 	}

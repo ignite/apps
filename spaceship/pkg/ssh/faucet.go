@@ -10,7 +10,7 @@ import (
 
 // faucet returns the path to the faucet script within the workspace.
 func (s *SSH) faucet() string {
-	return filepath.Join(s.bin(), faucet.BinaryName())
+	return filepath.Join(s.Bin(), faucet.BinaryName())
 }
 
 // faucetScript returns the path to the faucet runner script within the workspace.
@@ -29,8 +29,8 @@ func (s *SSH) FaucetStart(ctx context.Context, port uint64) (string, error) {
 }
 
 // FaucetRestart runs the faucet "restart" script on the remote server.
-func (s *SSH) FaucetRestart(ctx context.Context) (string, error) {
-	return s.runFaucetScript(ctx, "restart")
+func (s *SSH) FaucetRestart(ctx context.Context, port uint64) (string, error) {
+	return s.runFaucetScript(ctx, "restart", strconv.FormatUint(port, 10))
 }
 
 // FaucetStop runs the faucet "stop" script on the remote server.
