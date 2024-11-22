@@ -206,7 +206,8 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	_ = session.Println(color.Yellow.Sprintf("Chain binary uploaded to '%s'\n", binPath))
 
 	bar.Describe("Uploading faucet binary")
-	if _, err := c.UploadFaucetBinary(ctx, targetName, progressCallback); err != nil {
+	faucetBin, err := c.UploadFaucetBinary(ctx, targetName, progressCallback)
+	if err != nil {
 		return err
 	}
 	_ = session.Println()
@@ -252,7 +253,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		c.Log(),
 		home,
 		binPath,
-		binPath,
+		faucetBin,
 		*chainCfg.Faucet.Name,
 		denom,
 		scriptsDir,
