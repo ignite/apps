@@ -27,7 +27,7 @@ var faucetVersion = semver.MustParse("0.0.1")
 
 // faucetReleaseName constructs the download URL for a faucet binary tarball given the target platform.
 func faucetReleaseName(target string) string {
-	return fmt.Sprintf("%s/faucet_%s_%s.tar.gz", faucetLastRelease, faucetVersion.String(), target)
+	return fmt.Sprintf("%[1]v/v%[2]v/faucet_%[2]v_%[3]v.tar.gz", faucetLastRelease, faucetVersion.String(), target)
 }
 
 // FetchBinary downloads the faucet binary file from a specific target

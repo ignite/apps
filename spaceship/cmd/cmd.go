@@ -42,7 +42,7 @@ var defaultFlags = []*plugin.Flag{
 		Shorthand:    "f",
 		Usage:        "create a chain faucet",
 		Type:         plugin.FlagTypeBool,
-		DefaultValue: "true",
+		DefaultValue: "false",
 	},
 	{
 		Name:         flagFaucetPort,

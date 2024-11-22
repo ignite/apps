@@ -58,7 +58,15 @@ func main() {
 				Usage:     "run init chain and create the home folder",
 				Type:      plugin.FlagTypeBool,
 				Value:     "true",
-			})
+			},
+			&plugin.Flag{
+				Name:         "faucet",
+				Shorthand:    "f",
+				Usage:        "create a chain faucet",
+				Type:         plugin.FlagTypeBool,
+				DefaultValue: "true",
+			},
+		)
 		if err := cmd.ExecuteSSHDeploy(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return

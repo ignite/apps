@@ -261,7 +261,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return err
 	}
 
-	_ = session.Println(color.Yellow.Sprintf("Running chain %s", binName))
+	_ = session.Println(color.Yellow.Sprintf("Running chain %s", chain.ChainId))
 	start, err := c.Start(ctx)
 	if err != nil {
 		return err
@@ -270,7 +270,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	_ = session.Println(color.Blue.Sprint(start))
 
 	if faucet {
-		_ = session.Println(color.Yellow.Sprintf("Running chain %s faucet", binName))
+		_ = session.Println(color.Yellow.Sprintf("Running chain %s faucet", chain.ChainId))
 		faucetStart, err := c.FaucetStart(ctx, faucetPort)
 		if err != nil {
 			return err
