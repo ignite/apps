@@ -209,6 +209,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	if _, err := c.UploadFaucetBinary(ctx, targetName, progressCallback); err != nil {
 		return err
 	}
+	_ = session.Println()
 
 	home := c.Home()
 	if initChain || !c.HasGenesis(ctx) {
@@ -225,8 +226,10 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		if err != nil {
 			return err
 		}
+		_ = session.Println()
 		_ = session.Println(color.Yellow.Sprintf("Uploaded files: \n- %s\n", strings.Join(homeFiles, "\n- ")))
 	}
+	_ = session.Println()
 
 	chainCfg, err := chainConfig(chain)
 	if err != nil {
