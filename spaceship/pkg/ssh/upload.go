@@ -158,19 +158,21 @@ func (s *SSH) UploadBinary(srcPath string, progressCallback ProgressCallback) (s
 	return binPath, nil
 }
 
-// UploadRunnerScript uploads a runner script to the remote server
+// UploadScripts uploads a runner and faucet scripts to the remote server
 // and sets the appropriate permissions.
-func (s *SSH) UploadRunnerScript(srcPath string, progressCallback ProgressCallback) (string, error) {
-	path := s.runnerScript()
-	if _, err := s.UploadFile(srcPath, s.runnerScript(), progressCallback); err != nil {
-		return "", err
+func (s *SSH) UploadScripts(ctx context.Context, srcPath string, progressCallback ProgressCallback) error {
+	if _, err := s.Upload(ctx, srcPath, s.Workspace(), progressCallback); err != nil {
+		return err
 	}
 
 	// give binary permission
-	if err := s.sftpClient.Chmod(path, 0o755); err != nil {
-		return "", err
+	if err := s.sftpClient.Chmod(s.runnerScript(), 0o755); err != nil {
+		return err
 	}
-	return path, nil
+	if err := s.sftpClient.Chmod(s.faucetScript(), 0o755); err != nil {
+		return err
+	}
+	return nil
 }
 
 // UploadHome uploads the home directory to the remote server.
@@ -181,7 +183,7 @@ func (s *SSH) UploadHome(ctx context.Context, srcPath string, progressCallback P
 
 // UploadFaucetBinary uploads the faucet binary to the remote server.
 func (s *SSH) UploadFaucetBinary(ctx context.Context, target string, progressCallback ProgressCallback) (string, error) {
-	bin, err := faucet.FaucetBinary(ctx, target)
+	bin, err := faucet.FetchBinary(ctx, target)
 	if err != nil {
 		return "", err
 	}

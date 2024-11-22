@@ -21,8 +21,9 @@ func main() {
 		args      = os.Args
 		ctx       = context.Background()
 		chainInfo = &plugin.ChainInfo{
-			AppPath: filepath.Join(home, "Desktop/go/src/github.com/ignite/mars"),
-			ChainId: "mars",
+			AppPath:    filepath.Join(home, "Desktop/go/src/github.com/ignite/mars"),
+			ConfigPath: filepath.Join(home, "Desktop/go/src/github.com/ignite/mars/config.yml"),
+			ChainId:    "mars",
 		}
 		c = &plugin.ExecutedCommand{
 			Use:    args[1],

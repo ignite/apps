@@ -11,11 +11,11 @@ import (
 	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
 )
 
-//go:embed files/* files/**/*
+//go:embed files/*
 var fsRunScript embed.FS
 
-// NewRunScript returns the generator to scaffold a chain run script.
-func NewRunScript(path, log, home, binaryPath, account, denoms, output string) (string, error) {
+// NewRunScripts returns the generator to scaffold a chain and faucet run script.
+func NewRunScripts(path, log, home, binaryPath, account, denoms, output string) error {
 	var (
 		g         = genny.New()
 		runScript = xgenny.NewEmbedWalker(
@@ -25,7 +25,7 @@ func NewRunScript(path, log, home, binaryPath, account, denoms, output string) (
 		)
 	)
 	if err := g.Box(runScript); err != nil {
-		return "", err
+		return err
 	}
 
 	ctx := plush.NewContext()
@@ -34,12 +34,12 @@ func NewRunScript(path, log, home, binaryPath, account, denoms, output string) (
 	ctx.Set("home", home)
 	ctx.Set("binaryPath", binaryPath)
 	ctx.Set("binary", filepath.Base(binaryPath))
-	ctx.Set("account-name", account)
+	ctx.Set("account", account)
 	ctx.Set("denoms", denoms)
 
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
 	_, err := xgenny.RunWithValidation(placeholder.New(), g)
-	return filepath.Join(output, "run.sh"), err
+	return err
 }

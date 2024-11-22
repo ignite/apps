@@ -143,6 +143,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	if err != nil {
 		return err
 	}
+	targetName := strings.ReplaceAll(target, ":", "_")
 
 	// We are using the ignite chain build command to build the app.
 	igniteChainBuildCmd := ignitecmd.NewChainBuild()
@@ -185,7 +186,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 			"%s/%s_%s.tar.gz",
 			localBinOutput,
 			chain.ChainId,
-			strings.ReplaceAll(target, ":", "_"),
+			targetName,
 		)
 	)
 	extracted, err := tarball.ExtractFile(ctx, localChainTarball, localBinOutput, binName)
@@ -201,6 +202,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	if err != nil {
 		return err
 	}
+	_ = session.Println()
 	_ = session.Println(color.Yellow.Sprintf("Chain binary uploaded to '%s'\n", binPath))
 
 	home := c.Home()
@@ -208,7 +210,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		_ = session.Println(color.Yellow.Sprint("Initializing the chain home folder using Ignite:"))
 
 		igniteChainInitCmd := ignitecmd.NewChainInit()
-		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome, "--verbose"})
+		igniteChainInitCmd.SetArgs([]string{"-p", chain.AppPath, "--home", localChainHome})
 		if err := igniteChainInitCmd.ExecuteContext(ctx); err != nil {
 			return err
 		}
@@ -221,7 +223,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		_ = session.Println(color.Yellow.Sprintf("Uploaded files: \n- %s\n", strings.Join(homeFiles, "\n- ")))
 	}
 
-	chainCfg, err := config.ParseFile(chain.ConfigPath)
+	chainCfg, err := chainConfig(chain)
 	if err != nil {
 		return err
 	}
@@ -235,27 +237,27 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		denom = coin.Denom
 	}
 
-	// Create the runner script.
-	localRunScriptPath, err := script.NewRunScript(
+	// Create the chain and faucet runner scripts.
+	scriptsDir := filepath.Join(localDir, "scripts")
+	if err := script.NewRunScripts(
 		c.Workspace(),
 		c.Log(),
 		home,
 		binPath,
 		*chainCfg.Faucet.Name,
 		denom,
-		localDir,
-	)
-	if err != nil {
+		scriptsDir,
+	); err != nil {
 		return err
 	}
 
 	bar.Describe("Uploading runner script")
-	if _, err := c.UploadRunnerScript(localRunScriptPath, progressCallback); err != nil {
+	if err := c.UploadScripts(ctx, scriptsDir, progressCallback); err != nil {
 		return err
 	}
 
 	bar.Describe("Uploading faucet binary")
-	if _, err := c.UploadFaucetBinary(ctx, target, progressCallback); err != nil {
+	if _, err := c.UploadFaucetBinary(ctx, targetName, progressCallback); err != nil {
 		return err
 	}
 
@@ -277,4 +279,20 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		return session.Println(color.Blue.Sprint(faucetStart))
 	}
 	return nil
+}
+
+// chainConfig retrieves and parses the configuration for the given chain.
+// It first attempts to load the config from chain's specified path, if unsuccessful,
+// it attempts to locate and load the default config file.
+func chainConfig(chain *plugin.ChainInfo) (*config.Config, error) {
+	cfg, err := config.ParseFile(chain.ConfigPath)
+	if err == nil {
+		return cfg, nil
+	}
+
+	cfgPath, err := config.LocateDefault(chain.AppPath)
+	if err != nil {
+		return nil, err
+	}
+	return config.ParseFile(cfgPath)
 }

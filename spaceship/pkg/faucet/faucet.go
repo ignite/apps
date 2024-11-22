@@ -18,8 +18,8 @@ import (
 
 const (
 	faucetBinaryName     = "faucet"
-	binaryCacheDirectory = "spaceship/bin"
-	faucetLastRelease    = "https://github.com/ignite/faucet/releases/latest/download"
+	binaryCacheDirectory = "apps/spaceship/bin"
+	faucetLastRelease    = "https://github.com/ignite/faucet/releases/download"
 )
 
 // faucetVersion specifies the current version of the faucet application.
