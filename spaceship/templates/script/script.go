@@ -15,7 +15,7 @@ import (
 var fsRunScript embed.FS
 
 // NewRunScripts returns the generator to scaffold a chain and faucet run script.
-func NewRunScripts(path, log, home, binaryPath, account, denoms, output string) error {
+func NewRunScripts(path, log, home, binaryPath, faucetPath, account, denoms, output string) error {
 	var (
 		g         = genny.New()
 		runScript = xgenny.NewEmbedWalker(
@@ -34,6 +34,7 @@ func NewRunScripts(path, log, home, binaryPath, account, denoms, output string) 
 	ctx.Set("home", home)
 	ctx.Set("binaryPath", binaryPath)
 	ctx.Set("binary", filepath.Base(binaryPath))
+	ctx.Set("faucetPath", faucetPath)
 	ctx.Set("account", account)
 	ctx.Set("denoms", denoms)
 

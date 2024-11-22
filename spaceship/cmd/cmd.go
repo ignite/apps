@@ -37,19 +37,6 @@ var defaultFlags = []*plugin.Flag{
 		Usage: "ssh key password",
 		Type:  plugin.FlagTypeString,
 	},
-	{
-		Name:         flagFaucet,
-		Shorthand:    "f",
-		Usage:        "create a chain faucet",
-		Type:         plugin.FlagTypeBool,
-		DefaultValue: "false",
-	},
-	{
-		Name:         flagFaucetPort,
-		Usage:        "chain faucet port",
-		Type:         plugin.FlagTypeUint64,
-		DefaultValue: "8009",
-	},
 }
 
 // GetCommands returns the list of spaceship app commands.
@@ -60,8 +47,8 @@ func GetCommands() []*plugin.Command {
 			Short: "Deploy a chain remote through SSH using ignite build system",
 			Commands: []*plugin.Command{
 				{
-					Use:   "deploy",
-					Short: "deploy your chain",
+					Use:   "deploy [host]",
+					Short: "deploy the chain",
 					Flags: append(defaultFlags,
 						&plugin.Flag{
 							Name:      flagInitChain,
@@ -69,49 +56,76 @@ func GetCommands() []*plugin.Command {
 							Usage:     "run init chain and create the home folder",
 							Type:      plugin.FlagTypeBool,
 						},
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "create a chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+						&plugin.Flag{
+							Name:         flagFaucetPort,
+							Usage:        "chain faucet port",
+							Type:         plugin.FlagTypeUint64,
+							DefaultValue: "8009",
+						},
 					),
 				},
 				{
-					Use:   "log",
+					Use:   "log [host]",
 					Short: "get remote logs",
-					Flags: append(defaultFlags,
-						&plugin.Flag{
-							Name:         flagLines,
-							Shorthand:    "l",
-							Usage:        "number of lines of chain logs",
-							Type:         plugin.FlagTypeInt,
-							DefaultValue: "100",
-						},
-						&plugin.Flag{
-							Name:  flagRealTime,
-							Usage: "show the logs in the real time",
-							Type:  plugin.FlagTypeBool,
-						},
-					),
 					Commands: []*plugin.Command{
 						{
 							Use:   "chain",
 							Short: "get chain logs if its running",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
+									Name:         flagLines,
+									Shorthand:    "l",
+									Usage:        "number of lines of chain logs",
+									Type:         plugin.FlagTypeInt,
+									DefaultValue: "100",
+								},
+								&plugin.Flag{
+									Name:  flagRealTime,
+									Usage: "show the logs in the real time",
+									Type:  plugin.FlagTypeBool,
+								},
+							),
 						},
 						{
 							Use:   "faucet",
 							Short: "get faucet logs if its running",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
+									Name:         flagLines,
+									Shorthand:    "l",
+									Usage:        "number of lines of chain logs",
+									Type:         plugin.FlagTypeInt,
+									DefaultValue: "100",
+								},
+								&plugin.Flag{
+									Name:  flagRealTime,
+									Usage: "show the logs in the real time",
+									Type:  plugin.FlagTypeBool,
+								},
+							),
 						},
 					},
 				},
 				{
-					Use:   "status",
+					Use:   "status [host]",
 					Short: "get chain status if its running",
 					Flags: defaultFlags,
 				},
 				{
-					Use:   "restart",
-					Short: "restart your chain",
+					Use:   "restart [host]",
+					Short: "restart the chain",
 					Flags: defaultFlags,
 				},
 				{
-					Use:   "stop",
-					Short: "stop your chain",
+					Use:   "stop [host]",
+					Short: "stop the chain",
 					Flags: defaultFlags,
 				},
 				{
@@ -119,36 +133,38 @@ func GetCommands() []*plugin.Command {
 					Short: "faucet commands",
 					Commands: []*plugin.Command{
 						{
-							Use:   "status",
+							Use:   "status [host]",
 							Short: "get faucet status if its running",
+							Flags: defaultFlags,
 						},
 						{
-							Use:   "start",
-							Short: "start faucet",
-							Flags: plugin.Flags{
-								{
+							Use:   "start [host]",
+							Short: "start the faucet",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
 									Name:         flagFaucetPort,
 									Usage:        "chain faucet port",
 									Type:         plugin.FlagTypeUint64,
 									DefaultValue: "8009",
 								},
-							},
+							),
 						},
 						{
-							Use:   "restart",
-							Short: "restart your faucet",
-							Flags: plugin.Flags{
-								{
+							Use:   "restart [host]",
+							Short: "restart the faucet",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
 									Name:         flagFaucetPort,
 									Usage:        "chain faucet port",
 									Type:         plugin.FlagTypeUint64,
 									DefaultValue: "8009",
 								},
-							},
+							),
 						},
 						{
 							Use:   "stop",
-							Short: "stop your faucet",
+							Short: "stop the faucet",
+							Flags: defaultFlags,
 						},
 					},
 				},

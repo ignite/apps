@@ -6,7 +6,7 @@ PID_FILE="$HOME/<%= path %>/spaceship.pid"
 
 # Function to get the current date and time formatted for the log file
 get_log_file_name() {
-    echo "$HOME/chain_<%= log %>/$(date '+%Y-%m-%d_%H-%M-%S').log"
+    echo "$HOME/<%= log %>/chain_$(date '+%Y-%m-%d_%H-%M-%S').log"
 }
 
 # Function to ensure the directory exists

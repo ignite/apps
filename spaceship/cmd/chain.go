@@ -205,6 +205,11 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	_ = session.Println()
 	_ = session.Println(color.Yellow.Sprintf("Chain binary uploaded to '%s'\n", binPath))
 
+	bar.Describe("Uploading faucet binary")
+	if _, err := c.UploadFaucetBinary(ctx, targetName, progressCallback); err != nil {
+		return err
+	}
+
 	home := c.Home()
 	if initChain || !c.HasGenesis(ctx) {
 		_ = session.Println(color.Yellow.Sprint("Initializing the chain home folder using Ignite:"))
@@ -244,6 +249,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		c.Log(),
 		home,
 		binPath,
+		binPath,
 		*chainCfg.Faucet.Name,
 		denom,
 		scriptsDir,
@@ -253,11 +259,6 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 
 	bar.Describe("Uploading runner script")
 	if err := c.UploadScripts(ctx, scriptsDir, progressCallback); err != nil {
-		return err
-	}
-
-	bar.Describe("Uploading faucet binary")
-	if _, err := c.UploadFaucetBinary(ctx, targetName, progressCallback); err != nil {
 		return err
 	}
 

@@ -1,8 +1,7 @@
 #!/bin/bash
 
 PORT=${2:-8009}
-BINARY="<%= binary %>"
-COMMAND="$HOME/<%= binaryPath %> --home <%= home %> --cli-name $BINARY --account-name <%= account %> --denoms <%= denoms %> --port $PORT"
+COMMAND="$HOME/<%= faucetPath %> --home <%= home %> --cli-name <%= binary %> --account-name <%= account %> --denoms <%= denoms %> --port $PORT"
 PID_FILE="$HOME/<%= path %>/faucet.pid"
 
 # Function to get the current date and time formatted for the log file
@@ -23,22 +22,22 @@ start() {
     LOG_FILE=$(get_log_file_name)
     ensure_directory_exists "$LOG_FILE"
 
-    echo "Starting $BINARY..."
+    echo "Starting faucet..."
     nohup $COMMAND > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
-    echo "$BINARY started with PID $(cat $PID_FILE)."
+    echo "faucet started with PID $(cat $PID_FILE)."
     echo "Logs are being written to $LOG_FILE"
 }
 
 stop() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
-        echo "Stopping $BINARY with PID $PID..."
+        echo "Stopping faucet with PID $PID..."
         kill "$PID"
         rm "$PID_FILE"
-        echo "$BINARY stopped."
+        echo "faucet stopped."
     else
-        echo "$BINARY is not running."
+        echo "faucet is not running."
     fi
 }
 
@@ -46,12 +45,12 @@ status() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
         if ps -p "$PID" > /dev/null; then
-            echo "$BINARY is running with PID $PID."
+            echo "faucet is running with PID $PID."
         else
-            echo "$BINARY is not running, but PID file exists."
+            echo "faucet is not running, but PID file exists."
         fi
     else
-        echo "$BINARY is not running."
+        echo "faucet is not running."
     fi
 }
 
