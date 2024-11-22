@@ -181,7 +181,7 @@ func (s *SSH) UploadHome(ctx context.Context, srcPath string, progressCallback P
 
 // UploadFaucetBinary uploads the faucet binary to the remote server.
 func (s *SSH) UploadFaucetBinary(ctx context.Context, target string, progressCallback ProgressCallback) (string, error) {
-	bin, err := faucet.FetchBinary(ctx, target)
+	bin, err := faucet.FaucetBinary(ctx, target)
 	if err != nil {
 		return "", err
 	}

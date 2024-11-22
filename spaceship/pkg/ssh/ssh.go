@@ -12,7 +12,6 @@ import (
 	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v28/ignite/pkg/randstr"
 	"github.com/manifoldco/promptui"
 	"github.com/melbahja/goph"
@@ -20,9 +19,7 @@ import (
 	"golang.org/x/crypto/ssh/knownhosts"
 )
 
-const (
-	workdir = "spaceship"
-)
+const workdir = "spaceship"
 
 // SSH represents the SSH configuration and clients for connecting and interacting
 // with remote servers via SSH.
@@ -163,76 +160,6 @@ func parseURI(uri string) (host string, port string, username string, password s
 	return host, port, username, password, nil
 }
 
-// Close closes the SSH and SFTP clients.
-func (s *SSH) Close() error {
-	if err := s.sftpClient.Close(); err != nil {
-		return err
-	}
-	return s.client.Close()
-}
-
-// Connect establishes the SSH connection and initializes the SFTP client.
-func (s *SSH) Connect() error {
-	auth, err := s.auth()
-	if err != nil {
-		return err
-	}
-
-	s.client, err = goph.New(s.username, s.host, auth)
-	if errors.Is(err, &knownhosts.KeyError{}) {
-		prompt := promptui.Prompt{
-			Label:     fmt.Sprintf("Unknown host: %s. Do you want to proceed with the connection anyway", s.host),
-			IsConfirm: true,
-			Stdout:    os.Stdout,
-			Stdin:     os.Stdin,
-		}
-		if _, err := prompt.Run(); err != nil {
-			return err
-		}
-		s.client, err = goph.NewUnknown(s.username, s.host, auth)
-	}
-	if err != nil {
-		return errors.Wrapf(err, "Failed to connect to %v", s)
-	}
-
-	s.sftpClient, err = s.client.NewSftp()
-	if err != nil {
-		return err
-	}
-
-	return s.ensureEnvironment()
-}
-
-// Workspace returns the workspace directory for the SSH session.
-func (s *SSH) Workspace() string {
-	return filepath.Join(workdir, s.workspace)
-}
-
-// Home returns the home directory within the workspace.
-func (s *SSH) Home() string {
-	return filepath.Join(s.Workspace(), "home")
-}
-
-// Log returns the log directory within the workspace.
-func (s *SSH) Log() string {
-	return filepath.Join(s.Workspace(), "log")
-}
-
-// bin returns the binary directory within the workspace.
-func (s *SSH) bin() string {
-	return filepath.Join(s.Workspace(), "bin")
-}
-
-// genesis returns the path to the genesis.json file within the home directory.
-func (s *SSH) genesis() string {
-	return filepath.Join(s.Home(), "config", "genesis.json")
-}
-
-// runnerScript returns the path to the runner script within the workspace.
-func (s *SSH) runnerScript() string {
-	return filepath.Join(s.Workspace(), "run.sh")
-}
-
 // validate checks if the SSH configuration is valid.
 func (s *SSH) validate() error {
 	switch {
@@ -277,6 +204,56 @@ func (s *SSH) ensureEnvironment() error {
 	return nil
 }
 
+// bin returns the binary directory within the workspace.
+func (s *SSH) bin() string {
+	return filepath.Join(s.Workspace(), "bin")
+}
+
+// Workspace returns the workspace directory for the SSH session.
+func (s *SSH) Workspace() string {
+	return filepath.Join(workdir, s.workspace)
+}
+
+// Close closes the SSH and SFTP clients.
+func (s *SSH) Close() error {
+	if err := s.sftpClient.Close(); err != nil {
+		return err
+	}
+	return s.client.Close()
+}
+
+// Connect establishes the SSH connection and initializes the SFTP client.
+func (s *SSH) Connect() error {
+	auth, err := s.auth()
+	if err != nil {
+		return err
+	}
+
+	s.client, err = goph.New(s.username, s.host, auth)
+	if errors.Is(err, &knownhosts.KeyError{}) {
+		prompt := promptui.Prompt{
+			Label:     fmt.Sprintf("Unknown host: %s. Do you want to proceed with the connection anyway", s.host),
+			IsConfirm: true,
+			Stdout:    os.Stdout,
+			Stdin:     os.Stdin,
+		}
+		if _, err := prompt.Run(); err != nil {
+			return err
+		}
+		s.client, err = goph.NewUnknown(s.username, s.host, auth)
+	}
+	if err != nil {
+		return errors.Wrapf(err, "Failed to connect to %v", s)
+	}
+
+	s.sftpClient, err = s.client.NewSftp()
+	if err != nil {
+		return err
+	}
+
+	return s.ensureEnvironment()
+}
+
 // RunCommand runs a command on the remote server and returns the output.
 func (s *SSH) RunCommand(ctx context.Context, name string, args ...string) (string, error) {
 	cmd, err := s.client.CommandContext(ctx, name, args...)
@@ -295,107 +272,4 @@ func (s *SSH) RunCommand(ctx context.Context, name string, args ...string) (stri
 		)
 	}
 	return output, nil
-}
-
-// Start runs the "start" script on the remote server.
-func (s *SSH) Start(ctx context.Context) (string, error) {
-	return s.runScript(ctx, "start")
-}
-
-// Restart runs the "restart" script on the remote server.
-func (s *SSH) Restart(ctx context.Context) (string, error) {
-	return s.runScript(ctx, "restart")
-}
-
-// Stop runs the "stop" script on the remote server.
-func (s *SSH) Stop(ctx context.Context) (string, error) {
-	return s.runScript(ctx, "stop")
-}
-
-// Status runs the "status" script on the remote server.
-func (s *SSH) Status(ctx context.Context) (string, error) {
-	return s.runScript(ctx, "status")
-}
-
-// runScript runs the specified script with arguments on the remote server.
-func (s *SSH) runScript(ctx context.Context, args ...string) (string, error) {
-	return s.RunCommand(ctx, s.runnerScript(), args...)
-}
-
-// HasGenesis checks if the genesis file exists on the remote server.
-func (s *SSH) HasGenesis(ctx context.Context) bool {
-	return s.FileExist(ctx, s.genesis())
-}
-
-// HasRunnerScript checks if the runner script file exists on the remote server.
-func (s *SSH) HasRunnerScript(ctx context.Context) bool {
-	return s.FileExist(ctx, s.runnerScript())
-}
-
-// FolderExist checks if a directory exists at the specified path on the remote server.
-// It returns true if the directory exists, otherwise false.
-func (s *SSH) FolderExist(ctx context.Context, path string) bool {
-	return s.exist(ctx, path, false)
-}
-
-// FileExist checks if a file exists at the specified path on the remote server.
-// It returns true if the file exists, otherwise false.
-func (s *SSH) FileExist(ctx context.Context, path string) bool {
-	return s.exist(ctx, path, true)
-}
-
-// exist checks if a file or directory exists at the specified path on the remote server.
-// If isFile is true, it checks for a file, otherwise it checks for a directory.
-// It returns true if the specified file or directory exists, otherwise false.
-func (s *SSH) exist(ctx context.Context, path string, isFile bool) bool {
-	cmd := fmt.Sprintf("[ -d '%s' ] && echo 'true'", path)
-	if isFile {
-		cmd = fmt.Sprintf("[ -f '%s' ] && echo 'true'", path)
-	}
-	exist, err := s.RunCommand(ctx, cmd)
-	if err != nil {
-		return false
-	}
-	return exist == "true"
-}
-
-// OS returns the operating system type of the remote server.
-func (s *SSH) OS(ctx context.Context) (string, error) {
-	v, err := s.Uname(ctx)
-	if err != nil {
-		return "", err
-	}
-	return strings.ToLower(v), nil
-}
-
-// Arch returns the architecture type of the remote server.
-func (s *SSH) Arch(ctx context.Context) (string, error) {
-	v, err := s.Uname(ctx, "-m")
-	if err != nil {
-		return "", err
-	}
-	if arch, ok := archMap[v]; ok {
-		v = arch
-	}
-	return strings.ToLower(v), nil
-}
-
-// Target returns the build target for the remote server based on its OS and architecture.
-func (s *SSH) Target(ctx context.Context) (string, error) {
-	osType, err := s.OS(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	arch, err := s.Arch(ctx)
-	if err != nil {
-		return "", err
-	}
-
-	return gocmd.BuildTarget(osType, arch), nil
-}
-
-// Uname runs the "uname" command with the specified arguments on the remote server.
-func (s *SSH) Uname(ctx context.Context, args ...string) (string, error) {
-	return s.RunCommand(ctx, "uname", args...)
 }

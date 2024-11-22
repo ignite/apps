@@ -1,12 +1,13 @@
 #!/bin/bash
 
-HOME_PATH="$HOME/<%= home %>"
-COMMAND="$HOME/<%= binaryPath %> start --home $HOME_PATH"
-PID_FILE="$HOME/<%= path %>/spaceship.pid"
+PORT=${2:-8009}
+BINARY="<%= binary %>"
+COMMAND="$HOME/<%= binaryPath %> --home <%= home %> --cli-name $BINARY --account-name <%= account %> --denoms <%= denoms %> --port $PORT"
+PID_FILE="$HOME/<%= path %>/faucet.pid"
 
 # Function to get the current date and time formatted for the log file
 get_log_file_name() {
-    echo "$HOME/chain_<%= log %>/$(date '+%Y-%m-%d_%H-%M-%S').log"
+    echo "$HOME/<%= log %>/faucet_$(date '+%Y-%m-%d_%H-%M-%S').log"
 }
 
 # Function to ensure the directory exists
@@ -22,22 +23,22 @@ start() {
     LOG_FILE=$(get_log_file_name)
     ensure_directory_exists "$LOG_FILE"
 
-    echo "Starting $COMMAND..."
+    echo "Starting $BINARY..."
     nohup $COMMAND > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
-    echo "$COMMAND started with PID $(cat $PID_FILE)."
+    echo "$BINARY started with PID $(cat $PID_FILE)."
     echo "Logs are being written to $LOG_FILE"
 }
 
 stop() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
-        echo "Stopping $COMMAND with PID $PID..."
+        echo "Stopping $BINARY with PID $PID..."
         kill "$PID"
         rm "$PID_FILE"
-        echo "$COMMAND stopped."
+        echo "$BINARY stopped."
     else
-        echo "$COMMAND is not running."
+        echo "$BINARY is not running."
     fi
 }
 
@@ -45,12 +46,12 @@ status() {
     if [ -f "$PID_FILE" ]; then
         PID=$(cat "$PID_FILE")
         if ps -p "$PID" > /dev/null; then
-            echo "$COMMAND is running with PID $PID."
+            echo "$BINARY is running with PID $PID."
         else
-            echo "$COMMAND is not running, but PID file exists."
+            echo "$BINARY is not running, but PID file exists."
         fi
     else
-        echo "$COMMAND is not running."
+        echo "$BINARY is not running."
     fi
 }
 

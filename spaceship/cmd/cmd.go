@@ -37,6 +37,19 @@ var defaultFlags = []*plugin.Flag{
 		Usage: "ssh key password",
 		Type:  plugin.FlagTypeString,
 	},
+	{
+		Name:         flagFaucet,
+		Shorthand:    "f",
+		Usage:        "create a chain faucet",
+		Type:         plugin.FlagTypeBool,
+		DefaultValue: "true",
+	},
+	{
+		Name:         flagFaucetPort,
+		Usage:        "chain faucet port",
+		Type:         plugin.FlagTypeUint64,
+		DefaultValue: "8009",
+	},
 }
 
 // GetCommands returns the list of spaceship app commands.
@@ -56,24 +69,11 @@ func GetCommands() []*plugin.Command {
 							Usage:     "run init chain and create the home folder",
 							Type:      plugin.FlagTypeBool,
 						},
-						&plugin.Flag{
-							Name:         flagFaucet,
-							Shorthand:    "f",
-							Usage:        "create a chain faucet",
-							Type:         plugin.FlagTypeBool,
-							DefaultValue: "true",
-						},
-						&plugin.Flag{
-							Name:         flagFaucetPort,
-							Usage:        "chain faucet port",
-							Type:         plugin.FlagTypeUint64,
-							DefaultValue: "8009",
-						},
 					),
 				},
 				{
 					Use:   "log",
-					Short: "get chain logs if its running",
+					Short: "get remote logs",
 					Flags: append(defaultFlags,
 						&plugin.Flag{
 							Name:         flagLines,
@@ -88,6 +88,16 @@ func GetCommands() []*plugin.Command {
 							Type:  plugin.FlagTypeBool,
 						},
 					),
+					Commands: []*plugin.Command{
+						{
+							Use:   "chain",
+							Short: "get chain logs if its running",
+						},
+						{
+							Use:   "faucet",
+							Short: "get faucet logs if its running",
+						},
+					},
 				},
 				{
 					Use:   "status",
@@ -103,6 +113,44 @@ func GetCommands() []*plugin.Command {
 					Use:   "stop",
 					Short: "stop your chain",
 					Flags: defaultFlags,
+				},
+				{
+					Use:   "faucet",
+					Short: "faucet commands",
+					Commands: []*plugin.Command{
+						{
+							Use:   "status",
+							Short: "get faucet status if its running",
+						},
+						{
+							Use:   "start",
+							Short: "start faucet",
+							Flags: plugin.Flags{
+								{
+									Name:         flagFaucetPort,
+									Usage:        "chain faucet port",
+									Type:         plugin.FlagTypeUint64,
+									DefaultValue: "8009",
+								},
+							},
+						},
+						{
+							Use:   "restart",
+							Short: "restart your faucet",
+							Flags: plugin.Flags{
+								{
+									Name:         flagFaucetPort,
+									Usage:        "chain faucet port",
+									Type:         plugin.FlagTypeUint64,
+									DefaultValue: "8009",
+								},
+							},
+						},
+						{
+							Use:   "stop",
+							Short: "stop your faucet",
+						},
+					},
 				},
 			},
 		},

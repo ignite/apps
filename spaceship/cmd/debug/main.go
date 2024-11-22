@@ -69,8 +69,18 @@ func main() {
 			Type:  plugin.FlagTypeBool,
 			Value: "true",
 		})
-		if err := cmd.ExecuteSSHLog(ctx, c, chainInfo); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+		switch args[2] {
+		case "chain":
+			if err := cmd.ExecuteChainSSHLog(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "faucet":
+			if err := cmd.ExecuteFaucetSSHLog(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+			fmt.Fprintf(os.Stderr, "unknown log command: %s", args[2])
 			return
 		}
 	case "status":
@@ -88,8 +98,32 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-	default:
-		fmt.Fprintf(os.Stderr, "unknown command: %s", args[1])
-		return
+	case "faucet":
+		switch args[2] {
+		case "status":
+			if err := cmd.ExecuteSSHFaucetStatus(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "start":
+			if err := cmd.ExecuteSSHFaucetStart(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "restart":
+			if err := cmd.ExecuteSSHFaucetRestart(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "stop":
+			if err := cmd.ExecuteSSHSFaucetStop(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+
+		default:
+			fmt.Fprintf(os.Stderr, "unknown faucet command: %s", args[2])
+			return
+		}
 	}
 }
