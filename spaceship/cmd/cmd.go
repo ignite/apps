@@ -59,7 +59,7 @@ func GetCommands() []*plugin.Command {
 						&plugin.Flag{
 							Name:         flagFaucet,
 							Shorthand:    "f",
-							Usage:        "create a chain faucet",
+							Usage:        "run the chain faucet",
 							Type:         plugin.FlagTypeBool,
 							DefaultValue: "false",
 						},
@@ -115,17 +115,46 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:   "status [host]",
 					Short: "get chain status if its running",
-					Flags: defaultFlags,
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "show faucet status",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+					),
 				},
 				{
 					Use:   "restart [host]",
 					Short: "restart the chain",
-					Flags: defaultFlags,
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "run the chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+						&plugin.Flag{
+							Name:  flagFaucetPort,
+							Usage: "chain faucet port",
+							Type:  plugin.FlagTypeUint64,
+						},
+					),
 				},
 				{
 					Use:   "stop [host]",
 					Short: "stop the chain",
-					Flags: defaultFlags,
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "stop the chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+					),
 				},
 				{
 					Use:   "faucet",

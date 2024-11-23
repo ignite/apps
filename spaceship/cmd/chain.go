@@ -41,16 +41,20 @@ func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	}
 	_ = session.Println(chainStatus)
 
-	if !c.HasFaucetScript(ctx) {
-		return ErrServerNotInitialized
-	}
+	flags := plugin.Flags(cmd.Flags)
+	faucet, _ := flags.GetBool(flagFaucet)
+	if faucet {
+		if !c.HasFaucetScript(ctx) {
+			return ErrServerNotInitialized
+		}
 
-	stopStatus, err := c.FaucetStatus(ctx)
-	if err != nil {
-		return err
+		stopStatus, err := c.FaucetStatus(ctx)
+		if err != nil {
+			return err
+		}
+		_ = session.Println(stopStatus)
 	}
-
-	return session.Println(stopStatus)
+	return nil
 }
 
 // ExecuteSSHRestart executes the ssh restart subcommand.
@@ -74,20 +78,25 @@ func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *
 	}
 	_ = session.Println(chainRestart)
 
-	if !c.HasFaucetScript(ctx) {
-		return ErrServerNotInitialized
-	}
+	flags := plugin.Flags(cmd.Flags)
+	faucet, _ := flags.GetBool(flagFaucet)
+	if faucet {
+		if !c.HasFaucetScript(ctx) {
+			return ErrServerNotInitialized
+		}
 
-	faucetPort, err := faucetPort(cmd.Flags)
-	if err != nil {
-		return err
-	}
-	faucetRestart, err := c.FaucetRestart(ctx, faucetPort)
-	if err != nil {
-		return err
-	}
+		faucetPort, err := faucetPort(cmd.Flags)
+		if err != nil {
+			return err
+		}
 
-	return session.Println(faucetRestart)
+		faucetRestart, err := c.FaucetRestart(ctx, faucetPort)
+		if err != nil {
+			return err
+		}
+		_ = session.Println(faucetRestart)
+	}
+	return nil
 }
 
 // ExecuteSSHSStop executes the ssh stop subcommand.
@@ -111,16 +120,20 @@ func ExecuteSSHSStop(ctx context.Context, cmd *plugin.ExecutedCommand, chain *pl
 	}
 	_ = session.Println(chainStop)
 
-	if !c.HasFaucetScript(ctx) {
-		return ErrServerNotInitialized
-	}
+	flags := plugin.Flags(cmd.Flags)
+	faucet, _ := flags.GetBool(flagFaucet)
+	if faucet {
+		if !c.HasFaucetScript(ctx) {
+			return ErrServerNotInitialized
+		}
 
-	faucetStop, err := c.FaucetStop(ctx)
-	if err != nil {
-		return err
+		faucetStop, err := c.FaucetStop(ctx)
+		if err != nil {
+			return err
+		}
+		_ = session.Println(faucetStop)
 	}
-
-	return session.Println(faucetStop)
+	return nil
 }
 
 // ExecuteSSHDeploy executes the ssh deploy subcommand.
