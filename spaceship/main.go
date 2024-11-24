@@ -29,16 +29,36 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	// Remove the first two elements "ignite" and "spaceship" from OsArgs.
 	args := c.OsArgs[2:]
 	switch args[0] {
-	case "deploy":
-		return cmd.ExecuteSSHDeploy(ctx, c, chainInfo)
-	case "log":
-		return cmd.ExecuteSSHLog(ctx, c, chainInfo)
 	case "status":
 		return cmd.ExecuteSSHStatus(ctx, c, chainInfo)
+	case "deploy":
+		return cmd.ExecuteSSHDeploy(ctx, c, chainInfo)
 	case "restart":
 		return cmd.ExecuteSSHRestart(ctx, c, chainInfo)
 	case "stop":
 		return cmd.ExecuteSSHSStop(ctx, c, chainInfo)
+	case "log":
+		switch args[1] {
+		case "chain":
+			return cmd.ExecuteChainSSHLog(ctx, c, chainInfo)
+		case "faucet":
+			return cmd.ExecuteFaucetSSHLog(ctx, c, chainInfo)
+		default:
+			return fmt.Errorf("unknown log command: %s", args[1])
+		}
+	case "faucet":
+		switch args[1] {
+		case "status":
+			return cmd.ExecuteSSHFaucetStatus(ctx, c, chainInfo)
+		case "start":
+			return cmd.ExecuteSSHFaucetStart(ctx, c, chainInfo)
+		case "restart":
+			return cmd.ExecuteSSHFaucetRestart(ctx, c, chainInfo)
+		case "stop":
+			return cmd.ExecuteSSHSFaucetStop(ctx, c, chainInfo)
+		default:
+			return fmt.Errorf("unknown faucet command: %s", args[1])
+		}
 	default:
 		return fmt.Errorf("unknown command: %s", args[0])
 	}

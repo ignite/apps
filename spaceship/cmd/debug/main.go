@@ -21,8 +21,9 @@ func main() {
 		args      = os.Args
 		ctx       = context.Background()
 		chainInfo = &plugin.ChainInfo{
-			AppPath: filepath.Join(home, "Desktop/go/src/github.com/ignite/mars"),
-			ChainId: "mars",
+			AppPath:    filepath.Join(home, "Desktop/go/src/github.com/ignite/mars"),
+			ConfigPath: filepath.Join(home, "Desktop/go/src/github.com/ignite/mars/config.yml"),
+			ChainId:    "mars",
 		}
 		c = &plugin.ExecutedCommand{
 			Use:    args[1],
@@ -57,7 +58,15 @@ func main() {
 				Usage:     "run init chain and create the home folder",
 				Type:      plugin.FlagTypeBool,
 				Value:     "true",
-			})
+			},
+			&plugin.Flag{
+				Name:         "faucet",
+				Shorthand:    "f",
+				Usage:        "create a chain faucet",
+				Type:         plugin.FlagTypeBool,
+				DefaultValue: "true",
+			},
+		)
 		if err := cmd.ExecuteSSHDeploy(ctx, c, chainInfo); err != nil {
 			fmt.Fprintln(os.Stderr, err)
 			return
@@ -69,8 +78,18 @@ func main() {
 			Type:  plugin.FlagTypeBool,
 			Value: "true",
 		})
-		if err := cmd.ExecuteSSHLog(ctx, c, chainInfo); err != nil {
-			fmt.Fprintln(os.Stderr, err)
+		switch args[2] {
+		case "chain":
+			if err := cmd.ExecuteChainSSHLog(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "faucet":
+			if err := cmd.ExecuteFaucetSSHLog(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+			fmt.Fprintf(os.Stderr, "unknown log command: %s", args[2])
 			return
 		}
 	case "status":
@@ -88,8 +107,32 @@ func main() {
 			fmt.Fprintln(os.Stderr, err)
 			return
 		}
-	default:
-		fmt.Fprintf(os.Stderr, "unknown command: %s", args[1])
-		return
+	case "faucet":
+		switch args[2] {
+		case "status":
+			if err := cmd.ExecuteSSHFaucetStatus(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "start":
+			if err := cmd.ExecuteSSHFaucetStart(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "restart":
+			if err := cmd.ExecuteSSHFaucetRestart(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+		case "stop":
+			if err := cmd.ExecuteSSHSFaucetStop(ctx, c, chainInfo); err != nil {
+				fmt.Fprintln(os.Stderr, err)
+				return
+			}
+
+		default:
+			fmt.Fprintf(os.Stderr, "unknown faucet command: %s", args[2])
+			return
+		}
 	}
 }
