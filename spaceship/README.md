@@ -12,10 +12,10 @@ Spaceship is an Ignite App designed to extend the [Ignite CLI](https://github.co
 Spaceship provides multiple ways to connect to your SSH server for deployment:
 
 ```sh
-ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa
-ignite spaceship deploy 127.0.0.1 --user root --key $HOME/.ssh/id_rsa
-ignite spaceship deploy 127.0.0.1 --user root --password password
-ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --key-password key_password
+ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship deploy <ip-address> --user root --key $HOME/.ssh/id_rsa
+ignite spaceship deploy <ip-address> --user root --password password
+ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa --key-password key_password
 ```
 
 Each command initiates a build of the blockchain binary and sets up the chain's home directory based on the configuration. The app then connects to the specified SSH server, establishes workspaces, transfers the binary, and executes it using a runner script.
@@ -34,31 +34,31 @@ To manage your blockchain deployment, use the following commands:
 - **Check status**:
 
 ```sh
-ignite spaceship status root@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship status <user>@<ip-address> --key $HOME/.ssh/id_rsa
 ```
 
 - **View logs**:
 
 ```sh
-ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship log <user>@<ip-address> --key $HOME/.ssh/id_rsa
 ```
 
 - **Watch the logs in real time**:
 
 ```sh
-ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa --real-time
+ignite spaceship log <user>@<ip-address> --key $HOME/.ssh/id_rsa --real-time
 ```
 
 - **Restart the chain**:
 
 ```sh
-ignite spaceship restart root@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship restart <user>@<ip-address> --key $HOME/.ssh/id_rsa
 ```
 
 - **Stop the chain**:
 
 ```sh
-ignite spaceship stop root@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship stop <user>@<ip-address> --key $HOME/.ssh/id_rsa
 ```
 
 To redeploy the chain on the same server without overwriting the home directory, use the `--init-chain` flag to reinitialize the chain if necessary.
@@ -68,19 +68,19 @@ To redeploy the chain on the same server without overwriting the home directory,
 You can deploy your chain along with a faucet application by passing the faucet flag to the deploy command:
 
 ```sh
-ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet
+ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa --faucet
 ```
 
 You can also specify the faucet port:
 
 ```sh
-ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet --faucet-port 8077
+ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa --faucet --faucet-port 8077
 ```
 
 To check the faucet logs, pass the parameter `faucet` to the `--app` flag in the log command:
 
 ```sh
-ignite spaceship log root@127.0.0.1 --key $HOME/.ssh/id_rsa --app faucet
+ignite spaceship log <user>@<ip-address> --key $HOME/.ssh/id_rsa --app faucet
 ```
 
 ### Config
