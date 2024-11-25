@@ -9,6 +9,11 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
+const (
+	flagFaucet     = "faucet"
+	flagFaucetPort = "faucet-port"
+)
+
 func faucetPort(f []*plugin.Flag) (uint64, error) {
 	flags := plugin.Flags(f)
 	port, err := flags.GetUint64(flagFaucetPort)

@@ -1,6 +1,13 @@
 package cmd
 
-import "github.com/ignite/cli/v28/ignite/services/plugin"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+
+	"github.com/ignite/apps/spaceship/pkg/ssh"
+)
 
 var defaultFlags = []*plugin.Flag{
 	{
@@ -73,44 +80,30 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:   "log [host]",
 					Short: "get remote logs",
-					Commands: []*plugin.Command{
-						{
-							Use:   "chain",
-							Short: "get chain logs if its running",
-							Flags: append(defaultFlags,
-								&plugin.Flag{
-									Name:         flagLines,
-									Shorthand:    "l",
-									Usage:        "number of lines of chain logs",
-									Type:         plugin.FlagTypeInt,
-									DefaultValue: "100",
-								},
-								&plugin.Flag{
-									Name:  flagRealTime,
-									Usage: "show the logs in the real time",
-									Type:  plugin.FlagTypeBool,
-								},
-							),
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagLines,
+							Shorthand:    "l",
+							Usage:        "number of lines of chain logs",
+							Type:         plugin.FlagTypeInt,
+							DefaultValue: "100",
 						},
-						{
-							Use:   "faucet",
-							Short: "get faucet logs if its running",
-							Flags: append(defaultFlags,
-								&plugin.Flag{
-									Name:         flagLines,
-									Shorthand:    "l",
-									Usage:        "number of lines of chain logs",
-									Type:         plugin.FlagTypeInt,
-									DefaultValue: "100",
-								},
-								&plugin.Flag{
-									Name:  flagRealTime,
-									Usage: "show the logs in the real time",
-									Type:  plugin.FlagTypeBool,
-								},
-							),
+						&plugin.Flag{
+							Name:  flagRealTime,
+							Usage: "show the logs in the real time",
+							Type:  plugin.FlagTypeBool,
 						},
-					},
+						&plugin.Flag{
+							Name:      flagAppLog,
+							Shorthand: "a",
+							Usage: fmt.Sprintf(
+								"the app to show the log (%s)",
+								strings.Join(ssh.LogTypes(), ","),
+							),
+							Type:         plugin.FlagTypeString,
+							DefaultValue: ssh.LogChain.String(),
+						},
+					),
 				},
 				{
 					Use:   "status [host]",

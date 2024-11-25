@@ -11,16 +11,14 @@ import (
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 )
 
-func ExecuteChainSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
-	return ExecuteSSHLog(ctx, ssh.LogChain, cmd, chain)
-}
-
-func ExecuteFaucetSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
-	return ExecuteSSHLog(ctx, ssh.LogFaucet, cmd, chain)
-}
+const (
+	flagLines    = "lines"
+	flagRealTime = "real-time"
+	flagAppLog   = "app"
+)
 
 // ExecuteSSHLog executes the ssh log subcommand.
-func ExecuteSSHLog(ctx context.Context, logType ssh.LogType, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
+func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
@@ -28,7 +26,13 @@ func ExecuteSSHLog(ctx context.Context, logType ssh.LogType, cmd *plugin.Execute
 		flags       = plugin.Flags(cmd.Flags)
 		lines, _    = flags.GetInt(flagLines)
 		realTime, _ = flags.GetBool(flagRealTime)
+		appLog, _   = flags.GetString(flagAppLog)
 	)
+
+	logType, err := ssh.ParseLogType(appLog)
+	if err != nil {
+		return err
+	}
 
 	c, err := executeSSH(cmd, chain)
 	if err != nil {

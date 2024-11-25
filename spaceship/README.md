@@ -66,6 +66,26 @@ ignite spaceship stop root@127.0.0.1 --key $HOME/.ssh/id_rsa
 To redeploy the chain on the same server without overwriting the home directory, use the `--init-chain` flag to
 reinitialize the chain if necessary.
 
+## Faucet
+
+You  can deploy your chain along with a faucet application passing the faucet flag to the deploy command
+
+```ssh
+ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet
+```
+
+and also specify the faucet port:
+
+```ssh
+ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet --faucet-port 8077
+```
+
+To check the faucet logs, pass the parameter `faucet` to the `--app` flag into the log command:
+
+```sh
+ignite spaceship log root@127.0.0.1 --key $HOME/.ssh/id_rsa --app faucet
+```
+
 ### Config
 
 You can override the default [chain configuration](https://docs.ignite.com/references/config#validators) by using the

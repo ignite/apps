@@ -5,10 +5,12 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/cmd"
+	"github.com/ignite/apps/spaceship/pkg/ssh"
 )
 
 func main() {
@@ -72,24 +74,27 @@ func main() {
 			return
 		}
 	case "log":
-		c.Flags = append(c.Flags, &plugin.Flag{
-			Name:  "real-time",
-			Usage: "show the logs in the real time",
-			Type:  plugin.FlagTypeBool,
-			Value: "true",
-		})
-		switch args[2] {
-		case "chain":
-			if err := cmd.ExecuteChainSSHLog(ctx, c, chainInfo); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-		case "faucet":
-			if err := cmd.ExecuteFaucetSSHLog(ctx, c, chainInfo); err != nil {
-				fmt.Fprintln(os.Stderr, err)
-				return
-			}
-			fmt.Fprintf(os.Stderr, "unknown log command: %s", args[2])
+		c.Flags = append(c.Flags,
+			&plugin.Flag{
+				Name:  "real-time",
+				Usage: "show the logs in the real time",
+				Type:  plugin.FlagTypeBool,
+				Value: "true",
+			},
+			&plugin.Flag{
+				Name:      "app",
+				Shorthand: "a",
+				Usage: fmt.Sprintf(
+					"the app to show the log (%s)",
+					strings.Join(ssh.LogTypes(), ","),
+				),
+				Type:         plugin.FlagTypeString,
+				DefaultValue: ssh.LogChain.String(),
+				Value:        ssh.LogChain.String(),
+			},
+		)
+		if err := cmd.ExecuteSSHLog(ctx, c, chainInfo); err != nil {
+			fmt.Fprintln(os.Stderr, err)
 			return
 		}
 	case "status":

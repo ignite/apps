@@ -30,9 +30,29 @@ type (
 const (
 	logExtension = ".log"
 
-	LogChain  LogType = "chain_"
-	LogFaucet LogType = "faucet_"
+	LogChain  LogType = "chain"
+	LogFaucet LogType = "faucet"
 )
+
+func (l LogType) String() string {
+	return string(l)
+}
+
+func LogTypes() []string {
+	return []string{LogChain.String(), LogFaucet.String()}
+}
+
+// ParseLogType parses the log type from a string.
+func ParseLogType(logType string) (LogType, error) {
+	switch LogType(strings.ToLower(logType)) {
+	case LogChain:
+		return LogChain, nil
+	case LogFaucet:
+		return LogFaucet, nil
+	default:
+		return "", errors.New("invalid log type: " + logType)
+	}
+}
 
 func (a logs) Len() int           { return len(a) }
 func (a logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
