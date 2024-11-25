@@ -10,7 +10,7 @@
       "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/wasm",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/wasm/README.md",
   "license": {
     "name": "MIT",
