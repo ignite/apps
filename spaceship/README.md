@@ -32,25 +32,34 @@ The workspaces are organized under `$HOME/workspace/<chain-id>` and include:
 To manage your blockchain deployment, use the following commands:
 
 - **Check status**:
-  ```sh
-  ignite spaceship status root@<ip-address> --key $HOME/.ssh/id_rsa
-  ```
+
+```sh
+ignite spaceship status root@<ip-address> --key $HOME/.ssh/id_rsa
+```
+
 - **View logs**:
-  ```sh
-  ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa
-  ```
+
+```sh
+ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa
+```
+
 - **Watch the logs in real time**:
-  ```sh
-  ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa --real-time
-  ```
+
+```sh
+ignite spaceship log root@<ip-address> --key $HOME/.ssh/id_rsa --real-time
+```
+
 - **Restart the chain**:
-  ```sh
-  ignite spaceship restart root@<ip-address> --key $HOME/.ssh/id_rsa
-  ```
+
+```sh
+ignite spaceship restart root@<ip-address> --key $HOME/.ssh/id_rsa
+```
+
 - **Stop the chain**:
-  ```sh
-  ignite spaceship stop root@<ip-address> --key $HOME/.ssh/id_rsa
-  ```
+
+```sh
+ignite spaceship stop root@<ip-address> --key $HOME/.ssh/id_rsa
+```
 
 To redeploy the chain on the same server without overwriting the home directory, use the `--init-chain` flag to reinitialize the chain if necessary.
 
@@ -58,13 +67,13 @@ To redeploy the chain on the same server without overwriting the home directory,
 
 You can deploy your chain along with a faucet application by passing the faucet flag to the deploy command:
 
-```ssh
+```sh
 ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet
 ```
 
 You can also specify the faucet port:
 
-```ssh
+```sh
 ignite spaceship deploy root@127.0.0.1 --key $HOME/.ssh/id_rsa --faucet --faucet-port 8077
 ```
 
