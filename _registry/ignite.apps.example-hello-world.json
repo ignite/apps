@@ -12,7 +12,7 @@
       "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/examples/hello-world",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/examples/hello-world/README.md",
   "license": {
     "name": "MIT",

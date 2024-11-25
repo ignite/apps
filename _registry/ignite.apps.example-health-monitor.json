@@ -12,7 +12,7 @@
       "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/examples/health-monitor",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/examples/health-monitor/README.md",
   "license": {
     "name": "MIT",

@@ -12,7 +12,7 @@
       "github": "julienrbrt"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/consumer",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/consumer/README.md",
   "license": {
     "name": "MIT",

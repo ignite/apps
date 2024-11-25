@@ -14,7 +14,7 @@
       "github": "julienrbrt"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/appregistry",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/appregistry/README.md",
   "license": {
     "name": "MIT",

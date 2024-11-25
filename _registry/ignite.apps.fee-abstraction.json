@@ -10,7 +10,7 @@
       "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/fee-abstraction",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/fee-abstraction/README.md",
   "license": {
     "name": "MIT",
