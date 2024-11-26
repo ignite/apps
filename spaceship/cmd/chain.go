@@ -20,6 +20,10 @@ import (
 	"github.com/ignite/apps/spaceship/templates/script"
 )
 
+const (
+	flagInitChain = "init-chain"
+)
+
 // ExecuteSSHStatus executes the ssh status subcommand.
 func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))

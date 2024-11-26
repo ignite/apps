@@ -16,11 +16,6 @@ const (
 	flagKey         = "key"
 	flagRawKey      = "raw-key"
 	flagKeyPassword = "key-password"
-	flagInitChain   = "init-chain"
-	flagFaucet      = "faucet"
-	flagFaucetPort  = "faucet-port"
-	flagLines       = "lines"
-	flagRealTime    = "real-time"
 
 	statusConnecting = "Connecting..."
 )

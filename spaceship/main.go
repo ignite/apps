@@ -38,14 +38,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.Cl
 	case "stop":
 		return cmd.ExecuteSSHSStop(ctx, c, chainInfo)
 	case "log":
-		switch args[1] {
-		case "chain":
-			return cmd.ExecuteChainSSHLog(ctx, c, chainInfo)
-		case "faucet":
-			return cmd.ExecuteFaucetSSHLog(ctx, c, chainInfo)
-		default:
-			return fmt.Errorf("unknown log command: %s", args[1])
-		}
+		return cmd.ExecuteSSHLog(ctx, c, chainInfo)
 	case "faucet":
 		switch args[1] {
 		case "status":
