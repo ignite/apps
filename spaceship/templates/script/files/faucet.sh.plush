@@ -20,6 +20,11 @@ ensure_directory_exists() {
 }
 
 start() {
+    if [ -f "$PID_FILE" ] && ps -p "$(cat "$PID_FILE")" > /dev/null; then
+        echo "faucet is already running with PID $(cat "$PID_FILE")."
+        return
+    fi
+
     ensure_directory_exists "$PID_FILE"
     LOG_FILE=$(get_log_file_name)
     ensure_directory_exists "$LOG_FILE"
@@ -27,7 +32,7 @@ start() {
     echo "Starting faucet on port $PORT..."
     nohup $COMMAND > "$LOG_FILE" 2>&1 &
     echo $! > "$PID_FILE"
-    echo "faucet started with PID $(cat $PID_FILE)."
+    echo "faucet started with PID $(cat "$PID_FILE")."
     echo "Logs are being written to $LOG_FILE"
 }
 
