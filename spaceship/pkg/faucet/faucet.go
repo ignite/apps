@@ -23,7 +23,7 @@ const (
 )
 
 // faucetVersion specifies the current version of the faucet application.
-var faucetVersion = semver.MustParse("0.0.2")
+var faucetVersion = semver.MustParse("0.0.3")
 
 // faucetReleaseName constructs the download URL for a faucet binary tarball given the target platform.
 func faucetReleaseName(target string) string {
