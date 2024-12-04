@@ -24,6 +24,9 @@ apps:
   wasm:
     description: Scaffold a CosmosWasm-enabled chain with ease
     path: ./wasm
+  cca:
+    description: Scaffold a blockchain frontend in seconds with Ignite
+    path: ./cca
   example-chain-info:
     description: A simple chain information application
     path: ./examples/chain-info
