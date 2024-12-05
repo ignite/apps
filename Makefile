@@ -3,6 +3,18 @@
 # Project variables.
 PROJECT_NAME = 'ignite apps'
 
+## mocks: generate mocks
+mocks:
+	@echo Generating mocks
+	@go install github.com/vektra/mockery/v2@latest
+	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
+        if [ -e "$$dir/go.mod" ]; then \
+            echo "Running go generate in $$dir"; \
+			cd "$$dir" && mockery; \
+        fi \
+    done
+
+
 ## goget: Run go get for all apps.
 goget:
 	@echo Running go get $(REPO)...

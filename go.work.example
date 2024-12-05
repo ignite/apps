@@ -6,10 +6,11 @@ use (
 	./examples/health-monitor
 	./examples/hello-world
 	./examples/hooks
+	./appregistry
 	./explorer
 	./fee-abstraction
 	./hermes
-	./appregistry
+	./network
 	./rollkit
 	./spaceship
 	./wasm
