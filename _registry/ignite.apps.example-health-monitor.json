@@ -1,5 +1,6 @@
 {
-  "appName": "example-health-monitor",
+  "appName": "Health Monitor (example)",
+  "slug": "example-health-monitor",
   "appDescription": "A simple health monitor application",
   "ignite": ">28.3.0",
   "dependencies": {
@@ -7,6 +8,10 @@
   },
   "cosmosSDK": ">0.50.4",
   "authors": [
+    {
+      "name": "Ehsan Saradar",
+      "github": "Ehsan-saradar"
+    },
     {
       "name": "Danilo Pantani",
       "github": "Pantani"

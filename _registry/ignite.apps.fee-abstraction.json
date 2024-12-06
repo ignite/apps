@@ -1,5 +1,6 @@
 {
-  "appName": "fee-abstraction",
+  "appName": "Fee Abstraction",
+  "slug": "fee-abstraction",
   "appDescription": "Integrate the fee abstraction module from osmosis-labs to make it easy for new chains to accept the currencies of existing chains",
   "ignite": ">28.5.2",
   "dependencies": {},

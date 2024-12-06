@@ -1,5 +1,6 @@
 {
-  "appName": "spaceship",
+  "appName": "Spaceship",
+  "slug": "spaceship",
   "appDescription": "Deploy a chain remote through SSH using ignite build system",
   "ignite": ">28.3.0",
   "dependencies": {},
