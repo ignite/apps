@@ -1,5 +1,6 @@
 {
   "appName": "Your App Name",
+  "slug": "your-app-slug",
   "appDescription": "A brief description of what your app does.",
   "ignite": ">28.3.0",
   "dependencies": {
