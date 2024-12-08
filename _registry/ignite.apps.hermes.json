@@ -1,5 +1,6 @@
 {
-  "appName": "hermes",
+  "appName": "Hermes",
+  "slug": "hermes",
   "appDescription": "A wrapper around the hermes IBC relayer",
   "ignite": ">0.27.0",
   "dependencies": {},

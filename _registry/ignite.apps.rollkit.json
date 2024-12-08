@@ -1,5 +1,6 @@
 {
-  "appName": "rollkit",
+  "appName": "Rollkit",
+  "slug": "rollkit",
   "appDescription": "Scaffold a RollKit application with ease",
   "ignite": ">28.4.0",
   "dependencies": {},
