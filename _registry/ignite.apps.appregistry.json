@@ -1,5 +1,6 @@
 {
-  "appName": "appregistry",
+  "appName": "App Registry",
+  "slug": "appregistry",
   "appDescription": "Explore the world of Ignite applications and more!",
   "ignite": ">28.0.0",
   "dependencies": {},

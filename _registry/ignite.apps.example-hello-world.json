@@ -1,5 +1,6 @@
 {
-  "appName": "example-hello-world",
+  "appName": "Hello World (example)",
+  "slug": "example-hello-world",
   "appDescription": "A simple hello world application",
   "ignite": ">28.3.0",
   "dependencies": {
@@ -7,6 +8,10 @@
   },
   "cosmosSDK": ">0.50.4",
   "authors": [
+    {
+      "name": "Ehsan Saradar",
+      "github": "Ehsan-saradar"
+    },
     {
       "name": "Danilo Pantani",
       "github": "Pantani"
