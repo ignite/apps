@@ -1,0 +1,4186 @@
+From 9fa2d195a8a5af8c1be774ede796c31e83213fba Mon Sep 17 00:00:00 2001
+From: Julien Robert <julien@rbrt.fr>
+Date: Fri, 15 Nov 2024 18:01:54 +0100
+Subject: [PATCH] ignite chain template
+
+---
+ templates/chain-template/CHANGELOG.md         | 440 ------------------
+ templates/chain-template/README.md            |  85 +---
+ .../asset-list/AssetListSection.tsx           |  56 ---
+ .../components/asset-list/AssetsOverview.tsx  | 192 --------
+ .../asset-list/DropdownTransferModal.tsx      | 291 ------------
+ .../asset-list/RowTransferModal.tsx           | 288 ------------
+ .../components/asset-list/index.ts            |   2 -
+ .../components/asset-list/types.tsx           |  52 ---
+ .../components/common/Footer.tsx              |   8 +-
+ .../common/Header/ChainDropdown.tsx           |  33 +-
+ .../components/common/Sidebar/NavItems.tsx    |  10 -
+ .../common/Sidebar/SidebarContent.tsx         |   4 +-
+ templates/chain-template/components/index.ts  |   1 -
+ templates/chain-template/config/chains.ts     |   7 +-
+ templates/chain-template/config/products.ts   |  52 ++-
+ .../chain-template/hooks/asset-list/index.ts  |   7 -
+ .../hooks/asset-list/useAssets.ts             | 136 ------
+ .../hooks/asset-list/useBalance.ts            |  49 --
+ .../hooks/asset-list/useChainAssetsPrices.ts  |  49 --
+ .../hooks/asset-list/useChainUtils.ts         | 177 -------
+ .../hooks/asset-list/useOsmoQueryHooks.ts     |  37 --
+ .../hooks/asset-list/useTopTokens.ts          |  45 --
+ .../hooks/asset-list/useTotalAssets.ts        | 202 --------
+ .../chain-template/hooks/common/index.ts      |   1 -
+ .../hooks/common/useStarshipChains.ts         |  47 --
+ templates/chain-template/hooks/index.ts       |   1 -
+ .../hooks/voting/useVotingData.ts             |   2 +-
+ templates/chain-template/package.json         |   9 +-
+ templates/chain-template/pages/_app.tsx       |   2 +-
+ templates/chain-template/pages/asset-list.tsx |  13 -
+ templates/chain-template/pages/docs.tsx       |  10 +-
+ templates/chain-template/pages/faucet.tsx     | 214 ---------
+ .../starship/configs/config.yaml              |  36 --
+ templates/chain-template/starship/index.ts    |   1 -
+ templates/chain-template/starship/types.ts    |  19 -
+ .../chain-template/utils/asset-list/assets.ts |  19 -
+ .../chain-template/utils/asset-list/base.ts   |  96 ----
+ .../chain-template/utils/asset-list/format.ts |  31 --
+ .../chain-template/utils/asset-list/index.ts  |   5 -
+ .../chain-template/utils/asset-list/pool.ts   | 279 -----------
+ .../chain-template/utils/asset-list/types.ts  |  85 ----
+ templates/chain-template/utils/common.ts      |   2 +-
+ templates/chain-template/utils/index.ts       |   1 -
+ templates/chain-template/yarn.lock            | 281 ++---------
+ 44 files changed, 88 insertions(+), 3289 deletions(-)
+ delete mode 100644 templates/chain-template/CHANGELOG.md
+ delete mode 100644 templates/chain-template/components/asset-list/AssetListSection.tsx
+ delete mode 100644 templates/chain-template/components/asset-list/AssetsOverview.tsx
+ delete mode 100644 templates/chain-template/components/asset-list/DropdownTransferModal.tsx
+ delete mode 100644 templates/chain-template/components/asset-list/RowTransferModal.tsx
+ delete mode 100644 templates/chain-template/components/asset-list/index.ts
+ delete mode 100644 templates/chain-template/components/asset-list/types.tsx
+ delete mode 100644 templates/chain-template/hooks/asset-list/index.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useAssets.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useBalance.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useChainAssetsPrices.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useChainUtils.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useOsmoQueryHooks.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useTopTokens.ts
+ delete mode 100644 templates/chain-template/hooks/asset-list/useTotalAssets.ts
+ delete mode 100644 templates/chain-template/hooks/common/useStarshipChains.ts
+ delete mode 100644 templates/chain-template/pages/asset-list.tsx
+ delete mode 100644 templates/chain-template/pages/faucet.tsx
+ delete mode 100644 templates/chain-template/starship/configs/config.yaml
+ delete mode 100644 templates/chain-template/starship/index.ts
+ delete mode 100644 templates/chain-template/starship/types.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/assets.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/base.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/format.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/index.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/pool.ts
+ delete mode 100644 templates/chain-template/utils/asset-list/types.ts
+
+diff --git a/templates/chain-template/CHANGELOG.md b/templates/chain-template/CHANGELOG.md
+deleted file mode 100644
+index 4e82db79..00000000
+--- a/templates/chain-template/CHANGELOG.md
++++ /dev/null
+@@ -1,440 +0,0 @@
+-# Change Log
+-
+-All notable changes to this project will be documented in this file.
+-See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
+-
+-# 1.1.0 (2024-10-08)
+-
+-
+-### Bug Fixes
+-
+-* contract tab width ([7c859c0](https://github.com/cosmology-tech/create-cosmos-app/commit/7c859c0a94b7d42c772b33da56442668b5b8afd7))
+-* create contract popover style ([b2db706](https://github.com/cosmology-tech/create-cosmos-app/commit/b2db7060ef59d258182e0323589db85a74aea1ad))
+-* **style:** decrease max width ([62a25f8](https://github.com/cosmology-tech/create-cosmos-app/commit/62a25f8a3245542ec3e69907aee790afa3b61b73))
+-
+-
+-### Features
+-
+-* add contract address input field ([029d260](https://github.com/cosmology-tech/create-cosmos-app/commit/029d26056994664331d5bf69753885bf98616d2c))
+-* add create new contract button ([ef87061](https://github.com/cosmology-tech/create-cosmos-app/commit/ef8706144b607e1da1fae070a6d2dc43992fc21a))
+-* add dark theme styles ([56bd0cb](https://github.com/cosmology-tech/create-cosmos-app/commit/56bd0cb246cf154436a55e8c79cdb52b8ab3908b))
+-* add execute contract UI ([d158fa4](https://github.com/cosmology-tech/create-cosmos-app/commit/d158fa496d63a34125a5719ab1c1e5a502496d26))
+-* add instantiate contract UI ([3be345b](https://github.com/cosmology-tech/create-cosmos-app/commit/3be345b2704949a616757efa37e3438ac0f2d54c))
+-* add mobile styles ([40df1d9](https://github.com/cosmology-tech/create-cosmos-app/commit/40df1d961bc394ca614a727c716ec911a4c4d9f7))
+-* add My Contracts, Query and Execute tabs ([c904729](https://github.com/cosmology-tech/create-cosmos-app/commit/c904729b681fc896046ec9767cdf19f49fcf6b67))
+-* add query contract UI ([a543199](https://github.com/cosmology-tech/create-cosmos-app/commit/a5431990bb62f2a0ec0ff192526820e6d91e086d))
+-* add Stepper component ([f86cf5f](https://github.com/cosmology-tech/create-cosmos-app/commit/f86cf5f4837a68a47a54ea1ea7a4ac4aa6bac7f5))
+-* add tab and contract address to URL params ([c6f0af8](https://github.com/cosmology-tech/create-cosmos-app/commit/c6f0af88b1086d464112fb7725442425c4386ff8))
+-* add upload contract UI ([43867de](https://github.com/cosmology-tech/create-cosmos-app/commit/43867deebcf8aa6ba60bd5400de75299f9b864b0))
+-* autofill admin address ([8088abc](https://github.com/cosmology-tech/create-cosmos-app/commit/8088abc93cbfd794cf7eb38ddb1cc8c156b10f72))
+-* create contract from code ID ([0d02e31](https://github.com/cosmology-tech/create-cosmos-app/commit/0d02e31a46c50c2572d4de53401abd05db1f6555))
+-* initial commit for new chain-template ([e420c63](https://github.com/cosmology-tech/create-cosmos-app/commit/e420c639cd8fba249e70e44b151cde750aec7e75))
+-* search my contracts ([336edd3](https://github.com/cosmology-tech/create-cosmos-app/commit/336edd30cf791c6538fbc2de26aacbe201471ba2))
+-* switch tabs after instantiate ([1964562](https://github.com/cosmology-tech/create-cosmos-app/commit/196456255052728d3f3c39a4f2ba409146fb57bb))
+-* upload to instantiate contract flow ([4f2c118](https://github.com/cosmology-tech/create-cosmos-app/commit/4f2c1186605c1ed9a239abfccdc75e2de39b2346))
+-
+-
+-
+-
+-
+-# [1.0.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.16.2...@cosmology/connect-multi-chain@1.0.0) (2024-04-06)
+-
+-
+-### Bug Fixes
+-
+-* custom filtering connect-multi-chain ([0c345ce](https://github.com/cosmology-tech/create-cosmos-app/commit/0c345ceef886ebcd28574244aee3fef8f3d9ebb7))
+-* custom filtering stake-tokens ([9cc3d24](https://github.com/cosmology-tech/create-cosmos-app/commit/9cc3d24055cc54358af9dc7d8a56856bd2ef0787))
+-* use new combobox in asset-list ([68449d3](https://github.com/cosmology-tech/create-cosmos-app/commit/68449d39411c259f85eec07b7ae42f1a712c21a9))
+-* use new dropdown for connect-multi-chain and vote-proposal ([68dd4c3](https://github.com/cosmology-tech/create-cosmos-app/commit/68dd4c3b03939b14ff46c622e6267b41ac7ddf18))
+-
+-
+-
+-
+-
+-## [0.16.2](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.16.1...@cosmology/connect-multi-chain@0.16.2) (2024-01-20)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.16.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.16.0...@cosmology/connect-multi-chain@0.16.1) (2024-01-19)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.16.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.7...@cosmology/connect-multi-chain@0.16.0) (2024-01-19)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.7](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.6...@cosmology/connect-multi-chain@0.15.7) (2024-01-19)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.6](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.5...@cosmology/connect-multi-chain@0.15.6) (2024-01-19)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.5](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.4...@cosmology/connect-multi-chain@0.15.5) (2023-09-27)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.4](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.3...@cosmology/connect-multi-chain@0.15.4) (2023-09-27)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.2...@cosmology/connect-multi-chain@0.15.3) (2023-07-30)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.2](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.1...@cosmology/connect-multi-chain@0.15.2) (2023-07-14)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.15.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.15.0...@cosmology/connect-multi-chain@0.15.1) (2023-06-28)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.15.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.14.3...@cosmology/connect-multi-chain@0.15.0) (2023-04-12)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.14.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.14.2...@cosmology/connect-multi-chain@0.14.3) (2023-03-28)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.14.2](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.14.1...@cosmology/connect-multi-chain@0.14.2) (2023-02-15)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.14.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.14.0...@cosmology/connect-multi-chain@0.14.1) (2023-01-11)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.14.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.13.3...@cosmology/connect-multi-chain@0.14.0) (2022-12-17)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.13.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.13.2...@cosmology/connect-multi-chain@0.13.3) (2022-11-25)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.13.2](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.13.1...@cosmology/connect-multi-chain@0.13.2) (2022-11-21)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.13.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.13.0...@cosmology/connect-multi-chain@0.13.1) (2022-11-17)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.13.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.12.0...@cosmology/connect-multi-chain@0.13.0) (2022-11-15)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.12.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.11.0...@cosmology/connect-multi-chain@0.12.0) (2022-11-14)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.11.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.10.0...@cosmology/connect-multi-chain@0.11.0) (2022-11-10)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.10.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.9.0...@cosmology/connect-multi-chain@0.10.0) (2022-11-09)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.9.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.8.5...@cosmology/connect-multi-chain@0.9.0) (2022-11-08)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.8.5](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.8.4...@cosmology/connect-multi-chain@0.8.5) (2022-11-05)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.8.4](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.8.3...@cosmology/connect-multi-chain@0.8.4) (2022-11-05)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.8.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmology/connect-multi-chain@0.8.2...@cosmology/connect-multi-chain@0.8.3) (2022-11-05)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## 0.8.2 (2022-11-01)
+-
+-**Note:** Version bump only for package @cosmology/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.8.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.8.0...@cosmonauts/connect-multi-chain@0.8.1) (2022-10-27)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.8.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.7.3...@cosmonauts/connect-multi-chain@0.8.0) (2022-10-26)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.7.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.7.2...@cosmonauts/connect-multi-chain@0.7.3) (2022-10-24)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.7.2](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.7.1...@cosmonauts/connect-multi-chain@0.7.2) (2022-10-15)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.7.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.7.0...@cosmonauts/connect-multi-chain@0.7.1) (2022-10-03)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.7.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.6.1...@cosmonauts/connect-multi-chain@0.7.0) (2022-09-30)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.6.1](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.6.0...@cosmonauts/connect-multi-chain@0.6.1) (2022-09-25)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.6.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.5.0...@cosmonauts/connect-multi-chain@0.6.0) (2022-09-25)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.5.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.4.0...@cosmonauts/connect-multi-chain@0.5.0) (2022-09-23)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.4.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.3.0...@cosmonauts/connect-multi-chain@0.4.0) (2022-09-22)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.3.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.2.0...@cosmonauts/connect-multi-chain@0.3.0) (2022-09-22)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-# [0.2.0](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.10...@cosmonauts/connect-multi-chain@0.2.0) (2022-09-22)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.10](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.9...@cosmonauts/connect-multi-chain@0.1.10) (2022-09-11)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.9](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.8...@cosmonauts/connect-multi-chain@0.1.9) (2022-09-08)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.8](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.7...@cosmonauts/connect-multi-chain@0.1.8) (2022-09-02)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.7](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.6...@cosmonauts/connect-multi-chain@0.1.7) (2022-08-30)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.6](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.5...@cosmonauts/connect-multi-chain@0.1.6) (2022-08-27)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.5](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.4...@cosmonauts/connect-multi-chain@0.1.5) (2022-08-27)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.4](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.3...@cosmonauts/connect-multi-chain@0.1.4) (2022-08-27)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## [0.1.3](https://github.com/cosmology-tech/create-cosmos-app/compare/@cosmonauts/connect-multi-chain@0.1.2...@cosmonauts/connect-multi-chain@0.1.3) (2022-08-25)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## 0.1.2 (2022-08-25)
+-
+-**Note:** Version bump only for package @cosmonauts/connect-multi-chain
+-
+-
+-
+-
+-
+-## 0.1.1 (2022-08-24)
+-
+-**Note:** Version bump only for package @cosmos-app/connect-multi-chain
+diff --git a/templates/chain-template/README.md b/templates/chain-template/README.md
+index 8f7ea36c..93ac8c07 100644
+--- a/templates/chain-template/README.md
++++ b/templates/chain-template/README.md
+@@ -1,6 +1,4 @@
+-This is a Cosmos App project bootstrapped with [`create-cosmos-app`](https://github.com/cosmology-tech/create-cosmos-app).
+-
+-## Getting Started
++# Usage
+ 
+ First, install the packages and run the development server:
+ 
+@@ -11,84 +9,3 @@ yarn && yarn dev
+ Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+ 
+ You can start editing the page by modifying `pages/index.tsx`. The page auto-updates as you edit the file.
+-
+-## How to connect to Starship chains
+-
+-1. Follow the official guide to set up Starship: https://docs.cosmology.zone/starship/get-started/step-1
+-2. Run `yarn starship start` and wait until Starship is up and running
+-3. Open a new terminal and run `yarn dev`
+-4. Open http://localhost:3000, select "Osmosis Devnet" or "Cosmos Hub Devnet" from the chain dropdown in the top right corner then click "Connect Wallet" in the left sidebar to connect to the chain
+-5. Go to "Faucet" to get some test tokens and enjoy!
+-
+-## Learn More
+-
+-### Chain Registry
+-
+-The npm package for the Official Cosmos chain registry. Get chain and token data for you application.
+-
+-- https://github.com/cosmology-tech/chain-registry
+-
+-### Cosmology Videos
+-
+-Checkout more videos for how to use various frontend tooling in the Cosmos!
+-
+-- https://cosmology.zone/learn
+-
+-### Cosmos Kit
+-
+-A wallet connector for the Cosmos ⚛️
+-
+-- https://github.com/cosmology-tech/cosmos-kit
+-
+-### Telescope
+-
+-A "babel for the Cosmos", Telescope is a TypeScript Transpiler for Cosmos Protobufs. Telescope is used to generate libraries for Cosmos blockchains. Simply point to your protobuffer files and create developer-friendly Typescript libraries for teams to build on your blockchain.
+-
+-- https://github.com/cosmology-tech/telescope
+-
+-🎥 [Checkout the Telescope video playlist](https://www.youtube.com/watch?v=n82MsLe82mk&list=PL-lMkVv7GZwyQaK6bp6kMdOS5mzosxytC) to learn how to use `telescope`!
+-
+-### CosmWasm TS Codegen
+-
+-The quickest and easiest way to interact with CosmWasm Contracts. @cosmwasm/ts-codegen converts your CosmWasm smart contracts into dev-friendly TypeScript classes so you can focus on shipping code.
+-
+-- https://github.com/CosmWasm/ts-codegen
+-
+-🎥 [Checkout the CosmWasm/ts-codegen video playlist](https://www.youtube.com/watch?v=D_A5V2PfNLA&list=PL-lMkVv7GZwz1KO3jANwr5W4MoziruXwK) to learn how to use `ts-codegen`!
+-
+-## Learn More about Next.js
+-
+-To learn more about Next.js, take a look at the following resources:
+-
+-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+-
+-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+-
+-## Deploy on Vercel
+-
+-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+-
+-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+-
+-## Related
+-
+-Checkout these related projects:
+-
+-- [@cosmology/telescope](https://github.com/cosmology-tech/telescope) Your Frontend Companion for Building with TypeScript with Cosmos SDK Modules.
+-- [@cosmwasm/ts-codegen](https://github.com/CosmWasm/ts-codegen) Convert your CosmWasm smart contracts into dev-friendly TypeScript classes.
+-- [chain-registry](https://github.com/cosmology-tech/chain-registry) Everything from token symbols, logos, and IBC denominations for all assets you want to support in your application.
+-- [cosmos-kit](https://github.com/cosmology-tech/cosmos-kit) Experience the convenience of connecting with a variety of web3 wallets through a single, streamlined interface.
+-- [create-cosmos-app](https://github.com/cosmology-tech/create-cosmos-app) Set up a modern Cosmos app by running one command.
+-- [interchain-ui](https://github.com/cosmology-tech/interchain-ui) The Interchain Design System, empowering developers with a flexible, easy-to-use UI kit.
+-- [starship](https://github.com/cosmology-tech/starship) Unified Testing and Development for the Interchain.
+-
+-## Credits
+-
+-🛠 Built by Cosmology — if you like our tools, please consider delegating to [our validator ⚛️](https://cosmology.zone/validator)
+-
+-## Disclaimer
+-
+-AS DESCRIBED IN THE LICENSES, THE SOFTWARE IS PROVIDED “AS IS”, AT YOUR OWN RISK, AND WITHOUT WARRANTIES OF ANY KIND.
+-
+-No developer or entity involved in creating this software will be liable for any claims or damages whatsoever associated with your use, inability to use, or your interaction with other users of the code, including any direct, indirect, incidental, special, exemplary, punitive or consequential damages, or loss of profits, cryptocurrencies, tokens, or anything else of value.
+diff --git a/templates/chain-template/components/asset-list/AssetListSection.tsx b/templates/chain-template/components/asset-list/AssetListSection.tsx
+deleted file mode 100644
+index e4189f1e..00000000
+--- a/templates/chain-template/components/asset-list/AssetListSection.tsx
++++ /dev/null
+@@ -1,56 +0,0 @@
+-import React from 'react';
+-import { Text, Box } from '@interchain-ui/react';
+-import AssetsOverview from './AssetsOverview';
+-import { useChain } from '@cosmos-kit/react';
+-import { useAssets } from '@/hooks';
+-import { ChainName } from 'cosmos-kit';
+-
+-interface AssetListSectionProps {
+-  chainName: ChainName;
+-  children?: React.ReactNode;
+-}
+-
+-export const AssetListSection = ({ chainName }: AssetListSectionProps) => {
+-  const { isWalletConnected } = useChain(chainName);
+-  const { data, isLoading, refetch } = useAssets(chainName);
+-
+-  if (!isWalletConnected) {
+-    return (
+-      <Box maxWidth="768px" marginX="auto" marginBottom="60px">
+-        <Text
+-          fontSize="$xl"
+-          fontWeight="$semibold"
+-          attributes={{ marginBottom: '$10' }}
+-        >
+-          My assets
+-        </Text>
+-
+-        <Box
+-          height="160px"
+-          bg="$cardBg"
+-          borderRadius="$md"
+-          p="$6"
+-          display="flex"
+-          justifyContent="center"
+-          alignItems="center"
+-        >
+-          <Text fontSize="$md" color="$textSecondary">
+-            Connect the wallet to see the assets
+-          </Text>
+-        </Box>
+-      </Box>
+-    );
+-  }
+-
+-  return (
+-    <Box maxWidth="$containerMd" marginX="auto" marginBottom="$17">
+-      <AssetsOverview
+-        isLoading={isLoading || !data}
+-        assets={data?.assets ?? []}
+-        prices={data?.prices ?? {}}
+-        selectedChainName={chainName}
+-        refetch={refetch}
+-      />
+-    </Box>
+-  );
+-};
+diff --git a/templates/chain-template/components/asset-list/AssetsOverview.tsx b/templates/chain-template/components/asset-list/AssetsOverview.tsx
+deleted file mode 100644
+index 8a5967c5..00000000
+--- a/templates/chain-template/components/asset-list/AssetsOverview.tsx
++++ /dev/null
+@@ -1,192 +0,0 @@
+-import React, { useMemo, useState } from 'react';
+-import { flushSync } from 'react-dom';
+-import { useChain } from '@cosmos-kit/react';
+-import BigNumber from 'bignumber.js';
+-import { ChainName } from 'cosmos-kit';
+-import { SingleChain, SingleChainProps } from '@interchain-ui/react';
+-
+-import { useDisclosure, useChainUtils, useTotalAssets } from '@/hooks';
+-import {
+-  truncDecimals,
+-  formatDollarValue,
+-  prettyAssetToTransferItem,
+-} from '@/utils';
+-
+-import { DropdownTransferModal } from './DropdownTransferModal';
+-import { RowTransferModal } from './RowTransferModal';
+-
+-import { PrettyAsset, Transfer, TransferInfo } from './types';
+-
+-interface AssetsOverviewProps {
+-  isLoading?: boolean;
+-  assets: PrettyAsset[];
+-  prices: Record<string, number>;
+-  selectedChainName: ChainName;
+-  refetch?: () => void;
+-}
+-
+-const AssetsOverview = ({
+-  assets,
+-  selectedChainName,
+-  isLoading,
+-}: AssetsOverviewProps) => {
+-  const [dropdownTransferInfo, setTransferInfo] = useState<TransferInfo>();
+-  const [rowTransferInfo, setRowTransferInfo] = useState<TransferInfo>();
+-
+-  const { chain } = useChain(selectedChainName);
+-
+-  const {
+-    data,
+-    isLoading: isLoadingTotalAssets,
+-    refetch,
+-  } = useTotalAssets(selectedChainName);
+-  const {
+-    getChainName,
+-    getNativeDenom,
+-    isNativeAsset,
+-    getDenomBySymbolAndChain,
+-  } = useChainUtils(selectedChainName);
+-
+-  const modalControl = useDisclosure();
+-  const rowModalControl = useDisclosure();
+-
+-  const ibcAssets = useMemo(
+-    () => assets.filter((asset) => !isNativeAsset(asset)),
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-    [assets]
+-  );
+-
+-  const hasBalance = useMemo(
+-    () => ibcAssets.some((asset) => new BigNumber(asset.amount).gt(0)),
+-    [ibcAssets]
+-  );
+-
+-  const assetsToShow = useMemo(() => {
+-    const returnAssets: SingleChainProps['list'] = assets.map((asset) => ({
+-      imgSrc: asset.logoUrl ?? '',
+-      symbol: asset.symbol,
+-      denom: asset.denom,
+-      name: asset.prettyChainName,
+-      tokenAmount: truncDecimals(asset.displayAmount, 6),
+-      tokenAmountPrice: formatDollarValue(asset.dollarValue, asset.amount),
+-      chainName: asset.prettyChainName,
+-      showDeposit: !isNativeAsset(asset),
+-      showWithdraw: !isNativeAsset(asset),
+-      onDeposit: () => {
+-        const sourceChainName = getChainName(asset.denom);
+-        const denom = getDenomBySymbolAndChain(sourceChainName, asset.symbol);
+-        flushSync(() => {
+-          setRowTransferInfo({
+-            sourceChainName,
+-            type: Transfer.Deposit,
+-            destChainName: selectedChainName,
+-            token: {
+-              ...prettyAssetToTransferItem(asset),
+-              priceDisplayAmount: 0,
+-              available: 0,
+-              denom,
+-            },
+-          });
+-        });
+-
+-        rowModalControl.onOpen();
+-      },
+-      onWithdraw: () => {
+-        const destChainName = getChainName(asset.denom);
+-
+-        flushSync(() => {
+-          setRowTransferInfo({
+-            sourceChainName: selectedChainName,
+-            type: Transfer.Withdraw,
+-            destChainName,
+-            token: prettyAssetToTransferItem(asset),
+-          });
+-        });
+-
+-        rowModalControl.onOpen();
+-      },
+-    }));
+-
+-    return returnAssets;
+-  }, [
+-    assets,
+-    getChainName,
+-    getNativeDenom,
+-    isNativeAsset,
+-    rowModalControl,
+-    selectedChainName,
+-  ]);
+-
+-  const onWithdrawAsset = () => {
+-    const destChainName = getChainName(ibcAssets[0].denom);
+-    setTransferInfo({
+-      sourceChainName: selectedChainName,
+-      type: Transfer.Withdraw,
+-      destChainName,
+-      token: prettyAssetToTransferItem(ibcAssets[0]),
+-    });
+-    modalControl.onOpen();
+-  };
+-
+-  const onDepositAsset = () => {
+-    const sourceChainName = getChainName(ibcAssets[0].denom);
+-    const sourceChainAssetDenom = getNativeDenom(sourceChainName);
+-    setTransferInfo({
+-      sourceChainName,
+-      type: Transfer.Deposit,
+-      destChainName: selectedChainName,
+-      token: {
+-        ...prettyAssetToTransferItem(ibcAssets[0]),
+-        available: 0,
+-        priceDisplayAmount: 0,
+-        denom: sourceChainAssetDenom,
+-      },
+-    });
+-    modalControl.onOpen();
+-  };
+-
+-  return (
+-    <>
+-      <SingleChain
+-        isLoading={isLoading || isLoadingTotalAssets}
+-        title="Your assets"
+-        listTitle={`On ${chain.pretty_name}`}
+-        showDeposit={ibcAssets.length > 0}
+-        showWithdraw={hasBalance}
+-        onDeposit={onDepositAsset}
+-        onWithdraw={onWithdrawAsset}
+-        singleChainHeader={{
+-          label: `Total on ${chain.pretty_name}`,
+-          value: `${data?.total ?? 0}`,
+-        }}
+-        list={assetsToShow}
+-      />
+-
+-      {data && dropdownTransferInfo && (
+-        <DropdownTransferModal
+-          prices={data?.prices ?? {}}
+-          assets={ibcAssets}
+-          transferInfoState={{
+-            transferInfo: dropdownTransferInfo,
+-            setTransferInfo,
+-          }}
+-          modalControl={modalControl}
+-          updateData={refetch}
+-          selectedChainName={selectedChainName}
+-        />
+-      )}
+-
+-      {rowTransferInfo && (
+-        <RowTransferModal
+-          prices={data?.prices ?? {}}
+-          transferInfo={rowTransferInfo}
+-          updateData={refetch}
+-          modalControl={rowModalControl}
+-          selectedChainName={selectedChainName}
+-        />
+-      )}
+-    </>
+-  );
+-};
+-
+-export default AssetsOverview;
+diff --git a/templates/chain-template/components/asset-list/DropdownTransferModal.tsx b/templates/chain-template/components/asset-list/DropdownTransferModal.tsx
+deleted file mode 100644
+index fde312b7..00000000
+--- a/templates/chain-template/components/asset-list/DropdownTransferModal.tsx
++++ /dev/null
+@@ -1,291 +0,0 @@
+-import React, { useEffect, useState, useMemo } from 'react';
+-import {
+-  BasicModal,
+-  OverviewTransfer,
+-  OverviewTransferProps,
+-} from '@interchain-ui/react';
+-import { useChainWallet, useManager } from '@cosmos-kit/react';
+-import BigNumber from 'bignumber.js';
+-import { ibc } from 'osmo-query';
+-import { StdFee, coins } from '@cosmjs/amino';
+-import { ChainName } from 'cosmos-kit';
+-import { keplrWalletName } from '@/config';
+-import { useDisclosure, useChainUtils, useTx, useBalance } from '@/hooks';
+-import { truncDecimals } from '@/utils';
+-
+-import {
+-  PrettyAsset,
+-  PriceHash,
+-  TransferInfo,
+-  Transfer,
+-  Unpacked,
+-} from './types';
+-
+-const { transfer } = ibc.applications.transfer.v1.MessageComposer.withTypeUrl;
+-
+-const ZERO_AMOUNT = '0';
+-
+-interface OverviewTransferWrapperProps {
+-  prices: PriceHash;
+-  assets: PrettyAsset[];
+-  modalControl: ReturnType<typeof useDisclosure>;
+-  updateData: () => void;
+-  transferInfoState: {
+-    transferInfo: TransferInfo;
+-    setTransferInfo: React.Dispatch<
+-      React.SetStateAction<TransferInfo | undefined>
+-    >;
+-  };
+-  selectedChainName: ChainName;
+-}
+-
+-const OverviewTransferWrapper = (
+-  props: OverviewTransferWrapperProps & {
+-    isLoading: boolean;
+-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+-    inputValue: string;
+-    setInputValue: React.Dispatch<React.SetStateAction<string>>;
+-  }
+-) => {
+-  const {
+-    assets,
+-    prices,
+-    modalControl,
+-    transferInfoState,
+-    updateData,
+-    selectedChainName,
+-    isLoading,
+-    setIsLoading,
+-    inputValue,
+-    setInputValue,
+-  } = props;
+-
+-  const {
+-    convRawToDispAmount,
+-    symbolToDenom,
+-    getExponentByDenom,
+-    getIbcInfo,
+-    getChainName,
+-    getNativeDenom,
+-  } = useChainUtils(selectedChainName);
+-
+-  const { transferInfo, setTransferInfo } = transferInfoState;
+-
+-  const {
+-    type: transferType,
+-    token: transferToken,
+-    destChainName,
+-    sourceChainName,
+-  } = transferInfo;
+-
+-  const isDeposit = transferType === 'Deposit';
+-  const { balance, isLoading: isLoadingBalance } = useBalance(
+-    sourceChainName,
+-    isDeposit
+-  );
+-
+-  const { address: sourceAddress, connect: connectSourceChain } =
+-    useChainWallet(sourceChainName, keplrWalletName);
+-
+-  const { address: destAddress, connect: connectDestChain } = useChainWallet(
+-    destChainName,
+-    keplrWalletName
+-  );
+-
+-  const { getChainLogo } = useManager();
+-  const { tx } = useTx(sourceChainName);
+-
+-  const availableAmount = useMemo((): number => {
+-    if (!isDeposit) {
+-      return transferToken.priceDisplayAmount ?? 0;
+-    }
+-
+-    if (isLoadingBalance) {
+-      return 0;
+-    }
+-
+-    return new BigNumber(
+-      convRawToDispAmount(transferToken.symbol, balance?.amount || ZERO_AMOUNT)
+-    ).toNumber();
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [isDeposit, isLoadingBalance, transferToken]);
+-
+-  const dollarValue = new BigNumber(inputValue)
+-    .multipliedBy(prices[symbolToDenom(transferToken.symbol)])
+-    .decimalPlaces(2)
+-    .toString();
+-
+-  useEffect(() => {
+-    if (!modalControl.isOpen) return;
+-    if (!sourceAddress) connectSourceChain();
+-    if (!destAddress) connectDestChain();
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [destAddress, sourceAddress, modalControl]);
+-
+-  const closeModal = () => {
+-    modalControl.onClose();
+-    setInputValue('');
+-    setIsLoading(false);
+-  };
+-
+-  const handleTransferSubmit = async () => {
+-    if (!sourceAddress || !destAddress) return;
+-    setIsLoading(true);
+-
+-    const transferAmount = new BigNumber(inputValue)
+-      .shiftedBy(getExponentByDenom(symbolToDenom(transferToken.symbol)))
+-      .toString();
+-
+-    const { sourcePort, sourceChannel } = getIbcInfo(
+-      sourceChainName,
+-      destChainName
+-    );
+-
+-    const fee: StdFee = {
+-      amount: coins('1000', transferToken.denom ?? ''),
+-      gas: '250000',
+-    };
+-
+-    const token = {
+-      denom: transferToken.denom ?? '',
+-      amount: transferAmount,
+-    };
+-
+-    const stamp = Date.now();
+-    const timeoutInNanos = (stamp + 1.2e6) * 1e6;
+-
+-    const msg = transfer({
+-      sourcePort,
+-      sourceChannel,
+-      sender: sourceAddress,
+-      receiver: destAddress,
+-      token,
+-      // @ts-ignore
+-      timeoutHeight: undefined,
+-      timeoutTimestamp: BigInt(timeoutInNanos),
+-    });
+-
+-    await tx([msg], {
+-      fee,
+-      onSuccess: () => {
+-        updateData();
+-        closeModal();
+-      },
+-    });
+-
+-    setIsLoading(false);
+-  };
+-
+-  const assetOptions: OverviewTransferProps['dropdownList'] = useMemo(() => {
+-    return assets
+-      .filter((asset) => {
+-        if (isDeposit) {
+-          return true;
+-        }
+-        return new BigNumber(asset.amount).gt(0);
+-      })
+-      // .filter((asset) => {
+-      //   return asset.symbol !== transferToken.symbol;
+-      // })
+-      .map((asset) => ({
+-        available: new BigNumber(asset.displayAmount).toNumber(),
+-        symbol: asset.symbol,
+-        name: asset.prettyChainName,
+-        denom: asset.denom,
+-        imgSrc: asset.logoUrl ?? '',
+-        priceDisplayAmount: new BigNumber(
+-          truncDecimals(asset.dollarValue, 2)
+-        ).toNumber(),
+-      }));
+-  }, [assets, isDeposit, transferToken]);
+-  console.log('assetOptions', assetOptions);
+-
+-  const handleOnChange = (
+-    assetOption: Unpacked<OverviewTransferProps['dropdownList']>,
+-    value: number
+-  ) => {
+-    setInputValue(`${value}`);
+-
+-    setTransferInfo((prev) => {
+-      if (!prev) return;
+-
+-      if (transferType === Transfer.Withdraw) {
+-        const destChainName = getChainName(assetOption.denom ?? '');
+-        return { ...prev, destChainName, token: assetOption };
+-      }
+-
+-      const sourceChainName = getChainName(assetOption.denom ?? '');
+-      const sourceChainAssetDenom = getNativeDenom(sourceChainName);
+-      return {
+-        ...prev,
+-        sourceChainName,
+-        token: {
+-          ...assetOption,
+-          available: availableAmount,
+-          displayAmount: ZERO_AMOUNT,
+-          dollarValue: ZERO_AMOUNT,
+-          amount: ZERO_AMOUNT,
+-          denom: sourceChainAssetDenom,
+-        },
+-      };
+-    });
+-  };
+-
+-  return (
+-    <OverviewTransfer
+-      selectedItem={transferToken}
+-      isSubmitDisabled={
+-        isLoading ||
+-        !inputValue ||
+-        new BigNumber(inputValue).isEqualTo(0) ||
+-        isNaN(Number(inputValue))
+-      }
+-      fromChainLogoUrl={getChainLogo(transferInfo?.sourceChainName ?? '') ?? ''}
+-      toChainLogoUrl={getChainLogo(transferInfo?.destChainName ?? '') ?? ''}
+-      dropdownList={assetOptions}
+-      onTransfer={() => {
+-        handleTransferSubmit();
+-      }}
+-      onCancel={() => {
+-        closeModal();
+-      }}
+-      onChange={handleOnChange}
+-      timeEstimateLabel="≈ 20 seconds"
+-    />
+-  );
+-};
+-
+-export const DropdownTransferModal = (props: OverviewTransferWrapperProps) => {
+-  const { modalControl, transferInfoState } = props;
+-
+-  const [inputValue, setInputValue] = useState('');
+-  const [isLoading, setIsLoading] = useState<boolean>(false);
+-
+-  const closeModal = () => {
+-    modalControl.onClose();
+-    setInputValue('');
+-    setIsLoading(false);
+-  };
+-
+-  return (
+-    <BasicModal
+-      isOpen={modalControl.isOpen}
+-      title={transferInfoState.transferInfo.type}
+-      onClose={() => closeModal()}
+-    >
+-      {transferInfoState ? (
+-        <OverviewTransferWrapper
+-          {...props}
+-          modalControl={{
+-            ...props.modalControl,
+-            onClose: closeModal,
+-          }}
+-          isLoading={isLoading}
+-          setIsLoading={setIsLoading}
+-          inputValue={inputValue}
+-          setInputValue={setInputValue}
+-        />
+-      ) : null}
+-    </BasicModal>
+-  );
+-};
+diff --git a/templates/chain-template/components/asset-list/RowTransferModal.tsx b/templates/chain-template/components/asset-list/RowTransferModal.tsx
+deleted file mode 100644
+index 0d7ff494..00000000
+--- a/templates/chain-template/components/asset-list/RowTransferModal.tsx
++++ /dev/null
+@@ -1,288 +0,0 @@
+-import React, { useEffect, useMemo, useState } from 'react';
+-import { BasicModal, AssetWithdrawTokens } from '@interchain-ui/react';
+-import { useChainWallet, useManager } from '@cosmos-kit/react';
+-import BigNumber from 'bignumber.js';
+-import { ChainName } from 'cosmos-kit';
+-import { coins, StdFee } from '@cosmjs/amino';
+-import { useDisclosure, useChainUtils, useBalance, useTx } from '@/hooks';
+-import { keplrWalletName } from '@/config';
+-import { ibc } from 'osmo-query';
+-
+-import { PriceHash, TransferInfo, Transfer } from './types';
+-
+-const { transfer } = ibc.applications.transfer.v1.MessageComposer.withTypeUrl;
+-
+-interface IProps {
+-  prices: PriceHash;
+-  transferInfo: TransferInfo;
+-  modalControl: ReturnType<typeof useDisclosure>;
+-  updateData: () => void;
+-  selectedChainName: ChainName;
+-}
+-
+-const TransferModalBody = (
+-  props: IProps & {
+-    isLoading: boolean;
+-    setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
+-    inputValue: string;
+-    setInputValue: React.Dispatch<React.SetStateAction<string>>;
+-  }
+-) => {
+-  const {
+-    prices,
+-    selectedChainName,
+-    transferInfo,
+-    modalControl,
+-    updateData,
+-    isLoading,
+-    setIsLoading,
+-    inputValue,
+-    setInputValue,
+-  } = props;
+-
+-  const { getIbcInfo, symbolToDenom, getExponentByDenom, convRawToDispAmount } =
+-    useChainUtils(selectedChainName);
+-
+-  const {
+-    type: transferType,
+-    token: transferToken,
+-    destChainName,
+-    sourceChainName,
+-  } = transferInfo;
+-
+-  const isDeposit = transferType === Transfer.Deposit;
+-
+-  const {
+-    address: sourceAddress,
+-    connect: connectSourceChain,
+-    chain: sourceChainInfo,
+-  } = useChainWallet(sourceChainName, keplrWalletName);
+-
+-  const {
+-    address: destAddress,
+-    connect: connectDestChain,
+-    chain: destChainInfo,
+-  } = useChainWallet(destChainName, keplrWalletName);
+-
+-  const { balance, isLoading: isLoadingBalance } = useBalance(
+-    sourceChainName,
+-    isDeposit,
+-    transferInfo.token.symbol
+-  );
+-
+-  const { getChainLogo } = useManager();
+-  const { tx } = useTx(sourceChainName);
+-
+-  const availableAmount = useMemo(() => {
+-    if (!isDeposit) return transferToken.available ?? 0;
+-    if (isLoadingBalance) return 0;
+-
+-    console.log('transferInfo.token', transferInfo.token);
+-
+-    return new BigNumber(
+-      convRawToDispAmount(transferInfo.token.symbol, balance?.amount || '0')
+-    ).toNumber();
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [
+-    isDeposit,
+-    isLoading,
+-    transferToken.symbol,
+-    balance?.amount,
+-    transferInfo.token.symbol,
+-    isLoadingBalance,
+-  ]);
+-
+-  const dollarValue = new BigNumber(1)
+-    .multipliedBy(
+-      prices[symbolToDenom(transferToken.symbol, transferInfo.sourceChainName)]
+-    )
+-    .decimalPlaces(6)
+-    .toNumber();
+-
+-  useEffect(() => {
+-    if (!modalControl.isOpen) return;
+-    if (!sourceAddress) connectSourceChain();
+-    if (!destAddress) connectDestChain();
+-
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [modalControl.isOpen]);
+-
+-  const handleClick = async () => {
+-    if (!sourceAddress || !destAddress) return;
+-    setIsLoading(true);
+-
+-    const transferAmount = new BigNumber(inputValue)
+-      .shiftedBy(getExponentByDenom(symbolToDenom(transferToken.symbol)))
+-      .toString();
+-
+-    const { sourcePort, sourceChannel } = getIbcInfo(
+-      sourceChainName,
+-      destChainName
+-    );
+-
+-    const fee: StdFee = {
+-      amount: coins('1000', transferToken.denom ?? ''),
+-      gas: '250000',
+-    };
+-
+-    const token = {
+-      denom: transferToken.denom ?? '',
+-      amount: transferAmount,
+-    };
+-
+-    const stamp = Date.now();
+-    const timeoutInNanos = (stamp + 1.2e6) * 1e6;
+-
+-    const msg = transfer({
+-      sourcePort,
+-      sourceChannel,
+-      sender: sourceAddress,
+-      receiver: destAddress,
+-      token,
+-      // @ts-ignore
+-      timeoutHeight: undefined,
+-      timeoutTimestamp: BigInt(timeoutInNanos),
+-    });
+-
+-    await tx([msg], {
+-      fee,
+-      onSuccess: () => {
+-        updateData();
+-        modalControl.onClose();
+-      },
+-    });
+-
+-    setIsLoading(false);
+-  };
+-
+-  const sourceChain = useMemo(() => {
+-    return {
+-      name: sourceChainInfo.pretty_name,
+-      address: sourceAddress ?? '',
+-      imgSrc: getChainLogo(sourceChainName) ?? '',
+-    };
+-  }, [getChainLogo, sourceAddress, sourceChainInfo, sourceChainName]);
+-
+-  const destChain = useMemo(() => {
+-    return {
+-      symbol: destChainInfo.chain_name.toUpperCase(),
+-      name: destChainInfo.pretty_name,
+-      address: destAddress ?? '',
+-      imgSrc: getChainLogo(destChainName) ?? '',
+-    };
+-  }, [destChainInfo, destAddress, getChainLogo, destChainName]);
+-
+-  const handleSubmitTransfer = async () => {
+-    if (!sourceAddress || !destAddress) return;
+-    setIsLoading(true);
+-
+-    const transferAmount = new BigNumber(inputValue)
+-      .shiftedBy(getExponentByDenom(symbolToDenom(transferToken.symbol)))
+-      .toString();
+-
+-    const { sourcePort, sourceChannel } = getIbcInfo(
+-      sourceChainName,
+-      destChainName
+-    );
+-
+-    const fee: StdFee = {
+-      amount: coins('1000', transferToken.denom ?? ''),
+-      gas: '250000',
+-    };
+-
+-    const token = {
+-      denom: transferToken.denom ?? '',
+-      amount: transferAmount,
+-    };
+-
+-    const stamp = Date.now();
+-    const timeoutInNanos = (stamp + 1.2e6) * 1e6;
+-
+-    const msg = transfer({
+-      sourcePort,
+-      sourceChannel,
+-      sender: sourceAddress,
+-      receiver: destAddress,
+-      token,
+-      // @ts-ignore
+-      timeoutHeight: undefined,
+-      timeoutTimestamp: BigInt(timeoutInNanos),
+-    });
+-
+-    await tx([msg], {
+-      fee,
+-      onSuccess: () => {
+-        updateData();
+-        modalControl.onClose();
+-      },
+-    });
+-
+-    setIsLoading(false);
+-  };
+-
+-  return (
+-    <AssetWithdrawTokens
+-      isDropdown={false}
+-      fromSymbol={transferInfo.token.symbol}
+-      fromName={sourceChain.name}
+-      fromAddress={sourceChain.address}
+-      fromImgSrc={sourceChain.imgSrc}
+-      toName={destChain.name}
+-      toAddress={destChain.address}
+-      toImgSrc={destChain.imgSrc}
+-      isSubmitDisabled={
+-        isLoading ||
+-        !inputValue ||
+-        new BigNumber(inputValue).isEqualTo(0) ||
+-        isNaN(Number(inputValue))
+-      }
+-      available={availableAmount}
+-      priceDisplayAmount={dollarValue}
+-      timeEstimateLabel="20 seconds"
+-      amount={inputValue}
+-      onChange={(value) => {
+-        console.log('onChange value', value);
+-        setInputValue(value);
+-      }}
+-      onTransfer={() => {
+-        console.log('onTransfer');
+-        handleSubmitTransfer();
+-      }}
+-      onCancel={() => {
+-        console.log('onCancel');
+-        modalControl.onClose();
+-      }}
+-    />
+-  );
+-};
+-
+-export const RowTransferModal = (props: IProps) => {
+-  const { modalControl, transferInfo } = props;
+-  const [inputValue, setInputValue] = useState('');
+-  const [isLoading, setIsLoading] = useState(false);
+-
+-  const closeModal = () => {
+-    modalControl.onClose();
+-    setInputValue('');
+-  };
+-
+-  return (
+-    <BasicModal
+-      isOpen={modalControl.isOpen}
+-      title={transferInfo.type}
+-      onClose={() => closeModal()}
+-    >
+-      <TransferModalBody
+-        {...props}
+-        inputValue={inputValue}
+-        setInputValue={setInputValue}
+-        isLoading={isLoading}
+-        setIsLoading={setIsLoading}
+-        modalControl={{
+-          ...modalControl,
+-          onClose: closeModal,
+-        }}
+-      />
+-    </BasicModal>
+-  );
+-};
+diff --git a/templates/chain-template/components/asset-list/index.ts b/templates/chain-template/components/asset-list/index.ts
+deleted file mode 100644
+index 8a7f6313..00000000
+--- a/templates/chain-template/components/asset-list/index.ts
++++ /dev/null
+@@ -1,2 +0,0 @@
+-export * from './types';
+-export * from './AssetListSection';
+diff --git a/templates/chain-template/components/asset-list/types.tsx b/templates/chain-template/components/asset-list/types.tsx
+deleted file mode 100644
+index 56437be2..00000000
+--- a/templates/chain-template/components/asset-list/types.tsx
++++ /dev/null
+@@ -1,52 +0,0 @@
+-import { AvailableItem } from '@interchain-ui/react';
+-
+-export type Unpacked<T> = T extends (infer U)[] ? U : T;
+-
+-export type PrettyAsset = {
+-  logoUrl: string | undefined;
+-  symbol: string;
+-  prettyChainName: string;
+-  displayAmount: string;
+-  dollarValue: string;
+-  amount: string;
+-  denom: string;
+-};
+-
+-export type Token = {
+-  price: number;
+-  denom: string;
+-  symbol: string;
+-  liquidity: number;
+-  volume_24h: number;
+-  volume_24h_change: number;
+-  name: string;
+-  price_24h_change: number;
+-  price_7d_change: number;
+-  exponent: number;
+-  display: string;
+-};
+-
+-export type PriceHash = {
+-  [key: string]: number;
+-};
+-
+-export const Transfer = {
+-  Deposit: 'Deposit',
+-  Withdraw: 'Withdraw',
+-} as const;
+-
+-export type TransferValues = typeof Transfer[keyof typeof Transfer];
+-
+-export type TransferInfo = {
+-  type: TransferValues;
+-  sourceChainName: string;
+-  destChainName: string;
+-  token: AvailableItem;
+-};
+-
+-export type AssetOption = {
+-  value: string;
+-  icon: { png: string | undefined };
+-};
+-
+-export type PrettyAssetOption = PrettyAsset & AssetOption;
+diff --git a/templates/chain-template/components/common/Footer.tsx b/templates/chain-template/components/common/Footer.tsx
+index 95e1658c..5bb5388a 100644
+--- a/templates/chain-template/components/common/Footer.tsx
++++ b/templates/chain-template/components/common/Footer.tsx
+@@ -45,11 +45,11 @@ const TextDivider = () => {
+ const socialLinks = [
+   {
+     icon: <Icon name="github" color="$blackAlpha600" />,
+-    href: 'https://github.com/cosmology-tech',
++    href: 'https://github.com/ignite',
+   },
+   {
+     icon: <Icon name="discord" color="$blackAlpha600" />,
+-    href: 'https://discord.com/invite/xh3ZwHj2qQ',
++    href: 'https://discord.com/invite/ignite',
+   },
+   {
+     icon: (
+@@ -57,11 +57,11 @@ const socialLinks = [
+         <FaXTwitter size="16px" />
+       </Box>
+     ),
+-    href: 'https://x.com/cosmology_tech',
++    href: 'https://x.com/ignite',
+   },
+   {
+     icon: <Icon name="youtube" color="$blackAlpha600" />,
+-    href: 'https://www.youtube.com/channel/UCA9jzRlnUJRxec8S5Lt7Vcw',
++    href: 'https://www.youtube.com/@ignitehq',
+   },
+ ];
+ 
+diff --git a/templates/chain-template/components/common/Header/ChainDropdown.tsx b/templates/chain-template/components/common/Header/ChainDropdown.tsx
+index 47c933b8..ec464446 100644
+--- a/templates/chain-template/components/common/Header/ChainDropdown.tsx
++++ b/templates/chain-template/components/common/Header/ChainDropdown.tsx
+@@ -1,9 +1,9 @@
+ import Image from 'next/image';
+-import { useEffect, useState } from 'react';
++import { useState } from 'react';
+ import { useChain, useManager } from '@cosmos-kit/react';
+ import { Box, Combobox, Skeleton, Stack, Text } from '@interchain-ui/react';
+ 
+-import { useStarshipChains, useDetectBreakpoints } from '@/hooks';
++import { useDetectBreakpoints } from '@/hooks';
+ import { chainStore, useChainStore } from '@/contexts';
+ import { chainOptions } from '@/config';
+ import { getSignerOptions } from '@/utils';
+@@ -13,35 +13,12 @@ export const ChainDropdown = () => {
+   const { chain } = useChain(selectedChain);
+   const [input, setInput] = useState<string>(chain.pretty_name);
+   const { isMobile } = useDetectBreakpoints();
+-  const { data: starshipChains, refetch } = useStarshipChains();
+ 
+-  const [isChainsAdded, setIsChainsAdded] = useState(false);
+   const { addChains, getChainLogo } = useManager();
+ 
+-  useEffect(() => {
+-    if (
+-      starshipChains?.chains.length &&
+-      starshipChains?.assets.length &&
+-      !isChainsAdded
+-    ) {
+-      addChains(
+-        starshipChains.chains,
+-        starshipChains.assets,
+-        getSignerOptions(),
+-      );
+-      setIsChainsAdded(true);
+-    }
+-  }, [starshipChains, isChainsAdded]);
++  // TODO(@julienrbrt), use addChains, and add the chain from the generate chain-registry.json
+ 
+-  const onOpenChange = (isOpen: boolean) => {
+-    if (isOpen && !isChainsAdded) {
+-      refetch();
+-    }
+-  };
+-
+-  const chains = isChainsAdded
+-    ? chainOptions.concat(starshipChains?.chains ?? [])
+-    : chainOptions;
++  const onOpenChange = (isOpen: boolean) => {};
+ 
+   return (
+     <Combobox
+@@ -77,7 +54,7 @@ export const ChainDropdown = () => {
+         width: isMobile ? '130px' : '260px',
+       }}
+     >
+-      {chains.map((c) => (
++      {chainOptions.map((c) => (
+         <Combobox.Item key={c.chain_name} textValue={c.pretty_name}>
+           <Stack
+             direction="horizontal"
+diff --git a/templates/chain-template/components/common/Sidebar/NavItems.tsx b/templates/chain-template/components/common/Sidebar/NavItems.tsx
+index 164234b2..9791c87c 100644
+--- a/templates/chain-template/components/common/Sidebar/NavItems.tsx
++++ b/templates/chain-template/components/common/Sidebar/NavItems.tsx
+@@ -29,16 +29,6 @@ const navItems: NavItem[] = [
+     label: 'Governance',
+     href: '/governance',
+   },
+-  {
+-    icon: 'coinsLine',
+-    label: 'Asset List',
+-    href: '/asset-list',
+-  },
+-  {
+-    icon: <MdOutlineWaterDrop size="20px" />,
+-    label: 'Faucet',
+-    href: '/faucet',
+-  },
+   {
+     icon: <LuFileJson size="20px" />,
+     label: 'Contract',
+diff --git a/templates/chain-template/components/common/Sidebar/SidebarContent.tsx b/templates/chain-template/components/common/Sidebar/SidebarContent.tsx
+index bd250436..2a0df37d 100644
+--- a/templates/chain-template/components/common/Sidebar/SidebarContent.tsx
++++ b/templates/chain-template/components/common/Sidebar/SidebarContent.tsx
+@@ -91,13 +91,13 @@ export const SidebarContent = ({ onClose }: { onClose: () => void }) => {
+           <Text fontSize="12px" fontWeight="500" color="$text">
+             Powered by
+           </Text>
+-          <Image
++          <a href="https://github.com/cosmology-tech"><Image
+             src={poweredByLogoSrc}
+             alt="cosmology"
+             width="0"
+             height="0"
+             style={{ width: '100px', height: 'auto' }}
+-          />
++          /></a>
+         </Box>
+       </Box>
+     </Box>
+diff --git a/templates/chain-template/components/index.ts b/templates/chain-template/components/index.ts
+index 9b9594a6..06644b05 100644
+--- a/templates/chain-template/components/index.ts
++++ b/templates/chain-template/components/index.ts
+@@ -1,5 +1,4 @@
+ export * from './common';
+ export * from './staking';
+ export * from './voting';
+-export * from './asset-list';
+ export * from './contract';
+diff --git a/templates/chain-template/config/chains.ts b/templates/chain-template/config/chains.ts
+index 6177cb2e..3a4a3391 100644
+--- a/templates/chain-template/config/chains.ts
++++ b/templates/chain-template/config/chains.ts
+@@ -1,10 +1,7 @@
+ import { chains } from 'chain-registry';
+-import osmosis from 'chain-registry/mainnet/osmosis/chain';
+ 
+-const chainNames = ['osmosistestnet', 'juno', 'stargaze', 'osmosis', 'cosmoshub'];
++const chainNames = ['atomone', 'cosmoshub'];
+ 
+ export const chainOptions = chainNames.map(
+   (chainName) => chains.find((chain) => chain.chain_name === chainName)!
+-);
+-
+-export const osmosisChainName = osmosis.chain_name;
++);
+\ No newline at end of file
+diff --git a/templates/chain-template/config/products.ts b/templates/chain-template/config/products.ts
+index 193111c9..1bfbb53d 100644
+--- a/templates/chain-template/config/products.ts
++++ b/templates/chain-template/config/products.ts
+@@ -2,7 +2,6 @@ export type ProductCategory =
+   | 'cosmwasm'
+   | 'cosmos-sdk'
+   | 'frontend'
+-  | 'testing';
+ 
+ export type Product = {
+   name: string;
+@@ -12,6 +11,27 @@ export type Product = {
+ };
+ 
+ export const products: Product[] = [
++  {
++    name: 'Ignite',
++    description:
++      'Ignite makes developing, growing, and launching blockchain projects faster than ever before.',
++    link: 'https://ignite.com',
++    category: 'cosmos-sdk',
++  },
++  {
++    name: 'Ignite Tutorials',
++    description:
++      'Learn How to Build Cutting-Edge Blockchains.',
++    link: 'https://tutorials.ignite.com',
++    category: 'cosmos-sdk',
++  },
++  {
++    name: 'Cosmos SDK',
++    description:
++      'Get a quick introduction to the Cosmos SDK and its key features, including its modular architecture and developer-friendly tools.',
++    link: 'https://docs.cosmos.network',
++    category: 'cosmos-sdk',
++  },
+   {
+     name: 'Cosmos Kit',
+     description:
+@@ -19,6 +39,13 @@ export const products: Product[] = [
+     link: 'https://cosmology.zone/products/cosmos-kit',
+     category: 'frontend',
+   },
++  {
++    name: 'Ignite Videos',
++    description:
++      'Learn about Ignite development with video tutorials.',
++    link: 'https://youtube.com/@ignitehq',
++    category: 'frontend',
++  },
+   {
+     name: 'Telescope',
+     description:
+@@ -33,13 +60,6 @@ export const products: Product[] = [
+     link: 'https://cosmology.zone/products/interchain-ui',
+     category: 'frontend',
+   },
+-  {
+-    name: 'TS Codegen',
+-    description:
+-      'The quickest and easiest way to convert CosmWasm Contracts into dev-friendly TypeScript classes.',
+-    link: 'https://cosmology.zone/products/ts-codegen',
+-    category: 'cosmwasm',
+-  },
+   {
+     name: 'Chain Registry',
+     description:
+@@ -47,20 +67,6 @@ export const products: Product[] = [
+     link: 'https://cosmology.zone/products/chain-registry',
+     category: 'frontend',
+   },
+-  {
+-    name: 'OsmoJS',
+-    description:
+-      'OsmosJS makes it easy to compose and broadcast Osmosis and Cosmos messages.',
+-    link: 'https://cosmology.zone/products/osmojs',
+-    category: 'frontend',
+-  },
+-  {
+-    name: 'Starship',
+-    description:
+-      'Starship makes it easy to build a universal interchain development environment in k8s.',
+-    link: 'https://cosmology.zone/products/starship',
+-    category: 'testing',
+-  },
+   {
+     name: 'Create Cosmos App',
+     description:
+@@ -76,7 +82,7 @@ export const products: Product[] = [
+     category: 'cosmwasm',
+   },
+   {
+-    name: 'Videos',
++    name: 'Cosmology Videos',
+     description:
+       'How-to videos from the official Cosmology website, with learning resources for building in Cosmos.',
+     link: 'https://cosmology.zone/learn',
+diff --git a/templates/chain-template/hooks/asset-list/index.ts b/templates/chain-template/hooks/asset-list/index.ts
+deleted file mode 100644
+index 7021f7a9..00000000
+--- a/templates/chain-template/hooks/asset-list/index.ts
++++ /dev/null
+@@ -1,7 +0,0 @@
+-export * from './useChainUtils';
+-export * from './useChainAssetsPrices';
+-export * from './useTopTokens';
+-export * from './useAssets';
+-export * from './useTotalAssets';
+-export * from './useBalance';
+-export * from './useOsmoQueryHooks';
+diff --git a/templates/chain-template/hooks/asset-list/useAssets.ts b/templates/chain-template/hooks/asset-list/useAssets.ts
+deleted file mode 100644
+index 2c0bc391..00000000
+--- a/templates/chain-template/hooks/asset-list/useAssets.ts
++++ /dev/null
+@@ -1,136 +0,0 @@
+-import { PrettyAsset } from '@/components';
+-import { Coin } from '@cosmjs/stargate';
+-import { useChain } from '@cosmos-kit/react';
+-import { UseQueryResult } from '@tanstack/react-query';
+-import BigNumber from 'bignumber.js';
+-import { useEffect, useMemo } from 'react';
+-import { useChainUtils } from './useChainUtils';
+-import { useOsmoQueryHooks } from './useOsmoQueryHooks';
+-import { useChainAssetsPrices } from './useChainAssetsPrices';
+-import { useTopTokens } from './useTopTokens';
+-import { getPagination } from './useTotalAssets';
+-
+-(BigInt.prototype as any).toJSON = function () {
+-  return this.toString();
+-};
+-
+-const MAX_TOKENS_TO_SHOW = 50;
+-
+-export const useAssets = (chainName: string) => {
+-  const { address } = useChain(chainName);
+-
+-  const { cosmosQuery, isReady, isFetching } = useOsmoQueryHooks(chainName);
+-
+-  const allBalancesQuery: UseQueryResult<Coin[]> =
+-    cosmosQuery.bank.v1beta1.useAllBalances({
+-      request: {
+-        address: address || '',
+-        pagination: getPagination(100n),
+-      },
+-      options: {
+-        enabled: isReady,
+-        select: ({ balances }) => balances || [],
+-      },
+-    });
+-
+-  const pricesQuery = useChainAssetsPrices(chainName);
+-  const topTokensQuery = useTopTokens();
+-
+-  const dataQueries = {
+-    allBalances: allBalancesQuery,
+-    topTokens: topTokensQuery,
+-    prices: pricesQuery,
+-  };
+-
+-  const queriesToReset = [dataQueries.allBalances];
+-  const queriesToRefetch = [dataQueries.allBalances];
+-
+-  useEffect(() => {
+-    queriesToReset.forEach((query) => query.remove());
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [chainName]);
+-
+-  const queries = Object.values(dataQueries);
+-  const isInitialFetching = queries.some(({ isLoading }) => isLoading);
+-  const isRefetching = queries.some(({ isRefetching }) => isRefetching);
+-  const isLoading = isFetching || isInitialFetching || isRefetching;
+-
+-  type AllQueries = typeof dataQueries;
+-
+-  type QueriesData = {
+-    [Key in keyof AllQueries]: NonNullable<AllQueries[Key]['data']>;
+-  };
+-
+-  const {
+-    ibcAssets,
+-    getAssetByDenom,
+-    convRawToDispAmount,
+-    calcCoinDollarValue,
+-    denomToSymbol,
+-    getPrettyChainName,
+-  } = useChainUtils(chainName);
+-
+-  const data = useMemo(() => {
+-    if (isLoading) return;
+-
+-    const queriesData = Object.fromEntries(
+-      Object.entries(dataQueries).map(([key, query]) => [key, query.data])
+-    ) as QueriesData;
+-
+-    const { allBalances, prices, topTokens } = queriesData;
+-
+-    const nativeAndIbcBalances: Coin[] = allBalances?.filter(
+-      ({ denom }) => !denom.startsWith('gamm') && prices[denom]
+-    );
+-
+-    const emptyBalances: Coin[] = ibcAssets
+-      .filter(({ base }) => {
+-        const notInBalances = !nativeAndIbcBalances?.find(
+-          ({ denom }) => denom === base
+-        );
+-        return notInBalances && prices[base];
+-      })
+-      .filter((asset) => {
+-        const isWithinLimit = ibcAssets.length <= MAX_TOKENS_TO_SHOW;
+-        return isWithinLimit || topTokens.includes(asset.symbol);
+-      })
+-      .map((asset) => ({ denom: asset.base, amount: '0' }))
+-      .reduce((acc: { denom: string, amount: string }[], current) => {
+-        if (!acc.some(balance => balance.denom === current.denom)) {
+-          acc.push(current);
+-        }
+-        return acc;
+-      }, []);
+-    const finalAssets = [...(nativeAndIbcBalances ?? []), ...emptyBalances]
+-      .map(({ amount, denom }) => {
+-        const asset = getAssetByDenom(denom);
+-        const symbol = denomToSymbol(denom);
+-        const dollarValue = calcCoinDollarValue(prices, { amount, denom });
+-        return {
+-          symbol,
+-          logoUrl: asset.logo_URIs?.png || asset.logo_URIs?.svg,
+-          prettyChainName: getPrettyChainName(denom),
+-          displayAmount: convRawToDispAmount(denom, amount),
+-          dollarValue,
+-          amount,
+-          denom,
+-        };
+-      })
+-      .sort((a, b) =>
+-        new BigNumber(a.dollarValue).lt(b.dollarValue) ? 1 : -1
+-      );
+-
+-    return {
+-      prices,
+-      allBalances,
+-      assets: finalAssets as PrettyAsset[],
+-    };
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [isLoading]);
+-
+-  const refetch = () => {
+-    queriesToRefetch.forEach((query) => query.refetch());
+-  };
+-
+-  return { data, isLoading, refetch };
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useBalance.ts b/templates/chain-template/hooks/asset-list/useBalance.ts
+deleted file mode 100644
+index d29947b9..00000000
+--- a/templates/chain-template/hooks/asset-list/useBalance.ts
++++ /dev/null
+@@ -1,49 +0,0 @@
+-import { Coin } from '@cosmjs/stargate';
+-import { useChain } from '@cosmos-kit/react';
+-import { UseQueryResult } from '@tanstack/react-query';
+-import { useEffect } from 'react';
+-import { useOsmoQueryHooks } from './useOsmoQueryHooks';
+-
+-export const useBalance = (
+-  chainName: string,
+-  enabled: boolean = true,
+-  displayDenom?: string
+-) => {
+-  const { address, assets } = useChain(chainName);
+-  let denom = assets?.assets[0].base!;
+-  for (const asset of assets?.assets || []) {
+-    if (asset.display.toLowerCase() === displayDenom?.toLowerCase()) {
+-      denom = asset.base;
+-      break;
+-    }
+-  }
+-
+-  const { cosmosQuery, isReady, isFetching } = useOsmoQueryHooks(
+-    chainName,
+-    'balance'
+-  );
+-
+-  const balanceQuery: UseQueryResult<Coin> =
+-    cosmosQuery.bank.v1beta1.useBalance({
+-      request: {
+-        denom,
+-        address: address || '',
+-      },
+-      options: {
+-        enabled: isReady && enabled,
+-        select: ({ balance }) => balance,
+-      },
+-    });
+-
+-  useEffect(() => {
+-    return () => {
+-      balanceQuery.remove();
+-    };
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, []);
+-
+-  return {
+-    balance: balanceQuery.data,
+-    isLoading: isFetching, // || !!balanceQueries.find(item => item.isFetching),
+-  };
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useChainAssetsPrices.ts b/templates/chain-template/hooks/asset-list/useChainAssetsPrices.ts
+deleted file mode 100644
+index 72b63edf..00000000
+--- a/templates/chain-template/hooks/asset-list/useChainAssetsPrices.ts
++++ /dev/null
+@@ -1,49 +0,0 @@
+-import { Asset } from '@chain-registry/types';
+-import { useQuery } from '@tanstack/react-query';
+-import { useChainUtils } from './useChainUtils';
+-import { handleError } from './useTopTokens';
+-
+-type CoinGeckoId = string;
+-type CoinGeckoUSD = { usd: number };
+-type CoinGeckoUSDResponse = Record<CoinGeckoId, CoinGeckoUSD>;
+-
+-const getAssetsWithGeckoIds = (assets: Asset[]) => {
+-  return assets.filter((asset) => !!asset?.coingecko_id);
+-};
+-
+-const getGeckoIds = (assets: Asset[]) => {
+-  return assets.map((asset) => asset.coingecko_id) as string[];
+-};
+-
+-const formatPrices = (
+-  prices: CoinGeckoUSDResponse,
+-  assets: Asset[]
+-): Record<string, number> => {
+-  return Object.entries(prices).reduce((priceHash, cur) => {
+-    const denom = assets.find((asset) => asset.coingecko_id === cur[0])!.base;
+-    return { ...priceHash, [denom]: cur[1].usd };
+-  }, {});
+-};
+-
+-const fetchPrices = async (
+-  geckoIds: string[]
+-): Promise<CoinGeckoUSDResponse> => {
+-  const url = `https://api.coingecko.com/api/v3/simple/price?ids=${geckoIds.join()}&vs_currencies=usd`;
+-
+-  return fetch(url)
+-    .then(handleError)
+-    .then((res) => res.json());
+-};
+-
+-export const useChainAssetsPrices = (chainName: string) => {
+-  const { allAssets } = useChainUtils(chainName);
+-  const assetsWithGeckoIds = getAssetsWithGeckoIds(allAssets);
+-  const geckoIds = getGeckoIds(assetsWithGeckoIds);
+-
+-  return useQuery({
+-    queryKey: ['useChainAssetsPrices', chainName],
+-    queryFn: () => fetchPrices(geckoIds),
+-    select: (data) => formatPrices(data, assetsWithGeckoIds),
+-    staleTime: Infinity,
+-  });
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useChainUtils.ts b/templates/chain-template/hooks/asset-list/useChainUtils.ts
+deleted file mode 100644
+index 496239e6..00000000
+--- a/templates/chain-template/hooks/asset-list/useChainUtils.ts
++++ /dev/null
+@@ -1,177 +0,0 @@
+-import { useManager } from '@cosmos-kit/react';
+-import { useMemo } from 'react';
+-import { Asset, AssetList } from '@chain-registry/types';
+-import { asset_lists as ibcAssetLists } from '@chain-registry/assets';
+-import { assets as chainAssets, ibc } from 'chain-registry';
+-import { CoinDenom, CoinSymbol, Exponent, PriceHash } from '@/utils';
+-import BigNumber from 'bignumber.js';
+-import { Coin } from '@cosmjs/amino';
+-import { PrettyAsset } from '@/components';
+-import { ChainName } from 'cosmos-kit';
+-
+-export const useChainUtils = (chainName: string) => {
+-  const { getChainRecord } = useManager();
+-
+-  const filterAssets = (assetList: AssetList[]): Asset[] => {
+-    return (
+-      assetList
+-        .find(({ chain_name }) => chain_name === chainName)
+-        ?.assets?.filter(({ type_asset }) => type_asset !== 'ics20') || []
+-    );
+-  };
+-
+-  const { nativeAssets, ibcAssets } = useMemo(() => {
+-    // @ts-ignore
+-    const nativeAssets = filterAssets(chainAssets);
+-    // @ts-ignore
+-    const ibcAssets = filterAssets(ibcAssetLists);
+-
+-    return { nativeAssets, ibcAssets };
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [chainName]);
+-
+-  const allAssets = [...nativeAssets, ...ibcAssets];
+-
+-  const getIbcAssetsLength = () => {
+-    return ibcAssets.length;
+-  };
+-
+-  const getAssetByDenom = (denom: CoinDenom): Asset => {
+-    return allAssets.find((asset) => asset.base === denom) as Asset;
+-  };
+-
+-  const denomToSymbol = (denom: CoinDenom): CoinSymbol => {
+-    const asset = getAssetByDenom(denom);
+-    const symbol = asset?.symbol;
+-    if (!symbol) {
+-      return denom;
+-    }
+-    return symbol;
+-  };
+-
+-  const symbolToDenom = (symbol: CoinSymbol, chainName?: string): CoinDenom => {
+-    const asset = allAssets.find(
+-      (asset) =>
+-        asset.symbol === symbol &&
+-        (!chainName ||
+-          asset.traces?.[0].counterparty.chain_name.toLowerCase() ===
+-            chainName.toLowerCase())
+-    );
+-    const base = asset?.base;
+-    if (!base) {
+-      return symbol;
+-    }
+-    return base;
+-  };
+-
+-  const getExponentByDenom = (denom: CoinDenom): Exponent => {
+-    const asset = getAssetByDenom(denom);
+-    const unit = asset.denom_units.find(({ denom }) => denom === asset.display);
+-    return unit?.exponent || 0;
+-  };
+-
+-  const convRawToDispAmount = (symbol: string, amount: string | number) => {
+-    const denom = symbolToDenom(symbol);
+-    return new BigNumber(amount)
+-      .shiftedBy(-getExponentByDenom(denom))
+-      .toString();
+-  };
+-
+-  const calcCoinDollarValue = (prices: PriceHash, coin: Coin) => {
+-    const { denom, amount } = coin;
+-    return new BigNumber(amount)
+-      .shiftedBy(-getExponentByDenom(denom))
+-      .multipliedBy(prices[denom])
+-      .toString();
+-  };
+-
+-  const getChainName = (ibcDenom: CoinDenom) => {
+-    if (nativeAssets.find((asset) => asset.base === ibcDenom)) {
+-      return chainName;
+-    }
+-    const asset = ibcAssets.find((asset) => asset.base === ibcDenom);
+-    const ibcChainName = asset?.traces?.[0].counterparty.chain_name;
+-    if (!ibcChainName)
+-      throw Error('chainName not found for ibcDenom: ' + ibcDenom);
+-    return ibcChainName;
+-  };
+-
+-  const getPrettyChainName = (ibcDenom: CoinDenom) => {
+-    const chainName = getChainName(ibcDenom);
+-    try {
+-      const chainRecord = getChainRecord(chainName);
+-      // @ts-ignore
+-      return chainRecord.chain.pretty_name;
+-    } catch (e) {
+-      return 'CHAIN_INFO_NOT_FOUND';
+-    }
+-  };
+-
+-  const isNativeAsset = ({ denom }: PrettyAsset) => {
+-    return !!nativeAssets.find((asset) => asset.base === denom);
+-  };
+-
+-  const getNativeDenom = (chainName: ChainName) => {
+-    const chainRecord = getChainRecord(chainName);
+-    const denom = chainRecord.assetList?.assets[0].base;
+-    if (!denom) throw Error('denom not found');
+-    return denom;
+-  };
+-
+-  const getDenomBySymbolAndChain = (chainName: ChainName, symbol: string) => {
+-    const chainRecord = getChainRecord(chainName);
+-    const denom = chainRecord.assetList?.assets.find(
+-      (asset) => asset.symbol === symbol
+-    )?.base;
+-    if (!denom) throw Error('denom not found');
+-    return denom;
+-  };
+-
+-  const getIbcInfo = (fromChainName: string, toChainName: string) => {
+-    let flipped = false;
+-
+-    let ibcInfo = ibc.find(
+-      (i) =>
+-        i.chain_1.chain_name === fromChainName &&
+-        i.chain_2.chain_name === toChainName
+-    );
+-
+-    if (!ibcInfo) {
+-      ibcInfo = ibc.find(
+-        (i) =>
+-          i.chain_1.chain_name === toChainName &&
+-          i.chain_2.chain_name === fromChainName
+-      );
+-      flipped = true;
+-    }
+-
+-    if (!ibcInfo) {
+-      throw new Error('cannot find IBC info');
+-    }
+-
+-    const key = flipped ? 'chain_2' : 'chain_1';
+-    const sourcePort = ibcInfo.channels[0][key].port_id;
+-    const sourceChannel = ibcInfo.channels[0][key].channel_id;
+-
+-    return { sourcePort, sourceChannel };
+-  };
+-
+-  return {
+-    allAssets,
+-    nativeAssets,
+-    ibcAssets,
+-    getAssetByDenom,
+-    denomToSymbol,
+-    symbolToDenom,
+-    convRawToDispAmount,
+-    calcCoinDollarValue,
+-    getIbcAssetsLength,
+-    getChainName,
+-    getPrettyChainName,
+-    isNativeAsset,
+-    getNativeDenom,
+-    getIbcInfo,
+-    getExponentByDenom,
+-    getDenomBySymbolAndChain,
+-  };
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useOsmoQueryHooks.ts b/templates/chain-template/hooks/asset-list/useOsmoQueryHooks.ts
+deleted file mode 100644
+index bb6c5fa6..00000000
+--- a/templates/chain-template/hooks/asset-list/useOsmoQueryHooks.ts
++++ /dev/null
+@@ -1,37 +0,0 @@
+-import { useChain } from '@cosmos-kit/react';
+-import { useRpcEndpoint, useRpcClient, createRpcQueryHooks } from 'osmo-query';
+-
+-export const useOsmoQueryHooks = (chainName: string, extraKey?: string) => {
+-  const { address, getRpcEndpoint } = useChain(chainName);
+-
+-  const rpcEndpointQuery = useRpcEndpoint({
+-    getter: getRpcEndpoint,
+-    options: {
+-      staleTime: Infinity,
+-      queryKeyHashFn: (queryKey) => {
+-        const key = [...queryKey, chainName];
+-        return JSON.stringify(extraKey ? [...key, extraKey] : key);
+-      },
+-    },
+-  });
+-
+-  const rpcClientQuery = useRpcClient({
+-    rpcEndpoint: rpcEndpointQuery.data || '',
+-    options: {
+-      enabled: !!rpcEndpointQuery.data,
+-      staleTime: Infinity,
+-      queryKeyHashFn: (queryKey) => {
+-        return JSON.stringify(extraKey ? [...queryKey, extraKey] : queryKey);
+-      },
+-    },
+-  });
+-
+-  const { cosmos: cosmosQuery, osmosis: osmoQuery } = createRpcQueryHooks({
+-    rpc: rpcClientQuery.data,
+-  });
+-
+-  const isReady = !!address && !!rpcClientQuery.data;
+-  const isFetching = rpcEndpointQuery.isFetching || rpcClientQuery.isFetching;
+-
+-  return { cosmosQuery, osmoQuery, isReady, isFetching };
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useTopTokens.ts b/templates/chain-template/hooks/asset-list/useTopTokens.ts
+deleted file mode 100644
+index 13491ebe..00000000
+--- a/templates/chain-template/hooks/asset-list/useTopTokens.ts
++++ /dev/null
+@@ -1,45 +0,0 @@
+-import { useQuery } from '@tanstack/react-query';
+-
+-type Token = {
+-  price: number;
+-  denom: string;
+-  symbol: string;
+-  liquidity: number;
+-  volume_24h: number;
+-  volume_24h_change: number;
+-  name: string;
+-  price_24h_change: number;
+-  price_7d_change: number;
+-  exponent: number;
+-  display: string;
+-};
+-
+-export const handleError = (resp: Response) => {
+-  if (!resp.ok) throw Error(resp.statusText);
+-  return resp;
+-};
+-
+-const fetchTokens = async (): Promise<Token[]> => {
+-  const url = 'https://api-osmosis.imperator.co/tokens/v2/all';
+-  return fetch(url)
+-    .then(handleError)
+-    .then((res) => res.json());
+-};
+-
+-const MAX_TOP_TOKENS = 60;
+-
+-const filterTopTokens = (tokens: Token[]) => {
+-  return tokens
+-    .sort((a, b) => b.liquidity - a.liquidity)
+-    .slice(0, MAX_TOP_TOKENS)
+-    .map((token) => token.symbol);
+-};
+-
+-export const useTopTokens = () => {
+-  return useQuery({
+-    queryKey: ['tokens'],
+-    queryFn: fetchTokens,
+-    select: filterTopTokens,
+-    staleTime: Infinity,
+-  });
+-};
+diff --git a/templates/chain-template/hooks/asset-list/useTotalAssets.ts b/templates/chain-template/hooks/asset-list/useTotalAssets.ts
+deleted file mode 100644
+index 6a0820c3..00000000
+--- a/templates/chain-template/hooks/asset-list/useTotalAssets.ts
++++ /dev/null
+@@ -1,202 +0,0 @@
+-import { Coin } from '@cosmjs/stargate';
+-import { useChain } from '@cosmos-kit/react';
+-import { UseQueryResult } from '@tanstack/react-query';
+-import BigNumber from 'bignumber.js';
+-import { useEffect, useMemo } from 'react';
+-import { useChainUtils } from './useChainUtils';
+-import { useChainAssetsPrices } from './useChainAssetsPrices';
+-import { osmosisChainName } from '@/config';
+-import { Pool } from 'osmo-query/dist/codegen/osmosis/gamm/pool-models/balancer/balancerPool';
+-import { convertGammTokenToDollarValue } from '@/utils';
+-import { useOsmoQueryHooks } from './useOsmoQueryHooks';
+-
+-(BigInt.prototype as any).toJSON = function () {
+-  return this.toString();
+-};
+-
+-export const getPagination = (limit: bigint) => ({
+-  limit,
+-  key: new Uint8Array(),
+-  offset: 0n,
+-  countTotal: true,
+-  reverse: false,
+-});
+-
+-export const useTotalAssets = (chainName: string) => {
+-  const { address } = useChain(chainName);
+-
+-  const { cosmosQuery, osmoQuery, isReady, isFetching } =
+-    useOsmoQueryHooks(chainName);
+-
+-  const isOsmosisChain = chainName === osmosisChainName;
+-
+-  const allBalancesQuery: UseQueryResult<Coin[]> =
+-    cosmosQuery.bank.v1beta1.useAllBalances({
+-      request: {
+-        address: address || '',
+-        pagination: getPagination(100n),
+-      },
+-      options: {
+-        enabled: isReady,
+-        select: ({ balances }) => balances || [],
+-      },
+-    });
+-
+-  const delegationsQuery: UseQueryResult<Coin[]> =
+-    cosmosQuery.staking.v1beta1.useDelegatorDelegations({
+-      request: {
+-        delegatorAddr: address || '',
+-        pagination: getPagination(100n),
+-      },
+-      options: {
+-        enabled: isReady,
+-        select: ({ delegationResponses }) =>
+-          delegationResponses.map(({ balance }) => balance) || [],
+-      },
+-    });
+-
+-  const lockedCoinsQuery: UseQueryResult<Coin[]> =
+-    osmoQuery.lockup.useAccountLockedCoins({
+-      request: {
+-        owner: address || '',
+-      },
+-      options: {
+-        enabled: isReady && isOsmosisChain,
+-        select: ({ coins }) => coins || [],
+-        staleTime: Infinity,
+-      },
+-    });
+-
+-  const poolsQuery: UseQueryResult<Pool[]> = osmoQuery.gamm.v1beta1.usePools({
+-    request: {
+-      pagination: getPagination(5000n),
+-    },
+-    options: {
+-      enabled: isReady && isOsmosisChain,
+-      select: ({ pools }) => pools || [],
+-      staleTime: Infinity,
+-    },
+-  });
+-
+-  const pricesQuery = useChainAssetsPrices(chainName);
+-
+-  const dataQueries = {
+-    pools: poolsQuery,
+-    prices: pricesQuery,
+-    allBalances: allBalancesQuery,
+-    delegations: delegationsQuery,
+-    lockedCoins: lockedCoinsQuery,
+-  };
+-
+-  const queriesToReset = [dataQueries.allBalances, dataQueries.delegations];
+-  const queriesToRefetch = [dataQueries.allBalances];
+-
+-  useEffect(() => {
+-    queriesToReset.forEach((query) => query.remove());
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [chainName]);
+-
+-  const queries = Object.values(dataQueries);
+-  const isInitialFetching = queries.some(({ isFetching }) => isFetching);
+-  const isRefetching = queries.some(({ isRefetching }) => isRefetching);
+-  const isLoading = isFetching || isInitialFetching || isRefetching;
+-
+-  type AllQueries = typeof dataQueries;
+-
+-  type QueriesData = {
+-    [Key in keyof AllQueries]: NonNullable<AllQueries[Key]['data']>;
+-  };
+-
+-  const { calcCoinDollarValue } = useChainUtils(chainName);
+-
+-  const zero = new BigNumber(0);
+-
+-  const data = useMemo(() => {
+-    if (isLoading) return;
+-
+-    const queriesData = Object.fromEntries(
+-      Object.entries(dataQueries).map(([key, query]) => [key, query.data])
+-    ) as QueriesData;
+-
+-    const {
+-      allBalances,
+-      delegations,
+-      lockedCoins = [],
+-      pools = [],
+-      prices = {},
+-    } = queriesData;
+-
+-    const stakedTotal = delegations
+-      ?.map((coin) => calcCoinDollarValue(prices, coin))
+-      .reduce((total, cur) => total.plus(cur), zero)
+-      .toString();
+-
+-    const balancesTotal = allBalances
+-      ?.filter(({ denom }) => !denom.startsWith('gamm') && prices[denom])
+-      .map((coin) => calcCoinDollarValue(prices, coin))
+-      .reduce((total, cur) => total.plus(cur), zero)
+-      .toString();
+-
+-    let bondedTotal;
+-    let liquidityTotal;
+-
+-    if (isOsmosisChain) {
+-      const liquidityCoins = (allBalances ?? []).filter(({ denom }) =>
+-        denom.startsWith('gamm')
+-      );
+-      const gammTokenDenoms = [
+-        ...(liquidityCoins ?? []),
+-        ...(lockedCoins ?? []),
+-      ].map(({ denom }) => denom);
+-
+-      const uniqueDenoms = [...new Set(gammTokenDenoms)];
+-
+-      const poolsMap: Record<string, Pool> = pools
+-        .filter(({ totalShares }) => uniqueDenoms.includes(totalShares.denom))
+-        .filter((pool) => !pool?.$typeUrl?.includes('stableswap'))
+-        .filter(({ poolAssets }) => {
+-          return poolAssets.every(({ token }) => {
+-            const isGammToken = token.denom.startsWith('gamm/pool');
+-            return !isGammToken && prices[token.denom];
+-          });
+-        })
+-        .reduce((prev, cur) => ({ ...prev, [cur.totalShares.denom]: cur }), {});
+-
+-      bondedTotal = lockedCoins
+-        .map((coin) => {
+-          const poolData = poolsMap[coin.denom];
+-          if (!poolData) return '0';
+-          return convertGammTokenToDollarValue(coin, poolData, prices);
+-        })
+-        .reduce((total, cur) => total.plus(cur), zero)
+-        .toString();
+-
+-      liquidityTotal = liquidityCoins
+-        .map((coin) => {
+-          const poolData = poolsMap[coin.denom];
+-          if (!poolData) return '0';
+-          return convertGammTokenToDollarValue(coin, poolData, prices);
+-        })
+-        .reduce((total, cur) => total.plus(cur), zero)
+-        .toString();
+-    }
+-
+-    const total = [stakedTotal, balancesTotal, bondedTotal, liquidityTotal]
+-      .reduce((total, cur) => total.plus(cur || 0), zero)
+-      .decimalPlaces(2)
+-      .toString();
+-
+-    return {
+-      total,
+-      prices,
+-      allBalances,
+-    };
+-    // eslint-disable-next-line react-hooks/exhaustive-deps
+-  }, [isLoading]);
+-
+-  const refetch = () => {
+-    queriesToRefetch.forEach((query) => query.refetch());
+-  };
+-
+-  return { data, isLoading, refetch };
+-};
+diff --git a/templates/chain-template/hooks/common/index.ts b/templates/chain-template/hooks/common/index.ts
+index 69602ad0..97f8d80d 100644
+--- a/templates/chain-template/hooks/common/index.ts
++++ b/templates/chain-template/hooks/common/index.ts
+@@ -5,5 +5,4 @@ export * from './useCopyToClipboard';
+ export * from './useOutsideClick';
+ export * from './useMediaQuery';
+ export * from './useDetectBreakpoints';
+-export * from './useStarshipChains';
+ export * from './useConnectChain';
+diff --git a/templates/chain-template/hooks/common/useStarshipChains.ts b/templates/chain-template/hooks/common/useStarshipChains.ts
+deleted file mode 100644
+index a1bbf340..00000000
+--- a/templates/chain-template/hooks/common/useStarshipChains.ts
++++ /dev/null
+@@ -1,47 +0,0 @@
+-import { useQuery } from '@tanstack/react-query';
+-import { AssetList, Chain } from '@chain-registry/types';
+-
+-import { StarshipConfig } from '@/starship';
+-import config from '@/starship/configs/config.yaml';
+-
+-export const useStarshipChains = () => {
+-  const { registry } = config as StarshipConfig;
+-  const baseUrl = `http://localhost:${registry.ports.rest}`;
+-
+-  return useQuery({
+-    queryKey: ['starship-chains'],
+-    queryFn: async () => {
+-      try {
+-        const { chains } = (await fetcher<{ chains: Chain[] }>(
+-          `${baseUrl}/chains`
+-        )) ?? { chains: [] };
+-        const chainIds = chains.map((chain) => chain.chain_id);
+-        const assets = (await Promise.all(
+-          chainIds.map((chainId) =>
+-            fetcher<AssetList>(`${baseUrl}/chains/${chainId}/assets`)
+-          )
+-        ).then((assetLists) => assetLists.filter(Boolean))) as AssetList[];
+-
+-        return { chains, assets };
+-      } catch (error) {
+-        console.error(error);
+-        return undefined;
+-      }
+-    },
+-    staleTime: Infinity,
+-    cacheTime: Infinity,
+-    refetchOnMount: false,
+-    refetchOnReconnect: false,
+-  });
+-};
+-
+-const fetcher = async <T>(url: string): Promise<T | null> => {
+-  try {
+-    const response = await fetch(url);
+-    const data = await response.json();
+-    return data;
+-  } catch (error) {
+-    console.error(error);
+-    return null;
+-  }
+-};
+diff --git a/templates/chain-template/hooks/index.ts b/templates/chain-template/hooks/index.ts
+index 9b9594a6..06644b05 100644
+--- a/templates/chain-template/hooks/index.ts
++++ b/templates/chain-template/hooks/index.ts
+@@ -1,5 +1,4 @@
+ export * from './common';
+ export * from './staking';
+ export * from './voting';
+-export * from './asset-list';
+ export * from './contract';
+diff --git a/templates/chain-template/hooks/voting/useVotingData.ts b/templates/chain-template/hooks/voting/useVotingData.ts
+index aae05fd1..57e3c1ea 100644
+--- a/templates/chain-template/hooks/voting/useVotingData.ts
++++ b/templates/chain-template/hooks/voting/useVotingData.ts
+@@ -150,7 +150,7 @@ export function useVotingData(chainName: string) {
+       Object.entries(singleQueries).map(([key, query]) => [key, query.data])
+     ) as SingleQueriesData;
+ 
+-    singleQueriesData?.proposals.forEach((proposal) => {
++    singleQueriesData?.proposals?.forEach((proposal) => {
+       if (proposal.status === ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD) {
+         (async () => {
+           for (const { address } of chain?.apis?.rest || []) {
+diff --git a/templates/chain-template/package.json b/templates/chain-template/package.json
+index 972acc87..827d6903 100644
+--- a/templates/chain-template/package.json
++++ b/templates/chain-template/package.json
+@@ -9,8 +9,7 @@
+     "lint": "next lint",
+     "locks:remove": "rm -f yarn.lock",
+     "locks:create": "generate-lockfile --lockfile ../../yarn.lock --package package.json --write yarn.lock --force",
+-    "locks": "npm run locks:remove && npm run locks:create",
+-    "starship": "starship --config starship/configs/config.yaml"
++    "locks": "npm run locks:remove && npm run locks:create"
+   },
+   "resolutions": {
+     "react": "18.2.0",
+@@ -19,7 +18,6 @@
+     "@types/react-dom": "18.0.9"
+   },
+   "dependencies": {
+-    "@chain-registry/assets": "1.63.5",
+     "@cosmjs/amino": "0.32.3",
+     "@cosmjs/cosmwasm-stargate": "0.32.3",
+     "@cosmjs/stargate": "0.31.1",
+@@ -29,13 +27,12 @@
+     "@tanstack/react-query": "4.32.0",
+     "ace-builds": "1.35.0",
+     "bignumber.js": "9.1.2",
+-    "chain-registry": "1.62.3",
++    "chain-registry": "1.69.33",
+     "cosmos-kit": "2.18.4",
+     "dayjs": "1.11.11",
+     "interchain-query": "1.10.1",
+     "next": "^13",
+     "node-gzip": "^1.1.2",
+-    "osmo-query": "16.5.1",
+     "react": "18.2.0",
+     "react-ace": "11.0.1",
+     "react-dom": "18.2.0",
+@@ -47,7 +44,6 @@
+   "devDependencies": {
+     "@chain-registry/types": "0.44.3",
+     "@keplr-wallet/types": "^0.12.111",
+-    "@starship-ci/cli": "^2.9.0",
+     "@tanstack/react-query-devtools": "4.32.0",
+     "@types/node": "18.11.9",
+     "@types/node-gzip": "^1",
+@@ -56,7 +52,6 @@
+     "eslint": "8.28.0",
+     "eslint-config-next": "13.0.5",
+     "generate-lockfile": "0.0.12",
+-    "starshipjs": "^2.4.0",
+     "typescript": "4.9.3",
+     "yaml-loader": "^0.8.1"
+   }
+diff --git a/templates/chain-template/pages/_app.tsx b/templates/chain-template/pages/_app.tsx
+index e5f79bd4..ba517482 100644
+--- a/templates/chain-template/pages/_app.tsx
++++ b/templates/chain-template/pages/_app.tsx
+@@ -47,7 +47,7 @@ function CreateCosmosApp({ Component, pageProps }: AppProps) {
+         signerOptions={getSignerOptions()}
+         endpointOptions={{
+           endpoints: {
+-            osmosis: {
++            mychain: {
+               rpc: ['http://localhost:26657'],
+             },
+           },
+diff --git a/templates/chain-template/pages/asset-list.tsx b/templates/chain-template/pages/asset-list.tsx
+deleted file mode 100644
+index 49ecba75..00000000
+--- a/templates/chain-template/pages/asset-list.tsx
++++ /dev/null
+@@ -1,13 +0,0 @@
+-import { ReactNoSSR } from '@interchain-ui/react-no-ssr';
+-import { AssetListSection } from '@/components';
+-import { useChainStore } from '@/contexts';
+-
+-export default function AssetListPage() {
+-  const { selectedChain } = useChainStore();
+-
+-  return (
+-    <ReactNoSSR>
+-      <AssetListSection chainName={selectedChain} />
+-    </ReactNoSSR>
+-  );
+-}
+diff --git a/templates/chain-template/pages/docs.tsx b/templates/chain-template/pages/docs.tsx
+index a400279d..b46c7c98 100644
+--- a/templates/chain-template/pages/docs.tsx
++++ b/templates/chain-template/pages/docs.tsx
+@@ -17,11 +17,7 @@ const tabs: Tab[] = [
+     category: null,
+   },
+   {
+-    label: 'CosmWasm',
+-    category: 'cosmwasm',
+-  },
+-  {
+-    label: 'Cosmos SDK',
++    label: 'Cosmos SDK & Ignite',
+     category: 'cosmos-sdk',
+   },
+   {
+@@ -29,8 +25,8 @@ const tabs: Tab[] = [
+     category: 'frontend',
+   },
+   {
+-    label: 'Testing',
+-    category: 'testing',
++    label: 'CosmWasm',
++    category: 'cosmwasm',
+   },
+ ];
+ 
+diff --git a/templates/chain-template/pages/faucet.tsx b/templates/chain-template/pages/faucet.tsx
+deleted file mode 100644
+index 3c8a0801..00000000
+--- a/templates/chain-template/pages/faucet.tsx
++++ /dev/null
+@@ -1,214 +0,0 @@
+-import { useState } from 'react';
+-import { Box, Text, TextField, TextFieldAddon } from '@interchain-ui/react';
+-import { useChain } from '@cosmos-kit/react';
+-
+-import { Button } from '@/components';
+-import { useChainStore } from '@/contexts';
+-import { creditFromFaucet, validateChainAddress } from '@/utils';
+-import { useStarshipChains, useToast } from '@/hooks';
+-import config from '@/starship/configs/config.yaml';
+-import type { StarshipConfig } from '@/starship';
+-import styles from '@/styles/comp.module.css';
+-
+-export default function Faucet() {
+-  const [input, setInput] = useState('');
+-  const [isLoading, setIsLoading] = useState(false);
+-
+-  const { selectedChain } = useChainStore();
+-  const { address, chain, assets } = useChain(selectedChain);
+-  const { toast } = useToast();
+-  const { data: starshipChains } = useStarshipChains();
+-
+-  const checkIsChainSupported = () => {
+-    const isStarshipRunning =
+-      starshipChains?.chains?.length && starshipChains?.assets?.length;
+-
+-    if (!isStarshipRunning) {
+-      toast({
+-        type: 'error',
+-        title: 'Starship is not running',
+-        description: 'Faucet is only available in Starship environment',
+-      });
+-      return false;
+-    }
+-
+-    const isStarshipChain = starshipChains?.chains?.some(
+-      (c) => c.chain_id === chain.chain_id,
+-    );
+-
+-    if (!isStarshipChain) {
+-      toast({
+-        type: 'error',
+-        title: 'Chain is not supported',
+-        description: 'Faucet is only available for Starship chains',
+-      });
+-      return false;
+-    }
+-
+-    return true;
+-  };
+-
+-  const inputErrMsg = input
+-    ? validateChainAddress(input, chain.bech32_prefix)
+-    : null;
+-
+-  const handleGetTokens = async () => {
+-    if (!assets || !checkIsChainSupported()) return;
+-
+-    setIsLoading(true);
+-
+-    const asset = assets.assets[0];
+-    const port = (config as StarshipConfig).chains.find(
+-      (c) => c.id === chain.chain_id,
+-    )!.ports.faucet;
+-
+-    try {
+-      await creditFromFaucet(input, asset.base, port);
+-      toast({
+-        type: 'success',
+-        title: 'Tokens credited',
+-      });
+-    } catch (error: any) {
+-      console.error(error);
+-      toast({
+-        type: 'error',
+-        title: 'Failed to get tokens',
+-        description: error.message,
+-      });
+-    } finally {
+-      setIsLoading(false);
+-    }
+-  };
+-
+-  const isButtonDisabled = !input || !!inputErrMsg;
+-
+-  return (
+-    <>
+-      <Text
+-        textAlign="center"
+-        fontSize="48px"
+-        fontWeight="500"
+-        attributes={{ mt: '140px', mb: '20px' }}
+-      >
+-        Faucet
+-      </Text>
+-      <Text
+-        textAlign="center"
+-        fontSize="16px"
+-        fontWeight="500"
+-        attributes={{ mb: '20px' }}
+-      >
+-        Get test tokens for building applications
+-      </Text>
+-      <Box maxWidth="500px" mx="auto">
+-        <Text fontSize="16px" fontWeight="700" attributes={{ mb: '10px' }}>
+-          Address
+-        </Text>
+-
+-        <Box mb="24px">
+-          <TextField
+-            id="address"
+-            value={input}
+-            onChange={(e) => setInput(e.target.value)}
+-            placeholder="Enter your address"
+-            intent={inputErrMsg ? 'error' : 'default'}
+-            autoComplete="off"
+-            inputClassName={styles['input-pr']}
+-            endAddon={
+-              <TextFieldAddon position="end">
+-                <Box
+-                  height="$full"
+-                  display="flex"
+-                  alignItems="center"
+-                  borderLeftWidth="1px"
+-                  borderLeftStyle="solid"
+-                  borderLeftColor="$inputBorder"
+-                >
+-                  <Button
+-                    size="sm"
+-                    variant="text"
+-                    disabled={!address}
+-                    onClick={() => setInput(address ?? '')}
+-                  >
+-                    Autofill
+-                  </Button>
+-                </Box>
+-              </TextFieldAddon>
+-            }
+-          />
+-          {inputErrMsg && (
+-            <Text
+-              color="$red600"
+-              fontSize="12px"
+-              fontWeight="500"
+-              wordBreak="break-all"
+-              attributes={{ mt: '6px' }}
+-            >
+-              {inputErrMsg}
+-            </Text>
+-          )}
+-        </Box>
+-
+-        <Button
+-          variant="primary"
+-          width="100%"
+-          mb="30px"
+-          onClick={handleGetTokens}
+-          isLoading={isLoading}
+-          disabled={isButtonDisabled}
+-        >
+-          Get Tokens
+-        </Button>
+-
+-        <Text fontSize="16px" fontWeight="700" attributes={{ mb: '10px' }}>
+-          FAQ
+-        </Text>
+-
+-        <Box display="flex" flexDirection="column" gap="20px">
+-          {faqs.map(({ question, answer }) => (
+-            <FaqItem key={question} question={question} answer={answer} />
+-          ))}
+-        </Box>
+-      </Box>
+-    </>
+-  );
+-}
+-
+-const faqs = [
+-  {
+-    question: 'What is faucet?',
+-    answer:
+-      'A crypto faucet is a website or application that rewards you with cryptocurrency for completing simple tasks.',
+-  },
+-  {
+-    question: 'How can I get test tokens?',
+-    answer:
+-      'The Faucet dispenses a small number of test tokens after you claimed.',
+-  },
+-];
+-
+-const FaqItem = ({
+-  question,
+-  answer,
+-}: {
+-  question: string;
+-  answer: string;
+-}) => {
+-  return (
+-    <Box
+-      p="20px"
+-      width="$full"
+-      borderWidth="1px"
+-      borderStyle="solid"
+-      borderColor="$blackAlpha300"
+-      borderRadius="4px"
+-    >
+-      <Text fontSize="18px" fontWeight="600" attributes={{ mb: '10px' }}>
+-        {question}
+-      </Text>
+-      <Text fontSize="16px" fontWeight="500" color="$textSecondary">
+-        {answer}
+-      </Text>
+-    </Box>
+-  );
+-};
+diff --git a/templates/chain-template/starship/configs/config.yaml b/templates/chain-template/starship/configs/config.yaml
+deleted file mode 100644
+index 8b733102..00000000
+--- a/templates/chain-template/starship/configs/config.yaml
++++ /dev/null
+@@ -1,36 +0,0 @@
+-name: starship-dev
+-version: 0.2.10
+-
+-chains:
+-  - id: test-osmosis-1
+-    name: osmosis
+-    numValidators: 1
+-    ports:
+-      rest: 1317
+-      rpc: 26657
+-      faucet: 8007
+-  - id: test-cosmoshub-4
+-    name: cosmoshub
+-    numValidators: 1
+-    ports:
+-      rest: 1313
+-      rpc: 26653
+-      faucet: 8003
+-
+-relayers:
+-  - name: osmosis-cosmoshub
+-    type: hermes
+-    replicas: 1
+-    chains:
+-      - test-osmosis-1
+-      - test-cosmoshub-4
+-
+-registry:
+-  enabled: true
+-  ports:
+-    rest: 8081
+-
+-explorer:
+-  enabled: true
+-  ports:
+-    rest: 8080
+diff --git a/templates/chain-template/starship/index.ts b/templates/chain-template/starship/index.ts
+deleted file mode 100644
+index fcb073fe..00000000
+--- a/templates/chain-template/starship/index.ts
++++ /dev/null
+@@ -1 +0,0 @@
+-export * from './types';
+diff --git a/templates/chain-template/starship/types.ts b/templates/chain-template/starship/types.ts
+deleted file mode 100644
+index e822f7e7..00000000
+--- a/templates/chain-template/starship/types.ts
++++ /dev/null
+@@ -1,19 +0,0 @@
+-export interface StarshipConfig {
+-  registry: {
+-    ports: {
+-      rest: number;
+-    };
+-  };
+-  chains: Array<{
+-    id: string;
+-    name: string;
+-    ports: {
+-      rpc: number;
+-      rest: number;
+-      faucet: number;
+-    };
+-  }>;
+-  relayers: Array<{
+-    chains: [string, string];
+-  }>;
+-}
+diff --git a/templates/chain-template/utils/asset-list/assets.ts b/templates/chain-template/utils/asset-list/assets.ts
+deleted file mode 100644
+index 949e91ab..00000000
+--- a/templates/chain-template/utils/asset-list/assets.ts
++++ /dev/null
+@@ -1,19 +0,0 @@
+-import { Asset as OsmosisAsset } from '@chain-registry/types';
+-import { asset_lists } from '@chain-registry/assets';
+-import { assets } from 'chain-registry';
+-
+-let osmoAssets: OsmosisAsset[] = [];
+-
+-const chainInfo = asset_lists.find(
+-  ({ chain_name }) => chain_name === 'osmosis'
+-);
+-if (chainInfo && Array.isArray(chainInfo.assets)) {
+-  osmoAssets = [...chainInfo.assets];
+-}
+-
+-let chainInfo2 = assets.find(({ chain_name }) => chain_name === 'osmosis');
+-if (chainInfo2 && Array.isArray(chainInfo2.assets)) {
+-  osmoAssets = [...osmoAssets, ...chainInfo2.assets];
+-}
+-
+-export const osmosisAssets = osmoAssets;
+diff --git a/templates/chain-template/utils/asset-list/base.ts b/templates/chain-template/utils/asset-list/base.ts
+deleted file mode 100644
+index 856413cd..00000000
+--- a/templates/chain-template/utils/asset-list/base.ts
++++ /dev/null
+@@ -1,96 +0,0 @@
+-import { osmosisAssets } from './assets';
+-import {
+-  CoinGeckoToken,
+-  CoinDenom,
+-  Exponent,
+-  CoinSymbol,
+-  PriceHash,
+-  CoinGeckoUSDResponse,
+-} from './types';
+-import { Asset as OsmosisAsset } from '@chain-registry/types';
+-import BigNumber from 'bignumber.js';
+-
+-export const getOsmoAssetByDenom = (denom: CoinDenom): OsmosisAsset => {
+-  return osmosisAssets.find((asset) => asset.base === denom) as OsmosisAsset;
+-};
+-
+-export const getDenomForCoinGeckoId = (
+-  coinGeckoId: CoinGeckoToken
+-): CoinDenom => {
+-  // @ts-ignore
+-  return osmosisAssets.find((asset) => asset.coingecko_id === coinGeckoId).base;
+-};
+-
+-export const osmoDenomToSymbol = (denom: CoinDenom): CoinSymbol => {
+-  const asset = getOsmoAssetByDenom(denom);
+-  const symbol = asset?.symbol;
+-  if (!symbol) {
+-    return denom;
+-  }
+-  return symbol;
+-};
+-
+-export const symbolToOsmoDenom = (token: CoinSymbol): CoinDenom => {
+-  const asset = osmosisAssets.find(({ symbol }) => symbol === token);
+-  const base = asset?.base;
+-  if (!base) {
+-    console.log(`cannot find base for token ${token}`);
+-    // @ts-ignore
+-    return null;
+-  }
+-  return base;
+-};
+-
+-export const getExponentByDenom = (denom: CoinDenom): Exponent => {
+-  const asset = getOsmoAssetByDenom(denom);
+-  const unit = asset.denom_units.find(({ denom }) => denom === asset.display);
+-  // @ts-ignore
+-  return unit.exponent;
+-};
+-
+-export const convertGeckoPricesToDenomPriceHash = (
+-  prices: CoinGeckoUSDResponse
+-): PriceHash => {
+-  return Object.keys(prices).reduce((res, geckoId) => {
+-    const denom = getDenomForCoinGeckoId(geckoId);
+-    // @ts-ignore
+-    res[denom] = prices[geckoId].usd;
+-    return res;
+-  }, {});
+-};
+-
+-export const noDecimals = (num: number | string) => {
+-  return new BigNumber(num).decimalPlaces(0, BigNumber.ROUND_DOWN).toString();
+-};
+-
+-export const baseUnitsToDollarValue = (
+-  prices: PriceHash,
+-  symbol: string,
+-  amount: string | number
+-) => {
+-  const denom = symbolToOsmoDenom(symbol);
+-  return new BigNumber(amount)
+-    .shiftedBy(-getExponentByDenom(denom))
+-    .multipliedBy(prices[denom])
+-    .toString();
+-};
+-
+-export const dollarValueToDenomUnits = (
+-  prices: PriceHash,
+-  symbol: string,
+-  value: string | number
+-) => {
+-  const denom = symbolToOsmoDenom(symbol);
+-  return new BigNumber(value)
+-    .dividedBy(prices[denom])
+-    .shiftedBy(getExponentByDenom(denom))
+-    .toString();
+-};
+-
+-export const baseUnitsToDisplayUnits = (
+-  symbol: string,
+-  amount: string | number
+-) => {
+-  const denom = symbolToOsmoDenom(symbol);
+-  return new BigNumber(amount).shiftedBy(-getExponentByDenom(denom)).toString();
+-};
+diff --git a/templates/chain-template/utils/asset-list/format.ts b/templates/chain-template/utils/asset-list/format.ts
+deleted file mode 100644
+index c5fb7036..00000000
+--- a/templates/chain-template/utils/asset-list/format.ts
++++ /dev/null
+@@ -1,31 +0,0 @@
+-import BigNumber from 'bignumber.js';
+-import { PrettyAsset } from '@/components';
+-import { AvailableItem } from '@interchain-ui/react';
+-
+-export const truncDecimals = (
+-  val: string | number | undefined,
+-  decimals: number
+-) => {
+-  return new BigNumber(val || 0).decimalPlaces(decimals).toString();
+-};
+-
+-export const formatDollarValue = (dollarValue: string, amount: string) => {
+-  return new BigNumber(dollarValue).gt(0.01)
+-    ? '$' + truncDecimals(dollarValue, 2)
+-    : new BigNumber(amount).gt(0)
+-    ? '< $0.01'
+-    : '$0';
+-};
+-
+-export const prettyAssetToTransferItem = (from: PrettyAsset): AvailableItem => {
+-  return {
+-    imgSrc: from.logoUrl ?? '',
+-    symbol: from.symbol,
+-    name: from.prettyChainName,
+-    denom: from.denom,
+-    available: new BigNumber(from.displayAmount).toNumber(),
+-    priceDisplayAmount: new BigNumber(
+-      truncDecimals(from.dollarValue, 2)
+-    ).toNumber(),
+-  };
+-};
+diff --git a/templates/chain-template/utils/asset-list/index.ts b/templates/chain-template/utils/asset-list/index.ts
+deleted file mode 100644
+index 8a42ed6d..00000000
+--- a/templates/chain-template/utils/asset-list/index.ts
++++ /dev/null
+@@ -1,5 +0,0 @@
+-export * from './pool';
+-export * from './base';
+-export * from './assets';
+-export * from './format';
+-export * from './types';
+diff --git a/templates/chain-template/utils/asset-list/pool.ts b/templates/chain-template/utils/asset-list/pool.ts
+deleted file mode 100644
+index 0d511440..00000000
+--- a/templates/chain-template/utils/asset-list/pool.ts
++++ /dev/null
+@@ -1,279 +0,0 @@
+-import { Pool } from 'osmo-query/dist/codegen/osmosis/gamm/pool-models/balancer/balancerPool';
+-import { Coin } from 'osmo-query/dist/codegen/cosmos/base/v1beta1/coin';
+-import {
+-  PriceHash,
+-  CoinValue,
+-  PoolPretty,
+-  CoinBalance,
+-  PoolAssetPretty,
+-  PrettyPair,
+-} from './types';
+-import BigNumber from 'bignumber.js';
+-import { osmosisAssets } from './assets';
+-import {
+-  baseUnitsToDisplayUnits,
+-  baseUnitsToDollarValue,
+-  dollarValueToDenomUnits,
+-  getExponentByDenom,
+-  osmoDenomToSymbol,
+-  noDecimals,
+-  getOsmoAssetByDenom,
+-} from './base';
+-
+-export const calcPoolLiquidity = (pool: Pool, prices: PriceHash): string => {
+-  return pool.poolAssets
+-    .reduce((res, { token }) => {
+-      const liquidity = new BigNumber(token.amount)
+-        .shiftedBy(-getExponentByDenom(token.denom))
+-        .multipliedBy(prices[token.denom]);
+-      return res.plus(liquidity);
+-    }, new BigNumber(0))
+-    .toString();
+-};
+-
+-export const getPoolByGammName = (pools: Pool[], gammId: string): Pool => {
+-  return pools.find(({ totalShares: { denom } }) => denom === gammId) as Pool;
+-};
+-
+-export const convertGammTokenToDollarValue = (
+-  coin: Coin,
+-  pool: Pool,
+-  prices: PriceHash
+-): string => {
+-  const { amount } = coin;
+-  const liquidity = calcPoolLiquidity(pool, prices);
+-
+-  return new BigNumber(liquidity)
+-    .multipliedBy(amount)
+-    .dividedBy(pool.totalShares!.amount)
+-    .toString();
+-};
+-
+-export const convertDollarValueToCoins = (
+-  value: string | number,
+-  pool: Pool,
+-  prices: PriceHash
+-): CoinValue[] => {
+-  const tokens = pool.poolAssets.map(({ token: { denom }, weight }) => {
+-    const ratio = new BigNumber(weight).dividedBy(pool.totalWeight);
+-    const valueByRatio = new BigNumber(value).multipliedBy(ratio);
+-    const displayAmount = valueByRatio.dividedBy(prices[denom]).toString();
+-    const amount = new BigNumber(displayAmount)
+-      .shiftedBy(getExponentByDenom(denom))
+-      .toString();
+-    const symbol = osmoDenomToSymbol(denom);
+-
+-    return {
+-      denom,
+-      symbol,
+-      amount,
+-      displayAmount,
+-      value: valueByRatio.toString(),
+-    };
+-  });
+-  return tokens;
+-};
+-
+-export const convertDollarValueToShares = (
+-  value: string | number,
+-  pool: Pool,
+-  prices: PriceHash
+-) => {
+-  const liquidity = calcPoolLiquidity(pool, prices);
+-
+-  return new BigNumber(value)
+-    .multipliedBy(pool.totalShares.amount)
+-    .dividedBy(liquidity)
+-    .shiftedBy(-18)
+-    .toString();
+-};
+-
+-const assetHashMap = osmosisAssets.reduce((res, asset) => {
+-  return { ...res, [asset.base]: asset };
+-}, {});
+-
+-export const prettyPool = (
+-  pool: Pool,
+-  { includeDetails = false } = {}
+-): PoolPretty => {
+-  const totalWeight = new BigNumber(pool.totalWeight);
+-  const tokens = pool.poolAssets.map(({ token, weight }) => {
+-    // @ts-ignore
+-    const asset = assetHashMap?.[token.denom];
+-    const symbol = asset?.symbol ?? token.denom;
+-    const ratio = new BigNumber(weight).dividedBy(totalWeight).toString();
+-    const obj = {
+-      symbol,
+-      denom: token.denom,
+-      amount: token.amount,
+-      ratio,
+-      info: undefined,
+-    };
+-    if (includeDetails) {
+-      obj.info = asset;
+-    }
+-    return obj;
+-  });
+-  const value = {
+-    nickname: tokens.map((t) => t.symbol).join('/'),
+-    images: undefined,
+-  };
+-  if (includeDetails) {
+-    // @ts-ignore
+-    value.images = tokens
+-      .map((t) => {
+-        // @ts-ignore
+-        const imgs = t?.info?.logo_URIs;
+-        if (imgs) {
+-          return {
+-            token: t.symbol,
+-            images: imgs,
+-          };
+-        }
+-      })
+-      .filter(Boolean);
+-  }
+-  // @ts-ignore
+-  return {
+-    ...value,
+-    ...pool,
+-    poolAssetsPretty: tokens,
+-  };
+-};
+-
+-export const calcCoinsNeededForValue = (
+-  prices: PriceHash,
+-  poolInfo: PoolPretty,
+-  value: string | number
+-) => {
+-  const val = new BigNumber(value);
+-  const coinsNeeded = poolInfo.poolAssetsPretty.map(
+-    ({ symbol, amount, denom, ratio }) => {
+-      const valueByRatio = val.multipliedBy(ratio).toString();
+-      const amountNeeded = dollarValueToDenomUnits(
+-        prices,
+-        symbol,
+-        valueByRatio
+-      );
+-      const unitRatio = new BigNumber(amountNeeded)
+-        .dividedBy(amount)
+-        .toString();
+-
+-      return {
+-        denom: denom,
+-        symbol: symbol,
+-        amount: noDecimals(amountNeeded),
+-        shareTotalValue: valueByRatio,
+-        displayAmount: baseUnitsToDisplayUnits(symbol, amountNeeded),
+-        totalDollarValue: baseUnitsToDollarValue(prices, symbol, amount),
+-        unitRatio,
+-      };
+-    }
+-  );
+-  return coinsNeeded;
+-};
+-
+-export const getCoinBalance = (
+-  prices: PriceHash,
+-  balances: Coin[],
+-  prettyAsset: PoolAssetPretty
+-): CoinBalance => {
+-  const coinBalance = balances.find((coin) => coin.denom == prettyAsset.denom);
+-
+-  if (!coinBalance || !coinBalance.amount) {
+-    // console.log({ coinBalance });
+-    // throw new Error("not enough " + prettyAsset.symbol);
+-    // @ts-ignore
+-    return { ...coinBalance, displayValue: 0 };
+-  }
+-
+-  const displayValue = baseUnitsToDollarValue(
+-    prices,
+-    prettyAsset.symbol,
+-    coinBalance.amount
+-  );
+-
+-  return { ...coinBalance, displayValue };
+-};
+-
+-export const calcMaxCoinsForPool = (
+-  prices: PriceHash,
+-  poolInfo: PoolPretty,
+-  balances: Coin[]
+-) => {
+-  const smallestTotalDollarValue = poolInfo.poolAssetsPretty
+-    .map((prettyAsset) => {
+-      const { displayValue } = getCoinBalance(prices, balances, prettyAsset);
+-      return new BigNumber(displayValue).dividedBy(prettyAsset.ratio);
+-    })
+-    .sort((a, b) => a.minus(b).toNumber())[0]
+-    .toString();
+-
+-  const coinsNeeded = poolInfo.poolAssetsPretty.map((asset) => {
+-    const coinValue = new BigNumber(smallestTotalDollarValue)
+-      .multipliedBy(asset.ratio)
+-      .toString();
+-    const amount = dollarValueToDenomUnits(prices, asset.symbol, coinValue);
+-
+-    return {
+-      denom: asset.denom,
+-      amount: noDecimals(amount),
+-    };
+-  });
+-
+-  return coinsNeeded;
+-};
+-
+-export const calcShareOutAmount = (
+-  poolInfo: Pool,
+-  coinsNeeded: Coin[]
+-): string => {
+-  return poolInfo.poolAssets
+-    .map(({ token }, i) => {
+-      const tokenInAmount = new BigNumber(coinsNeeded[i].amount);
+-      const totalShare = new BigNumber(poolInfo.totalShares.amount);
+-      const totalShareExp = totalShare.shiftedBy(-18);
+-      const poolAssetAmount = new BigNumber(token.amount);
+-
+-      return tokenInAmount
+-        .multipliedBy(totalShareExp)
+-        .dividedBy(poolAssetAmount)
+-        .shiftedBy(18)
+-        .decimalPlaces(0, BigNumber.ROUND_HALF_UP)
+-        .toString();
+-    })
+-    .sort()[0];
+-};
+-
+-export const makePoolPairs = (pools: Pool[]): PrettyPair[] => {
+-  // @ts-ignore
+-  return pools
+-    .filter(
+-      (pool) =>
+-        pool.poolAssets.length === 2 &&
+-        pool.poolAssets.every(({ token }) => !token.denom.startsWith('gamm'))
+-    )
+-    .map((pool) => {
+-      const assetA = pool.poolAssets[0].token;
+-      const assetAinfo = getOsmoAssetByDenom(assetA.denom);
+-      const assetB = pool.poolAssets[1].token;
+-      const assetBinfo = getOsmoAssetByDenom(assetB.denom);
+-
+-      if (!assetAinfo || !assetBinfo) return;
+-
+-      return {
+-        // TODO fix the fact this is seemingly using long
+-        // TODO or, why do we even have pools here???
+-        // @ts-ignore
+-        poolId: typeof pool.id === 'string' ? pool.id : pool.id.low.toString(),
+-        poolAddress: pool.address,
+-        baseName: assetAinfo.display,
+-        baseSymbol: assetAinfo.symbol,
+-        baseAddress: assetAinfo.base,
+-        quoteName: assetBinfo.display,
+-        quoteSymbol: assetBinfo.symbol,
+-        quoteAddress: assetBinfo.base,
+-      };
+-    })
+-    .filter(Boolean);
+-};
+diff --git a/templates/chain-template/utils/asset-list/types.ts b/templates/chain-template/utils/asset-list/types.ts
+deleted file mode 100644
+index e1e13eb1..00000000
+--- a/templates/chain-template/utils/asset-list/types.ts
++++ /dev/null
+@@ -1,85 +0,0 @@
+-import { AssetDenomUnit } from '@chain-registry/types';
+-import { Duration } from 'osmo-query/dist/codegen/google/protobuf/duration';
+-import { Gauge } from 'osmo-query/dist/codegen/osmosis/incentives/gauge';
+-import { SuperfluidAsset } from 'osmo-query/dist/codegen/osmosis/superfluid/superfluid';
+-import { Coin } from 'osmo-query/dist/codegen/cosmos/base/v1beta1/coin';
+-import { Pool } from 'osmo-query/dist/codegen/osmosis/gamm/pool-models/balancer/balancerPool';
+-
+-export type CoinDenom = AssetDenomUnit['denom'];
+-
+-export type Exponent = AssetDenomUnit['exponent'];
+-
+-export type CoinSymbol = string;
+-
+-export interface PriceHash {
+-  [key: CoinDenom]: number;
+-}
+-
+-export type CoinGeckoToken = string;
+-
+-export interface CoinGeckoUSD {
+-  usd: number;
+-}
+-
+-export type CoinGeckoUSDResponse = Record<CoinGeckoToken, CoinGeckoUSD>;
+-
+-export interface CoinValue {
+-  amount: string;
+-  denom: CoinDenom;
+-  displayAmount: string;
+-  value: string;
+-  symbol: CoinSymbol;
+-}
+-
+-export type CoinBalance = Coin & { displayValue: string | number };
+-
+-export interface PoolAssetPretty {
+-  symbol: any;
+-  denom: string;
+-  amount: string;
+-  ratio: string;
+-  info: any;
+-}
+-
+-export interface PoolTokenImage {
+-  token: CoinSymbol;
+-  images: {
+-    png: string;
+-    svg: string;
+-  };
+-}
+-
+-export interface PoolPretty extends Pool {
+-  nickname: string;
+-  images: PoolTokenImage[] | null;
+-  poolAssetsPretty: PoolAssetPretty[];
+-}
+-
+-export interface CalcPoolAprsParams {
+-  activeGauges: Gauge[];
+-  pool: Pool;
+-  prices: PriceHash;
+-  superfluidPools: SuperfluidAsset[];
+-  aprSuperfluid: string | number;
+-  lockupDurations: Duration[];
+-  volume7d: string | number;
+-  swapFee: string | number;
+-  lockup?: string;
+-  includeNonPerpetual?: boolean;
+-}
+-
+-export interface Trade {
+-  sell: Coin;
+-  buy: Coin;
+-}
+-
+-export interface PrettyPair {
+-  poolId: string;
+-  poolAddress: string;
+-  baseName: string;
+-  baseSymbol: string;
+-  baseAddress: string;
+-  quoteName: string;
+-  quoteSymbol: string;
+-  quoteAddress: string;
+-}
+diff --git a/templates/chain-template/utils/common.ts b/templates/chain-template/utils/common.ts
+index 45f856b7..0ba2ca4d 100644
+--- a/templates/chain-template/utils/common.ts
++++ b/templates/chain-template/utils/common.ts
+@@ -31,7 +31,7 @@ export const getWalletLogo = (wallet: Wallet) => {
+ };
+ 
+ export const getSignerOptions = (): SignerOptions => {
+-  const defaultGasPrice = GasPrice.fromString('0.025uosmo');
++  const defaultGasPrice = GasPrice.fromString('0.025uatom');
+ 
+   return {
+     // @ts-ignore
+diff --git a/templates/chain-template/utils/index.ts b/templates/chain-template/utils/index.ts
+index acb8b603..3e96554e 100644
+--- a/templates/chain-template/utils/index.ts
++++ b/templates/chain-template/utils/index.ts
+@@ -1,6 +1,5 @@
+ export * from './common';
+ export * from './staking';
+ export * from './voting';
+-export * from './asset-list';
+ export * from './contract';
+ export * from './faucet';
+diff --git a/templates/chain-template/yarn.lock b/templates/chain-template/yarn.lock
+index 79dfd50a..f0d36278 100644
+--- a/templates/chain-template/yarn.lock
++++ b/templates/chain-template/yarn.lock
+@@ -5,7 +5,7 @@ __metadata:
+   version: 8
+   cacheKey: 10c0
+ 
+-"@babel/runtime@npm:^7.12.5, @babel/runtime@npm:^7.21.0":
++"@babel/runtime@npm:^7.12.5":
+   version: 7.24.4
+   resolution: "@babel/runtime@npm:7.24.4"
+   dependencies:
+@@ -23,28 +23,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@chain-registry/assets@npm:1.63.5":
+-  version: 1.63.5
+-  resolution: "@chain-registry/assets@npm:1.63.5"
+-  dependencies:
+-    "@chain-registry/types": "npm:^0.44.3"
+-  checksum: 10c0/52211bb383829a245f738e9a7f388fb768ae35ad34a299dce6b4506ee02d069eaee103f62794b786efc4fc258c6b9b26fd88d21a5c8a2d75612343737b9f10f2
+-  languageName: node
+-  linkType: hard
+-
+-"@chain-registry/client@npm:1.18.1":
+-  version: 1.18.1
+-  resolution: "@chain-registry/client@npm:1.18.1"
+-  dependencies:
+-    "@babel/runtime": "npm:^7.21.0"
+-    "@chain-registry/types": "npm:^0.17.1"
+-    "@chain-registry/utils": "npm:^1.17.0"
+-    bfs-path: "npm:^1.0.2"
+-    cross-fetch: "npm:^3.1.5"
+-  checksum: 10c0/9e03b44aae667f6050d6de4f1388122470a2dd94693314f7214c925ed4a1eff79e88ca000bf9f10d308bfd5eb633eca722d2b4e413fef7b566c9a83331e71f26
+-  languageName: node
+-  linkType: hard
+-
+ "@chain-registry/client@npm:^1.48.1":
+   version: 1.48.31
+   resolution: "@chain-registry/client@npm:1.48.31"
+@@ -103,7 +81,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@chain-registry/types@npm:0.44.3, @chain-registry/types@npm:^0.44.3":
++"@chain-registry/types@npm:0.44.3":
+   version: 0.44.3
+   resolution: "@chain-registry/types@npm:0.44.3"
+   checksum: 10c0/471e85e934e42ba2704fece7ca0545df5ef98e947a5d10aaefa7872145a21211036740b4b37bb8a33359561b7533c07c22e1608b372efc19be5e2ebd386ac3de
+@@ -117,15 +95,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@chain-registry/types@npm:^0.17.1":
+-  version: 0.17.1
+-  resolution: "@chain-registry/types@npm:0.17.1"
+-  dependencies:
+-    "@babel/runtime": "npm:^7.21.0"
+-  checksum: 10c0/00400f2994c838dbf0a4a6aa01af397d72badbeee82e13095e1ae1e5853a9405f802f0e5629f3aab0cfaa7ec9eae78eb0976001d5a24a7f33d138e2b02edb547
+-  languageName: node
+-  linkType: hard
+-
+ "@chain-registry/types@npm:^0.45.1, @chain-registry/types@npm:^0.45.31":
+   version: 0.45.31
+   resolution: "@chain-registry/types@npm:0.45.31"
+@@ -133,21 +102,10 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@chain-registry/types@npm:^0.45.26":
+-  version: 0.45.26
+-  resolution: "@chain-registry/types@npm:0.45.26"
+-  checksum: 10c0/9f3163a458c7f2a5867bbad2cea0916345df9df3c03e110dfd79290331b58462da903836fb98b573ba1b95ad835ecffb803c3de649edcfcfb608dde7880e24b4
+-  languageName: node
+-  linkType: hard
+-
+-"@chain-registry/utils@npm:^1.17.0":
+-  version: 1.46.26
+-  resolution: "@chain-registry/utils@npm:1.46.26"
+-  dependencies:
+-    "@chain-registry/types": "npm:^0.45.26"
+-    bignumber.js: "npm:9.1.2"
+-    sha.js: "npm:^2.4.11"
+-  checksum: 10c0/37cff17ed77323e9c2fe7575261e30ed7e07812b6488e61649252259e6cdb03349146a1d789d2fd5ca77fc51b9baabe38e9ddce267f082a0b95806bf25de505c
++"@chain-registry/types@npm:^0.50.14":
++  version: 0.50.14
++  resolution: "@chain-registry/types@npm:0.50.14"
++  checksum: 10c0/8801a9f9570128f05b410d412897f857a98a59ec088ab038510fb07b2e3b77f481f1d27bfed540dcdaf96af534ae93453a349712bde795de6dd683e2619d9f75
+   languageName: node
+   linkType: hard
+ 
+@@ -184,18 +142,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/amino@npm:0.29.3":
+-  version: 0.29.3
+-  resolution: "@cosmjs/amino@npm:0.29.3"
+-  dependencies:
+-    "@cosmjs/crypto": "npm:^0.29.3"
+-    "@cosmjs/encoding": "npm:^0.29.3"
+-    "@cosmjs/math": "npm:^0.29.3"
+-    "@cosmjs/utils": "npm:^0.29.3"
+-  checksum: 10c0/5f7916ed259239c83303a5c1ae467021961db7c250a56aba24b2432ad66c2d1612c73055a1e86783f54417720450ba814ca5e854a0c98eb6823f66f20bdecdec
+-  languageName: node
+-  linkType: hard
+-
+ "@cosmjs/amino@npm:0.29.4":
+   version: 0.29.4
+   resolution: "@cosmjs/amino@npm:0.29.4"
+@@ -220,7 +166,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/amino@npm:^0.29.3, @cosmjs/amino@npm:^0.29.4, @cosmjs/amino@npm:^0.29.5":
++"@cosmjs/amino@npm:^0.29.4, @cosmjs/amino@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/amino@npm:0.29.5"
+   dependencies:
+@@ -292,7 +238,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/crypto@npm:^0.29.3, @cosmjs/crypto@npm:^0.29.4, @cosmjs/crypto@npm:^0.29.5":
++"@cosmjs/crypto@npm:^0.29.4, @cosmjs/crypto@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/crypto@npm:0.29.5"
+   dependencies:
+@@ -352,7 +298,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/encoding@npm:^0.29.3, @cosmjs/encoding@npm:^0.29.4, @cosmjs/encoding@npm:^0.29.5":
++"@cosmjs/encoding@npm:^0.29.4, @cosmjs/encoding@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/encoding@npm:0.29.5"
+   dependencies:
+@@ -436,7 +382,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/math@npm:^0.29.3, @cosmjs/math@npm:^0.29.4, @cosmjs/math@npm:^0.29.5":
++"@cosmjs/math@npm:^0.29.4, @cosmjs/math@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/math@npm:0.29.5"
+   dependencies:
+@@ -472,21 +418,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/proto-signing@npm:0.29.3":
+-  version: 0.29.3
+-  resolution: "@cosmjs/proto-signing@npm:0.29.3"
+-  dependencies:
+-    "@cosmjs/amino": "npm:^0.29.3"
+-    "@cosmjs/crypto": "npm:^0.29.3"
+-    "@cosmjs/encoding": "npm:^0.29.3"
+-    "@cosmjs/math": "npm:^0.29.3"
+-    "@cosmjs/utils": "npm:^0.29.3"
+-    cosmjs-types: "npm:^0.5.2"
+-    long: "npm:^4.0.0"
+-  checksum: 10c0/8d73649b3a340a085633609d4db94b4fc01f94574e3ead2667db071afd12a4008a84710142dd15dc315981d39d55c9355c875176e7ab20ac239980110e23eebe
+-  languageName: node
+-  linkType: hard
+-
+ "@cosmjs/proto-signing@npm:0.29.4":
+   version: 0.29.4
+   resolution: "@cosmjs/proto-signing@npm:0.29.4"
+@@ -502,7 +433,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/proto-signing@npm:^0.29.3, @cosmjs/proto-signing@npm:^0.29.4":
++"@cosmjs/proto-signing@npm:^0.29.4":
+   version: 0.29.5
+   resolution: "@cosmjs/proto-signing@npm:0.29.5"
+   dependencies:
+@@ -608,26 +539,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/stargate@npm:0.29.3":
+-  version: 0.29.3
+-  resolution: "@cosmjs/stargate@npm:0.29.3"
+-  dependencies:
+-    "@confio/ics23": "npm:^0.6.8"
+-    "@cosmjs/amino": "npm:^0.29.3"
+-    "@cosmjs/encoding": "npm:^0.29.3"
+-    "@cosmjs/math": "npm:^0.29.3"
+-    "@cosmjs/proto-signing": "npm:^0.29.3"
+-    "@cosmjs/stream": "npm:^0.29.3"
+-    "@cosmjs/tendermint-rpc": "npm:^0.29.3"
+-    "@cosmjs/utils": "npm:^0.29.3"
+-    cosmjs-types: "npm:^0.5.2"
+-    long: "npm:^4.0.0"
+-    protobufjs: "npm:~6.11.3"
+-    xstream: "npm:^11.14.0"
+-  checksum: 10c0/a37fc5ba1f2c8521c55d7efb9dfce0e3bfde7b6cbe241e54b36af769d256683ecd955e8b50ee5a9f6932f8847adda3866c3652ece3610463fac3b6d9a021e9fe
+-  languageName: node
+-  linkType: hard
+-
+ "@cosmjs/stargate@npm:0.29.4":
+   version: 0.29.4
+   resolution: "@cosmjs/stargate@npm:0.29.4"
+@@ -704,7 +615,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/stream@npm:^0.29.3, @cosmjs/stream@npm:^0.29.4, @cosmjs/stream@npm:^0.29.5":
++"@cosmjs/stream@npm:^0.29.4, @cosmjs/stream@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/stream@npm:0.29.5"
+   dependencies:
+@@ -740,7 +651,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/tendermint-rpc@npm:^0.29.3, @cosmjs/tendermint-rpc@npm:^0.29.4":
++"@cosmjs/tendermint-rpc@npm:^0.29.4":
+   version: 0.29.5
+   resolution: "@cosmjs/tendermint-rpc@npm:0.29.5"
+   dependencies:
+@@ -812,7 +723,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@cosmjs/utils@npm:^0.29.3, @cosmjs/utils@npm:^0.29.4, @cosmjs/utils@npm:^0.29.5":
++"@cosmjs/utils@npm:^0.29.4, @cosmjs/utils@npm:^0.29.5":
+   version: 0.29.5
+   resolution: "@cosmjs/utils@npm:0.29.5"
+   checksum: 10c0/cfb2dbc499bc305cf0b7d3f0afc936b52e0e7492dce33e3bef7986b0e3aa8c34316c60072b7664799d182ce5f5016eaead3d5f948d871c5b1afe30604ef2542d
+@@ -844,7 +755,6 @@ __metadata:
+   version: 0.0.0-use.local
+   resolution: "@cosmology/chain-template@workspace:."
+   dependencies:
+-    "@chain-registry/assets": "npm:1.63.5"
+     "@chain-registry/types": "npm:0.44.3"
+     "@cosmjs/amino": "npm:0.32.3"
+     "@cosmjs/cosmwasm-stargate": "npm:0.32.3"
+@@ -853,7 +763,6 @@ __metadata:
+     "@interchain-ui/react": "npm:1.23.31"
+     "@interchain-ui/react-no-ssr": "npm:0.1.2"
+     "@keplr-wallet/types": "npm:^0.12.111"
+-    "@starship-ci/cli": "npm:^2.9.0"
+     "@tanstack/react-query": "npm:4.32.0"
+     "@tanstack/react-query-devtools": "npm:4.32.0"
+     "@types/node": "npm:18.11.9"
+@@ -862,7 +771,7 @@ __metadata:
+     "@types/react-dom": "npm:18.0.9"
+     ace-builds: "npm:1.35.0"
+     bignumber.js: "npm:9.1.2"
+-    chain-registry: "npm:1.62.3"
++    chain-registry: "npm:1.69.33"
+     cosmos-kit: "npm:2.18.4"
+     dayjs: "npm:1.11.11"
+     eslint: "npm:8.28.0"
+@@ -871,30 +780,18 @@ __metadata:
+     interchain-query: "npm:1.10.1"
+     next: "npm:^13"
+     node-gzip: "npm:^1.1.2"
+-    osmo-query: "npm:16.5.1"
+     react: "npm:18.2.0"
+     react-ace: "npm:11.0.1"
+     react-dom: "npm:18.2.0"
+     react-dropzone: "npm:^14.2.3"
+     react-icons: "npm:5.2.1"
+     react-markdown: "npm:9.0.1"
+-    starshipjs: "npm:^2.4.0"
+     typescript: "npm:4.9.3"
+     yaml-loader: "npm:^0.8.1"
+     zustand: "npm:4.5.2"
+   languageName: unknown
+   linkType: soft
+ 
+-"@cosmology/lcd@npm:^0.12.0":
+-  version: 0.12.0
+-  resolution: "@cosmology/lcd@npm:0.12.0"
+-  dependencies:
+-    "@babel/runtime": "npm:^7.21.0"
+-    axios: "npm:0.27.2"
+-  checksum: 10c0/28fbc26cd4c7cf693ae5be7aab637d1f5420f407dbc7a588d67bf5e5bb5e8f0b58e1c428993ca54dbe1dbac8c9dbd9d2713dffad76dfbc727d7bb77b5fb9b041
+-  languageName: node
+-  linkType: hard
+-
+ "@cosmos-kit/cdcwallet-extension@npm:^2.13.2":
+   version: 2.13.2
+   resolution: "@cosmos-kit/cdcwallet-extension@npm:2.13.2"
+@@ -4420,35 +4317,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"@starship-ci/cli@npm:^2.9.0":
+-  version: 2.9.0
+-  resolution: "@starship-ci/cli@npm:2.9.0"
+-  dependencies:
+-    "@starship-ci/client": "npm:^2.8.0"
+-    chalk: "npm:^4.1.0"
+-    deepmerge: "npm:^4.3.1"
+-    inquirerer: "npm:^1.9.0"
+-    js-yaml: "npm:^4.1.0"
+-    minimist: "npm:^1.2.8"
+-  bin:
+-    starship: index.js
+-  checksum: 10c0/3aca862a045a6d0a3f163b7e4b729d7f7e13666a7ea34c3b418eb47776f86ece193ed89544486fd44ade91ebadd652d41709d8e3c3b96bdb8cee0873b6a3c036
+-  languageName: node
+-  linkType: hard
+-
+-"@starship-ci/client@npm:^2.8.0":
+-  version: 2.8.0
+-  resolution: "@starship-ci/client@npm:2.8.0"
+-  dependencies:
+-    chalk: "npm:^4.1.0"
+-    deepmerge: "npm:^4.3.1"
+-    js-yaml: "npm:^4.1.0"
+-    mkdirp: "npm:3.0.1"
+-    shelljs: "npm:^0.8.5"
+-  checksum: 10c0/ceb176da93674f56933aebca44c7ae09ba0d19f452eeb388a91833a607248c0bb00a1466ef574c35fcacd7c58bdd6ad7b371957b8cad1257061fcc2d221d8b7f
+-  languageName: node
+-  linkType: hard
+-
+ "@swc/helpers@npm:0.5.2":
+   version: 0.5.2
+   resolution: "@swc/helpers@npm:0.5.2"
+@@ -5483,16 +5351,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"axios@npm:0.27.2, axios@npm:^0.27.2":
+-  version: 0.27.2
+-  resolution: "axios@npm:0.27.2"
+-  dependencies:
+-    follow-redirects: "npm:^1.14.9"
+-    form-data: "npm:^4.0.0"
+-  checksum: 10c0/76d673d2a90629944b44d6f345f01e58e9174690f635115d5ffd4aca495d99bcd8f95c590d5ccb473513f5ebc1d1a6e8934580d0c57cdd0498c3a101313ef771
+-  languageName: node
+-  linkType: hard
+-
+ "axios@npm:^0.21.2":
+   version: 0.21.4
+   resolution: "axios@npm:0.21.4"
+@@ -5502,6 +5360,16 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
++"axios@npm:^0.27.2":
++  version: 0.27.2
++  resolution: "axios@npm:0.27.2"
++  dependencies:
++    follow-redirects: "npm:^1.14.9"
++    form-data: "npm:^4.0.0"
++  checksum: 10c0/76d673d2a90629944b44d6f345f01e58e9174690f635115d5ffd4aca495d99bcd8f95c590d5ccb473513f5ebc1d1a6e8934580d0c57cdd0498c3a101313ef771
++  languageName: node
++  linkType: hard
++
+ "axios@npm:^1.6.0":
+   version: 1.6.8
+   resolution: "axios@npm:1.6.8"
+@@ -5632,7 +5500,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"bip39@npm:^3.0.3, bip39@npm:^3.1.0":
++"bip39@npm:^3.0.3":
+   version: 3.1.0
+   resolution: "bip39@npm:3.1.0"
+   dependencies:
+@@ -5888,12 +5756,12 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"chain-registry@npm:1.62.3":
+-  version: 1.62.3
+-  resolution: "chain-registry@npm:1.62.3"
++"chain-registry@npm:1.69.33":
++  version: 1.69.33
++  resolution: "chain-registry@npm:1.69.33"
+   dependencies:
+-    "@chain-registry/types": "npm:^0.44.3"
+-  checksum: 10c0/acb2dcee56604083a38dd7e4524458d7d5c2e786d8d78ed40444530a8cb3236d16e0fef52462603ef339c2c529ede1c846597a8e6f99fa7751481b28279c9a56
++    "@chain-registry/types": "npm:^0.50.14"
++  checksum: 10c0/96ed7b5a12c627aad124c499ac06f7009d248ba79c77b01f9901b43fc8312a72794b2dd0450459d6c875988d0933ac8755c3ff0c71153222b09bc5d9055646a5
+   languageName: node
+   linkType: hard
+ 
+@@ -6396,7 +6264,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"deepmerge@npm:^4.2.2, deepmerge@npm:^4.3.1":
++"deepmerge@npm:^4.2.2":
+   version: 4.3.1
+   resolution: "deepmerge@npm:4.3.1"
+   checksum: 10c0/e53481aaf1aa2c4082b5342be6b6d8ad9dfe387bc92ce197a66dea08bd4265904a087e75e464f14d1347cf2ac8afe1e4c16b266e0561cc5df29382d3c5f80044
+@@ -7543,7 +7411,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"glob@npm:^7.0.0, glob@npm:^7.1.3":
++"glob@npm:^7.1.3":
+   version: 7.2.3
+   resolution: "glob@npm:7.2.3"
+   dependencies:
+@@ -7909,18 +7777,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"inquirerer@npm:^1.9.0":
+-  version: 1.9.0
+-  resolution: "inquirerer@npm:1.9.0"
+-  dependencies:
+-    chalk: "npm:^4.1.0"
+-    deepmerge: "npm:^4.3.1"
+-    js-yaml: "npm:^4.1.0"
+-    minimist: "npm:^1.2.8"
+-  checksum: 10c0/c405e4ce4eb73ef5ad495dd9ae66ebd9686a127d5de0a55440eda3472ce9e93d5233bba9f6feb326d240348a9ff009c6eafb5ef29404880b850b91bbcd18ef6b
+-  languageName: node
+-  linkType: hard
+-
+ "interchain-query@npm:1.10.1":
+   version: 1.10.1
+   resolution: "interchain-query@npm:1.10.1"
+@@ -7947,13 +7803,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"interpret@npm:^1.0.0":
+-  version: 1.4.0
+-  resolution: "interpret@npm:1.4.0"
+-  checksum: 10c0/08c5ad30032edeec638485bc3f6db7d0094d9b3e85e0f950866600af3c52e9fd69715416d29564731c479d9f4d43ff3e4d302a178196bdc0e6837ec147640450
+-  languageName: node
+-  linkType: hard
+-
+ "intl-messageformat@npm:^10.1.0":
+   version: 10.5.11
+   resolution: "intl-messageformat@npm:10.5.11"
+@@ -9313,7 +9162,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"minimist@npm:^1.2.0, minimist@npm:^1.2.6, minimist@npm:^1.2.8":
++"minimist@npm:^1.2.0, minimist@npm:^1.2.6":
+   version: 1.2.8
+   resolution: "minimist@npm:1.2.8"
+   checksum: 10c0/19d3fcdca050087b84c2029841a093691a91259a47def2f18222f41e7645a0b7c44ef4b40e88a1e58a40c84d2ef0ee6047c55594d298146d0eb3f6b737c20ce6
+@@ -9404,15 +9253,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"mkdirp@npm:3.0.1":
+-  version: 3.0.1
+-  resolution: "mkdirp@npm:3.0.1"
+-  bin:
+-    mkdirp: dist/cjs/src/bin.js
+-  checksum: 10c0/9f2b975e9246351f5e3a40dcfac99fcd0baa31fbfab615fe059fb11e51f10e4803c63de1f384c54d656e4db31d000e4767e9ef076a22e12a641357602e31d57d
+-  languageName: node
+-  linkType: hard
+-
+ "mkdirp@npm:^1.0.3":
+   version: 1.0.4
+   resolution: "mkdirp@npm:1.0.4"
+@@ -9606,7 +9446,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.12, node-fetch@npm:^2.6.9":
++"node-fetch@npm:^2.6.1, node-fetch@npm:^2.6.12":
+   version: 2.7.0
+   resolution: "node-fetch@npm:2.7.0"
+   dependencies:
+@@ -9848,19 +9688,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"osmo-query@npm:16.5.1":
+-  version: 16.5.1
+-  resolution: "osmo-query@npm:16.5.1"
+-  dependencies:
+-    "@cosmjs/amino": "npm:0.29.3"
+-    "@cosmjs/proto-signing": "npm:0.29.3"
+-    "@cosmjs/stargate": "npm:0.29.3"
+-    "@cosmjs/tendermint-rpc": "npm:^0.29.3"
+-    "@cosmology/lcd": "npm:^0.12.0"
+-  checksum: 10c0/036877b1f2aefda492f1ff2c84163955de439c07bb87380cf05e3d8b244d77f12a505d93e655389172d89bd09214d5b812d8123bd1203fe649e7d934f87c2d34
+-  languageName: node
+-  linkType: hard
+-
+ "p-limit@npm:^3.0.2":
+   version: 3.1.0
+   resolution: "p-limit@npm:3.1.0"
+@@ -10507,15 +10334,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"rechoir@npm:^0.6.2":
+-  version: 0.6.2
+-  resolution: "rechoir@npm:0.6.2"
+-  dependencies:
+-    resolve: "npm:^1.1.6"
+-  checksum: 10c0/22c4bb32f4934a9468468b608417194f7e3ceba9a508512125b16082c64f161915a28467562368eeb15dc16058eb5b7c13a20b9eb29ff9927d1ebb3b5aa83e84
+-  languageName: node
+-  linkType: hard
+-
+ "reflect.getprototypeof@npm:^1.0.4":
+   version: 1.0.6
+   resolution: "reflect.getprototypeof@npm:1.0.6"
+@@ -10603,7 +10421,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"resolve@npm:^1.1.6, resolve@npm:^1.22.4":
++"resolve@npm:^1.22.4":
+   version: 1.22.8
+   resolution: "resolve@npm:1.22.8"
+   dependencies:
+@@ -10629,7 +10447,7 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"resolve@patch:resolve@npm%3A^1.1.6#optional!builtin<compat/resolve>, resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
++"resolve@patch:resolve@npm%3A^1.22.4#optional!builtin<compat/resolve>":
+   version: 1.22.8
+   resolution: "resolve@patch:resolve@npm%3A1.22.8#optional!builtin<compat/resolve>::version=1.22.8&hash=c3c19d"
+   dependencies:
+@@ -10870,19 +10688,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"shelljs@npm:^0.8.5":
+-  version: 0.8.5
+-  resolution: "shelljs@npm:0.8.5"
+-  dependencies:
+-    glob: "npm:^7.0.0"
+-    interpret: "npm:^1.0.0"
+-    rechoir: "npm:^0.6.2"
+-  bin:
+-    shjs: bin/shjs
+-  checksum: 10c0/feb25289a12e4bcd04c40ddfab51aff98a3729f5c2602d5b1a1b95f6819ec7804ac8147ebd8d9a85dfab69d501bcf92d7acef03247320f51c1552cec8d8e2382
+-  languageName: node
+-  linkType: hard
+-
+ "side-channel@npm:^1.0.4, side-channel@npm:^1.0.6":
+   version: 1.0.6
+   resolution: "side-channel@npm:1.0.6"
+@@ -10990,18 +10795,6 @@ __metadata:
+   languageName: node
+   linkType: hard
+ 
+-"starshipjs@npm:^2.4.0":
+-  version: 2.4.0
+-  resolution: "starshipjs@npm:2.4.0"
+-  dependencies:
+-    "@chain-registry/client": "npm:1.18.1"
+-    bip39: "npm:^3.1.0"
+-    js-yaml: "npm:^4.1.0"
+-    node-fetch: "npm:^2.6.9"
+-  checksum: 10c0/e62cc540bc9e8700d3bdb61ac1261b71417f0e687c98a0e3733317d363e425c7188a205d9af70f5218e87f99195fbfb5b759b4f3f9d87823989ef6b4d90442d6
+-  languageName: node
+-  linkType: hard
+-
+ "std-env@npm:^3.7.0":
+   version: 3.7.0
+   resolution: "std-env@npm:3.7.0"
+-- 
+2.47.0
+
