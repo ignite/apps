@@ -20,7 +20,7 @@ func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 }
 
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Remove the three two elements "ignite", "relayer" and "hermes" from OsArgs.
+	// Remove the three elements "ignite", "relayer" and "hermes" from OsArgs.
 	args := c.OsArgs[3:]
 	switch args[0] {
 	case "configure":
