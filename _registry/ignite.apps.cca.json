@@ -1,7 +1,7 @@
 {
   "appName": "cca",
   "appDescription": "Scaffold a blockchain frontend in seconds with Ignite",
-  "ignite": ">28.0.0",
+  "ignite": ">28.7.0",
   "dependencies": {},
   "cosmosSDK": ">0.50.1",
   "authors": [

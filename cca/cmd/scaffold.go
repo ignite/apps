@@ -9,6 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v28/ignite/services/scaffolder"
 )
 
 const (
@@ -38,6 +39,23 @@ func ExecuteScaffold(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	sc, err := scaffolder.New(absPath)
+	if err != nil {
+		return err
+	}
+
+	cfg, err := c.Config()
+	if err != nil {
+		return err
+	}
+
+	// add chain registry files
+	// those are used for the wallet connector
+	if err = sc.AddChainRegistryFiles(c, cfg); err != nil {
+		return err
+	}
+
+	// add cca files
 	if err := templates.Write(c.AppPath()); err != nil {
 		return fmt.Errorf("failed to write CCA: %w", err)
 	}
