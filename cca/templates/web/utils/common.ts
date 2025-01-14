@@ -31,7 +31,7 @@ export const getWalletLogo = (wallet: Wallet) => {
 };
 
 export const getSignerOptions = (): SignerOptions => {
-  const defaultGasPrice = GasPrice.fromString('0.025uatom');
+  const defaultGasPrice = GasPrice.fromString('0.025stake');
 
   return {
     // @ts-ignore

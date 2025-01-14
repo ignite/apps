@@ -7,5 +7,4 @@ export const wallets = [
   _wallets.keplr.extension,
   _wallets.leap.extension,
   _wallets.cosmostation.extension,
-  _wallets.station.extension,
 ] as MainWalletBase[];

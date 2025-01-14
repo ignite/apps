@@ -1,7 +1,8 @@
 import Image from 'next/image';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useChain, useManager } from '@cosmos-kit/react';
 import { Box, Combobox, Skeleton, Stack, Text } from '@interchain-ui/react';
+import { Chain, AssetList } from '@chain-registry/types';
 
 import { useDetectBreakpoints } from '@/hooks';
 import { chainStore, useChainStore } from '@/contexts';
@@ -11,12 +12,28 @@ import { getSignerOptions } from '@/utils';
 export const ChainDropdown = () => {
   const { selectedChain } = useChainStore();
   const { chain } = useChain(selectedChain);
-  const [input, setInput] = useState<string>(chain.pretty_name);
+  const [input, setInput] = useState<string>(chain.chain_name);
   const { isMobile } = useDetectBreakpoints();
 
   const { addChains, getChainLogo } = useManager();
 
   // TODO(@julienrbrt), use addChains, and add the chain from the generate chain-registry.json
+  const loadAndAddChains = async () => {
+    try {
+      // Load chain and asset configurations
+      const chainConfig: Chain = await import('../../../../chain.json');
+      const assetConfig: AssetList = await import('../../../../assetlist.json');
+
+      // Add chains using cosmos-kit
+      await addChains([chainConfig],[assetConfig]);
+    } catch (error) {
+      console.error('Failed to load chain configuration:', error);
+    }
+  };
+
+  useEffect(() => {
+    loadAndAddChains();
+  }, []);
 
   const onOpenChange = (isOpen: boolean) => {};
 
@@ -63,7 +80,7 @@ export const ChainDropdown = () => {
           >
             <Image
               src={getChainLogo(c.chain_name) ?? ''}
-              alt={c.pretty_name}
+              alt={c.chain_name}
               width={isMobile ? 18 : 24}
               height={isMobile ? 18 : 24}
               style={{
