@@ -40,6 +40,10 @@ func TestCCA(t *testing.T) {
 	})
 	assertGlobalPlugins(t, nil)
 
+	// no web folder yet
+	_, err = os.Stat(filepath.Join(app.SourcePath(), "web"))
+	require.Error(err)
+
 	buf := &bytes.Buffer{}
 	env.Must(env.Exec("run cca",
 		step.NewSteps(step.New(
@@ -55,6 +59,9 @@ func TestCCA(t *testing.T) {
 	))
 
 	require.Contains(buf.String(), "Ignite CCA added")
+	ccaFolder, err := os.Stat(filepath.Join(app.SourcePath(), "web"))
+	require.NoError(err)
+	require.True(ccaFolder.IsDir())
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
