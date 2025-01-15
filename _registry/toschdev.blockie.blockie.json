@@ -30,6 +30,6 @@
     "mac",
     "linux"
   ],
-  "icon": "",
+  "icon": "https://raw.githubusercontent.com/toschdev/blockie/refs/heads/main/cubie_ignite.png",
   "cover": ""
 }
