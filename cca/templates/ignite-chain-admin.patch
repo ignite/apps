@@ -1491,94 +1491,149 @@ index 95e1658c..5bb5388a 100644
  ];
  
 diff --git a/templates/chain-template/components/common/Header/ChainDropdown.tsx b/templates/chain-template/components/common/Header/ChainDropdown.tsx
-index 47c933b8..4c25a002 100644
+index 47c933b8..e31f2f28 100644
 --- a/templates/chain-template/components/common/Header/ChainDropdown.tsx
 +++ b/templates/chain-template/components/common/Header/ChainDropdown.tsx
-@@ -1,9 +1,10 @@
- import Image from 'next/image';
+@@ -1,48 +1,52 @@
+-import Image from 'next/image';
 -import { useEffect, useState } from 'react';
-+import { useState, useEffect } from 'react';
- import { useChain, useManager } from '@cosmos-kit/react';
- import { Box, Combobox, Skeleton, Stack, Text } from '@interchain-ui/react';
-+import { Chain, AssetList } from '@chain-registry/types';
+-import { useChain, useManager } from '@cosmos-kit/react';
+-import { Box, Combobox, Skeleton, Stack, Text } from '@interchain-ui/react';
++import Image from "next/image";
++import { useEffect, useState } from "react";
++import { useChain, useManager } from "@cosmos-kit/react";
++import { Box, Combobox, Skeleton, Stack, Text } from "@interchain-ui/react";
++import { Chain, AssetList } from "@chain-registry/types";
  
 -import { useStarshipChains, useDetectBreakpoints } from '@/hooks';
-+import { useDetectBreakpoints } from '@/hooks';
- import { chainStore, useChainStore } from '@/contexts';
- import { chainOptions } from '@/config';
- import { getSignerOptions } from '@/utils';
-@@ -11,37 +12,30 @@ import { getSignerOptions } from '@/utils';
+-import { chainStore, useChainStore } from '@/contexts';
+-import { chainOptions } from '@/config';
+-import { getSignerOptions } from '@/utils';
++import { useDetectBreakpoints } from "@/hooks";
++import { chainStore, useChainStore } from "@/contexts";
++import { chainOptions } from "@/config";
++import { getSignerOptions } from "@/utils";
+ 
  export const ChainDropdown = () => {
    const { selectedChain } = useChainStore();
    const { chain } = useChain(selectedChain);
 -  const [input, setInput] = useState<string>(chain.pretty_name);
-+  const [input, setInput] = useState<string>(chain.chain_name);
++  const [input, setInput] = useState<string>(chain.pretty_name??chain.chain_name);
    const { isMobile } = useDetectBreakpoints();
 -  const { data: starshipChains, refetch } = useStarshipChains();
  
--  const [isChainsAdded, setIsChainsAdded] = useState(false);
+   const [isChainsAdded, setIsChainsAdded] = useState(false);
    const { addChains, getChainLogo } = useManager();
  
--  useEffect(() => {
++  // local chain config
++  const chainConfig: Chain = require("../../../../chain.json");
++  const assetConfig: AssetList = require("../../../../assetlist.json");
++
+   useEffect(() => {
 -    if (
 -      starshipChains?.chains.length &&
 -      starshipChains?.assets.length &&
 -      !isChainsAdded
 -    ) {
--      addChains(
++    if (isChainsAdded) return;
++
++    if (chainConfig && assetConfig) {
+       addChains(
 -        starshipChains.chains,
 -        starshipChains.assets,
--        getSignerOptions(),
--      );
--      setIsChainsAdded(true);
--    }
++        [chainConfig], 
++        [assetConfig], 
+         getSignerOptions(),
++        {
++          [chainConfig.chain_name]: {
++            rpc: [chainConfig.apis.rpc[0].address],
++            rest: [chainConfig.apis.rest[0].address]
++          }
++        },
+       );
+       setIsChainsAdded(true);
+     }
 -  }, [starshipChains, isChainsAdded]);
-+  // TODO(@julienrbrt), use addChains, and add the chain from the generate chain-registry.json
-+  const loadAndAddChains = async () => {
-+    try {
-+      // Load chain and asset configurations
-+      const chainConfig: Chain = await import('../../../../chain.json');
-+      const assetConfig: AssetList = await import('../../../../assetlist.json');
++  }, [chainConfig, assetConfig, isChainsAdded]);
  
 -  const onOpenChange = (isOpen: boolean) => {
 -    if (isOpen && !isChainsAdded) {
 -      refetch();
-+      // Add chains using cosmos-kit
-+      await addChains([chainConfig],[assetConfig]);
-+    } catch (error) {
-+      console.error('Failed to load chain configuration:', error);
-     }
-   };
- 
--  const chains = isChainsAdded
--    ? chainOptions.concat(starshipChains?.chains ?? [])
--    : chainOptions;
-+  useEffect(() => {
-+    loadAndAddChains();
-+  }, []);
-+
+-    }
+-  };
 +  const onOpenChange = (isOpen: boolean) => {};
  
+   const chains = isChainsAdded
+-    ? chainOptions.concat(starshipChains?.chains ?? [])
++    ? chainOptions.concat([chainConfig])
+     : chainOptions;
+-
++    
    return (
      <Combobox
-@@ -77,7 +71,7 @@ export const ChainDropdown = () => {
-         width: isMobile ? '130px' : '260px',
+       onInputChange={(input) => {
+@@ -60,12 +64,12 @@ export const ChainDropdown = () => {
+         <Box display="flex" justifyContent="center" alignItems="center" px="$4">
+           {input === chain.pretty_name ? (
+             <Image
+-              src={getChainLogo(selectedChain) ?? ''}
++              src={getChainLogo(selectedChain) ?? "/images/ignite.ico"}
+               alt={chain.pretty_name}
+               width={24}
+               height={24}
+               style={{
+-                borderRadius: '50%',
++                borderRadius: "50%",
+               }}
+             />
+           ) : (
+@@ -74,26 +78,26 @@ export const ChainDropdown = () => {
+         </Box>
+       }
+       styleProps={{
+-        width: isMobile ? '130px' : '260px',
++        width: isMobile ? "130px" : "260px",
        }}
      >
--      {chains.map((c) => (
-+      {chainOptions.map((c) => (
+       {chains.map((c) => (
          <Combobox.Item key={c.chain_name} textValue={c.pretty_name}>
            <Stack
              direction="horizontal"
-@@ -86,7 +80,7 @@ export const ChainDropdown = () => {
+-            space={isMobile ? '$3' : '$4'}
+-            attributes={{ alignItems: 'center' }}
++            space={isMobile ? "$3" : "$4"}
++            attributes={{ alignItems: "center" }}
            >
              <Image
-               src={getChainLogo(c.chain_name) ?? ''}
+-              src={getChainLogo(c.chain_name) ?? ''}
 -              alt={c.pretty_name}
-+              alt={c.chain_name}
++              src={getChainLogo(c.chain_name) ?? "/images/ignite.ico"}
++              alt={c.pretty_name??chain.chain_name}
                width={isMobile ? 18 : 24}
                height={isMobile ? 18 : 24}
                style={{
+-                borderRadius: '50%',
++                borderRadius: "50%",
+               }}
+             />
+-            <Text fontSize={isMobile ? '12px' : '16px'} fontWeight="500">
++            <Text fontSize={isMobile ? "12px" : "16px"} fontWeight="500">
+               {c.pretty_name}
+             </Text>
+           </Stack>
+diff --git a/templates/chain-template/components/common/Layout.tsx b/templates/chain-template/components/common/Layout.tsx
+index 22e6408d..a236bf80 100644
+--- a/templates/chain-template/components/common/Layout.tsx
++++ b/templates/chain-template/components/common/Layout.tsx
+@@ -18,7 +18,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
+       <Box maxWidth="1440px" width="$full" mx="$auto" display="flex">
+         <Head>
+           <title>Create Cosmos App</title>
+-          <meta name="description" content="Generated by create cosmos app" />
++          <meta name="description" content="Generated by Ignite CCA" />
+           <link rel="icon" href="/images/favicon.ico" />
+         </Head>
+         <Sidebar isOpen={isOpen} onClose={onClose} />
 diff --git a/templates/chain-template/components/common/Sidebar/NavItems.tsx b/templates/chain-template/components/common/Sidebar/NavItems.tsx
 index 164234b2..9791c87c 100644
 --- a/templates/chain-template/components/common/Sidebar/NavItems.tsx
@@ -2918,6 +2973,10 @@ index 3c8a0801..00000000
 -    </Box>
 -  );
 -};
+diff --git a/templates/chain-template/public/images/ignite.ico b/templates/chain-template/public/images/ignite.ico
+new file mode 100644
+index 00000000..f076b10f
+Binary files /dev/null and b/templates/chain-template/public/images/ignite.ico differ
 diff --git a/templates/chain-template/starship/configs/config.yaml b/templates/chain-template/starship/configs/config.yaml
 deleted file mode 100644
 index 8b733102..00000000
@@ -3544,10 +3603,33 @@ index e1e13eb1..00000000
 -  quoteAddress: string;
 -}
 diff --git a/templates/chain-template/utils/common.ts b/templates/chain-template/utils/common.ts
-index 45f856b7..9fcd54d4 100644
+index 45f856b7..6d392726 100644
 --- a/templates/chain-template/utils/common.ts
 +++ b/templates/chain-template/utils/common.ts
-@@ -31,7 +31,7 @@ export const getWalletLogo = (wallet: Wallet) => {
+@@ -2,14 +2,20 @@ import { assets } from 'chain-registry';
+ import { Asset, AssetList } from '@chain-registry/types';
+ import { GasPrice } from '@cosmjs/stargate';
+ import { SignerOptions, Wallet } from '@cosmos-kit/core';
++import { useChain } from '@cosmos-kit/react';
+ 
+ export const getChainAssets = (chainName: string) => {
+   return assets.find((chain) => chain.chain_name === chainName) as AssetList;
+ };
+ 
+ export const getCoin = (chainName: string) => {
+-  const chainAssets = getChainAssets(chainName);
+-  return chainAssets.assets[0] as Asset;
++  const { assets } = useChain(chainName);
++  if (!assets) {
++    const chainAssets = getChainAssets(chainName);
++    return chainAssets.assets[0] as Asset;
++  }
++
++  return assets.assets[0] as Asset;
+ };
+ 
+ export const getExponent = (chainName: string) => {
+@@ -31,7 +37,7 @@ export const getWalletLogo = (wallet: Wallet) => {
  };
  
  export const getSignerOptions = (): SignerOptions => {
@@ -3556,6 +3638,53 @@ index 45f856b7..9fcd54d4 100644
  
    return {
      // @ts-ignore
+diff --git a/templates/chain-template/utils/faucet.ts b/templates/chain-template/utils/faucet.ts
+index 699c8bd9..1b1bc2e5 100644
+--- a/templates/chain-template/utils/faucet.ts
++++ b/templates/chain-template/utils/faucet.ts
+@@ -13,7 +13,6 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
+     coinImageUrl:
+       asset.logo_URIs?.svg ||
+       asset.logo_URIs?.png ||
+-      asset.logo_URIs?.jpeg ||
+       '',
+   };
+ 
+@@ -26,7 +25,7 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
+       coinType: 118,
+     },
+     bech32Config: {
+-      bech32PrefixAccAddr: chain.bech32_prefix,
++      bech32PrefixAccAddr: chain.bech32_prefix ?? '',
+       bech32PrefixAccPub: chain.bech32_prefix + 'pub',
+       bech32PrefixValAddr: chain.bech32_prefix + 'valoper',
+       bech32PrefixValPub: chain.bech32_prefix + 'valoperpub',
+@@ -48,25 +47,6 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
+   };
+ };
+ 
+-export const creditFromFaucet = async (
+-  address: string,
+-  denom: string,
+-  port: number
+-) => {
+-  const faucetEndpoint = `http://localhost:${port}/credit`;
+-
+-  await fetch(faucetEndpoint, {
+-    method: 'POST',
+-    body: JSON.stringify({
+-      address,
+-      denom,
+-    }),
+-    headers: {
+-      'Content-type': 'application/json',
+-    },
+-  });
+-};
+-
+ export const validateChainAddress = (address: string, bech32Prefix: string) => {
+   if (!address.startsWith(bech32Prefix)) {
+     return `Invalid prefix (expected "${bech32Prefix}")`;
 diff --git a/templates/chain-template/utils/index.ts b/templates/chain-template/utils/index.ts
 index acb8b603..3e96554e 100644
 --- a/templates/chain-template/utils/index.ts

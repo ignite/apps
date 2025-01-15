@@ -17,6 +17,9 @@ ignite app install -g github.com/ignite/apps/cca
 
 ### Usage
 
+Run the app using `ignite chain serve` command.
+In another terminal, run the frontend using the following commands:
+
 ```shell
 ignite s cca
 cd web

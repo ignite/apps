@@ -13,7 +13,6 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
     coinImageUrl:
       asset.logo_URIs?.svg ||
       asset.logo_URIs?.png ||
-      asset.logo_URIs?.jpeg ||
       '',
   };
 
@@ -26,7 +25,7 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
       coinType: 118,
     },
     bech32Config: {
-      bech32PrefixAccAddr: chain.bech32_prefix,
+      bech32PrefixAccAddr: chain.bech32_prefix ?? '',
       bech32PrefixAccPub: chain.bech32_prefix + 'pub',
       bech32PrefixValAddr: chain.bech32_prefix + 'valoper',
       bech32PrefixValPub: chain.bech32_prefix + 'valoperpub',
@@ -46,25 +45,6 @@ export const makeKeplrChainInfo = (chain: Chain, asset: Asset): ChainInfo => {
     ],
     stakeCurrency: currency,
   };
-};
-
-export const creditFromFaucet = async (
-  address: string,
-  denom: string,
-  port: number
-) => {
-  const faucetEndpoint = `http://localhost:${port}/credit`;
-
-  await fetch(faucetEndpoint, {
-    method: 'POST',
-    body: JSON.stringify({
-      address,
-      denom,
-    }),
-    headers: {
-      'Content-type': 'application/json',
-    },
-  });
 };
 
 export const validateChainAddress = (address: string, bech32Prefix: string) => {

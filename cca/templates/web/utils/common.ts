@@ -2,14 +2,20 @@ import { assets } from 'chain-registry';
 import { Asset, AssetList } from '@chain-registry/types';
 import { GasPrice } from '@cosmjs/stargate';
 import { SignerOptions, Wallet } from '@cosmos-kit/core';
+import { useChain } from '@cosmos-kit/react';
 
 export const getChainAssets = (chainName: string) => {
   return assets.find((chain) => chain.chain_name === chainName) as AssetList;
 };
 
 export const getCoin = (chainName: string) => {
-  const chainAssets = getChainAssets(chainName);
-  return chainAssets.assets[0] as Asset;
+  const { assets } = useChain(chainName);
+  if (!assets) {
+    const chainAssets = getChainAssets(chainName);
+    return chainAssets.assets[0] as Asset;
+  }
+
+  return assets.assets[0] as Asset;
 };
 
 export const getExponent = (chainName: string) => {

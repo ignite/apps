@@ -1,42 +1,52 @@
-import Image from 'next/image';
-import { useState, useEffect } from 'react';
-import { useChain, useManager } from '@cosmos-kit/react';
-import { Box, Combobox, Skeleton, Stack, Text } from '@interchain-ui/react';
-import { Chain, AssetList } from '@chain-registry/types';
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useChain, useManager } from "@cosmos-kit/react";
+import { Box, Combobox, Skeleton, Stack, Text } from "@interchain-ui/react";
+import { Chain, AssetList } from "@chain-registry/types";
 
-import { useDetectBreakpoints } from '@/hooks';
-import { chainStore, useChainStore } from '@/contexts';
-import { chainOptions } from '@/config';
-import { getSignerOptions } from '@/utils';
+import { useDetectBreakpoints } from "@/hooks";
+import { chainStore, useChainStore } from "@/contexts";
+import { chainOptions } from "@/config";
+import { getSignerOptions } from "@/utils";
 
 export const ChainDropdown = () => {
   const { selectedChain } = useChainStore();
   const { chain } = useChain(selectedChain);
-  const [input, setInput] = useState<string>(chain.chain_name);
+  const [input, setInput] = useState<string>(chain.pretty_name??chain.chain_name);
   const { isMobile } = useDetectBreakpoints();
 
+  const [isChainsAdded, setIsChainsAdded] = useState(false);
   const { addChains, getChainLogo } = useManager();
 
-  // TODO(@julienrbrt), use addChains, and add the chain from the generate chain-registry.json
-  const loadAndAddChains = async () => {
-    try {
-      // Load chain and asset configurations
-      const chainConfig: Chain = await import('../../../../chain.json');
-      const assetConfig: AssetList = await import('../../../../assetlist.json');
-
-      // Add chains using cosmos-kit
-      await addChains([chainConfig],[assetConfig]);
-    } catch (error) {
-      console.error('Failed to load chain configuration:', error);
-    }
-  };
+  // local chain config
+  const chainConfig: Chain = require("../../../../chain.json");
+  const assetConfig: AssetList = require("../../../../assetlist.json");
 
   useEffect(() => {
-    loadAndAddChains();
-  }, []);
+    if (isChainsAdded) return;
+
+    if (chainConfig && assetConfig) {
+      addChains(
+        [chainConfig], 
+        [assetConfig], 
+        getSignerOptions(),
+        {
+          [chainConfig.chain_name]: {
+            rpc: [chainConfig.apis.rpc[0].address],
+            rest: [chainConfig.apis.rest[0].address]
+          }
+        },
+      );
+      setIsChainsAdded(true);
+    }
+  }, [chainConfig, assetConfig, isChainsAdded]);
 
   const onOpenChange = (isOpen: boolean) => {};
 
+  const chains = isChainsAdded
+    ? chainOptions.concat([chainConfig])
+    : chainOptions;
+    
   return (
     <Combobox
       onInputChange={(input) => {
@@ -54,12 +64,12 @@ export const ChainDropdown = () => {
         <Box display="flex" justifyContent="center" alignItems="center" px="$4">
           {input === chain.pretty_name ? (
             <Image
-              src={getChainLogo(selectedChain) ?? ''}
+              src={getChainLogo(selectedChain) ?? "/images/ignite.ico"}
               alt={chain.pretty_name}
               width={24}
               height={24}
               style={{
-                borderRadius: '50%',
+                borderRadius: "50%",
               }}
             />
           ) : (
@@ -68,26 +78,26 @@ export const ChainDropdown = () => {
         </Box>
       }
       styleProps={{
-        width: isMobile ? '130px' : '260px',
+        width: isMobile ? "130px" : "260px",
       }}
     >
-      {chainOptions.map((c) => (
+      {chains.map((c) => (
         <Combobox.Item key={c.chain_name} textValue={c.pretty_name}>
           <Stack
             direction="horizontal"
-            space={isMobile ? '$3' : '$4'}
-            attributes={{ alignItems: 'center' }}
+            space={isMobile ? "$3" : "$4"}
+            attributes={{ alignItems: "center" }}
           >
             <Image
-              src={getChainLogo(c.chain_name) ?? ''}
-              alt={c.chain_name}
+              src={getChainLogo(c.chain_name) ?? "/images/ignite.ico"}
+              alt={c.pretty_name??chain.chain_name}
               width={isMobile ? 18 : 24}
               height={isMobile ? 18 : 24}
               style={{
-                borderRadius: '50%',
+                borderRadius: "50%",
               }}
             />
-            <Text fontSize={isMobile ? '12px' : '16px'} fontWeight="500">
+            <Text fontSize={isMobile ? "12px" : "16px"} fontWeight="500">
               {c.pretty_name}
             </Text>
           </Stack>
