@@ -54,7 +54,7 @@ func TestCCA(t *testing.T) {
 		)),
 	))
 
-	require.Contains("Ignite CCA added", buf.String())
+	require.Contains(buf.String(), "Ignite CCA added")
 }
 
 func assertLocalPlugins(t *testing.T, app envtest.App, expectedPlugins []pluginsconfig.Plugin) {
