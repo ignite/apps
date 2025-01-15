@@ -8,7 +8,7 @@ import (
 	"path/filepath"
 )
 
-//go:embed web/*
+//go:embed all:web/*
 var web embed.FS
 
 func Write(destinationPath string) error {

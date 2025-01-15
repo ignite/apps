@@ -23,7 +23,7 @@ In another terminal, run the frontend using the following commands:
 ```shell
 ignite s cca
 cd web
-yarn
+yarn install
 yarn dev
 ```
 
