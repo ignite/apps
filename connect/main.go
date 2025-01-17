@@ -31,6 +31,9 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	// command root is "connect" not "ignite".
 	args := c.OsArgs[2:]
 	switch args[0] {
+	case "discover":
+		return cmd.DiscoverHandler(ctx, c)
+
 	default:
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}
