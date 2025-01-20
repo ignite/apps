@@ -67,10 +67,5 @@ func (r *ChainRegistry) FetchChains() error {
 		r.Chains[c.ChainName] = c
 	}
 
-	fmt.Printf("Fetched %d chains from %s\n", len(r.Chains), repoURL)
-	for _, c := range r.Chains {
-		fmt.Printf("- %s\n", c.ChainName)
-	}
-
 	return nil
 }

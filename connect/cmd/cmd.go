@@ -17,6 +17,11 @@ func GetCommands() []*plugin.Command {
 					Use:   "discover",
 					Short: "Discover chains to connect to",
 				},
+				{
+					Use:     "add [chain]",
+					Short:   "Add a chain to interact with",
+					Aliases: []string{"a", "init"},
+				},
 			},
 		},
 	}
