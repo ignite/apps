@@ -1,0 +1,35 @@
+{
+  "appName": "CCA",
+  "slug": "cca",
+  "appDescription": "Scaffold a blockchain frontend in seconds with Ignite",
+  "ignite": ">28.7.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.1",
+  "authors": [
+    {
+      "name": "Julien Robert",
+      "github": "julienrbrt"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/cca/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "cca",
+    "create-cosmos-app",
+    "telescope",
+    "cosmjs",
+    "interchain-js",
+    "cosmology",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ]
+}
