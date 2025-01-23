@@ -2647,6 +2647,20 @@ index aae05fd1..57e3c1ea 100644
        if (proposal.status === ProposalStatus.PROPOSAL_STATUS_VOTING_PERIOD) {
          (async () => {
            for (const { address } of chain?.apis?.rest || []) {
+diff --git a/templates/chain-template/next.config.js b/templates/chain-template/next.config.js
+index 59bb75ea..f3cafd6d 100644
+--- a/templates/chain-template/next.config.js
++++ b/templates/chain-template/next.config.js
+@@ -16,6 +16,9 @@ module.exports = {
+       {
+         hostname: 'raw.githubusercontent.com',
+       },
++      {
++        hostname: 'ignite.com',
++      },
+     ],
+   },
+ };
 diff --git a/templates/chain-template/package.json b/templates/chain-template/package.json
 index 3d285bd8..b4f20c68 100644
 --- a/templates/chain-template/package.json
