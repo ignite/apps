@@ -24,6 +24,9 @@ apps:
   wasm:
     description: Scaffold a CosmosWasm-enabled chain with ease
     path: ./wasm
+  connect:
+    description: Interact with any Cosmos SDK based blockchain using Ignite Connect
+    path: ./connect
   cca:
     description: Scaffold a blockchain frontend in seconds with Ignite
     path: ./cca
