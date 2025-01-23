@@ -21,10 +21,7 @@ const (
 )
 
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return err
-	}
+	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()
@@ -60,7 +57,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	return session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
 }
 
-// finish finalize the scaffolded code (formating, dependencies)
+// finish finalize the scaffolded code (formating, dependencies).
 func finish(ctx context.Context, session *cliui.Session, path string) error {
 	session.StartSpinner("go mod tidy...")
 	if err := gocmd.ModTidy(ctx, path); err != nil {

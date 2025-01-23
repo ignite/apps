@@ -16,12 +16,8 @@ import (
 
 // ExecuteMonitor executes the monitor subcommand.
 func ExecuteMonitor(ctx context.Context, cmd *plugin.ExecutedCommand, chainInfo *plugin.ChainInfo) error {
-	flags, err := cmd.NewFlags()
-	if err != nil {
-		return errors.Errorf("failed to parse flags: %s", err)
-	}
-
 	var (
+		flags              = plugin.Flags(cmd.Flags)
 		isJSON, _          = flags.GetBool(flagJSON)
 		refreshDuration, _ = flags.GetString(flagRefreshDuration)
 		rpcAddress, _      = flags.GetString(flagRPCAddress)

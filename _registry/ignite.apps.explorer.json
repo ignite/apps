@@ -1,5 +1,6 @@
 {
-  "appName": "explorer",
+  "appName": "Explorer",
+  "slug": "explorer",
   "appDescription": "Shows real time feed of your blockchain",
   "ignite": ">28.3.0",
   "dependencies": {
@@ -12,8 +13,8 @@
       "github": "jeronimoalbi"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/cosmos/gex",
+  "repositoryUrl": "https://github.com/ignite/apps/explorer",
+  "documentationUrl": "https://github.com/ignite/gex/blob/main/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
@@ -27,5 +28,7 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ]
+  ],
+  "icon": "",
+  "cover": ""
 }

@@ -2,30 +2,49 @@ package main
 
 import (
 	"context"
-	"os"
 
 	hplugin "github.com/hashicorp/go-plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/hermes/cmd"
 )
 
-var _ plugin.Interface = app{}
-
 type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	m := &plugin.Manifest{Name: "hermes"}
-	m.ImportCobraCommand(cmd.NewHermes(), "ignite relayer")
-	return m, nil
+	return &plugin.Manifest{
+		Name:     "hermes",
+		Commands: cmd.GetCommands(),
+	}, nil
 }
 
-func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
-	// Run the "hermes" command as if it were a root command. To do
-	// so remove the first two arguments which are "ignite relayer"
-	// from OSArgs to treat "hermes" as the root command.
-	os.Args = c.OsArgs[2:]
-	return cmd.NewHermes().Execute()
+func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
+	// Remove the three two elements "ignite", "relayer" and "hermes" from OsArgs.
+	args := c.OsArgs[3:]
+	switch args[0] {
+	case "configure":
+		return cmd.ConfigureHandler(ctx, c)
+	case "exec":
+		return cmd.ExecuteHandler(ctx, c)
+	case "start":
+		return cmd.StartHandler(ctx, c)
+	case "keys":
+		switch args[1] {
+		case "add":
+			return cmd.KeysAddMnemonicHandler(ctx, c)
+		case "file":
+			return cmd.KeysAddFileHandler(ctx, c)
+		case "list":
+			return cmd.KeysListHandler(ctx, c)
+		case "delete":
+			return cmd.KeysDeleteHandler(ctx, c)
+		default:
+			return errors.Errorf("unknown keys command: %s", args[1])
+		}
+	default:
+		return errors.Errorf("unknown command: %s", args[0])
+	}
 }
 
 func (app) ExecuteHookPre(context.Context, *plugin.ExecutedHook, plugin.ClientAPI) error {

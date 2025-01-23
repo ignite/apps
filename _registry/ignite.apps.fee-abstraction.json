@@ -1,0 +1,35 @@
+{
+  "appName": "Fee Abstraction",
+  "slug": "fee-abstraction",
+  "appDescription": "Integrate the fee abstraction module from osmosis-labs to make it easy for new chains to accept the currencies of existing chains",
+  "ignite": ">28.5.2",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.8",
+  "authors": [
+    {
+      "name": "Danilo Pantani",
+      "github": "Pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/fee-abstraction",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/fee-abstraction/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "scaffolder",
+    "fee-abstraction",
+    "osmosis",
+    "osmosis-labs",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "icon": "",
+  "cover": ""
+}

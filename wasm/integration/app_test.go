@@ -17,7 +17,7 @@ func TestWasm(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/wasm-app")
+		app         = env.Scaffold("github.com/apps/wasmapp")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -49,13 +49,14 @@ func TestWasm(t *testing.T) {
 		)),
 	))
 
+	require.FileExists(filepath.Join(app.SourcePath(), "app/wasm.go"))
+
 	// sign tx to add an item to the list.
 	steps := step.NewSteps(
 		step.New(
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
-				err := env.IsAppServed(ctx, servers.API)
-				return err
+				return env.IsAppServed(ctx, servers.API)
 			}),
 			step.Exec(
 				envtest.IgniteApp,

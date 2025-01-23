@@ -1,0 +1,39 @@
+{
+  "appName": "Hooks (example)",
+  "slug": "example-hooks",
+  "appDescription": "A simple hooks application",
+  "ignite": ">28.3.0",
+  "dependencies": {
+    "docker": ">23.0.5"
+  },
+  "cosmosSDK": ">0.50.4",
+  "authors": [
+    {
+      "name": "Ehsan Saradar",
+      "github": "Ehsan-saradar"
+    },
+    {
+      "name": "Danilo Pantani",
+      "github": "Pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/examples/hooks",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/examples/hooks/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "hooks",
+    "example",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "icon": "",
+  "cover": ""
+}

@@ -1,5 +1,6 @@
 {
   "appName": "Your App Name",
+  "slug": "your-app-slug",
   "appDescription": "A brief description of what your app does.",
   "ignite": ">28.3.0",
   "dependencies": {
@@ -41,5 +42,7 @@
       "otherSupportedCryptos": "address"
     },
     "fiatDonationLinks": "URL to Patreon, Ko-fi, etc."
-  }
+  },
+  "icon": "https://URL.to/icon",
+  "cover": "https://URL.to/cover"
 }

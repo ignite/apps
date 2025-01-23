@@ -20,20 +20,20 @@ const (
 )
 
 type (
-	// wasmOptions represents configuration for the message scaffolding.
-	wasmOptions struct {
+	// options represents configuration for the message scaffolding.
+	options struct {
 		version            semver.Version
 		simulationGasLimit uint64
 		smartQueryGasLimit uint64
 		memoryCacheSize    uint64
 	}
-	// WasmOption configures the message scaffolding.
-	WasmOption func(*wasmOptions)
+	// Option configures the message scaffolding.
+	Option func(*options)
 )
 
-// newWasmOptions returns a wasmOptions with default options.
-func newWasmOptions() wasmOptions {
-	return wasmOptions{
+// newOptions returns a options with default options.
+func newOptions() options {
+	return options{
 		simulationGasLimit: 0,
 		smartQueryGasLimit: 3_000_000,
 		memoryCacheSize:    100,
@@ -41,29 +41,29 @@ func newWasmOptions() wasmOptions {
 }
 
 // WithWasmVersion set the wasm semantic version.
-func WithWasmVersion(version semver.Version) WasmOption {
-	return func(m *wasmOptions) {
+func WithWasmVersion(version semver.Version) Option {
+	return func(m *options) {
 		m.version = version
 	}
 }
 
 // WithSimulationGasLimit provides a simulation gas limit for the wasm config.
-func WithSimulationGasLimit(simulationGasLimit uint64) WasmOption {
-	return func(m *wasmOptions) {
+func WithSimulationGasLimit(simulationGasLimit uint64) Option {
+	return func(m *options) {
 		m.simulationGasLimit = simulationGasLimit
 	}
 }
 
 // WithSmartQueryGasLimit provides a smart query gas limit for the wasm config.
-func WithSmartQueryGasLimit(smartQueryGasLimit uint64) WasmOption {
-	return func(m *wasmOptions) {
+func WithSmartQueryGasLimit(smartQueryGasLimit uint64) Option {
+	return func(m *options) {
 		m.smartQueryGasLimit = smartQueryGasLimit
 	}
 }
 
 // WithMemoryCacheSize provides a memory cache size for the wasm config.
-func WithMemoryCacheSize(memoryCacheSize uint64) WasmOption {
-	return func(m *wasmOptions) {
+func WithMemoryCacheSize(memoryCacheSize uint64) Option {
+	return func(m *options) {
 		m.memoryCacheSize = memoryCacheSize
 	}
 }
@@ -72,9 +72,9 @@ func WithMemoryCacheSize(memoryCacheSize uint64) WasmOption {
 func (s Scaffolder) AddWasm(
 	ctx context.Context,
 	tracer *placeholder.Tracer,
-	options ...WasmOption,
+	options ...Option,
 ) (xgenny.SourceModification, error) {
-	scaffoldingOpts := newWasmOptions()
+	scaffoldingOpts := newOptions()
 	for _, apply := range options {
 		apply(&scaffoldingOpts)
 	}
@@ -86,7 +86,7 @@ func (s Scaffolder) AddWasm(
 	}
 	if !xgit.HasVersion(versions, scaffoldingOpts.version) {
 		return xgenny.SourceModification{},
-			errors.Errorf("semantic version vgo%s not exist in %s", scaffoldingOpts.version.String(), wasmRepo)
+			errors.Errorf("semantic version v%s not exist in %s", scaffoldingOpts.version.String(), wasmRepo)
 	}
 
 	// Check if chain already have wasm integration.
@@ -101,11 +101,11 @@ func (s Scaffolder) AddWasm(
 		return xgenny.SourceModification{}, err
 	}
 
-	configTOML, err := s.chain.ConfigTOMLPath()
+	appTOMLPath, err := s.chain.AppTOMLPath()
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
-	if _, err := os.Stat(configTOML); os.IsNotExist(err) {
+	if _, err := os.Stat(appTOMLPath); os.IsNotExist(err) {
 		s.session.Printf(`Cannot find the chain config. If the chain %[1]v is not initialized yet, run "%[1]vd init" or "ignite chain serve" to init the chain. 
 After, run the "ignite wasm config" command to add the wasm config
 
@@ -115,7 +115,7 @@ After, run the "ignite wasm config" command to add the wasm config
 	} else if err == nil {
 		// Add wasm options to the chain config.
 		if err := config.AddWasm(
-			configTOML,
+			appTOMLPath,
 			config.WithSimulationGasLimit(scaffoldingOpts.simulationGasLimit),
 			config.WithSmartQueryGasLimit(scaffoldingOpts.smartQueryGasLimit),
 			config.WithMemoryCacheSize(scaffoldingOpts.memoryCacheSize),

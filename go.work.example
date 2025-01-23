@@ -7,7 +7,11 @@ use (
 	./examples/hello-world
 	./examples/hooks
 	./explorer
+	./fee-abstraction
 	./hermes
 	./appregistry
 	./rollkit
+	./spaceship
+	./wasm
+	./web
 )

@@ -1,0 +1,34 @@
+{
+  "appName": "Spaceship",
+  "slug": "spaceship",
+  "appDescription": "Deploy a chain remote through SSH using ignite build system",
+  "ignite": ">28.3.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.4",
+  "authors": [
+    {
+      "name": "Danilo Pantani",
+      "github": "Pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/spaceship",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/spaceship/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "deploy",
+    "spaceship",
+    "ssh",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "icon": "",
+  "cover": ""
+}

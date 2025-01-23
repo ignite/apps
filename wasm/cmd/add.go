@@ -1,41 +1,28 @@
 package cmd
 
 import (
+	"context"
+
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/wasm/services/scaffolder"
 )
 
-// NewWasmAdd add wasm integration to a chain.
-func NewWasmAdd() *cobra.Command {
-	c := &cobra.Command{
-		Use:   "add",
-		Short: "Add wasm support",
-		Args:  cobra.NoArgs,
-		RunE:  wasmAddExecuteHandler,
-	}
+func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.ClientAPI) error {
+	flags := plugin.Flags(cmd.Flags)
 
-	flagSetPath(c)
-	flagSetHome(c)
-	flagSetWasmConfigs(c)
-	flagSetWasmVersion(c)
-
-	return c
-}
-
-func wasmAddExecuteHandler(cmd *cobra.Command, _ []string) error {
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
 	defer session.End()
 
 	var (
-		simulationGasLimit = getSimulationGasLimit(cmd)
-		smartQueryGasLimit = getSmartQueryGasLimit(cmd)
-		memoryCacheSize    = getMemoryCacheSize(cmd)
-		wasmVersion        = getWasmVersion(cmd)
+		simulationGasLimit = getSimulationGasLimit(flags)
+		smartQueryGasLimit = getSmartQueryGasLimit(flags)
+		memoryCacheSize    = getMemoryCacheSize(flags)
+		wasmVersion        = getVersion(flags)
 	)
 
 	wasmSemVer, err := semver.Parse(wasmVersion)
@@ -43,7 +30,7 @@ func wasmAddExecuteHandler(cmd *cobra.Command, _ []string) error {
 		return err
 	}
 
-	c, err := newChainWithHomeFlags(cmd, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
+	c, err := newChain(ctx, api, chain.WithOutputer(session), chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
 	}
@@ -54,7 +41,7 @@ func wasmAddExecuteHandler(cmd *cobra.Command, _ []string) error {
 	}
 
 	sm, err := sc.AddWasm(
-		cmd.Context(),
+		ctx,
 		placeholder.New(),
 		scaffolder.WithWasmVersion(wasmSemVer),
 		scaffolder.WithSimulationGasLimit(simulationGasLimit),
