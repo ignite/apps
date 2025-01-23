@@ -60,5 +60,5 @@ func ExecuteScaffold(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return fmt.Errorf("failed to write CCA: %w", err)
 	}
 
-	return session.Printf("🎉 Ignite CCA added (`%[1]v`).\n", c.AppPath(), c.Name())
+	return session.Printf("🎉 Ignite CCA added (`%[1]v/web`).\n", c.AppPath(), c.Name())
 }

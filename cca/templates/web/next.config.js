@@ -16,6 +16,9 @@ module.exports = {
       {
         hostname: 'raw.githubusercontent.com',
       },
+      {
+        hostname: 'ignite.com',
+      }
     ],
   },
 };
