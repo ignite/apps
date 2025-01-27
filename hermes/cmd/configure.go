@@ -332,7 +332,7 @@ GetKey:
 			session.StopSpinner()
 			if err := session.Ask(cliquiz.NewQuestion(
 				fmt.Sprintf(
-					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one:",
+					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one",
 					chainID,
 				),
 				&mnemonic,
@@ -477,7 +477,6 @@ func newHermesConfig(flags plugin.Flags, args []string, customCfg string) (*herm
 		chainASequentialBatchTx, _         = flags.GetBool(flagChainASequentialBatchTx)
 	)
 
-	fmt.Println("aefaefaefeaf _ " + chainAGasMultiplier)
 	chainAGasMulti := new(big.Float)
 	chainAGasMulti, ok := chainAGasMulti.SetString(chainAGasMultiplier)
 	if !ok {
