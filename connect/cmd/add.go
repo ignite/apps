@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"github.com/charmbracelet/bubbles/spinner"
@@ -138,8 +139,10 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	if len(cmd.Args) < 1 {
-		return fmt.Errorf("please provide a chain name as argument")
+	if len(cmd.Args) < 1 || len(cmd.Args) > 2 {
+		return errors.New("usage: connect add <chain> [endpoint]")
+	} else if len(cmd.Args) == 2 { // support custom chains
+		return initChain(chainregistry.Chain{ChainName: cmd.Args[0]}, cmd.Args[1])
 	}
 
 	chain, ok := chainRegistry.Chains[cmd.Args[0]]

@@ -11,16 +11,17 @@ func GetCommands() []*plugin.Command {
 			Use:     "connect [command]",
 			Aliases: []string{"c"},
 			Short:   "Interact with any Cosmos SDK based blockchain using Ignite Connect",
-			Long:    "Ignite Connect is an app that allows you to interact with any Cosmos SDK based blockchain.\n It leverages AutoCLI from client/v2.",
+			Long:    "Ignite Connect allows you to interact with any Cosmos SDK based blockchain.\n It leverages AutoCLI from client/v2.",
 			Commands: []*plugin.Command{
 				{
 					Use:   "discover",
 					Short: "Discover chains to connect to",
 				},
 				{
-					Use:     "add [chain]",
+					Use:     "add <chain> [endpoint]",
 					Short:   "Add a chain to interact with",
-					Aliases: []string{"a", "init"},
+					Long:    "Add a chain to interact with. If a chain and endpoint are provided, the chain will be added without prompting",
+					Aliases: []string{"init"},
 				},
 				{
 					Use:   "version",

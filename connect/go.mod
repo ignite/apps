@@ -7,6 +7,7 @@ require (
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.7.1-0.20250116085640-fcf01a4e4b39
+	gopkg.in/yaml.v3 v3.0.1
 )
 
 require (
