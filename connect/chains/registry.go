@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
@@ -109,6 +110,25 @@ func EnrichChain(chain *chainregistry.Chain) error {
 	if err := json.Unmarshal(rawChain, chain); err != nil {
 		return fmt.Errorf("failed to unmarshal %s chain: %w", chain.ChainName, err)
 	}
+
+	// clean-up data (mainly grpc endpoints)
+	cleanEntries := make([]chainregistry.APIProvider, 0)
+	for _, api := range chain.APIs.Grpc {
+		// clean-up the http(s):// prefix
+		if idx := strings.Index(api.Address, "://"); idx != -1 {
+			api.Address = api.Address[idx+3:]
+		}
+		// remove trailing slashes
+		api.Address = strings.TrimSuffix(api.Address, "/")
+
+		// remove addresses without a port
+		if !strings.Contains(api.Address, ":") {
+			continue
+		}
+
+		cleanEntries = append(cleanEntries, api)
+	}
+	chain.APIs.Grpc = cleanEntries
 
 	return nil
 }
