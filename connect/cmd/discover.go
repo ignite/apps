@@ -16,8 +16,8 @@ import (
 
 const pageSize = 10
 
-// Model for Bubble Tea UI
-type model struct {
+// model holds the state of the UI
+type discoverCmdModel struct {
 	spinner  spinner.Model
 	fetching bool
 	err      error
@@ -28,23 +28,17 @@ type model struct {
 	selectedChain chainregistry.Chain
 }
 
-func initialModel() *model {
-	s := spinner.NewModel()
-	s.Spinner = spinner.Dot
-	return &model{
-		spinner:  s,
-		fetching: true,
-	}
-}
-
 // Messages
 type fetchDoneMsg struct {
 	reg *chains.ChainRegistry
 }
-type fetchErrMsg struct{ err error }
+
+type fetchErrMsg struct {
+	err error
+}
 
 // Initialize Bubble Tea program
-func (m *model) Init() tea.Cmd {
+func (m *discoverCmdModel) Init() tea.Cmd {
 	return tea.Batch(fetchChainsCmd)
 }
 
@@ -58,7 +52,7 @@ func fetchChainsCmd() tea.Msg {
 }
 
 // Update handles messages and updates the model accordingly
-func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
@@ -74,40 +68,39 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 			m.input = "" // Clear input when navigating
 		case "enter":
-			if m.input != "" {
-				if m.chainRegistry != nil {
-					chains := m.chainRegistry.Chains
-					if len(chains) > 0 {
-						chainsSlice := slices.Collect(maps.Keys(chains))
-						start := m.page * pageSize
-						if start >= len(chainsSlice) {
-							start = 0
-							m.page = 0
-						}
-						end := start + pageSize
-						if end > len(chainsSlice) {
-							end = len(chainsSlice)
-						}
+			if m.input != "" && m.chainRegistry != nil {
+				chains := m.chainRegistry.Chains
+				totalSize := len(chains)
+				chainsNames := slices.Sorted(maps.Keys(chains))
 
-						inputNum, err := strconv.Atoi(m.input)
-						if err != nil {
-							m.err = fmt.Errorf("invalid input: %s", m.input)
-							m.input = ""
-							return m, nil
-						}
+				start := m.page * pageSize
+				if start >= totalSize {
+					start = 0
+					m.page = 0
+				}
 
-						// Adjust inputNum to be 0-indexed
-						selectedIndex := start + inputNum - 1
-						if selectedIndex >= start && selectedIndex < end {
-							chainKey := chainsSlice[selectedIndex]
+				end := start + pageSize
+				if end > totalSize {
+					end = totalSize
+				}
 
-							m.selectedChain = chains[chainKey]
-							return m, tea.Quit // chain selected, quit
-						} else {
-							m.err = fmt.Errorf("invalid chain number: %s", m.input)
-							m.input = ""
-						}
-					}
+				inputNum, err := strconv.Atoi(m.input)
+				if err != nil {
+					m.err = fmt.Errorf("invalid input: %s", m.input)
+					m.input = ""
+					return m, nil
+				}
+
+				// Adjust inputNum to be 0-indexed
+				selectedIndex := start + inputNum - 1
+				if selectedIndex >= start && selectedIndex < end {
+					chainKey := chainsNames[selectedIndex]
+
+					m.selectedChain = chains[chainKey]
+					return m, tea.Quit // chain selected, quit
+				} else {
+					m.err = fmt.Errorf("invalid chain number: %s", m.input)
+					m.input = ""
 				}
 			}
 		case "backspace", "delete":
@@ -115,6 +108,7 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.input = m.input[:len(m.input)-1]
 			}
 		default:
+			// input should be a number
 			if len(msg.String()) == 1 && msg.String()[0] >= '0' && msg.String()[0] <= '9' {
 				m.input += msg.String()
 			}
@@ -125,46 +119,52 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		m.fetching = false
 		m.chainRegistry = msg.reg
 	case fetchErrMsg:
-		m.err = msg.err
 		m.fetching = false
+		m.err = msg.err
 	}
+
 	return m, cmd
 }
 
 // View returns the UI as a string
-func (m *model) View() string {
+func (m *discoverCmdModel) View() string {
 	if m.fetching && m.err == nil {
 		return fmt.Sprintf("%s Discovering chains... (press 'q' to quit)\n", m.spinner.View())
 	}
+
 	if m.err != nil {
 		return fmt.Sprintf("Error: %v\n(press 'q' to quit)\n", m.err)
 	}
 
+	// same pagination logic than in Update
 	chains := m.chainRegistry.Chains
-	total := len(chains)
+	totalSize := len(chains)
+	chainsNames := slices.Sorted(maps.Keys(chains))
+
 	start := m.page * pageSize
-	if start >= total {
+	if start >= totalSize {
 		start = 0
 		m.page = 0
 	}
+
 	end := start + pageSize
-	if end > total {
-		end = total
+	if end > totalSize {
+		end = totalSize
 	}
 
-	chainsSlice := slices.Sorted(maps.Keys(chains))
 	out := "\033[K" // clear current line before printing
-	out += fmt.Sprintf("Fetched %d chains. Showing %d-%d:\n", total, start+1, end)
+	out += fmt.Sprintf("Fetched %d chains. Showing %d-%d:\n", totalSize, start+1, end)
 
 	// ANSI escape codes for highlighting
 	highlightStart := "\033[32;1m" // Green color and bold
 	highlightEnd := "\033[0m"      // Reset to default
 
-	for i, k := range chainsSlice[start:end] {
+	for i, k := range chainsNames[start:end] {
 		chain := m.chainRegistry.Chains[k]
 		lineNumber := i + 1 + start
 
 		out += "\033[K" // clear current line before printing
+
 		// Check if the input corresponds to this line number
 		inputNum, err := strconv.Atoi(m.input)
 		if err == nil && inputNum == lineNumber {
@@ -181,7 +181,13 @@ func (m *model) View() string {
 }
 
 func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	model := initialModel()
+	s := spinner.NewModel()
+	s.Spinner = spinner.Dot
+	model := &discoverCmdModel{
+		spinner:  s,
+		fetching: true,
+	}
+
 	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
 		return err
@@ -189,7 +195,13 @@ func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 	// if the user selected a chain, execute the add command
 	if len(model.selectedChain.ChainName) > 0 {
-		return initializeChain(ctx, model.selectedChain)
+		selectedChain := model.chainRegistry.Chains[model.selectedChain.ChainName]
+
+		p := tea.NewProgram(newAddCmdModel(selectedChain))
+		if _, err := p.Run(); err != nil {
+			return err
+		}
+
 	}
 
 	return nil

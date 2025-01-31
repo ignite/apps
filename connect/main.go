@@ -35,7 +35,8 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 		return cmd.DiscoverHandler(ctx, c)
 	case "add":
 		return cmd.AddHandler(ctx, c)
-
+	case "version":
+		return cmd.VersionHandler(ctx, c)
 	default:
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}
