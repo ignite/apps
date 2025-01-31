@@ -28,21 +28,17 @@ type ChainConfig struct {
 }
 
 func (c *Config) Save() error {
-	igniteConfigDir, err := igniteconfig.DirPath()
-	if err != nil {
-		return fmt.Errorf("failed to get ignite config directory: %w", err)
-	}
-
 	out, err := yaml.Marshal(c)
 	if err != nil {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	connectConfigPath := path.Join(igniteConfigDir, "connect", configName)
-	if err := os.MkdirAll(path.Dir(connectConfigPath), 0755); err != nil {
-		return fmt.Errorf("failed to create config directory: %w", err)
+	configDir, err := configDir()
+	if err != nil {
+		return err
 	}
 
+	connectConfigPath := path.Join(configDir, configName)
 	if err := os.WriteFile(connectConfigPath, out, 0644); err != nil {
 		return fmt.Errorf("error saving config: %w", err)
 	}
@@ -51,12 +47,12 @@ func (c *Config) Save() error {
 }
 
 func ReadConfig() (*Config, error) {
-	igniteConfigDir, err := igniteconfig.DirPath()
+	configDir, err := configDir()
 	if err != nil {
-		return nil, fmt.Errorf("failed to get ignite config directory: %w", err)
+		return nil, err
 	}
 
-	connectConfigPath := path.Join(igniteConfigDir, "connect", configName)
+	connectConfigPath := path.Join(configDir, configName)
 	if _, err := os.Stat(connectConfigPath); os.IsNotExist(err) {
 		return &Config{}, ErrConfigNotFound
 	} else if err != nil {
@@ -74,4 +70,18 @@ func ReadConfig() (*Config, error) {
 	}
 
 	return &c, nil
+}
+
+func configDir() (string, error) {
+	igniteConfigDir, err := igniteconfig.DirPath()
+	if err != nil {
+		return "", fmt.Errorf("failed to get ignite config directory: %w", err)
+	}
+
+	dir := path.Join(igniteConfigDir, "connect")
+	if err := os.MkdirAll(dir, 0755); err != nil {
+		return "", fmt.Errorf("failed to create config directory: %w", err)
+	}
+
+	return dir, nil
 }

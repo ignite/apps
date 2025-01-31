@@ -5,8 +5,10 @@ import (
 	"errors"
 	"fmt"
 
+	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"google.golang.org/grpc"
 
 	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
@@ -142,7 +144,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	if len(cmd.Args) < 1 || len(cmd.Args) > 2 {
 		return errors.New("usage: connect add <chain> [endpoint]")
 	} else if len(cmd.Args) == 2 { // support custom chains
-		return initChain(chainregistry.Chain{ChainName: cmd.Args[0]}, cmd.Args[1])
+		return initChain(ctx, chainregistry.Chain{ChainName: cmd.Args[0]}, cmd.Args[1])
 	}
 
 	chain, ok := chainRegistry.Chains[cmd.Args[0]]
@@ -156,10 +158,10 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	return initChain(model.chain, model.selectedEndpoint)
+	return initChain(context.TODO(), model.chain, model.selectedEndpoint)
 }
 
-func initChain(chain chainregistry.Chain, endpoint string) error {
+func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) error {
 	fmt.Println("Selected endpoint:", endpoint)
 
 	cfg, err := chains.ReadConfig()
@@ -168,11 +170,49 @@ func initChain(chain chainregistry.Chain, endpoint string) error {
 	}
 
 	// add chain to cfg
-	cfg.Chains[chain.ChainName] = &chains.ChainConfig{
+	chainCfg := &chains.ChainConfig{
 		ChainID:      chain.ChainID,
 		Bech32Prefix: chain.Bech32Prefix,
 		GRPCEndpoint: endpoint,
 	}
 
-	return nil
+	conn, err := chains.NewConn(chain, chainCfg)
+	if err != nil {
+		return err
+	}
+
+	if err := conn.Load(ctx); err != nil {
+		return err
+	}
+
+	// if no bech32 prefix is set, fetch it from the chain
+	if chainCfg.Bech32Prefix == "" {
+		client, err := conn.Connect()
+		if err != nil {
+			return err
+		}
+
+		chainCfg.Bech32Prefix, err = getAddressPrefix(ctx, client)
+		if err != nil {
+			return err
+		}
+	}
+
+	cfg.Chains[chain.ChainName] = chainCfg
+	return cfg.Save()
+}
+
+// getAddressPrefix returns the address prefix of the chain.
+func getAddressPrefix(ctx context.Context, conn grpc.ClientConnInterface) (string, error) {
+	authClient := authv1betav1.NewQueryClient(conn)
+	resp, err := authClient.Bech32Prefix(ctx, &authv1betav1.Bech32PrefixRequest{})
+	if err != nil {
+		return "", err
+	}
+
+	if resp == nil || resp.Bech32Prefix == "" {
+		return "", errors.New("bech32 account address prefix is not set")
+	}
+
+	return resp.Bech32Prefix, nil
 }
