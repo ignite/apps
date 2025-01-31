@@ -33,7 +33,7 @@ func (c *Config) Save() error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	configDir, err := configDir()
+	configDir, err := ConfigDir()
 	if err != nil {
 		return err
 	}
@@ -47,7 +47,7 @@ func (c *Config) Save() error {
 }
 
 func ReadConfig() (*Config, error) {
-	configDir, err := configDir()
+	configDir, err := ConfigDir()
 	if err != nil {
 		return nil, err
 	}
@@ -72,7 +72,7 @@ func ReadConfig() (*Config, error) {
 	return &c, nil
 }
 
-func configDir() (string, error) {
+func ConfigDir() (string, error) {
 	igniteConfigDir, err := igniteconfig.DirPath()
 	if err != nil {
 		return "", fmt.Errorf("failed to get ignite config directory: %w", err)

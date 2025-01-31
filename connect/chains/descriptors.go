@@ -32,7 +32,7 @@ type Conn struct {
 }
 
 func NewConn(chain chainregistry.Chain, cfg *ChainConfig) (*Conn, error) {
-	configDir, err := configDir()
+	configDir, err := ConfigDir()
 	if err != nil {
 		return nil, err
 	}
