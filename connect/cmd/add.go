@@ -162,5 +162,17 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 func initChain(chain chainregistry.Chain, endpoint string) error {
 	fmt.Println("Selected endpoint:", endpoint)
 
+	cfg, err := chains.ReadConfig()
+	if err != nil && !errors.Is(err, chains.ErrConfigNotFound) {
+		return err
+	}
+
+	// add chain to cfg
+	cfg.Chains[chain.ChainName] = &chains.ChainConfig{
+		ChainID:      chain.ChainID,
+		Bech32Prefix: chain.Bech32Prefix,
+		GRPCEndpoint: endpoint,
+	}
+
 	return nil
 }

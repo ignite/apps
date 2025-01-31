@@ -10,9 +10,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-const configName = "connect.yaml"
+var (
+	configName = "connect.yaml"
 
-var errConfigNotFound = fmt.Errorf("config file not found")
+	// ErrConfigNotFound is returned when the config file is not found
+	ErrConfigNotFound = fmt.Errorf("config file not found")
+)
 
 type Config struct {
 	Chains map[string]*ChainConfig `yaml:"chains"`
@@ -55,7 +58,7 @@ func ReadConfig() (*Config, error) {
 
 	connectConfigPath := path.Join(igniteConfigDir, "connect", configName)
 	if _, err := os.Stat(connectConfigPath); os.IsNotExist(err) {
-		return &Config{}, errConfigNotFound
+		return &Config{}, ErrConfigNotFound
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to check config file: %w", err)
 	}
