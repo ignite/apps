@@ -17,6 +17,7 @@ type addCmdModel struct {
 	spinner          spinner.Model
 	err              error
 	chain            chainregistry.Chain
+	page             int
 	selectedEndpoint string
 	selectedIndex    int
 }
@@ -48,16 +49,35 @@ func (m *addCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
+		case "n", "right":
+			if m.page < len(m.chain.APIs.Grpc)/pageSize {
+				m.page++
+			}
+		case "p", "left":
+			if m.page > 0 {
+				m.page--
+			}
 		case "up":
 			if m.selectedIndex > 0 {
 				m.selectedIndex--
+			}
+
+			if m.selectedIndex%pageSize == pageSize-1 {
+				m.page--
+				m.selectedIndex = 0
 			}
 		case "down":
 			if m.selectedIndex < len(m.chain.APIs.Grpc)-1 {
 				m.selectedIndex++
 			}
+
+			if m.selectedIndex%pageSize == 0 {
+				m.page++
+				m.selectedIndex = 0
+			}
 		case "enter":
-			m.selectedEndpoint = m.chain.APIs.Grpc[m.selectedIndex].Address
+			selectedIndex := m.page*pageSize + m.selectedIndex
+			m.selectedEndpoint = m.chain.APIs.Grpc[selectedIndex].Address
 			return m, tea.Quit
 		}
 	case spinner.TickMsg:
@@ -77,21 +97,32 @@ func (m *addCmdModel) View() string {
 	for i, endpoint := range m.chain.APIs.Grpc {
 		items[i] = endpoint.Address
 	}
+	totalSize := len(items)
+
+	start := m.page * pageSize
+	if start >= totalSize {
+		start = 0
+		m.page = 0
+	}
+
+	end := start + pageSize
+	if end > totalSize {
+		end = totalSize
+	}
 
 	out := "\033[K" // clear current line before printing
 	out += "Select endpoint:\n"
-	for i, item := range items {
+	for i, item := range items[start:end] {
 		out += "\033[K" // clear current line before printing
-		prefix := " "
 		if i == m.selectedIndex {
-			prefix = ">"
+			out += "\033[32m✓ \033[1m" + item + "\033[0m\n"
+		} else {
+			out += fmt.Sprintf("  %s\n", item)
 		}
-
-		out += fmt.Sprintf("%s %s\n", prefix, item)
 	}
 
 	out += "\033[K" // clear current line before printing
-	out += "(press 'up' or 'down' for selecting, 'enter' to add chain, 'q'/'ctrl+c' to quit)\n"
+	out += "(press 'n'/'right' for next, 'p'/'left' for prev, 'enter' to add chain, 'q'/'ctrl+c' to quit)\n"
 
 	return out
 }
@@ -111,10 +142,12 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return fmt.Errorf("chain %s not found", cmd.Args[0])
 	}
 
-	p := tea.NewProgram(newAddCmdModel(chain))
+	model := newAddCmdModel(chain)
+	p := tea.NewProgram(model)
 	if _, err := p.Run(); err != nil {
 		return err
 	}
 
+	fmt.Println("Selected endpoint:", model.selectedEndpoint)
 	return nil
 }

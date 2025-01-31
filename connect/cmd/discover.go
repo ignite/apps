@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"maps"
 	"slices"
-	"strconv"
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
@@ -22,10 +21,10 @@ type discoverCmdModel struct {
 	fetching bool
 	err      error
 	page     int
-	input    string // track user input for chain number
 
-	chainRegistry *chains.ChainRegistry
+	selectedIndex int
 	selectedChain chainregistry.Chain
+	chainRegistry *chains.ChainRegistry
 }
 
 // Messages
@@ -60,57 +59,38 @@ func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "n", "right":
-			m.page++
-			m.input = "" // Clear input when navigating
+			if m.page < len(m.chainRegistry.Chains)/pageSize {
+				m.page++
+			}
 		case "p", "left":
 			if m.page > 0 {
 				m.page--
 			}
-			m.input = "" // Clear input when navigating
+		case "up":
+			if m.selectedIndex > 0 {
+				m.selectedIndex--
+			}
+
+			if m.selectedIndex%pageSize == pageSize-1 {
+				m.page--
+				m.selectedIndex = 0
+			}
+		case "down":
+			if m.selectedIndex < len(m.chainRegistry.Chains)-1 {
+				m.selectedIndex++
+			}
+
+			if m.selectedIndex%pageSize == 0 {
+				m.page++
+				m.selectedIndex = 0
+			}
 		case "enter":
-			if m.input != "" && m.chainRegistry != nil {
+			if m.chainRegistry != nil {
 				chains := m.chainRegistry.Chains
-				totalSize := len(chains)
 				chainsNames := slices.Sorted(maps.Keys(chains))
-
-				start := m.page * pageSize
-				if start >= totalSize {
-					start = 0
-					m.page = 0
-				}
-
-				end := start + pageSize
-				if end > totalSize {
-					end = totalSize
-				}
-
-				inputNum, err := strconv.Atoi(m.input)
-				if err != nil {
-					m.err = fmt.Errorf("invalid input: %s", m.input)
-					m.input = ""
-					return m, nil
-				}
-
-				// Adjust inputNum to be 0-indexed
-				selectedIndex := start + inputNum - 1
-				if selectedIndex >= start && selectedIndex < end {
-					chainKey := chainsNames[selectedIndex]
-
-					m.selectedChain = chains[chainKey]
-					return m, tea.Quit // chain selected, quit
-				} else {
-					m.err = fmt.Errorf("invalid chain number: %s", m.input)
-					m.input = ""
-				}
-			}
-		case "backspace", "delete":
-			if len(m.input) > 0 {
-				m.input = m.input[:len(m.input)-1]
-			}
-		default:
-			// input should be a number
-			if len(msg.String()) == 1 && msg.String()[0] >= '0' && msg.String()[0] <= '9' {
-				m.input += msg.String()
+				selectedIndex := m.page*pageSize + m.selectedIndex
+				m.selectedChain = chains[chainsNames[selectedIndex]]
+				return m, tea.Quit
 			}
 		}
 	case spinner.TickMsg:
@@ -136,7 +116,6 @@ func (m *discoverCmdModel) View() string {
 		return fmt.Sprintf("Error: %v\n(press 'q' to quit)\n", m.err)
 	}
 
-	// same pagination logic than in Update
 	chains := m.chainRegistry.Chains
 	totalSize := len(chains)
 	chainsNames := slices.Sorted(maps.Keys(chains))
@@ -156,26 +135,23 @@ func (m *discoverCmdModel) View() string {
 	out += fmt.Sprintf("Fetched %d chains. Showing %d-%d:\n", totalSize, start+1, end)
 
 	// ANSI escape codes for highlighting
-	highlightStart := "\033[32;1m" // Green color and bold
-	highlightEnd := "\033[0m"      // Reset to default
+	highlightStart := "\033[32m✓ \033[1m" // Green color and bold
+	highlightEnd := "\033[0m"             // Reset to default
 
 	for i, k := range chainsNames[start:end] {
 		chain := m.chainRegistry.Chains[k]
-		lineNumber := i + 1 + start
 
 		out += "\033[K" // clear current line before printing
 
 		// Check if the input corresponds to this line number
-		inputNum, err := strconv.Atoi(m.input)
-		if err == nil && inputNum == lineNumber {
-			out += fmt.Sprintf("%s%d. %s (%s)%s\n", highlightStart, lineNumber, chain.PrettyName, chain.ChainName, highlightEnd)
+		if i == m.selectedIndex {
+			out += fmt.Sprintf("%s%s (%s)%s\n", highlightStart, chain.PrettyName, chain.ChainName, highlightEnd)
 		} else {
-			out += fmt.Sprintf("%d. %s (%s)\n", lineNumber, chain.PrettyName, chain.ChainName)
+			out += fmt.Sprintf("  %s (%s)\n", chain.PrettyName, chain.ChainName)
 		}
 	}
 
 	out += "\033[K" // clear current line before printing
-	out += fmt.Sprintf("Select chain: %s\n", m.input)
 	out += "(press 'n'/'right' for next, 'p'/'left' for prev, 'enter' to init chain, 'q'/'ctrl+c' to quit)\n"
 	return out
 }
