@@ -54,7 +54,7 @@ func ReadConfig() (*Config, error) {
 
 	connectConfigPath := path.Join(configDir, configName)
 	if _, err := os.Stat(connectConfigPath); os.IsNotExist(err) {
-		return &Config{}, ErrConfigNotFound
+		return &Config{map[string]*ChainConfig{}}, ErrConfigNotFound
 	} else if err != nil {
 		return nil, fmt.Errorf("failed to check config file: %w", err)
 	}

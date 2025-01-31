@@ -4,11 +4,13 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"strings"
 
-	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/grpc"
+
+	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 
 	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
@@ -158,12 +160,11 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	fmt.Println("Selected endpoint:", model.selectedEndpoint)
 	return initChain(context.TODO(), model.chain, model.selectedEndpoint)
 }
 
 func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) error {
-	fmt.Println("Selected endpoint:", endpoint)
-
 	cfg, err := chains.ReadConfig()
 	if err != nil && !errors.Is(err, chains.ErrConfigNotFound) {
 		return err
@@ -176,7 +177,7 @@ func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) 
 		GRPCEndpoint: endpoint,
 	}
 
-	conn, err := chains.NewConn(chain, chainCfg)
+	conn, err := chains.NewConn(chain.ChainName, chainCfg)
 	if err != nil {
 		return err
 	}
@@ -199,7 +200,12 @@ func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) 
 	}
 
 	cfg.Chains[chain.ChainName] = chainCfg
-	return cfg.Save()
+	if err := cfg.Save(); err != nil {
+		return err
+	}
+
+	fmt.Printf("%s is ready to Connect!\n", strings.Title(chain.ChainName))
+	return nil
 }
 
 // getAddressPrefix returns the address prefix of the chain.

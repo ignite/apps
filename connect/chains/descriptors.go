@@ -15,30 +15,29 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/descriptorpb"
 
+	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv1 "cosmossdk.io/api/cosmos/reflection/v1"
-
-	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
 )
 
 type Conn struct {
-	chain     chainregistry.Chain
+	chainName string
 	config    *ChainConfig
 	configDir string
+	client    *grpc.ClientConn
 
-	client        *grpc.ClientConn
-	protoFiles    *protoregistry.Files
-	moduleOptions map[string]*autocliv1.ModuleOptions
+	ProtoFiles    *protoregistry.Files
+	ModuleOptions map[string]*autocliv1.ModuleOptions
 }
 
-func NewConn(chain chainregistry.Chain, cfg *ChainConfig) (*Conn, error) {
+func NewConn(chainName string, cfg *ChainConfig) (*Conn, error) {
 	configDir, err := ConfigDir()
 	if err != nil {
 		return nil, err
 	}
 
 	return &Conn{
-		chain:     chain,
+		chainName: chainName,
 		config:    cfg,
 		configDir: configDir,
 	}, nil
@@ -46,12 +45,12 @@ func NewConn(chain chainregistry.Chain, cfg *ChainConfig) (*Conn, error) {
 
 // fdsCacheFilename returns the filename for the cached file descriptor set.
 func (c *Conn) fdsCacheFilename() string {
-	return path.Join(c.configDir, fmt.Sprintf("%s.fds", c.chain.ChainName))
+	return path.Join(c.configDir, fmt.Sprintf("%s.fds", c.chainName))
 }
 
 // appOptsCacheFilename returns the filename for the app options cache file.
 func (c *Conn) appOptsCacheFilename() string {
-	return path.Join(c.configDir, fmt.Sprintf("%s.autocli", c.chain.ChainName))
+	return path.Join(c.configDir, fmt.Sprintf("%s.autocli", c.chainName))
 }
 
 func (c *Conn) Load(ctx context.Context) error {
@@ -68,7 +67,7 @@ func (c *Conn) Load(ctx context.Context) error {
 		reflectionClient := reflectionv1.NewReflectionServiceClient(client)
 		fdRes, err := reflectionClient.FileDescriptors(ctx, &reflectionv1.FileDescriptorsRequest{})
 		if err != nil {
-			return fmt.Errorf("error getting file descriptors: %w, this chain is using a too old version of the Cosmos SDK", err)
+			return fmt.Errorf("error getting file descriptors: %w", err)
 		}
 
 		fdSet = &descriptorpb.FileDescriptorSet{File: fdRes.Files}
@@ -91,7 +90,7 @@ func (c *Conn) Load(ctx context.Context) error {
 		}
 	}
 
-	c.protoFiles, err = protodesc.FileOptions{AllowUnresolvable: true}.NewFiles(fdSet)
+	c.ProtoFiles, err = protodesc.FileOptions{AllowUnresolvable: true}.NewFiles(fdSet)
 	if err != nil {
 		return fmt.Errorf("error building protoregistry.Files: %w", err)
 	}
@@ -106,7 +105,7 @@ func (c *Conn) Load(ctx context.Context) error {
 		autocliQueryClient := autocliv1.NewQueryClient(client)
 		appOptsRes, err := autocliQueryClient.AppOptions(ctx, &autocliv1.AppOptionsRequest{})
 		if err != nil {
-			return fmt.Errorf("error getting autocli config: %w, this chain is using a too old version of the Cosmos SDK", err)
+			return fmt.Errorf("error getting autocli config: %w", err)
 		}
 
 		bz, err := proto.Marshal(appOptsRes)
@@ -118,7 +117,7 @@ func (c *Conn) Load(ctx context.Context) error {
 			return err
 		}
 
-		c.moduleOptions = appOptsRes.ModuleOptions
+		c.ModuleOptions = appOptsRes.ModuleOptions
 	} else {
 		bz, err := os.ReadFile(appOptsFilename)
 		if err != nil {
@@ -130,7 +129,7 @@ func (c *Conn) Load(ctx context.Context) error {
 			return err
 		}
 
-		c.moduleOptions = appOptsRes.ModuleOptions
+		c.ModuleOptions = appOptsRes.ModuleOptions
 	}
 
 	return nil
@@ -146,16 +145,20 @@ func (c *Conn) Connect() (*grpc.ClientConn, error) {
 		MinVersion: tls.VersionTLS12,
 	})
 
-	// we use Dial here instead of NewClient as we want to attempt to connect to the gRPC server immediately
-	// and fallback to another connection if it fails
-	c.client, err = grpc.Dial(c.config.GRPCEndpoint, grpc.WithTransportCredentials(creds)) //nolint:staticcheck: we want to use dial
-	if err != nil {
-		creds = insecure.NewCredentials()
-		c.client, err = grpc.NewClient(c.config.GRPCEndpoint, grpc.WithTransportCredentials(creds))
-	}
-
+	c.client, err = grpc.NewClient(c.config.GRPCEndpoint, grpc.WithTransportCredentials(creds))
 	if err != nil {
 		return nil, fmt.Errorf("failed to connect to gRPC server: %w", err)
+	}
+
+	// try connection by querying an endpoint
+	// fallback to insecure if it doesn't work
+	authClient := authv1betav1.NewQueryClient(c.client)
+	if _, err = authClient.Params(context.Background(), &authv1betav1.QueryParamsRequest{}); err != nil {
+		creds = insecure.NewCredentials()
+		c.client, err = grpc.NewClient(c.config.GRPCEndpoint, grpc.WithTransportCredentials(creds))
+		if err != nil {
+			return nil, fmt.Errorf("failed to connect to gRPC server: %w", err)
+		}
 	}
 
 	return c.client, nil

@@ -186,6 +186,7 @@ func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 			return err
 		}
 
+		fmt.Println("Selected endpoint:", addCmdModel.selectedEndpoint)
 		return initChain(context.TODO(), selectedChain, addCmdModel.selectedEndpoint)
 	}
 

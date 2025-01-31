@@ -59,7 +59,12 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 		return cmd.VersionHandler(ctx, c)
 	default:
 		if slices.Contains(availableChains, args[0]) {
-			return cmd.AppHandler(ctx, c, args[0], *cfg)
+			appCmd, err := cmd.AppHandler(ctx, c, args[0], cfg.Chains[args[0]])
+			if err != nil {
+				return err
+			}
+
+			return appCmd.ExecuteContext(ctx)
 		}
 
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))

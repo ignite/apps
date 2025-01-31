@@ -42,7 +42,7 @@ func GetCommands(availableChains []string) []*plugin.Command {
 		cmd[0].Commands = append(cmd[0].Commands,
 			&plugin.Command{
 				Use:   name,
-				Short: fmt.Sprintf("Interact with %s chain", name),
+				Short: fmt.Sprintf("Commands for %s chain", name),
 			},
 		)
 	}
