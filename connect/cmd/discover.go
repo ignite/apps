@@ -53,13 +53,19 @@ func fetchChainsCmd() tea.Msg {
 // Update handles messages and updates the model accordingly
 func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	var totalSize int
+
+	if m.chainRegistry != nil {
+		totalSize = len(m.chainRegistry.Chains)
+	}
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "n", "right":
-			if m.page < len(m.chainRegistry.Chains)/pageSize {
+			if m.page < totalSize/pageSize {
 				m.page++
 			}
 		case "p", "left":
@@ -76,9 +82,11 @@ func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selectedIndex = 0
 			}
 		case "down":
-			if m.selectedIndex < len(m.chainRegistry.Chains)-1 {
-				m.selectedIndex++
+			if m.page*pageSize+m.selectedIndex == totalSize-1 {
+				return m, cmd
 			}
+
+			m.selectedIndex++
 
 			if m.selectedIndex%pageSize == 0 {
 				m.page++
@@ -86,10 +94,9 @@ func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			}
 		case "enter":
 			if m.chainRegistry != nil {
-				chains := m.chainRegistry.Chains
-				chainsNames := slices.Sorted(maps.Keys(chains))
+				chainsNames := slices.Sorted(maps.Keys(m.chainRegistry.Chains))
 				selectedIndex := m.page*pageSize + m.selectedIndex
-				m.selectedChain = chains[chainsNames[selectedIndex]]
+				m.selectedChain = m.chainRegistry.Chains[chainsNames[selectedIndex]]
 				return m, tea.Quit
 			}
 		}
@@ -173,11 +180,13 @@ func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	if len(model.selectedChain.ChainName) > 0 {
 		selectedChain := model.chainRegistry.Chains[model.selectedChain.ChainName]
 
-		p := tea.NewProgram(newAddCmdModel(selectedChain))
+		addCmdModel := newAddCmdModel(selectedChain)
+		p := tea.NewProgram(addCmdModel)
 		if _, err := p.Run(); err != nil {
 			return err
 		}
 
+		return initChain(selectedChain, addCmdModel.selectedEndpoint)
 	}
 
 	return nil

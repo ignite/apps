@@ -14,10 +14,11 @@ import (
 )
 
 type addCmdModel struct {
-	spinner          spinner.Model
-	err              error
+	spinner spinner.Model
+	err     error
+	page    int
+
 	chain            chainregistry.Chain
-	page             int
 	selectedEndpoint string
 	selectedIndex    int
 }
@@ -39,18 +40,20 @@ func newAddCmdModel(chain chainregistry.Chain) *addCmdModel {
 }
 
 func (m *addCmdModel) Init() tea.Cmd {
-	return tea.Batch(fetchChainsCmd)
+	return tea.Batch() // no preloading needed
 }
 
 func (m *addCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
+	totalSize := len(m.chain.APIs.Grpc)
+
 	switch msg := msg.(type) {
 	case tea.KeyMsg:
 		switch msg.String() {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "n", "right":
-			if m.page < len(m.chain.APIs.Grpc)/pageSize {
+			if m.page < totalSize/pageSize {
 				m.page++
 			}
 		case "p", "left":
@@ -67,9 +70,11 @@ func (m *addCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 				m.selectedIndex = 0
 			}
 		case "down":
-			if m.selectedIndex < len(m.chain.APIs.Grpc)-1 {
-				m.selectedIndex++
+			if m.page*pageSize+m.selectedIndex == totalSize-1 {
+				return m, cmd
 			}
+
+			m.selectedIndex++
 
 			if m.selectedIndex%pageSize == 0 {
 				m.page++
@@ -148,6 +153,11 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	fmt.Println("Selected endpoint:", model.selectedEndpoint)
+	return initChain(model.chain, model.selectedEndpoint)
+}
+
+func initChain(chain chainregistry.Chain, endpoint string) error {
+	fmt.Println("Selected endpoint:", endpoint)
+
 	return nil
 }
