@@ -1,17 +1,19 @@
 package cmd
 
 import (
+	"fmt"
+
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
 // GetCommands returns the list of app commands.
-func GetCommands() []*plugin.Command {
-	return []*plugin.Command{
+func GetCommands(availableChains []string) []*plugin.Command {
+	cmd := []*plugin.Command{
 		{
 			Use:     "connect [command]",
 			Aliases: []string{"c"},
 			Short:   "Interact with any Cosmos SDK based blockchain using Ignite Connect",
-			Long:    "Connect allows you to interact with any Cosmos SDK based blockchain.\n It leverages AutoCLI from client/v2.",
+			Long:    "Connect allows you to interact with any Cosmos SDK based blockchain.",
 			Commands: []*plugin.Command{
 				{
 					Use:   "discover",
@@ -30,9 +32,20 @@ func GetCommands() []*plugin.Command {
 				},
 				{
 					Use:   "version",
-					Short: "Print the version of the Connect app",
+					Short: "Display Connect version",
 				},
 			},
 		},
 	}
+
+	for _, name := range availableChains {
+		cmd[0].Commands = append(cmd[0].Commands,
+			&plugin.Command{
+				Use:   name,
+				Short: fmt.Sprintf("Interact with %s chain", name),
+			},
+		)
+	}
+
+	return cmd
 }
