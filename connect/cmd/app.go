@@ -5,16 +5,18 @@ import (
 	"fmt"
 	"strings"
 
-	"cosmossdk.io/client/v2/autocli"
-	"cosmossdk.io/client/v2/autocli/flag"
-	"github.com/cosmos/cosmos-sdk/client"
-	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
-	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
+
+	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/client/v2/autocli/flag"
+	"github.com/cosmos/cosmos-sdk/client"
+	sdkflags "github.com/cosmos/cosmos-sdk/client/flags"
+	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
+	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 
 	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
@@ -35,7 +37,7 @@ func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, c
 		return nil, err
 	}
 
-	// add comet commands // TODO(@julienrbrt): in distant future, verify if chain is using comet or something else.
+	// add comet commands
 	cometCmds := cmtservice.NewCometBFTCommands()
 	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
 
@@ -54,7 +56,11 @@ func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, c
 		GetClientConn: func(command *cobra.Command) (grpc.ClientConnInterface, error) {
 			return conn.Connect()
 		},
-		AddQueryConnFlags: func(command *cobra.Command) {},
+		AddQueryConnFlags: func(command *cobra.Command) {
+			sdkflags.AddQueryFlagsToCmd(command)
+			sdkflags.AddKeyringFlags(command.Flags())
+		},
+		AddTxConnFlags: sdkflags.AddTxFlagsToCmd,
 	}
 
 	// add client context
