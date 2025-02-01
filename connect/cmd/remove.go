@@ -36,6 +36,6 @@ func RemoveHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	_ = os.Remove(path.Join(configDir, fmt.Sprintf("%s.fds", chainName)))
 	_ = os.Remove(path.Join(configDir, fmt.Sprintf("%s.autocli", chainName)))
 
-	fmt.Printf("Chain %s successfully removed from Connect\n", chainName)
+	fmt.Printf("Chain %s successfully removed!\n", chainName)
 	return nil
 }

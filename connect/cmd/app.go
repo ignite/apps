@@ -22,7 +22,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
-func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, cfg *chains.ChainConfig) (*cobra.Command, error) {
+func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
 	chainCmd := &cobra.Command{
 		Use:   name,
 		Short: fmt.Sprintf("Commands for %s chain", name),
@@ -68,6 +68,10 @@ func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, c
 	chainCmd.SetContext(context.WithValue(context.Background(), client.ClientContextKey, &clientCtx))
 	if err := appOpts.EnhanceRootCommandWithBuilder(chainCmd, builder); err != nil {
 		return nil, err
+	}
+
+	if len(args) > 0 {
+		chainCmd.SetArgs(args)
 	}
 
 	return chainCmd, nil
