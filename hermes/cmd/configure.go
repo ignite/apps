@@ -25,7 +25,12 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		flags = plugin.Flags(cmd.Flags)
 	)
 
-	session := cliui.New(cliui.StartSpinnerWithText("Generating Hermes config"))
+	session := cliui.New(
+		cliui.WithStdout(os.Stdout),
+		cliui.WithStdin(os.Stdin),
+		cliui.WithStderr(os.Stderr),
+		cliui.StartSpinnerWithText("Generating Hermes config"),
+	)
 	defer session.End()
 
 	var (
