@@ -78,7 +78,7 @@ func ConfigDir() (string, error) {
 		return "", fmt.Errorf("failed to get ignite config directory: %w", err)
 	}
 
-	dir := path.Join(igniteConfigDir, "connect")
+	dir := path.Join(igniteConfigDir, "apps", "connect")
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", fmt.Errorf("failed to create config directory: %w", err)
 	}

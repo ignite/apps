@@ -203,7 +203,7 @@ func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) 
 		return err
 	}
 
-	fmt.Printf("%s is ready to Connect!\n", strings.Title(chain.ChainName))
+	fmt.Printf("%s is ready to Connect!\n", strings.Title(chain.ChainName)) //nolintlint:staticcheck // strings.Title has a better API.
 	return nil
 }
 

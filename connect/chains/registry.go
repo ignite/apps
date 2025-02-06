@@ -97,23 +97,24 @@ func EnrichChain(chain *chainregistry.Chain) error {
 		return fmt.Errorf("failed to read response: %w", err)
 	}
 
-	var cdOutput map[string]json.RawMessage
-	if err := json.Unmarshal(body, &cdOutput); err != nil {
+	apiResponseType := struct {
+		Chain *chainregistry.Chain `json:"chain"`
+	}{
+		Chain: chain,
+	}
+
+	if err := json.Unmarshal(body, &apiResponseType); err != nil {
 		return fmt.Errorf("failed to unmarshal cosmos.directory API response: %w", err)
 	}
 
-	rawChain, ok := cdOutput["chain"]
-	if !ok {
-		return fmt.Errorf("failed to get chains from response: cosmos.directory API may have changed")
-	}
+	chain.APIs.Grpc = cleanGRPCEntries(chain.APIs.Grpc)
 
-	if err := json.Unmarshal(rawChain, chain); err != nil {
-		return fmt.Errorf("failed to unmarshal %s chain: %w", chain.ChainName, err)
-	}
+	return nil
+}
 
-	// clean-up data (mainly grpc endpoints)
+func cleanGRPCEntries(entries []chainregistry.APIProvider) []chainregistry.APIProvider {
 	cleanEntries := make([]chainregistry.APIProvider, 0)
-	for _, api := range chain.APIs.Grpc {
+	for _, api := range entries {
 		// clean-up the http(s):// prefix
 		if idx := strings.Index(api.Address, "://"); idx != -1 {
 			api.Address = api.Address[idx+3:]
@@ -128,7 +129,6 @@ func EnrichChain(chain *chainregistry.Chain) error {
 
 		cleanEntries = append(cleanEntries, api)
 	}
-	chain.APIs.Grpc = cleanEntries
 
-	return nil
+	return cleanEntries
 }
