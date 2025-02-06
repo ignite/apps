@@ -13,6 +13,10 @@ import (
 )
 
 func RemoveHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+	if len(cmd.Args) < 1 {
+		return errors.New("usage: connect remove <chain>")
+	}
+
 	cfg, err := chains.ReadConfig()
 	if errors.Is(err, chains.ErrConfigNotFound) {
 		return nil
@@ -21,6 +25,9 @@ func RemoveHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 
 	chainName := cmd.Args[0]
+	if _, ok := cfg.Chains[chainName]; !ok {
+		return errors.New("chain not found")
+	}
 
 	// delete config
 	delete(cfg.Chains, chainName)
