@@ -59,7 +59,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 		return cmd.VersionHandler(ctx, c)
 	default:
 		if slices.Contains(availableChains, args[0]) {
-			appCmd, err := cmd.AppHandler(ctx, c, args[0], cfg.Chains[args[0]], args[1:]...)
+			appCmd, err := cmd.AppHandler(ctx, args[0], cfg.Chains[args[0]], args[1:]...)
 			if err != nil {
 				return err
 			}

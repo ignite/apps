@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"strings"
 
+	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
 	"google.golang.org/grpc"
-
-	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 
 	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
 	"github.com/ignite/cli/v28/ignite/services/plugin"

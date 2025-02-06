@@ -7,8 +7,9 @@ import (
 	"os"
 	"path"
 
-	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
+
+	"github.com/ignite/apps/connect/chains"
 )
 
 func RemoveHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {

@@ -5,24 +5,22 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-	"google.golang.org/protobuf/reflect/protoreflect"
-	"google.golang.org/protobuf/reflect/protoregistry"
-	"google.golang.org/protobuf/types/dynamicpb"
-
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/client/v2/autocli/flag"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdkflags "github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
+	"github.com/spf13/cobra"
+	"google.golang.org/grpc"
+	"google.golang.org/protobuf/reflect/protoreflect"
+	"google.golang.org/protobuf/reflect/protoregistry"
+	"google.golang.org/protobuf/types/dynamicpb"
 
 	"github.com/ignite/apps/connect/chains"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
-func AppHandler(ctx context.Context, cmd *plugin.ExecutedCommand, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
+func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
 	chainCmd := &cobra.Command{
 		Use:   name,
 		Short: fmt.Sprintf("Commands for %s chain", name),
