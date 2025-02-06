@@ -10,7 +10,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
-func VersionHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func VersionHandler(_ context.Context, _ *plugin.ExecutedCommand) error {
 	version, ok := debug.ReadBuildInfo()
 	if !ok {
 		return errors.New("failed to get hubl version")

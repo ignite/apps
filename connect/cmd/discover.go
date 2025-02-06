@@ -36,12 +36,12 @@ type fetchErrMsg struct {
 	err error
 }
 
-// Initialize Bubble Tea program
+// Init initialize Bubble Tea program
 func (m *discoverCmdModel) Init() tea.Cmd {
 	return tea.Batch(fetchChainsCmd)
 }
 
-// Fetch the chains in the background
+// fetchChainsCmd fetch the chains in the background
 func fetchChainsCmd() tea.Msg {
 	cr := chains.NewChainRegistry()
 	if err := cr.FetchChains(); err != nil {

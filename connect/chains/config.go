@@ -39,7 +39,7 @@ func (c *Config) Save() error {
 	}
 
 	connectConfigPath := path.Join(configDir, configName)
-	if err := os.WriteFile(connectConfigPath, out, 0644); err != nil {
+	if err := os.WriteFile(connectConfigPath, out, 0o644); err != nil {
 		return fmt.Errorf("error saving config: %w", err)
 	}
 
@@ -79,7 +79,7 @@ func ConfigDir() (string, error) {
 	}
 
 	dir := path.Join(igniteConfigDir, "connect")
-	if err := os.MkdirAll(dir, 0755); err != nil {
+	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return "", fmt.Errorf("failed to create config directory: %w", err)
 	}
 
