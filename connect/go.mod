@@ -11,6 +11,7 @@ require (
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.7.1-0.20250116085640-fcf01a4e4b39
 	github.com/spf13/cobra v1.8.1
+	github.com/stretchr/testify v1.10.0
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -38,6 +39,7 @@ require (
 	github.com/beorn7/perks v1.0.1 // indirect
 	github.com/bgentry/speakeasy v0.1.1-0.20220910012023-760eaf8b6816 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
+	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
 	github.com/charmbracelet/lipgloss v1.0.0 // indirect
@@ -181,7 +183,6 @@ require (
 	github.com/spf13/cast v1.7.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.19.0 // indirect
-	github.com/stretchr/testify v1.9.0 // indirect
 	github.com/subosito/gotenv v1.6.0 // indirect
 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
 	github.com/tendermint/go-amino v0.16.0 // indirect

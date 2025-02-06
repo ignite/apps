@@ -176,6 +176,7 @@ func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) 
 		GRPCEndpoint: endpoint,
 	}
 
+	fmt.Println("Initializing chain...")
 	conn, err := chains.NewConn(chain.ChainName, chainCfg)
 	if err != nil {
 		return err
