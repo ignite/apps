@@ -5,6 +5,7 @@ go 1.21.1
 require (
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/cosmos/go-bip39 v1.0.0
+	github.com/creack/pty v1.1.17
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.7.0
