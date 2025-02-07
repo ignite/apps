@@ -25,7 +25,12 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		flags = plugin.Flags(cmd.Flags)
 	)
 
-	session := cliui.New(cliui.StartSpinnerWithText("Generating Hermes config"))
+	session := cliui.New(
+		cliui.WithStdout(os.Stdout),
+		cliui.WithStdin(os.Stdin),
+		cliui.WithStderr(os.Stderr),
+		cliui.StartSpinnerWithText("Generating Hermes config"),
+	)
 	defer session.End()
 
 	var (
@@ -332,7 +337,7 @@ GetKey:
 			session.StopSpinner()
 			if err := session.Ask(cliquiz.NewQuestion(
 				fmt.Sprintf(
-					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one:",
+					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one",
 					chainID,
 				),
 				&mnemonic,
@@ -477,7 +482,6 @@ func newHermesConfig(flags plugin.Flags, args []string, customCfg string) (*herm
 		chainASequentialBatchTx, _         = flags.GetBool(flagChainASequentialBatchTx)
 	)
 
-	fmt.Println("aefaefaefeaf _ " + chainAGasMultiplier)
 	chainAGasMulti := new(big.Float)
 	chainAGasMulti, ok := chainAGasMulti.SetString(chainAGasMultiplier)
 	if !ok {
