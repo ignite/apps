@@ -18,8 +18,8 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	msgv1 "cosmossdk.io/api/cosmos/msg/v1"
 	"cosmossdk.io/core/address"
-	"github.com/ignite/apps/connect/internal/internal/flags"
-	"github.com/ignite/apps/connect/internal/internal/util"
+	"github.com/ignite/apps/connect/internal/flags"
+	"github.com/ignite/apps/connect/internal/util"
 )
 
 const (

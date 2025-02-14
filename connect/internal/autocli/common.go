@@ -17,9 +17,9 @@ import (
 	"github.com/ignite/apps/connect/internal/autocli/keyring"
 	"github.com/ignite/apps/connect/internal/broadcast/comet"
 	clientcontext "github.com/ignite/apps/connect/internal/context"
-	"github.com/ignite/apps/connect/internal/internal/flags"
-	"github.com/ignite/apps/connect/internal/internal/print"
-	"github.com/ignite/apps/connect/internal/internal/util"
+	"github.com/ignite/apps/connect/internal/flags"
+	"github.com/ignite/apps/connect/internal/print"
+	"github.com/ignite/apps/connect/internal/util"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 )

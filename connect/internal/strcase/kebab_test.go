@@ -5,7 +5,7 @@ import (
 
 	"gotest.tools/v3/assert"
 
-	"github.com/ignite/apps/connect/internal/internal/strcase"
+	"github.com/ignite/apps/connect/internal/strcase"
 )
 
 func toKebab(tb testing.TB) {

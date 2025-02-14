@@ -9,7 +9,7 @@ import (
 	"github.com/spf13/cobra"
 	"sigs.k8s.io/yaml"
 
-	"github.com/ignite/apps/connect/internal/internal/flags"
+	"github.com/ignite/apps/connect/internal/flags"
 )
 
 const (

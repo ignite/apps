@@ -18,7 +18,7 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	queryv1beta1 "cosmossdk.io/api/cosmos/base/query/v1beta1"
 	basev1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
-	"github.com/ignite/apps/connect/internal/internal/testpb"
+	"github.com/ignite/apps/connect/internal/testpb"
 
 	"github.com/cosmos/cosmos-sdk/client"
 )

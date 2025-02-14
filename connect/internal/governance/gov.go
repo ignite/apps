@@ -10,7 +10,7 @@ import (
 	"google.golang.org/protobuf/types/known/anypb"
 
 	govv1 "cosmossdk.io/api/cosmos/gov/v1"
-	"github.com/ignite/apps/connect/internal/internal/coins"
+	"github.com/ignite/apps/connect/internal/coins"
 )
 
 const (

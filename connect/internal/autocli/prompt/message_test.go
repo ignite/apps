@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/require"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/ignite/apps/connect/internal/internal/testpb"
+	"github.com/ignite/apps/connect/internal/testpb"
 
 	address2 "github.com/cosmos/cosmos-sdk/codec/address"
 )

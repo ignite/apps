@@ -15,8 +15,8 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	"cosmossdk.io/math"
 	"cosmossdk.io/x/tx/signing/aminojson"
-	"github.com/ignite/apps/connect/internal/internal/flags"
-	"github.com/ignite/apps/connect/internal/internal/util"
+	"github.com/ignite/apps/connect/internal/flags"
+	"github.com/ignite/apps/connect/internal/util"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )

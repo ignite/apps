@@ -7,7 +7,7 @@ import (
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/ignite/apps/connect/internal/internal/strcase"
+	"github.com/ignite/apps/connect/internal/strcase"
 )
 
 type enumType struct {

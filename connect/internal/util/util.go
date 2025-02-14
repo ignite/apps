@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
 
-	"github.com/ignite/apps/connect/internal/internal/strcase"
+	"github.com/ignite/apps/connect/internal/strcase"
 )
 
 // get build info to verify later if comment is supported

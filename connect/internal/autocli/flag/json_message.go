@@ -11,7 +11,7 @@ import (
 	"google.golang.org/protobuf/proto"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/ignite/apps/connect/internal/internal/util"
+	"github.com/ignite/apps/connect/internal/util"
 )
 
 var isJSONFileRegex = regexp.MustCompile(`\.json$`)

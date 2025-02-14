@@ -15,7 +15,7 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv2alpha1 "cosmossdk.io/api/cosmos/base/reflection/v2alpha1"
 	"github.com/ignite/apps/connect/internal/autocli/flag"
-	"github.com/ignite/apps/connect/internal/internal/testpb"
+	"github.com/ignite/apps/connect/internal/testpb"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"

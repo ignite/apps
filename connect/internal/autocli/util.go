@@ -7,7 +7,7 @@ import (
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
-	"github.com/ignite/apps/connect/internal/internal/strcase"
+	"github.com/ignite/apps/connect/internal/strcase"
 )
 
 // findSubCommand finds a sub-command of the provided command whose Use

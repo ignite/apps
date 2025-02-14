@@ -12,9 +12,9 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	addresscodec "cosmossdk.io/core/address"
 	"github.com/ignite/apps/connect/internal/autocli/flag"
-	"github.com/ignite/apps/connect/internal/internal/flags"
-	"github.com/ignite/apps/connect/internal/internal/governance"
-	"github.com/ignite/apps/connect/internal/internal/util"
+	"github.com/ignite/apps/connect/internal/flags"
+	"github.com/ignite/apps/connect/internal/governance"
+	"github.com/ignite/apps/connect/internal/util"
 
 	"github.com/cosmos/cosmos-sdk/client"
 	clienttx "github.com/cosmos/cosmos-sdk/client/tx"

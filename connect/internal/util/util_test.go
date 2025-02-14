@@ -7,7 +7,7 @@ import (
 	"google.golang.org/protobuf/reflect/protoreflect"
 	"google.golang.org/protobuf/reflect/protoregistry"
 
-	_ "github.com/ignite/apps/connect/internal/internal/testpb"
+	_ "github.com/ignite/apps/connect/internal/testpb"
 )
 
 func TestIsSupportedVersion(t *testing.T) {
