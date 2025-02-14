@@ -5,8 +5,6 @@ import (
 	"fmt"
 	"strings"
 
-	"cosmossdk.io/client/v2/autocli"
-	"cosmossdk.io/client/v2/autocli/flag"
 	"github.com/cosmos/cosmos-sdk/client"
 	sdkflags "github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
@@ -18,6 +16,8 @@ import (
 	"google.golang.org/protobuf/types/dynamicpb"
 
 	"github.com/ignite/apps/connect/chains"
+	"github.com/ignite/apps/connect/internal/autocli"
+	"github.com/ignite/apps/connect/internal/autocli/flag"
 )
 
 func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
