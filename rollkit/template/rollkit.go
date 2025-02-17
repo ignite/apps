@@ -66,7 +66,7 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 					addModuleInitFlags(startCmd)
 				},
 			})`
-			thirdv050DefaultServerOptions = "server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions[servertypes.Application]{})"
+			thirdv050DefaultServerOptions = "server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{})"
 
 			rollkitServerOptions = `server.AddCommandsWithStartCmdOptions(
 				rootCmd,
