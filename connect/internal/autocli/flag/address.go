@@ -2,13 +2,13 @@ package flag
 
 import (
 	"context"
+	"errors"
 	"fmt"
 
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	"cosmossdk.io/core/address"
 	"github.com/ignite/apps/connect/internal/autocli/keyring"
-	clientcontext "github.com/ignite/apps/connect/internal/context"
 
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/codec/types"
@@ -154,10 +154,14 @@ func getKeyringFromCtx(ctx *context.Context) keyring.Keyring {
 		return keyring.NoKeyring{}
 	}
 
-	c, err := clientcontext.ClientContextFromGoContext(*ctx)
-	if err != nil {
-		return keyring.NoKeyring{}
+	if kv := (*ctx).Value(keyring.ContextKey); kv != nil {
+		k, ok := kv.(*keyring.KeyringImpl)
+		if !ok {
+			panic(errors.New("keyring is not of type *keyring.KeyringImpl"))
+		}
+
+		return k
 	}
 
-	return c.Keyring
+	return keyring.NoKeyring{}
 }

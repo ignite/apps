@@ -2,26 +2,16 @@ package autocli
 
 import (
 	"context"
-	"crypto/tls"
 	"fmt"
-	"strconv"
 
 	"github.com/spf13/cobra"
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/credentials"
-	grpcinsecure "google.golang.org/grpc/credentials/insecure"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
-	"github.com/ignite/apps/connect/internal/autocli/config"
 	"github.com/ignite/apps/connect/internal/autocli/keyring"
-	"github.com/ignite/apps/connect/internal/broadcast/comet"
-	clientcontext "github.com/ignite/apps/connect/internal/context"
 	"github.com/ignite/apps/connect/internal/flags"
 	"github.com/ignite/apps/connect/internal/print"
 	"github.com/ignite/apps/connect/internal/util"
-
-	"github.com/cosmos/cosmos-sdk/codec"
 )
 
 type cmdType int
@@ -121,21 +111,10 @@ func (b *Builder) buildMethodCommandCommon(descriptor protoreflect.MethodDescrip
 func (b *Builder) enhanceCommandCommon(
 	cmd *cobra.Command,
 	cmdType cmdType,
-	appOptions AppOptions,
-	customCmds map[string]*cobra.Command,
+	moduleOptions map[string]*autocliv1.ModuleOptions,
 ) error {
-	moduleOptions := appOptions.ModuleOptions
 	if len(moduleOptions) == 0 {
 		moduleOptions = make(map[string]*autocliv1.ModuleOptions)
-	}
-	for name, module := range appOptions.Modules {
-		if _, ok := moduleOptions[name]; !ok {
-			if module, ok := module.(HasAutoCLIConfig); ok {
-				moduleOptions[name] = module.AutoCLIOptions()
-			} else {
-				moduleOptions[name] = nil
-			}
-		}
 	}
 
 	for moduleName, modOpts := range moduleOptions {
@@ -149,27 +128,6 @@ func (b *Builder) enhanceCommandCommon(
 				}
 			}
 
-			continue
-		}
-
-		// if we have a custom command use that instead of generating one
-		if custom, ok := customCmds[moduleName]; ok {
-			// Custom may not be called the same as its module, so we need to have a separate check here
-			if subCmd := findSubCommand(cmd, custom.Name()); subCmd != nil {
-				if hasModuleOptions { // check if we need to enhance the existing command
-					if err := enhanceCustomCmd(b, subCmd, cmdType, modOpts); err != nil {
-						return err
-					}
-				}
-				continue
-			}
-			if hasModuleOptions { // check if we need to enhance the new command
-				if err := enhanceCustomCmd(b, custom, cmdType, modOpts); err != nil {
-					return err
-				}
-			}
-
-			cmd.AddCommand(custom)
 			continue
 		}
 
@@ -266,26 +224,13 @@ func (b *Builder) getContext(cmd *cobra.Command) (context.Context, error) {
 		k   keyring.Keyring
 		err error
 	)
-	if cmd.Flags().Lookup(flags.FlagKeyringDir) != nil && cmd.Flags().Lookup(flags.FlagKeyringBackend) != nil {
-		k, err = keyring.NewKeyringFromFlags(cmd.Flags(), b.AddressCodec, cmd.InOrStdin(), b.Cdc)
-		if err != nil {
-			return nil, err
-		}
-	} else {
-		k = keyring.NoKeyring{}
+
+	k, err = keyring.NewKeyringFromFlags(cmd.Flags(), b.AddressCodec, cmd.InOrStdin(), b.Cdc)
+	if err != nil {
+		return nil, err
 	}
 
-	clientCtx := clientcontext.Context{
-		Flags:                 cmd.Flags(),
-		AddressCodec:          b.AddressCodec,
-		ValidatorAddressCodec: b.ValidatorAddressCodec,
-		ConsensusAddressCodec: b.ConsensusAddressCodec,
-		Cdc:                   b.Cdc,
-		Keyring:               k,
-		EnabledSignModes:      b.EnabledSignModes,
-	}
-
-	return clientcontext.SetInContext(cmd.Context(), clientCtx), nil
+	return context.WithValue(cmd.Context(), keyring.ContextKey, k), nil
 }
 
 // preRunE returns a function that sets flags from the configuration before running a command.
@@ -305,20 +250,15 @@ func (b *Builder) preRunE() func(cmd *cobra.Command, args []string) error {
 // setFlagsFromConfig sets command flags from the provided configuration.
 // It only sets flags that haven't been explicitly changed by the user.
 func (b *Builder) setFlagsFromConfig(cmd *cobra.Command) error {
-	conf, err := config.CreateClientConfigFromFlags(cmd.Flags())
-	if err != nil {
-		return err
-	}
-
 	flagsToSet := map[string]string{
-		flags.FlagChainID:        conf.ChainID,
-		flags.FlagKeyringBackend: conf.KeyringBackend,
-		flags.FlagFrom:           conf.KeyringDefaultKeyName,
-		flags.FlagOutput:         conf.Output,
-		flags.FlagNode:           conf.Node,
-		flags.FlagBroadcastMode:  conf.BroadcastMode,
-		flags.FlagGrpcAddress:    conf.GRPC.Address,
-		flags.FlagGrpcInsecure:   strconv.FormatBool(conf.GRPC.Insecure),
+		flags.FlagChainID: b.Config.ChainID,
+		// flags.FlagKeyringBackend: conf.KeyringBackend,
+		// flags.FlagFrom:           conf.KeyringDefaultKeyName,
+		// flags.FlagOutput:         conf.Output,
+		// flags.FlagNode:           conf.Node,
+		// flags.FlagBroadcastMode:  conf.BroadcastMode,
+		// flags.FlagGrpcAddress:    conf.GRPC.Address,
+		// flags.FlagGrpcInsecure:   strconv.FormatBool(conf.GRPC.Insecure),
 	}
 
 	for flagName, value := range flagsToSet {
@@ -330,44 +270,4 @@ func (b *Builder) setFlagsFromConfig(cmd *cobra.Command) error {
 	}
 
 	return nil
-}
-
-// getQueryClientConn returns a function that creates a gRPC client connection based on command flags.
-// It handles the creation of secure or insecure connections and falls back to a CometBFT broadcaster
-// if no gRPC address is specified.
-func getQueryClientConn(cdc codec.Codec) func(cmd *cobra.Command) (grpc.ClientConnInterface, error) {
-	return func(cmd *cobra.Command) (grpc.ClientConnInterface, error) {
-		var err error
-		creds := grpcinsecure.NewCredentials()
-
-		insecure := true
-		if cmd.Flags().Lookup(flags.FlagGrpcInsecure) != nil {
-			insecure, err = cmd.Flags().GetBool(flags.FlagGrpcInsecure)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if !insecure {
-			creds = credentials.NewTLS(&tls.Config{MinVersion: tls.VersionTLS12})
-		}
-
-		var addr string
-		if cmd.Flags().Lookup(flags.FlagGrpcAddress) != nil {
-			addr, err = cmd.Flags().GetString(flags.FlagGrpcAddress)
-			if err != nil {
-				return nil, err
-			}
-		}
-		if addr == "" {
-			// if grpc-addr has not been set, use the default clientConn
-			// TODO: default is comet
-			node, err := cmd.Flags().GetString(flags.FlagNode)
-			if err != nil {
-				return nil, err
-			}
-			return comet.NewCometBFTBroadcaster(node, comet.BroadcastSync, cdc)
-		}
-
-		return grpc.NewClient(addr, []grpc.DialOption{grpc.WithTransportCredentials(creds)}...)
-	}
 }

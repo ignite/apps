@@ -207,31 +207,6 @@ func TestHelpMsg(t *testing.T) {
 	golden.Assert(t, out.String(), "help-echo-msg.golden")
 }
 
-func TestBuildCustomMsgCommand(t *testing.T) {
-	b := &Builder{}
-	customCommandCalled := false
-	appOptions := AppOptions{
-		ModuleOptions: map[string]*autocliv1.ModuleOptions{
-			"test": {
-				Tx: &autocliv1.ServiceCommandDescriptor{
-					Service:           testpb.Msg_ServiceDesc.ServiceName,
-					RpcCommandOptions: []*autocliv1.RpcCommandOptions{},
-				},
-			},
-		},
-	}
-
-	cmd, err := b.BuildMsgCommand(context.Background(), appOptions, map[string]*cobra.Command{
-		"test": {Use: "test", Run: func(cmd *cobra.Command, args []string) {
-			customCommandCalled = true
-		}},
-	})
-	assert.NilError(t, err)
-	cmd.SetArgs([]string{"test", "tx"})
-	assert.NilError(t, cmd.Execute())
-	assert.Assert(t, customCommandCalled)
-}
-
 func TestNotFoundErrorsMsg(t *testing.T) {
 	fixture := initFixture(t)
 	b := fixture.b

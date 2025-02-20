@@ -21,14 +21,12 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
 
-// BuildQueryCommand builds the query commands for all the provided modules. If a custom command is provided for a
-// module, this is used instead of any automatically generated CLI commands. This allows apps to a fully dynamic client
-// with a more customized experience if a binary with custom commands is downloaded.
-func (b *Builder) BuildQueryCommand(ctx context.Context, appOptions AppOptions, customCmds map[string]*cobra.Command) (*cobra.Command, error) {
+// BuildQueryCommand builds the query commands for all the provided modules.
+func (b *Builder) BuildQueryCommand(ctx context.Context, moduleOptions map[string]*autocliv1.ModuleOptions) (*cobra.Command, error) {
 	queryCmd := topLevelCmd(ctx, "query", "Querying subcommands")
 	queryCmd.Aliases = []string{"q"}
 
-	if err := b.enhanceCommandCommon(queryCmd, queryCmdType, appOptions, customCmds); err != nil {
+	if err := b.enhanceCommandCommon(queryCmd, queryCmdType, moduleOptions); err != nil {
 		return nil, err
 	}
 

@@ -88,7 +88,7 @@ func initFixture(t *testing.T) *fixture {
 		AddTxConnFlags:    addTxAndGlobalFlagsToCmd,
 		Cdc:               encodingConfig.Codec,
 	}
-	assert.NilError(t, b.ValidateAndComplete())
+	assert.NilError(t, b.Validate())
 
 	return &fixture{
 		conn:      conn,
@@ -165,33 +165,17 @@ func TestEnhanceCommand(t *testing.T) {
 	for i := 0; i < 2; i++ {
 		cmdTp := cmdType(i)
 
-		appOptions := AppOptions{
-			ModuleOptions: map[string]*autocliv1.ModuleOptions{
-				"test": {},
-			},
+		moduleOptions := map[string]*autocliv1.ModuleOptions{
+			"test": {},
 		}
-
-		err := b.enhanceCommandCommon(cmd, cmdTp, appOptions, map[string]*cobra.Command{})
+		err := b.enhanceCommandCommon(cmd, cmdTp, moduleOptions)
 		assert.NilError(t, err)
 
 		cmd = &cobra.Command{Use: "test"}
-
-		appOptions = AppOptions{
-			ModuleOptions: map[string]*autocliv1.ModuleOptions{},
+		moduleOptions = map[string]*autocliv1.ModuleOptions{
+			"test": {Tx: nil},
 		}
-		customCommands := map[string]*cobra.Command{
-			"test2": {Use: "test"},
-		}
-		err = b.enhanceCommandCommon(cmd, cmdTp, appOptions, customCommands)
-		assert.NilError(t, err)
-
-		cmd = &cobra.Command{Use: "test"}
-		appOptions = AppOptions{
-			ModuleOptions: map[string]*autocliv1.ModuleOptions{
-				"test": {Tx: nil},
-			},
-		}
-		err = b.enhanceCommandCommon(cmd, cmdTp, appOptions, map[string]*cobra.Command{})
+		err = b.enhanceCommandCommon(cmd, cmdTp, moduleOptions)
 		assert.NilError(t, err)
 	}
 }
@@ -216,20 +200,18 @@ func TestErrorBuildCommand(t *testing.T) {
 		},
 	}
 
-	appOptions := AppOptions{
-		ModuleOptions: map[string]*autocliv1.ModuleOptions{
-			"test": {
-				Query: commandDescriptor,
-				Tx:    commandDescriptor,
-			},
+	moduleOptions := map[string]*autocliv1.ModuleOptions{
+		"test": {
+			Query: commandDescriptor,
+			Tx:    commandDescriptor,
 		},
 	}
 
-	_, err := b.BuildMsgCommand(context.Background(), appOptions, nil)
+	_, err := b.BuildMsgCommand(context.Background(), moduleOptions)
 	assert.ErrorContains(t, err, "can't find field un-existent-proto-field")
 
-	appOptions.ModuleOptions["test"].Tx = &autocliv1.ServiceCommandDescriptor{Service: "un-existent-service"}
-	appOptions.ModuleOptions["test"].Query = &autocliv1.ServiceCommandDescriptor{Service: "un-existent-service"}
-	_, err = b.BuildMsgCommand(context.Background(), appOptions, nil)
+	moduleOptions["test"].Tx = &autocliv1.ServiceCommandDescriptor{Service: "un-existent-service"}
+	moduleOptions["test"].Query = &autocliv1.ServiceCommandDescriptor{Service: "un-existent-service"}
+	_, err = b.BuildMsgCommand(context.Background(), moduleOptions)
 	assert.ErrorContains(t, err, "can't find service un-existent-service")
 }

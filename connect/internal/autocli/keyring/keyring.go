@@ -5,6 +5,9 @@ import (
 
 	"github.com/spf13/pflag"
 
+	"github.com/ignite/apps/connect/internal/flags"
+	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
+
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
 	"cosmossdk.io/core/address"
 
@@ -13,9 +16,9 @@ import (
 	"github.com/cosmos/cosmos-sdk/crypto/types"
 )
 
-// KeyringContextKey is the key used to store the keyring in the context.
+// ContextKey is the key used to store the keyring in the context.
 // The keyring must be wrapped using the KeyringImpl.
-var KeyringContextKey keyringContextKey
+var ContextKey keyringContextKey
 
 type keyringContextKey struct{}
 
@@ -25,41 +28,30 @@ type KeyringImpl struct {
 	k Keyring
 }
 
-// NewKeyringFromFlags creates a new Keyring instance based on command-line flags.
-// It retrieves the keyring backend and directory from flags, creates a new keyring,
-// and wraps it with an AutoCLI-compatible interface.
-func NewKeyringFromFlags(flagSet *pflag.FlagSet, ac address.Codec, input io.Reader, cdc codec.Codec, opts ...keyring.Option) (Keyring, error) {
-	backEnd, err := flagSet.GetString("keyring-backend")
+// NewKeyringFromFlags creates a new keyring instance based on command-line flags.
+func NewKeyringFromFlags(
+	flagSet *pflag.FlagSet,
+	ac address.Codec,
+	input io.Reader,
+	cdc codec.Codec,
+	opts ...keyring.Option,
+) (*KeyringImpl, error) {
+	backEnd, err := flagSet.GetString(flags.FlagKeyringBackend)
 	if err != nil {
 		return nil, err
 	}
 
-	keyringDir, err := flagSet.GetString("keyring-dir")
-	if err != nil {
-		return nil, err
-	}
-	if keyringDir == "" {
-		keyringDir, err = flagSet.GetString("home")
-		if err != nil {
-			return nil, err
-		}
-	}
-
-	k, err := keyring.New("autoclikeyring", backEnd, keyringDir, input, cdc, opts...)
+	k, err := keyring.New("ignitekeyring", backEnd, cosmosaccount.KeyringHome, input, cdc, opts...)
 	if err != nil {
 		return nil, err
 	}
 
-	autoCLIKeyring, err := keyring.NewAutoCLIKeyring(k)
+	igniteKeyring, err := keyring.NewAutoCLIKeyring(k)
 	if err != nil {
 		return nil, err
 	}
 
-	return NewKeyringImpl(autoCLIKeyring), nil
-}
-
-func NewKeyringImpl(k Keyring) *KeyringImpl {
-	return &KeyringImpl{k: k}
+	return &KeyringImpl{k: igniteKeyring}, nil
 }
 
 // GetPubKey implements Keyring.

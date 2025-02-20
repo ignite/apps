@@ -35,14 +35,6 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 		return nil, err
 	}
 
-	// add comet commands
-	cometCmds := cmtservice.NewCometBFTCommands()
-	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
-
-	appOpts := autocli.AppOptions{
-		ModuleOptions: conn.ModuleOptions,
-	}
-
 	builder := &autocli.Builder{
 		Builder: flag.Builder{
 			TypeResolver:          &dynamicTypeResolver{conn},
@@ -51,6 +43,7 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 			ValidatorAddressCodec: addresscodec.NewBech32Codec(fmt.Sprintf("%svaloper", cfg.Bech32Prefix)),
 			ConsensusAddressCodec: addresscodec.NewBech32Codec(fmt.Sprintf("%svalcons", cfg.Bech32Prefix)),
 		},
+		Config: cfg,
 		GetClientConn: func(command *cobra.Command) (grpc.ClientConnInterface, error) {
 			return conn.Connect()
 		},
@@ -64,7 +57,13 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 	// add client context
 	clientCtx := client.Context{}
 	chainCmd.SetContext(context.WithValue(context.Background(), client.ClientContextKey, &clientCtx))
-	if err := appOpts.EnhanceRootCommandWithBuilder(chainCmd, builder); err != nil {
+
+	// add comet commands
+	cometCmds := cmtservice.NewCometBFTCommands()
+	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
+
+	// add autocli commands
+	if err := autocli.EnhanceRootCommand(chainCmd, builder, conn.ModuleOptions); err != nil {
 		return nil, err
 	}
 

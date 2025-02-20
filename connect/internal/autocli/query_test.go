@@ -653,29 +653,6 @@ func TestDeprecatedQuery(t *testing.T) {
 	assert.Assert(t, strings.Contains(out.String(), "--shorthand-deprecated-field has been deprecated"))
 }
 
-func TestBuildCustomQueryCommand(t *testing.T) {
-	b := &Builder{}
-	customCommandCalled := false
-
-	appOptions := AppOptions{
-		ModuleOptions: map[string]*autocliv1.ModuleOptions{
-			"test": {
-				Query: testCmdDesc,
-			},
-		},
-	}
-
-	cmd, err := b.BuildQueryCommand(context.Background(), appOptions, map[string]*cobra.Command{
-		"test": {Use: "test", Run: func(cmd *cobra.Command, args []string) {
-			customCommandCalled = true
-		}},
-	})
-	assert.NilError(t, err)
-	cmd.SetArgs([]string{"test", "query"})
-	assert.NilError(t, cmd.Execute())
-	assert.Assert(t, customCommandCalled)
-}
-
 func TestNotFoundErrorsQuery(t *testing.T) {
 	fixture := initFixture(t)
 	b := fixture.b
