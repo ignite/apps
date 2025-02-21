@@ -5,12 +5,10 @@ go 1.23.0
 require (
 	cosmossdk.io/api v0.7.6
 	cosmossdk.io/core v0.11.1
-	cosmossdk.io/errors v1.0.1
 	cosmossdk.io/math v1.4.0
 	cosmossdk.io/x/tx v0.13.8
 	github.com/charmbracelet/bubbles v0.7.6
 	github.com/charmbracelet/bubbletea v1.2.4
-	github.com/cometbft/cometbft v0.38.15
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
 	github.com/cosmos/cosmos-sdk v0.50.11
 	github.com/cosmos/gogoproto v1.7.0
@@ -20,7 +18,6 @@ require (
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.10.0
-	go.uber.org/mock v0.5.0
 	google.golang.org/grpc v1.67.1
 	google.golang.org/protobuf v1.35.1
 	gopkg.in/yaml.v3 v3.0.1
@@ -31,6 +28,7 @@ require (
 require (
 	cosmossdk.io/collections v0.4.0 // indirect
 	cosmossdk.io/depinject v1.1.0 // indirect
+	cosmossdk.io/errors v1.0.1 // indirect
 	cosmossdk.io/log v1.4.1 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
 	dario.cat/mergo v1.0.0 // indirect
@@ -60,6 +58,7 @@ require (
 	github.com/cockroachdb/pebble v1.1.2 // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
+	github.com/cometbft/cometbft v0.38.15 // indirect
 	github.com/cometbft/cometbft-db v0.14.1 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.1.0 // indirect

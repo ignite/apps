@@ -179,8 +179,8 @@ func (b *Builder) queryContext(ctx context.Context, cmd *cobra.Command) context.
 	}
 
 	md = map[string][]string{}
-	if cmd.Flags().Lookup("height") != nil {
-		h, _ := cmd.Flags().GetInt64("height")
+	if cmd.Flags().Lookup(flags.FlagHeight) != nil {
+		h, _ := cmd.Flags().GetInt64(flags.FlagHeight)
 		md["x-cosmos-block-height"] = []string{fmt.Sprintf("%d", h)}
 	}
 

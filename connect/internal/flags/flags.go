@@ -31,13 +31,18 @@ const (
 
 	// FlagNode is the flag to specify the node address to connect to.
 	FlagNode = "node"
+
 	// FlagBroadcastMode is the flag to specify the broadcast mode for transactions.
 	FlagBroadcastMode = "broadcast-mode"
 
 	// FlagGrpcAddress is the flag to specify the gRPC server address to connect to.
 	FlagGrpcAddress = "grpc-addr"
+
 	// FlagGrpcInsecure is the flag to allow insecure gRPC connections.
 	FlagGrpcInsecure = "grpc-insecure"
+
+	// FlagHeight is the flag to specify the height at which to query the state.
+	FlagHeight = "height"
 )
 
 // List of supported output formats

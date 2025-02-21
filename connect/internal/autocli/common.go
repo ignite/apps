@@ -64,10 +64,12 @@ func (b *Builder) buildMethodCommandCommon(descriptor protoreflect.MethodDescrip
 	cmd.PreRunE = b.preRunE()
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		ctx, err = b.getContext(cmd)
+		// set keyring in context
+		k, err := keyring.NewKeyringFromFlags(cmd.Flags(), b.AddressCodec, cmd.InOrStdin(), b.Cdc)
 		if err != nil {
 			return err
 		}
+		cmd.SetContext(context.WithValue(cmd.Context(), keyring.ContextKey, k))
 
 		input, err := binder.BuildMessage(args)
 		if err != nil {
@@ -214,23 +216,6 @@ func (b *Builder) outOrStdoutFormat(cmd *cobra.Command, out []byte) error {
 		return err
 	}
 	return p.PrintBytes(out)
-}
-
-// getContext creates and returns a new context.Context with an autocli.Context value.
-// It initializes a printer and, if necessary, a keyring based on command flags.
-func (b *Builder) getContext(cmd *cobra.Command) (context.Context, error) {
-	// if the command uses the keyring this must be set
-	var (
-		k   keyring.Keyring
-		err error
-	)
-
-	k, err = keyring.NewKeyringFromFlags(cmd.Flags(), b.AddressCodec, cmd.InOrStdin(), b.Cdc)
-	if err != nil {
-		return nil, err
-	}
-
-	return context.WithValue(cmd.Context(), keyring.ContextKey, k), nil
 }
 
 // preRunE returns a function that sets flags from the configuration before running a command.
