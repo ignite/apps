@@ -150,6 +150,7 @@ func TestMsgWithFlattenFields(t *testing.T) {
 		"--generate-only",
 		"--output", "json",
 		"--chain-id", fixture.chainID,
+		"--no-proposal",
 	)
 	assert.NilError(t, err)
 	assertNormalizedJSONEqual(t, out.Bytes(), goldenLoad(t, "flatten-output.golden"))

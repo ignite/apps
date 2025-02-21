@@ -3,7 +3,6 @@ package autocli
 import (
 	"context"
 	"fmt"
-	"strings"
 
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/proto"
@@ -226,21 +225,21 @@ func (b *Builder) handleGovProposal(
 // isProposalMessage checks the msg name against well known proposal messages.
 // this isn't exhaustive. to have it better we need to add a field in autocli proto
 // as it was done in v0.52.
-func isProposalMessage(desc protoreflect.MessageDescriptor) bool {
-	msg := []string{
-		"cosmos.gov.v1.MsgSubmitProposal",
-		"cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
-		"cosmos.upgrade.v1beta1.MsgCancelUpgrade",
-		"cosmos.distribution.v1beta1.MsgFundCommunityPool",
-		"ibc.core.client.v1.MsgIBCSoftwareUpgrade",
-		".MsgUpdateParams",
-	}
+func isProposalMessage(_ protoreflect.MessageDescriptor) bool {
+	// msg := []string{
+	// 	"cosmos.gov.v1.MsgSubmitProposal",
+	// 	"cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+	// 	"cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+	// 	"cosmos.distribution.v1beta1.MsgFundCommunityPool",
+	// 	"ibc.core.client.v1.MsgIBCSoftwareUpgrade",
+	// 	".MsgUpdateParams",
+	// }
 
-	for _, m := range msg {
-		if strings.HasSuffix(string(desc.FullName()), m) {
-			return true
-		}
-	}
+	// for _, m := range msg {
+	// 	if strings.HasSuffix(string(desc.FullName()), m) {
+	// 		return true
+	// 	}
+	// }
 
 	return false
 }
