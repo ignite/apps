@@ -14,6 +14,7 @@ import (
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	reflectionv2alpha1 "cosmossdk.io/api/cosmos/base/reflection/v2alpha1"
+	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/apps/connect/internal/autocli/flag"
 	"github.com/ignite/apps/connect/internal/testpb"
 
@@ -87,6 +88,7 @@ func initFixture(t *testing.T) *fixture {
 		AddQueryConnFlags: flags.AddQueryFlagsToCmd,
 		AddTxConnFlags:    addTxAndGlobalFlagsToCmd,
 		Cdc:               encodingConfig.Codec,
+		Config:            &chains.ChainConfig{},
 	}
 	assert.NilError(t, b.Validate())
 

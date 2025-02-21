@@ -229,6 +229,10 @@ func (b *Builder) handleGovProposal(
 func isProposalMessage(desc protoreflect.MessageDescriptor) bool {
 	msg := []string{
 		"cosmos.gov.v1.MsgSubmitProposal",
+		"cosmos.upgrade.v1beta1.MsgSoftwareUpgrade",
+		"cosmos.upgrade.v1beta1.MsgCancelUpgrade",
+		"cosmos.distribution.v1beta1.MsgFundCommunityPool",
+		"ibc.core.client.v1.MsgIBCSoftwareUpgrade",
 		".MsgUpdateParams",
 	}
 

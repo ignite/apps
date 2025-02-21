@@ -1,6 +1,8 @@
 package autocli
 
 import (
+	"errors"
+
 	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/apps/connect/internal/autocli/flag"
@@ -41,6 +43,10 @@ func EnhanceRootCommand(
 	builder *Builder,
 	moduleOptions map[string]*autocliv1.ModuleOptions,
 ) error {
+	if builder.Config == nil {
+		return errors.New("missing config")
+	}
+
 	if err := builder.Validate(); err != nil {
 		return err
 	}
