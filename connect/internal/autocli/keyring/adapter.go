@@ -20,6 +20,15 @@ type autoCLIKeyringAdapter struct {
 	ac address.Codec
 }
 
+func (a *autoCLIKeyringAdapter) DefaultKey() string {
+	l, err := a.List()
+	if err != nil || len(l) == 0 {
+		return ""
+	}
+
+	return l[0]
+}
+
 func (a *autoCLIKeyringAdapter) List() ([]string, error) {
 	list, err := a.Keyring.List()
 	if err != nil {
@@ -103,4 +112,8 @@ func (a *autoCLIKeyringAdapter) KeyInfo(nameOrAddr string) (string, string, uint
 	}
 
 	return record.Name, nameOrAddr, uint(record.GetType()), nil
+}
+
+func (a *autoCLIKeyringAdapter) Impl() any {
+	return a.Keyring
 }

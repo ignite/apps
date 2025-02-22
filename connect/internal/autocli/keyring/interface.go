@@ -9,6 +9,9 @@ import (
 // Keyring is an interface used for signing transactions.
 // It aims to be simplistic and easy to use.
 type Keyring interface {
+	// DefaultKey returns the default key name.
+	DefaultKey() string
+
 	// List returns the names of all keys stored in the keyring.
 	List() ([]string, error)
 
@@ -23,4 +26,7 @@ type Keyring interface {
 
 	// KeyInfo given a key name or address returns key name, key address and key type.
 	KeyInfo(nameOrAddr string) (string, string, uint, error)
+
+	// Impl returns the underlying keyring implementation.
+	Impl() any
 }

@@ -14,6 +14,10 @@ var errNoKeyring = errors.New("no keyring configured")
 
 type NoKeyring struct{}
 
+func (k NoKeyring) DefaultKey() string {
+	return ""
+}
+
 func (k NoKeyring) List() ([]string, error) {
 	return nil, errNoKeyring
 }
@@ -32,4 +36,8 @@ func (k NoKeyring) Sign(name string, msg []byte, signMode signingv1beta1.SignMod
 
 func (k NoKeyring) KeyInfo(nameOrAddr string) (string, string, uint, error) {
 	return "", "", 0, errNoKeyring
+}
+
+func (k NoKeyring) Impl() any {
+	return nil
 }
