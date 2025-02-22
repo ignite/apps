@@ -16,12 +16,10 @@ import (
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
 	bankv1beta1 "cosmossdk.io/api/cosmos/bank/v1beta1"
 	"github.com/ignite/apps/connect/internal/testpb"
-
-	"github.com/cosmos/cosmos-sdk/client"
 )
 
 var buildModuleMsgCommand = func(moduleName string, f *fixture) (*cobra.Command, error) {
-	ctx := context.WithValue(context.Background(), client.ClientContextKey, &f.clientCtx)
+	ctx := context.TODO()
 	cmd := topLevelCmd(ctx, moduleName, fmt.Sprintf("Transactions commands for the %s module", moduleName))
 	err := f.b.AddMsgServiceCommands(cmd, bankAutoCLI)
 	return cmd, err
@@ -29,7 +27,7 @@ var buildModuleMsgCommand = func(moduleName string, f *fixture) (*cobra.Command,
 
 func buildCustomModuleMsgCommand(cmdDescriptor *autocliv1.ServiceCommandDescriptor) func(moduleName string, f *fixture) (*cobra.Command, error) {
 	return func(moduleName string, f *fixture) (*cobra.Command, error) {
-		ctx := context.WithValue(context.Background(), client.ClientContextKey, &f.clientCtx)
+		ctx := context.TODO()
 		cmd := topLevelCmd(ctx, moduleName, fmt.Sprintf("Transactions commands for the %s module", moduleName))
 		err := f.b.AddMsgServiceCommands(cmd, cmdDescriptor)
 		return cmd, err

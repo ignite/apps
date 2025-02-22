@@ -1,7 +1,6 @@
 package autocli
 
 import (
-	"context"
 	"fmt"
 
 	"github.com/spf13/cobra"
@@ -11,6 +10,7 @@ import (
 	"github.com/ignite/apps/connect/internal/autocli/keyring"
 	"github.com/ignite/apps/connect/internal/flags"
 	"github.com/ignite/apps/connect/internal/print"
+	"github.com/ignite/apps/connect/internal/tx"
 	"github.com/ignite/apps/connect/internal/util"
 )
 
@@ -64,12 +64,19 @@ func (b *Builder) buildMethodCommandCommon(descriptor protoreflect.MethodDescrip
 	cmd.PreRunE = b.preRunE()
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
-		// set keyring in context
-		k, err := keyring.NewIgniteKeyring(cmd.Flags(), cmd.InOrStdin())
+		// create context
+		k, err := keyring.NewKeyring(cmd.Flags(), cmd.InOrStdin(), b.AddressCodec)
 		if err != nil {
 			return err
 		}
-		cmd.SetContext(context.WithValue(cmd.Context(), keyring.ContextKey, k))
+
+		cmd.SetContext(tx.SetContext(cmd.Context(), tx.Context{
+			Flags:                 cmd.Flags(),
+			Keyring:               k,
+			AddressCodec:          b.AddressCodec,
+			ValidatorAddressCodec: b.ValidatorAddressCodec,
+			ConsensusAddressCodec: b.ConsensusAddressCodec,
+		}))
 
 		input, err := binder.BuildMessage(args)
 		if err != nil {

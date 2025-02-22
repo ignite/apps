@@ -18,20 +18,17 @@ import (
 	"github.com/ignite/apps/connect/internal/autocli/flag"
 	"github.com/ignite/apps/connect/internal/testpb"
 
-	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	sdkkeyring "github.com/cosmos/cosmos-sdk/crypto/keyring"
-	sdk "github.com/cosmos/cosmos-sdk/types"
 	moduletestutil "github.com/cosmos/cosmos-sdk/types/module/testutil"
 	"github.com/cosmos/cosmos-sdk/x/bank"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 )
 
 type fixture struct {
-	conn      *testClientConn
-	b         *Builder
-	clientCtx client.Context
+	conn *testClientConn
+	b    *Builder
 
 	home     string
 	chainID  string
@@ -57,21 +54,8 @@ func initFixture(t *testing.T) *fixture {
 	assert.NilError(t, err)
 
 	encodingConfig := moduletestutil.MakeTestEncodingConfig(bank.AppModule{})
-	kr, err := sdkkeyring.New(sdk.KeyringServiceName(), sdkkeyring.BackendMemory, home, nil, encodingConfig.Codec)
-	assert.NilError(t, err)
-
 	interfaceRegistry := encodingConfig.Codec.InterfaceRegistry()
 	banktypes.RegisterInterfaces(interfaceRegistry)
-
-	clientCtx := client.Context{}.
-		WithKeyring(kr).
-		WithKeyringDir(home).
-		WithHomeDir(home).
-		WithViper("").
-		WithInterfaceRegistry(interfaceRegistry).
-		WithTxConfig(encodingConfig.TxConfig).
-		WithAccountRetriever(client.MockAccountRetriever{}).
-		WithChainID("autocli-test")
 
 	conn := &testClientConn{ClientConn: clientConn}
 	b := &Builder{
@@ -92,9 +76,8 @@ func initFixture(t *testing.T) *fixture {
 	assert.NilError(t, b.Validate())
 
 	return &fixture{
-		conn:      conn,
-		b:         b,
-		clientCtx: clientCtx,
+		conn: conn,
+		b:    b,
 
 		home:     home,
 		chainID:  "autocli-test",

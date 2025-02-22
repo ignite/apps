@@ -14,10 +14,9 @@ import (
 	"github.com/ignite/apps/connect/internal/autocli/flag"
 	"github.com/ignite/apps/connect/internal/flags"
 	"github.com/ignite/apps/connect/internal/governance"
+	"github.com/ignite/apps/connect/internal/tx"
 	"github.com/ignite/apps/connect/internal/util"
 
-	"github.com/cosmos/cosmos-sdk/client"
-	clienttx "github.com/cosmos/cosmos-sdk/client/tx"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 )
 
@@ -114,21 +113,13 @@ func (b *Builder) AddMsgServiceCommands(cmd *cobra.Command, cmdDescriptor *autoc
 // BuildMsgMethodCommand returns a command that outputs the JSON representation of the message.
 func (b *Builder) BuildMsgMethodCommand(descriptor protoreflect.MethodDescriptor, options *autocliv1.RpcCommandOptions) (*cobra.Command, error) {
 	execFunc := func(cmd *cobra.Command, input protoreflect.Message) error {
-		clientCtx, err := client.GetClientTxContext(cmd)
-		if err != nil {
-			return err
-		}
-
-		clientCtx = clientCtx.WithCmdContext(cmd.Context())
-		clientCtx = clientCtx.WithOutput(cmd.OutOrStdout())
-
 		fd := input.Descriptor().Fields().ByName(protoreflect.Name(flag.GetSignerFieldName(input.Descriptor())))
 		addressCodec := b.Builder.AddressCodec
 
 		// handle gov proposals commands
 		skipProposal, _ := cmd.Flags().GetBool(flags.FlagNoProposal)
 		if isProposalMessage(descriptor.Input()) && !skipProposal {
-			return b.handleGovProposal(cmd, input, clientCtx, addressCodec, fd)
+			return b.handleGovProposal(cmd, input, addressCodec, fd)
 		}
 
 		// set signer to signer field if empty
@@ -144,10 +135,9 @@ func (b *Builder) BuildMsgMethodCommand(descriptor protoreflect.MethodDescriptor
 				}
 			}
 
-			signerFromFlag := clientCtx.GetFromAddress()
-			signer, err := addressCodec.BytesToString(signerFromFlag.Bytes())
+			signer, err := tx.GetFromAddress(cmd)
 			if err != nil {
-				return fmt.Errorf("failed to set signer on message, got %v: %w", signerFromFlag, err)
+				return fmt.Errorf("failed to get from address: %w", err)
 			}
 
 			input.Set(fd, protoreflect.ValueOfString(signer))
@@ -159,7 +149,12 @@ func (b *Builder) BuildMsgMethodCommand(descriptor protoreflect.MethodDescriptor
 		msg := dynamicpb.NewMessage(input.Descriptor())
 		proto.Merge(msg, input.Interface())
 
-		return clienttx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), msg)
+		out, err := tx.GenerateAndBroadcastTxCLI(cmd.Context(), nil /* TODO */, msg)
+		if err != nil {
+			return err
+		}
+
+		return b.outOrStdoutFormat(cmd, out)
 	}
 
 	cmd, err := b.buildMethodCommandCommon(descriptor, options, execFunc)
@@ -187,7 +182,6 @@ func (b *Builder) BuildMsgMethodCommand(descriptor protoreflect.MethodDescriptor
 func (b *Builder) handleGovProposal(
 	cmd *cobra.Command,
 	input protoreflect.Message,
-	clientCtx client.Context,
 	addressCodec addresscodec.Codec,
 	fd protoreflect.FieldDescriptor,
 ) error {
@@ -198,13 +192,12 @@ func (b *Builder) handleGovProposal(
 	}
 	input.Set(fd, protoreflect.ValueOfString(authority))
 
-	signerFromFlag := clientCtx.GetFromAddress()
-	signer, err := addressCodec.BytesToString(signerFromFlag.Bytes())
+	signerFromFlag, err := tx.GetFromAddress(cmd)
 	if err != nil {
-		return fmt.Errorf("failed to set signer on message, got %q: %w", signerFromFlag, err)
+		return fmt.Errorf("failed to get from address: %w", err)
 	}
 
-	proposal, err := governance.ReadGovPropCmdFlags(signer, cmd.Flags())
+	proposal, err := governance.ReadGovPropCmdFlags(signerFromFlag, cmd.Flags())
 	if err != nil {
 		return err
 	}
@@ -219,7 +212,12 @@ func (b *Builder) handleGovProposal(
 		return fmt.Errorf("failed to set msg in proposal %w", err)
 	}
 
-	return clienttx.GenerateOrBroadcastTxCLI(clientCtx, cmd.Flags(), proposal)
+	out, err := tx.GenerateAndBroadcastTxCLI(cmd.Context(), nil /* TODO */, proposal)
+	if err != nil {
+		return err
+	}
+
+	return b.outOrStdoutFormat(cmd, out)
 }
 
 // isProposalMessage checks the msg name against well known proposal messages.

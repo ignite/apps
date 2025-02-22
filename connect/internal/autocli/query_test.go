@@ -19,12 +19,10 @@ import (
 	queryv1beta1 "cosmossdk.io/api/cosmos/base/query/v1beta1"
 	basev1beta1 "cosmossdk.io/api/cosmos/base/v1beta1"
 	"github.com/ignite/apps/connect/internal/testpb"
-
-	"github.com/cosmos/cosmos-sdk/client"
 )
 
 var buildModuleQueryCommand = func(moduleName string, f *fixture) (*cobra.Command, error) {
-	ctx := context.WithValue(context.Background(), client.ClientContextKey, &f.clientCtx)
+	ctx := context.TODO()
 	cmd := topLevelCmd(ctx, moduleName, fmt.Sprintf("Querying commands for the %s module", moduleName))
 
 	err := f.b.AddQueryServiceCommands(cmd, testCmdDesc)
@@ -32,7 +30,7 @@ var buildModuleQueryCommand = func(moduleName string, f *fixture) (*cobra.Comman
 }
 
 var buildModuleQueryCommandOptional = func(moduleName string, f *fixture) (*cobra.Command, error) {
-	ctx := context.WithValue(context.Background(), client.ClientContextKey, &f.clientCtx)
+	ctx := context.TODO()
 	cmd := topLevelCmd(ctx, moduleName, fmt.Sprintf("Querying commands for the %s module", moduleName))
 
 	err := f.b.AddQueryServiceCommands(cmd, testCmdDescOptional)
@@ -40,7 +38,7 @@ var buildModuleQueryCommandOptional = func(moduleName string, f *fixture) (*cobr
 }
 
 var buildModuleVargasOptional = func(moduleName string, f *fixture) (*cobra.Command, error) {
-	ctx := context.WithValue(context.Background(), client.ClientContextKey, &f.clientCtx)
+	ctx := context.TODO()
 	cmd := topLevelCmd(ctx, moduleName, fmt.Sprintf("Querying commands for the %s module", moduleName))
 
 	err := f.b.AddQueryServiceCommands(cmd, testCmdDescInvalidOptAndVargas)

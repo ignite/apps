@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"cosmossdk.io/core/address"
-	"github.com/cosmos/cosmos-sdk/client"
 	sdkflags "github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
@@ -61,10 +60,6 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 		},
 		AddTxConnFlags: sdkflags.AddTxFlagsToCmd,
 	}
-
-	// add client context
-	clientCtx := client.Context{}
-	chainCmd.SetContext(context.WithValue(ctx, client.ClientContextKey, &clientCtx))
 
 	// add comet commands
 	cometCmds := cmtservice.NewCometBFTCommands()
