@@ -9,9 +9,7 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
 
 	signingv1beta1 "cosmossdk.io/api/cosmos/tx/signing/v1beta1"
-	"cosmossdk.io/core/address"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/cosmos/cosmos-sdk/crypto/keyring"
 	"github.com/cosmos/cosmos-sdk/crypto/types"
 )
@@ -28,25 +26,27 @@ type KeyringImpl struct {
 	k Keyring
 }
 
-// NewKeyringFromFlags creates a new keyring instance based on command-line flags.
-func NewKeyringFromFlags(
+// NewIgniteKeyring creates a new keyring instance based on command-line flags.
+func NewIgniteKeyring(
 	flagSet *pflag.FlagSet,
-	ac address.Codec,
 	input io.Reader,
-	cdc codec.Codec,
-	opts ...keyring.Option,
 ) (*KeyringImpl, error) {
-	backEnd, err := flagSet.GetString(flags.FlagKeyringBackend)
+	keyringBackend, err := flagSet.GetString(flags.FlagKeyringBackend)
+	if err != nil {
+		return nil, err
+	} else if keyringBackend == "" {
+		keyringBackend = keyring.BackendTest
+	}
+
+	ca, err := cosmosaccount.New(
+		cosmosaccount.WithKeyringBackend(cosmosaccount.KeyringBackend(keyringBackend)),
+		cosmosaccount.WithKeyringServiceName("ignitekeyring"),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	k, err := keyring.New("ignitekeyring", backEnd, cosmosaccount.KeyringHome, input, cdc, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	igniteKeyring, err := keyring.NewAutoCLIKeyring(k)
+	igniteKeyring, err := keyring.NewAutoCLIKeyring(ca.Keyring)
 	if err != nil {
 		return nil, err
 	}

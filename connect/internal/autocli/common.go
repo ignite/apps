@@ -65,7 +65,7 @@ func (b *Builder) buildMethodCommandCommon(descriptor protoreflect.MethodDescrip
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		// set keyring in context
-		k, err := keyring.NewKeyringFromFlags(cmd.Flags(), b.AddressCodec, cmd.InOrStdin(), b.Cdc)
+		k, err := keyring.NewIgniteKeyring(cmd.Flags(), cmd.InOrStdin())
 		if err != nil {
 			return err
 		}

@@ -3,7 +3,6 @@ package autocli
 import (
 	"errors"
 
-	"github.com/cosmos/cosmos-sdk/codec"
 	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/apps/connect/internal/autocli/flag"
 	"github.com/spf13/cobra"
@@ -29,9 +28,6 @@ type Builder struct {
 
 	// AddTxConnFlags adds flags to transaction commands
 	AddTxConnFlags func(*cobra.Command)
-
-	// Cdc is the codec to use for encoding and decoding messages.
-	Cdc codec.Codec
 }
 
 // EnhanceRootCommand enhances the root command with the provided module options.

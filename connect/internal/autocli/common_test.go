@@ -87,7 +87,6 @@ func initFixture(t *testing.T) *fixture {
 		},
 		AddQueryConnFlags: flags.AddQueryFlagsToCmd,
 		AddTxConnFlags:    addTxAndGlobalFlagsToCmd,
-		Cdc:               encodingConfig.Codec,
 		Config:            &chains.ChainConfig{},
 	}
 	assert.NilError(t, b.Validate())
