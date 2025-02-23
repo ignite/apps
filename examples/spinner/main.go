@@ -7,9 +7,9 @@ import (
 
 	"github.com/gookit/color"
 	hplugin "github.com/hashicorp/go-plugin"
-	"github.com/ignite/cli/v29/ignite/pkg/cliui"
-	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/ignite/cli/v29/ignite/services/plugin"
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/manifoldco/promptui"
 
 	"github.com/ignite/apps/examples/spinner/cmd"
