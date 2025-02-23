@@ -7,7 +7,7 @@ toolchain go1.24.0
 require (
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/ignite/cli/v28 v28.7.0
+	github.com/ignite/cli/v28 v28.8.0
 	github.com/manifoldco/promptui v0.9.0
 )
 

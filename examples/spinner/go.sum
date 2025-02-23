@@ -137,8 +137,8 @@ github.com/hashicorp/yamux v0.1.2 h1:XtB8kyFOyHXYVFnwT5C3+Bdo8gArse7j2AQ0DA0Uey8
 github.com/hashicorp/yamux v0.1.2/go.mod h1:C+zze2n6e/7wshOZep2A70/aQU6QBRWJO/G6FT1wIns=
 github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec h1:qv2VnGeEQHchGaZ/u7lxST/RaJw+cv273q79D81Xbog=
 github.com/hinshun/vt10x v0.0.0-20220119200601-820417d04eec/go.mod h1:Q48J4R4DvxnHolD5P8pOtXigYlRuPLGl6moFx3ulM68=
-github.com/ignite/cli/v28 v28.7.0 h1:J8UuvtY5DnONYcructXI5/Ow3BZPw9Zzv6qDvckvNUg=
-github.com/ignite/cli/v28 v28.7.0/go.mod h1:HzT0fYcTX1q8rbgm/OTxTwHl0rsJSOxJ9O3urSNu/6Y=
+github.com/ignite/cli/v28 v28.8.0 h1:FW9X/hpaF0PZZ1GsUOwKfwm/x3m/AeJMKfhuw8wvoNI=
+github.com/ignite/cli/v28 v28.8.0/go.mod h1:LBoYU71zrea5sX7frlycNFr8mrHo42L8dV+PtuoxWLE=
 github.com/imdario/mergo v0.3.15 h1:M8XP7IuFNsqUx6VPK2P9OSmsYsI/YFaGil0uD21V3dM=
 github.com/imdario/mergo v0.3.15/go.mod h1:WBLT9ZmE3lPoWsEzCh9LPo3TiwVN+ZKEjmz+hD27ysY=
 github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
