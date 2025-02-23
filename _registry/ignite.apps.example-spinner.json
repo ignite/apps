@@ -1,0 +1,39 @@
+{
+  "appName": "Spinner (example)",
+  "slug": "example-spinner",
+  "appDescription": "A simple spinner application",
+  "ignite": ">28.3.0",
+  "dependencies": {
+    "docker": ">23.0.5"
+  },
+  "cosmosSDK": ">0.50.4",
+  "authors": [
+    {
+      "name": "Ehsan Saradar",
+      "github": "Ehsan-saradar"
+    },
+    {
+      "name": "Danilo Pantani",
+      "github": "Pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/examples/spinner",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/examples/spinner/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "spinner",
+    "example",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "icon": "",
+  "cover": ""
+}
