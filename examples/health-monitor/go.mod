@@ -2,8 +2,6 @@ module github.com/ignite/apps/examples/health-monitor
 
 go 1.23.0
 
-toolchain go1.24.0
-
 require (
 	github.com/cometbft/cometbft v0.38.17
 	github.com/hashicorp/go-plugin v1.6.1

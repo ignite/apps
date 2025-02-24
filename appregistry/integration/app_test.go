@@ -49,7 +49,7 @@ func TestAppRegistry(t *testing.T) {
 		)),
 	))
 	gotList := listOutput.String()
-	require.True(strings.Contains(gotList, "appregistry :"), "unexpected output: %s", gotList)
+	require.True(strings.Contains(gotList, "App Registry :"), "unexpected output: %s", gotList)
 
 	infoOutput := &bytes.Buffer{}
 	env.Must(env.Exec("run appregistry info",

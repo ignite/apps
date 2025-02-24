@@ -2,8 +2,6 @@ module github.com/ignite/apps/hermes
 
 go 1.23.6
 
-toolchain go1.24.0
-
 require (
 	github.com/cosmos/cosmos-sdk v0.50.12
 	github.com/cosmos/go-bip39 v1.0.0

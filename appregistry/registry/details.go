@@ -52,7 +52,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 
 	var appEntry AppEntry
 	for _, app := range apps {
-		if app.Name == appName {
+		if strings.EqualFold(app.Name, appName) {
 			appEntry = app
 		}
 	}
@@ -78,7 +78,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 
 	var appDetails AppDetails
 	for name, info := range appYML.Apps {
-		if name != appName {
+		if !strings.EqualFold(name, appName) {
 			continue
 		}
 

@@ -2,8 +2,6 @@ module github.com/ignite/apps/wasm
 
 go 1.23.0
 
-toolchain go1.24.0
-
 require (
 	github.com/CosmWasm/wasmd v0.53.0
 	github.com/blang/semver/v4 v4.0.0

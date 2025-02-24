@@ -2,8 +2,6 @@ module github.com/ignite/apps/spaceship
 
 go 1.23.0
 
-toolchain go1.24.0
-
 require (
 	github.com/blang/semver/v4 v4.0.0
 	github.com/cosmos/cosmos-sdk v0.50.12
