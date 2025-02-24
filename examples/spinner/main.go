@@ -49,6 +49,7 @@ func (app) Execute(context.Context, *plugin.ExecutedCommand, plugin.ClientAPI) e
 
 	for i := time.Duration(0); i < 5; i++ {
 		time.Sleep(time.Second * 2 * i)
+		session.StopSpinner()
 		session.StartSpinner(fmt.Sprintf("Start again with stop %d", i))
 	}
 
