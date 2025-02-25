@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ignite/apps/cca/templates"
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/services/chain"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"github.com/ignite/cli/v28/ignite/services/scaffolder"
+
+	"github.com/ignite/apps/cca/templates"
 )
 
 const (

@@ -8,9 +8,10 @@ import (
 
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
-	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
+
+	"github.com/ignite/apps/connect/chains"
 )
 
 const pageSize = 10

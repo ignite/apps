@@ -42,6 +42,9 @@ apps:
   example-hello-world:
     description: A simple hello world application
     path: ./examples/hello-world
+  example-spinner:
+    description: A simple spinner application
+    path: ./examples/spinner
   example-hooks:
     description: A simple hooks application
     path: ./examples/hooks
