@@ -4,7 +4,8 @@
 
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.3.0)
 
-* [#](https://github.com/ignite/apps/pull/) Bump wasm to `v0.54.0`
+* [#173](https://github.com/ignite/apps/pull/173) Bump wasm to `v0.54.0`
+* [#173](https://github.com/ignite/apps/pull/173) Fixes installation issue on WSL
 
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.1)
 
