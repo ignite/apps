@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.3.0)
+
+* [#](https://github.com/ignite/apps/pull/) Bump wasm to `v0.54.0`
+
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.1)
 
 ### Fixes
@@ -10,18 +14,11 @@
 
 ## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.2.0)
 
-### Features
-
 * [#113](https://github.com/ignite/apps/pull/113) Move wasm apps from cobra commands to default cmds
 * [#128](https://github.com/ignite/apps/pull/128) Bump wasm to `v0.53.0`
-
-### Fixes
-
 * [#99](https://github.com/ignite/apps/pull/99) Fix missing CLI imports
 
 ## [`v0.1.1`](https://github.com/ignite/apps/releases/tag/wasm/v0.1.1)
-
-## Fixes
 
 * [#77](https://github.com/ignite/apps/pull/77) Update scaffolded ibc modules registration to avoid unused imports
 

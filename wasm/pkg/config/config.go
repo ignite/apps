@@ -69,7 +69,7 @@ func AddWasm(configPath string, options ...Option) error {
 	}
 
 	// Add default configs.
-	config := wasmtypes.DefaultWasmConfig()
+	config := wasmtypes.DefaultNodeConfig()
 	if opts.simulationGasLimit != 0 {
 		config.SimulationGasLimit = &opts.simulationGasLimit
 	}
