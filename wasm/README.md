@@ -38,6 +38,7 @@ ignite wasm add
 This command integrates Wasm into your chain's code and configuration. If your chain configuration does not exist yet (for non-initiated chains), you'll need to add the Wasm configuration manually:
 
 ```shell
+ignite chain init
 ignite wasm config
 ```
 
