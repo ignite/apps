@@ -22,6 +22,11 @@ The app adds `ignite wasm` commands to add a [CosmWasm](https://cosmwasm.com/) i
 ignite app install -g github.com/ignite/apps/wasm
 ```
 
+> [!IMPORTANT]  
+> Wasmd uses CGO. Which means library for compiling C must be installed.
+> While on most linux distribution or macos those are insatalled by default,
+> users of WSL or Ubuntu must run the following: `sudo apt-get install build-essential`
+
 ## Usage
 
 - Navigate to your chain's directory and execute the following command to add Wasm support:
@@ -33,6 +38,7 @@ ignite wasm add
 This command integrates Wasm into your chain's code and configuration. If your chain configuration does not exist yet (for non-initiated chains), you'll need to add the Wasm configuration manually:
 
 ```shell
+ignite chain init
 ignite wasm config
 ```
 
