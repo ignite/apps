@@ -8,7 +8,7 @@ require (
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.3
 	github.com/ignite/cli/v28 v28.8.0
-	github.com/ignite/ignite-files/hermes v1.11.0
+	github.com/ignite/ignite-files/hermes v1.12.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.2.3
 	github.com/stretchr/testify v1.10.0
