@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## [`v0.2.2`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.2)
+
+* [#168](https://github.com/ignite/apps/pull/168) Update expected template.
 * [#112](https://github.com/ignite/apps/pull/112) Use default command instead cobra commands.
 
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.1)
