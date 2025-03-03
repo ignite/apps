@@ -61,6 +61,7 @@ For detailed contribution guidelines, please refer to [CONTRIBUTING.md](CONTRIBU
 Each directory in the root of this repository is a Go module containing an Ignite App package, with each app having its own go.mod file.
 This structure ensures modularity and ease of management for each app within the Ignite ecosystem.
 
+```sh
 app-name/
 ├── cmd/
 │   └── command_one.go
@@ -72,6 +73,7 @@ app-name/
 ├── go.sum
 ├── main.go
 └── README.md
+```
 
 The actual implementation of the app is in the root directory, while the `cmd` directory contains the commands that are exposed to the user.
 
