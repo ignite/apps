@@ -189,7 +189,7 @@ func serve(session *cliui.Session, path string) error {
 	}
 
 	// run the ping.pub explorer
-	cmd := exec.Command("yarn", "--ignore-engines", "serve")
+	cmd := exec.Command("sh", "-c", "yarn --ignore-engines && yarn serve")
 	cmd.Dir = path
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
