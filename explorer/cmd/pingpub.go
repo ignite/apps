@@ -95,6 +95,7 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 	filesToRemove := []string{
 		filepath.Join(pingPubPath, "README.md"),
+		filepath.Join(pingPubPath, "installation.md"),
 	}
 
 	// remove directories
