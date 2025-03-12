@@ -36,12 +36,6 @@ func GetCommands() []*plugin.Command {
 							Shorthand: "p",
 							Type:      plugin.FlagTypeString,
 						},
-						{
-							Name:         flagPort,
-							Usage:        "port to run the explorer on",
-							Type:         plugin.FlagTypeUint,
-							DefaultValue: "8080",
-						},
 					},
 				},
 			},

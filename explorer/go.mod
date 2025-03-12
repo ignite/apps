@@ -3,6 +3,7 @@ module github.com/ignite/apps/explorer
 go 1.23.0
 
 require (
+	github.com/cosmos/cosmos-sdk v0.50.12
 	github.com/hashicorp/go-plugin v1.6.1
 	github.com/ignite/cli/v28 v28.8.0
 	github.com/ignite/gex v1.0.0
@@ -52,7 +53,6 @@ require (
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.1.1 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5 // indirect
-	github.com/cosmos/cosmos-sdk v0.50.12 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/gogoproto v1.7.0 // indirect
