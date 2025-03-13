@@ -185,7 +185,7 @@ func serve(session *cliui.Session, path string) error {
 
 	// check if yarn is installed
 	if _, err := exec.LookPath("yarn"); err != nil {
-		return errors.New("yarn is not installed. Please install yarn to run the ping.pub explorer")
+		return errors.New("yarn is not installed. Please install yarn to run the web explorer")
 	}
 
 	// run the ping.pub explorer

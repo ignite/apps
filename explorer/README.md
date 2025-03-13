@@ -16,6 +16,9 @@ Additionally, it integrates the [Ping.pub](https://ping.pub) explorer, which all
 Before using the Explorer app, ensure your environment meets the following requirements:
 
 - **Ignite CLI**: Version `v28.3.0` or higher.
+- For Ping.pub:
+  - [**Node.js**](https://nodejs.org/en/download) (version 18 or higher)
+  - [**Yarn**](https://yarnpkg.com/getting-started/install)
 
 ## Usage
 
