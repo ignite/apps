@@ -135,6 +135,18 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		}
 	}
 
+	// get bech32 prefix
+	bech32Prefix, err := c.Bech32Prefix()
+	if err != nil {
+		return errors.Errorf("failed to get bech32 prefix: %w", err)
+	}
+
+	// get coin type
+	coinType, err := c.CoinType()
+	if err != nil {
+		return errors.Errorf("failed to get coin type: %w", err)
+	}
+
 	// create ping.pub configuration file
 	pingCfg := pingPubConfig{
 		ChainName: c.Name(),
@@ -158,9 +170,9 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 			},
 		},
 		SdkVersion: c.Version.String(),
-		CoinType:   "118",
+		CoinType:   fmt.Sprintf("%d", coinType),
 		MinTxFee:   "500",
-		AddrPrefix: "cosmos",
+		AddrPrefix: bech32Prefix,
 		ThemeColor: "#467dff",
 		Logo:       "/logos/cosmos.svg",
 	}
