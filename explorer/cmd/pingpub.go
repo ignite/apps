@@ -56,9 +56,6 @@ type pingPubConfigAsset struct {
 func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 
-	session := cliui.New(cliui.StartSpinnerWithText(statusCloning))
-	defer session.End()
-
 	// get the app path
 	appPath, err := flags.GetString(flagPath)
 	if err != nil {
@@ -69,6 +66,9 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	if err != nil {
 		return err
 	}
+
+	session := cliui.New(cliui.StartSpinnerWithText(statusCloning))
+	defer session.End()
 
 	// initialize chain object
 	c, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
@@ -186,14 +186,15 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return errors.Errorf("failed to write ping.pub configuration: %w", err)
 	}
 
-	_ = session.Printf("🎉 ping.pub explorer configured successfully at `%s/web/ping-pub`.\n", c.AppPath())
-	_ = session.Printf("Optionally edit the configuration at %s\n", configFilePath)
+	session.Printf("🎉 ping.pub explorer configured successfully at `%s/web/ping-pub`.\n", c.AppPath())
+	session.Printf("Optionally edit the configuration at %s\n", configFilePath)
 
 	return serve(session, pingPubPath)
 }
 
 func serve(session *cliui.Session, path string) error {
-	_ = session.Printf("🚀 Starting ping.pub explorer...\n")
+	session.StopSpinner()
+	session.Printf("🚀 Starting ping.pub explorer...\n")
 
 	// check if yarn is installed
 	if _, err := exec.LookPath("yarn"); err != nil {
