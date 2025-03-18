@@ -88,6 +88,9 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return errors.Errorf("failed to clone ping.pub repository: %w", err)
 	}
 
+	session.StopSpinner()
+	session.StartSpinner(statusConfiguring)
+
 	// remove specified directories and files
 	dirsToRemove := []string{
 		filepath.Join(pingPubPath, "chains", "mainnet"),
@@ -111,8 +114,6 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 			return errors.Errorf("failed to remove file %s: %w", file, err)
 		}
 	}
-
-	session.StartSpinner(statusConfiguring)
 
 	// create chain directory
 	chainDir := filepath.Join(pingPubPath, "chains", "mainnet")
