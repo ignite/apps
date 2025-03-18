@@ -52,7 +52,7 @@ func ExecuteScaffold(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 	// add chain registry files
 	// those are used for the wallet connector
-	if err = sc.AddChainRegistryFiles(c, cfg); err != nil {
+	if err = sc.CreateChainRegistryFiles(c, cfg); err != nil {
 		return err
 	}
 
