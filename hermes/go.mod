@@ -3,12 +3,11 @@ module github.com/ignite/apps/hermes
 go 1.23.6
 
 require (
-	github.com/cosmos/cosmos-sdk v0.50.13
+	github.com/cosmos/cosmos-sdk v0.50.12
 	github.com/cosmos/go-bip39 v1.0.0
-	github.com/creack/pty v1.1.17
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/ignite/cli/v28 v28.8.2
+	github.com/ignite/cli/v28 v28.8.0
 	github.com/ignite/ignite-files/hermes v1.12.0
 	github.com/manifoldco/promptui v0.9.0
 	github.com/pelletier/go-toml/v2 v2.2.3
