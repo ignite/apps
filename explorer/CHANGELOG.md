@@ -1,5 +1,13 @@
 # Explorer App Changelog
 
+## [`v0.4.1`](https://github.com/ignite/apps/releases/tag/explorer/v0.4.1)
+
+* Fix spinner not stopping.
+
+## [`v0.4.0`](https://github.com/ignite/apps/releases/tag/explorer/v0.4.0)
+
+* Introduce `explorer pingpub` command, to scaffold and serve a web explorer.
+
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/explorer/v0.3.0)
 
 * The Gex app was malfunctioning when passing a custom RPC address.

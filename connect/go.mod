@@ -4,19 +4,19 @@ go 1.23.0
 
 require (
 	cosmossdk.io/api v0.7.6
-	cosmossdk.io/core v0.11.1
+	cosmossdk.io/core v0.11.2
 	cosmossdk.io/errors v1.0.1
-	cosmossdk.io/math v1.4.0
+	cosmossdk.io/math v1.5.0
 	cosmossdk.io/x/tx v0.13.8
 	github.com/charmbracelet/bubbles v0.7.6
 	github.com/charmbracelet/bubbletea v1.2.4
 	github.com/cometbft/cometbft v0.38.17
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5
-	github.com/cosmos/cosmos-sdk v0.50.12
+	github.com/cosmos/cosmos-sdk v0.50.13
 	github.com/cosmos/go-bip39 v1.0.0
 	github.com/cosmos/gogoproto v1.7.0
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/ignite/cli/v28 v28.8.0
+	github.com/ignite/cli/v28 v28.8.2
 	github.com/manifoldco/promptui v0.9.0
 	github.com/spf13/cobra v1.8.1
 	github.com/spf13/pflag v1.0.5
@@ -33,7 +33,7 @@ require (
 	cosmossdk.io/depinject v1.1.0 // indirect
 	cosmossdk.io/log v1.4.1 // indirect
 	cosmossdk.io/store v1.1.1 // indirect
-	dario.cat/mergo v1.0.0 // indirect
+	dario.cat/mergo v1.0.1 // indirect
 	filippo.io/edwards25519 v1.0.0 // indirect
 	github.com/99designs/go-keychain v0.0.0-20191008050251-8e49817e8af4 // indirect
 	github.com/99designs/keyring v1.2.2 // indirect
@@ -54,6 +54,7 @@ require (
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/chzyer/readline v1.5.1 // indirect
 	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cockroachdb/apd/v3 v3.2.1 // indirect
 	github.com/cockroachdb/errors v1.11.3 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect

@@ -4,11 +4,11 @@ go 1.23.0
 
 require (
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/ignite/cli/v28 v28.8.0
+	github.com/ignite/cli/v28 v28.8.2
 )
 
 require (
-	dario.cat/mergo v1.0.0 // indirect
+	dario.cat/mergo v1.0.1 // indirect
 	github.com/Microsoft/go-winio v0.6.1 // indirect
 	github.com/ProtonMail/go-crypto v1.1.5 // indirect
 	github.com/aymanbagabas/go-osc52 v1.2.1 // indirect
@@ -20,7 +20,7 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20230118201751-21c54148d20b // indirect
 	github.com/cockroachdb/redact v1.1.5 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
-	github.com/cosmos/cosmos-sdk v0.50.12 // indirect
+	github.com/cosmos/cosmos-sdk v0.50.13 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/fatih/color v1.17.0 // indirect
