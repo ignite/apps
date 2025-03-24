@@ -20,13 +20,15 @@ func GetCommands(availableChains []string) []*plugin.Command {
 					Short: "Discover chains to connect to",
 				},
 				{
-					Use:   "add <chain> [endpoint]",
-					Short: "Add a chain to interact with",
-					Long:  "Add a chain to interact with. If a chain and endpoint are provided, the chain will be added without prompting",
+					Use:     "add <chain> [endpoint]",
+					Aliases: []string{"to", "init"},
+					Short:   "Add a chain to interact with",
+					Long:    "Add a chain to interact with. If a chain and endpoint are provided, the chain will be added without prompting",
 				},
 				{
-					Use:   "remove <chain>",
-					Short: "Remove a chain from Connect",
+					Use:     "remove <chain>",
+					Short:   "Remove a chain from Connect",
+					Aliases: []string{"rm"},
 				},
 				{
 					Use:   "version",

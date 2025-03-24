@@ -13,8 +13,9 @@ func GetCommands() []*plugin.Command {
 			Aliases: []string{"e"},
 			Commands: []*plugin.Command{
 				{
-					Use:   "gex",
-					Short: "Run gex explorer",
+					Use:     "gex",
+					Short:   "Run gex explorer",
+					Aliases: []string{"g"},
 					Flags: []*plugin.Flag{
 						{
 							Name:         flagRPCAddress,
@@ -25,8 +26,9 @@ func GetCommands() []*plugin.Command {
 					},
 				},
 				{
-					Use:   "pingpub",
-					Short: "Run Ping pub explorer",
+					Use:     "pingpub",
+					Short:   "Run Ping pub explorer",
+					Aliases: []string{"ping-pub"},
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,
