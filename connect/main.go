@@ -51,7 +51,7 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	switch args[0] {
 	case "discover":
 		return cmd.DiscoverHandler(ctx, c)
-	case "add", "init":
+	case "add", "to", "init":
 		return cmd.AddHandler(ctx, c)
 	case "remove", "rm":
 		return cmd.RemoveHandler(ctx, c)

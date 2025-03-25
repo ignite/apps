@@ -27,9 +27,9 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	args := c.OsArgs[2:]
 
 	switch args[0] {
-	case "gex":
+	case "gex", "g":
 		return cmd.ExecuteGex(ctx, c)
-	case "ping-pub", "pingpub":
+	case "pingpub", "ping-pub":
 		return cmd.ExecutePingPub(ctx, c)
 	default:
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))

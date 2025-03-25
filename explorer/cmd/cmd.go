@@ -28,7 +28,7 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:     "pingpub",
 					Short:   "Run Ping pub explorer",
-					Aliases: []string{"p"},
+					Aliases: []string{"ping-pub"},
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,
