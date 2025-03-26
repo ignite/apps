@@ -1,4 +1,4 @@
-go 1.23
+go 1.24
 
 use (
 	./examples/chain-info
@@ -13,6 +13,7 @@ use (
 	./explorer
 	./fee-abstraction
 	./hermes
+	./network
 	./rollkit
 	./spaceship
 	./wasm

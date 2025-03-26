@@ -117,7 +117,7 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 	// create chain directory
 	chainDir := filepath.Join(pingPubPath, "chains", "mainnet")
-	if err := os.MkdirAll(chainDir, 0755); err != nil {
+	if err := os.MkdirAll(chainDir, 0o755); err != nil {
 		return errors.Errorf("failed to create directory %s: %w", chainDir, err)
 	}
 
@@ -183,7 +183,7 @@ func ExecutePingPub(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	}
 
 	configFilePath := filepath.Join(chainDir, fmt.Sprintf("%s.json", c.Name()))
-	if err := os.WriteFile(configFilePath, pingCfgBz, 0644); err != nil {
+	if err := os.WriteFile(configFilePath, pingCfgBz, 0o644); err != nil {
 		return errors.Errorf("failed to write ping.pub configuration: %w", err)
 	}
 

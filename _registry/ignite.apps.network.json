@@ -1,0 +1,32 @@
+{
+  "appName": "Network",
+  "slug": "network",
+  "appDescription": "Launch a blockchain in production",
+  "ignite": ">0.28.2",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.13",
+  "authors": [
+    {
+      "name": "Danilo Pantani",
+      "github": "Pantani"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/network",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/network/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "network",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ],
+  "icon": "",
+  "cover": ""
+}
