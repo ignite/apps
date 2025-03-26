@@ -1,0 +1,82 @@
+#!/bin/bash
+
+PORT=${2:-8009}
+COMMAND="$HOME/<%= faucetBinPath %> --home <%= home %> --cli-name <%= binary %> --account-name <%= account %> --denoms <%= denoms %> --port $PORT"
+PID_FILE="$HOME/<%= path %>/faucet.pid"
+
+export PATH="$PATH:$HOME/<%= binDirPath %>"
+
+# Function to get the current date and time formatted for the log file
+get_log_file_name() {
+    echo "$HOME/<%= log %>/faucet_$(date '+%Y-%m-%d_%H-%M-%S').log"
+}
+
+# Function to ensure the directory exists
+ensure_directory_exists() {
+    DIR=$(dirname "$1")
+    if [ ! -d "$DIR" ]; then
+        mkdir -p "$DIR"
+    fi
+}
+
+start() {
+    if [ -f "$PID_FILE" ] && ps -p "$(cat "$PID_FILE")" > /dev/null; then
+        echo "faucet is already running with PID $(cat "$PID_FILE")."
+        return
+    fi
+
+    ensure_directory_exists "$PID_FILE"
+    LOG_FILE=$(get_log_file_name)
+    ensure_directory_exists "$LOG_FILE"
+
+    echo "Starting faucet on port $PORT..."
+    nohup $COMMAND > "$LOG_FILE" 2>&1 &
+    echo $! > "$PID_FILE"
+    echo "faucet started with PID $(cat "$PID_FILE")."
+    echo "Logs are being written to $LOG_FILE"
+}
+
+stop() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        echo "Stopping faucet with PID $PID..."
+        kill "$PID"
+        rm "$PID_FILE"
+        echo "faucet stopped."
+    else
+        echo "faucet is not running."
+    fi
+}
+
+status() {
+    if [ -f "$PID_FILE" ]; then
+        PID=$(cat "$PID_FILE")
+        if ps -p "$PID" > /dev/null; then
+            echo "faucet is running with PID $PID."
+        else
+            echo "faucet is not running, but PID file exists."
+        fi
+    else
+        echo "faucet is not running."
+    fi
+}
+
+case "$1" in
+    start)
+        start
+        ;;
+    stop)
+        stop
+        ;;
+    restart)
+        stop
+        start
+        ;;
+    status)
+        status
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac

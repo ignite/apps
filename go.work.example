@@ -1,4 +1,4 @@
-go 1.21.1
+go 1.24
 
 use (
 	./examples/chain-info
@@ -6,8 +6,12 @@ use (
 	./examples/health-monitor
 	./examples/hello-world
 	./examples/hooks
+	./examples/spinner
 	./appregistry
+	./cca
+	./connect
 	./explorer
+	./fee-abstraction
 	./hermes
 	./network
 	./rollkit

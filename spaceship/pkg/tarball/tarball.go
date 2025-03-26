@@ -2,8 +2,8 @@ package tarball
 
 import (
 	"context"
+	"io"
 	"os"
-	"path"
 	"path/filepath"
 
 	"github.com/mholt/archiver/v4"
@@ -13,15 +13,20 @@ import (
 
 const tarballExt = ".tar.gz"
 
-func Extract(ctx context.Context, file, output string, fileList ...string) ([]string, error) {
-	baseName := path.Base(file)
+func ExtractFile(ctx context.Context, file, output string, fileList ...string) ([]string, error) {
 	f, err := os.Open(file)
 	if err != nil {
 		return nil, err
 	}
 	defer f.Close()
+	return ExtractData(ctx, f, output, fileList...)
+}
 
-	format, reader, err := archiver.Identify(baseName, f)
+func ExtractData(ctx context.Context, file io.Reader, output string, fileList ...string) ([]string, error) {
+	// TODO check if need basename
+	//  baseName := path.Base(file)
+	//  format, reader, err := archiver.Identify(baseName, file)
+	format, reader, err := archiver.Identify("", file)
 	if err != nil {
 		return nil, err
 	}

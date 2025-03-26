@@ -1,5 +1,6 @@
 {
-  "appName": "wasm",
+  "appName": "Wasm",
+  "slug": "wasm",
   "appDescription": "Scaffold a CosmosWasm-enabled chain with ease",
   "ignite": ">28.3.0",
   "dependencies": {},
@@ -7,10 +8,10 @@
   "authors": [
     {
       "name": "Danilo Pantani",
-      "github": "pantani"
+      "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
+  "repositoryUrl": "https://github.com/ignite/apps/wasm",
   "documentationUrl": "https://github.com/ignite/apps/blob/main/wasm/README.md",
   "license": {
     "name": "MIT",
@@ -26,5 +27,7 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ]
+  ],
+  "icon": "",
+  "cover": ""
 }

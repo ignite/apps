@@ -13,26 +13,59 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-const (
-	logExtension = ".log"
+type (
+	// LogType represents the log type.
+	LogType string
+
+	// log represents a log file with its name and modification time.
+	log struct {
+		name string
+		time time.Time
+	}
+
+	// logs implements sort.Interface based on the Time field.
+	logs []log
 )
 
-// log represents a log file with its name and modification time.
-type log struct {
-	name string
-	time time.Time
+const (
+	logExtension = ".log"
+
+	LogChain  LogType = "chain"
+	LogFaucet LogType = "faucet"
+)
+
+func (l LogType) String() string {
+	return string(l)
 }
 
-// logs implements sort.Interface based on the Time field.
-type logs []log
+func LogTypes() []string {
+	return []string{LogChain.String(), LogFaucet.String()}
+}
+
+// ParseLogType parses the log type from a string.
+func ParseLogType(logType string) (LogType, error) {
+	switch LogType(strings.ToLower(logType)) {
+	case LogChain:
+		return LogChain, nil
+	case LogFaucet:
+		return LogFaucet, nil
+	default:
+		return "", errors.New("invalid log type: " + logType)
+	}
+}
 
 func (a logs) Len() int           { return len(a) }
 func (a logs) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
 func (a logs) Less(i, j int) bool { return a[i].time.Before(a[j].time) }
 
+// Log returns the log directory within the workspace.
+func (s *SSH) Log() string {
+	return filepath.Join(s.Workspace(), "log")
+}
+
 // LatestLog returns the last n lines from the latest log file.
-func (s *SSH) LatestLog(n int) (string, error) {
-	logFiles, err := s.getLogFiles()
+func (s *SSH) LatestLog(logType LogType, n int) (string, error) {
+	logFiles, err := s.getLogFiles(logType)
 	if err != nil {
 		return "", errors.Wrap(err, "error fetching log files")
 	}
@@ -78,8 +111,8 @@ func (s *SSH) readLastNLines(filePath string, n int) ([]string, error) {
 }
 
 // FollowLog follows the latest log file and sends new lines to the provided channel in real-time.
-func (s *SSH) FollowLog(ctx context.Context, ch chan<- string) error {
-	logFiles, err := s.getLogFiles()
+func (s *SSH) FollowLog(ctx context.Context, logType LogType, ch chan<- string) error {
+	logFiles, err := s.getLogFiles(logType)
 	if err != nil {
 		return errors.Wrap(err, "error fetching log files")
 	}
@@ -121,7 +154,7 @@ func (s *SSH) FollowLog(ctx context.Context, ch chan<- string) error {
 }
 
 // getLogFiles fetches all log files from the specified directory.
-func (s *SSH) getLogFiles() (logs, error) {
+func (s *SSH) getLogFiles(logType LogType) (logs, error) {
 	dir := s.Log()
 
 	files, err := s.sftpClient.ReadDir(dir)
@@ -134,14 +167,15 @@ func (s *SSH) getLogFiles() (logs, error) {
 		if file.IsDir() {
 			continue
 		}
-
-		// Assuming log files have a .log extension
-		if filepath.Ext(file.Name()) == logExtension {
-			logFiles = append(logFiles, log{
-				name: filepath.Join(dir, file.Name()),
-				time: file.ModTime(),
-			})
+		// Assuming log files have a .log extension and check the filename prefix
+		if filepath.Ext(file.Name()) != logExtension ||
+			!strings.HasPrefix(file.Name(), string(logType)) {
+			continue
 		}
+		logFiles = append(logFiles, log{
+			name: filepath.Join(dir, file.Name()),
+			time: file.ModTime(),
+		})
 	}
 	return logFiles, nil
 }

@@ -1,5 +1,6 @@
 {
-  "appName": "hermes",
+  "appName": "Hermes",
+  "slug": "hermes",
   "appDescription": "A wrapper around the hermes IBC relayer",
   "ignite": ">0.27.0",
   "dependencies": {},
@@ -7,11 +8,11 @@
   "authors": [
     {
       "name": "Danilo Pantani",
-      "github": "pantani"
+      "github": "Pantani"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps",
-  "documentationUrl": "https://github.com/ignite/apps/tree/main/hermes/README.md",
+  "repositoryUrl": "https://github.com/ignite/apps/hermes",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/hermes/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
@@ -25,5 +26,7 @@
   "supportedPlatforms": [
     "mac",
     "linux"
-  ]
+  ],
+  "icon": "",
+  "cover": ""
 }

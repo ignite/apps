@@ -1,6 +1,13 @@
 package cmd
 
-import "github.com/ignite/cli/v28/ignite/services/plugin"
+import (
+	"fmt"
+	"strings"
+
+	"github.com/ignite/cli/v28/ignite/services/plugin"
+
+	"github.com/ignite/apps/spaceship/pkg/ssh"
+)
 
 var defaultFlags = []*plugin.Flag{
 	{
@@ -47,8 +54,8 @@ func GetCommands() []*plugin.Command {
 			Short: "Deploy a chain remote through SSH using ignite build system",
 			Commands: []*plugin.Command{
 				{
-					Use:   "deploy",
-					Short: "deploy your chain",
+					Use:   "deploy [host]",
+					Short: "deploy the chain",
 					Flags: append(defaultFlags,
 						&plugin.Flag{
 							Name:      flagInitChain,
@@ -56,11 +63,23 @@ func GetCommands() []*plugin.Command {
 							Usage:     "run init chain and create the home folder",
 							Type:      plugin.FlagTypeBool,
 						},
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "run the chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+						&plugin.Flag{
+							Name:  flagFaucetPort,
+							Usage: "chain faucet port",
+							Type:  plugin.FlagTypeUint64,
+						},
 					),
 				},
 				{
-					Use:   "log",
-					Short: "get chain logs if its running",
+					Use:   "log [host]",
+					Short: "get remote logs",
 					Flags: append(defaultFlags,
 						&plugin.Flag{
 							Name:         flagLines,
@@ -74,22 +93,99 @@ func GetCommands() []*plugin.Command {
 							Usage: "show the logs in the real time",
 							Type:  plugin.FlagTypeBool,
 						},
+						&plugin.Flag{
+							Name:      flagAppLog,
+							Shorthand: "a",
+							Usage: fmt.Sprintf(
+								"the app to show the log (%s)",
+								strings.Join(ssh.LogTypes(), ","),
+							),
+							Type:         plugin.FlagTypeString,
+							DefaultValue: ssh.LogChain.String(),
+						},
 					),
 				},
 				{
-					Use:   "status",
+					Use:   "status [host]",
 					Short: "get chain status if its running",
-					Flags: defaultFlags,
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "show faucet status",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+					),
 				},
 				{
-					Use:   "restart",
-					Short: "restart your chain",
-					Flags: defaultFlags,
+					Use:   "restart [host]",
+					Short: "restart the chain",
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "run the chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+						&plugin.Flag{
+							Name:  flagFaucetPort,
+							Usage: "chain faucet port",
+							Type:  plugin.FlagTypeUint64,
+						},
+					),
 				},
 				{
-					Use:   "stop",
-					Short: "stop your chain",
-					Flags: defaultFlags,
+					Use:   "stop [host]",
+					Short: "stop the chain",
+					Flags: append(defaultFlags,
+						&plugin.Flag{
+							Name:         flagFaucet,
+							Shorthand:    "f",
+							Usage:        "stop the chain faucet",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "false",
+						},
+					),
+				},
+				{
+					Use:   "faucet",
+					Short: "faucet commands",
+					Commands: []*plugin.Command{
+						{
+							Use:   "status [host]",
+							Short: "get faucet status if its running",
+							Flags: defaultFlags,
+						},
+						{
+							Use:   "start [host]",
+							Short: "start the faucet",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
+									Name:  flagFaucetPort,
+									Usage: "chain faucet port",
+									Type:  plugin.FlagTypeUint64,
+								},
+							),
+						},
+						{
+							Use:   "restart [host]",
+							Short: "restart the faucet",
+							Flags: append(defaultFlags,
+								&plugin.Flag{
+									Name:  flagFaucetPort,
+									Usage: "chain faucet port",
+									Type:  plugin.FlagTypeUint64,
+								},
+							),
+						},
+						{
+							Use:   "stop",
+							Short: "stop the faucet",
+							Flags: defaultFlags,
+						},
+					},
 				},
 			},
 		},
