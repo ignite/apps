@@ -245,7 +245,7 @@ func encoder(encoder aminojson.Encoder) aminojson.Encoder {
 			return fmt.Errorf("invalid amount: %s: %w", amount, err)
 		}
 
-		_, err = fmt.Fprintf(w, `"%s"`, sdk.NewDecCoinFromDec(denom, amountDec)) // TODO(@julienrbrt): Eventually remove this SDK dependency
+		_, err = fmt.Fprintf(w, `"%s"`, sdk.NewDecCoinFromDec(denom, amountDec))
 		return err
 	})
 }

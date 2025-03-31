@@ -3,6 +3,7 @@ package tx
 import (
 	"fmt"
 
+	"cosmossdk.io/core/address"
 	"github.com/spf13/cobra"
 
 	"github.com/cosmos/cosmos-sdk/client/flags"
@@ -12,7 +13,7 @@ import (
 )
 
 // GetFromAddress gets the from address from the cobra command.
-func GetFromAddress(cmd *cobra.Command) (string, error) {
+func GetFromAddress(cmd *cobra.Command, addressCodec address.Codec) (string, error) {
 	from, err := cmd.Flags().GetString(flags.FlagFrom)
 	if err != nil {
 		return "", err
@@ -33,7 +34,12 @@ func GetFromAddress(cmd *cobra.Command) (string, error) {
 		_ = cmd.Flags().Set(flags.FlagSignMode, flags.SignModeLegacyAminoJSON)
 	}
 
-	return fromAddr.String(), nil
+	fromAddrStr, err := addressCodec.BytesToString(fromAddr)
+	if err != nil {
+		return "", fmt.Errorf("failed to convert address to string: %w", err)
+	}
+
+	return fromAddrStr, nil
 }
 
 // GetFromFields returns a from account address and keyring type, given either an address or key name.

@@ -135,7 +135,7 @@ func (b *Builder) BuildMsgMethodCommand(descriptor protoreflect.MethodDescriptor
 				}
 			}
 
-			signer, err := tx.GetFromAddress(cmd)
+			signer, err := tx.GetFromAddress(cmd, addressCodec)
 			if err != nil {
 				return fmt.Errorf("failed to get from address: %w", err)
 			}
@@ -192,7 +192,7 @@ func (b *Builder) handleGovProposal(
 	}
 	input.Set(fd, protoreflect.ValueOfString(authority))
 
-	signerFromFlag, err := tx.GetFromAddress(cmd)
+	signerFromFlag, err := tx.GetFromAddress(cmd, addressCodec)
 	if err != nil {
 		return fmt.Errorf("failed to get from address: %w", err)
 	}

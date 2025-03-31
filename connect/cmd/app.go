@@ -66,7 +66,8 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
 
 	// add autocli commands
-	if err := autocli.EnhanceRootCommand(chainCmd, builder, conn.ModuleOptions); err != nil {
+	err = autocli.EnhanceRootCommand(chainCmd, builder, conn.ModuleOptions)
+	if err != nil {
 		return nil, err
 	}
 

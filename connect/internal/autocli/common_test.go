@@ -76,9 +76,8 @@ func initFixture(t *testing.T) *fixture {
 	assert.NilError(t, b.Validate())
 
 	return &fixture{
-		conn: conn,
-		b:    b,
-
+		conn:     conn,
+		b:        b,
 		home:     home,
 		chainID:  "autocli-test",
 		kBackend: sdkkeyring.BackendMemory,

@@ -1,8 +1,6 @@
 package keyring
 
 import (
-	"io"
-
 	"github.com/spf13/pflag"
 
 	"github.com/ignite/apps/connect/internal/flags"
@@ -16,8 +14,8 @@ import (
 // NewKeyring creates a new keyring instance based on command-line flags.
 func NewKeyring(
 	flagSet *pflag.FlagSet,
-	input io.Reader,
 	addressCodec address.Codec,
+	bech32Prefix string,
 ) (Keyring, error) {
 	keyringBackend, err := flagSet.GetString(flags.FlagKeyringBackend)
 	if err != nil {
@@ -27,8 +25,9 @@ func NewKeyring(
 	}
 
 	ca, err := cosmosaccount.New(
+		cosmosaccount.WithBech32Prefix(bech32Prefix),
+		cosmosaccount.WithHome(cosmosaccount.KeyringHome),
 		cosmosaccount.WithKeyringBackend(cosmosaccount.KeyringBackend(keyringBackend)),
-		cosmosaccount.WithKeyringServiceName("ignitekeyring"),
 	)
 	if err != nil {
 		return nil, err

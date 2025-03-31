@@ -3,10 +3,14 @@ package autocli
 import (
 	"fmt"
 
+	"github.com/cosmos/cosmos-sdk/codec"
+	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
+	"github.com/cosmos/gogoproto/proto"
 	"github.com/spf13/cobra"
 	"google.golang.org/protobuf/reflect/protoreflect"
 
 	autocliv1 "cosmossdk.io/api/cosmos/autocli/v1"
+	"cosmossdk.io/x/tx/signing"
 	"github.com/ignite/apps/connect/internal/autocli/keyring"
 	"github.com/ignite/apps/connect/internal/flags"
 	"github.com/ignite/apps/connect/internal/print"
@@ -65,12 +69,29 @@ func (b *Builder) buildMethodCommandCommon(descriptor protoreflect.MethodDescrip
 
 	cmd.RunE = func(cmd *cobra.Command, args []string) error {
 		// create context
-		k, err := keyring.NewKeyring(cmd.Flags(), cmd.InOrStdin(), b.AddressCodec)
+		k, err := keyring.NewKeyring(cmd.Flags(), b.AddressCodec, b.Config.Bech32Prefix)
+		if err != nil {
+			return err
+		}
+
+		mergedFiles, err := proto.MergedRegistry()
+		if err != nil {
+			return err
+		}
+
+		ir, err := codectypes.NewInterfaceRegistryWithOptions(codectypes.InterfaceRegistryOptions{
+			ProtoFiles: mergedFiles,
+			SigningOptions: signing.Options{
+				AddressCodec:          b.AddressCodec,
+				ValidatorAddressCodec: b.ValidatorAddressCodec,
+			},
+		})
 		if err != nil {
 			return err
 		}
 
 		cmd.SetContext(tx.SetContext(cmd.Context(), tx.Context{
+			Cdc:                   codec.NewProtoCodec(ir),
 			Flags:                 cmd.Flags(),
 			Keyring:               k,
 			AddressCodec:          b.AddressCodec,

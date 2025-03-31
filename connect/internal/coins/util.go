@@ -33,7 +33,7 @@ func IsZero[T withAmount](coins []T) (bool, error) {
 }
 
 func ParseDecCoins(coins string) ([]*base.DecCoin, error) {
-	parsedGasPrices, err := sdk.ParseDecCoins(coins) // TODO: do it here to avoid sdk dependency
+	parsedGasPrices, err := sdk.ParseDecCoins(coins)
 	if err != nil {
 		return nil, err
 	}
@@ -49,7 +49,7 @@ func ParseDecCoins(coins string) ([]*base.DecCoin, error) {
 }
 
 func ParseCoinsNormalized(coins string) ([]*base.Coin, error) {
-	parsedFees, err := sdk.ParseCoinsNormalized(coins) // TODO: do it here to avoid sdk dependency
+	parsedFees, err := sdk.ParseCoinsNormalized(coins)
 	if err != nil {
 		return nil, err
 	}
