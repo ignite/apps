@@ -226,6 +226,7 @@ func getNetworkCosmosClient(cmd *cobra.Command) (cosmosclient.Client, error) {
 		cosmosclient.WithKeyringServiceName(cosmosaccount.KeyringServiceName),
 		cosmosclient.WithKeyringDir(getKeyringDir(cmd)),
 		cosmosclient.WithGas(cosmosclient.GasAuto),
+		cosmosclient.WithGasPrices(networktypes.DefaultGasPrices),
 	}
 
 	keyringBackend := getKeyringBackend(cmd)

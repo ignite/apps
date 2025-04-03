@@ -18,4 +18,7 @@ const (
 
 	// ChainPortID is the chain ibc port id used for the relayer connection.
 	ChainPortID = "monitoringp"
+
+	// DefaultGasPrices is the default gas prices used in the network transactions.
+	DefaultGasPrices = "2uspn"
 )
