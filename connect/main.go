@@ -18,18 +18,24 @@ var _ plugin.Interface = app{}
 
 type app struct{}
 
-func (app) Manifest(context.Context) (*plugin.Manifest, error) {
-	var availableChains []string
+func (app) Manifest(ctx context.Context) (*plugin.Manifest, error) {
+	m := &plugin.Manifest{
+		Name:     "connect",
+		Commands: cmd.GetCommands(),
+	}
+
 	if cfg, err := chains.ReadConfig(); err == nil {
-		for name := range cfg.Chains {
-			availableChains = append(availableChains, name)
+		for chainName, chainCfg := range cfg.Chains {
+			cobraCmd, err := cmd.AppHandler(ctx, chainName, chainCfg)
+			if err != nil {
+				return nil, err
+			}
+
+			m.ImportCobraCommand(cobraCmd, m.Name)
 		}
 	}
 
-	return &plugin.Manifest{
-		Name:     "connect",
-		Commands: cmd.GetCommands(availableChains),
-	}, nil
+	return m, nil
 }
 
 func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {

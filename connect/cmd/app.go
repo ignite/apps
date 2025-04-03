@@ -16,9 +16,9 @@ import (
 	"google.golang.org/protobuf/reflect/protoregistry"
 	"google.golang.org/protobuf/types/dynamicpb"
 
+	"cosmossdk.io/client/v2/autocli"
+	"cosmossdk.io/client/v2/autocli/flag"
 	"github.com/ignite/apps/connect/chains"
-	"github.com/ignite/apps/connect/internal/autocli"
-	"github.com/ignite/apps/connect/internal/autocli/flag"
 )
 
 func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
@@ -50,7 +50,6 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 			ValidatorAddressCodec: validatorAddressCodec,
 			ConsensusAddressCodec: consensusAddressCodec,
 		},
-		Config: cfg,
 		GetClientConn: func(cmd *cobra.Command) (grpc.ClientConnInterface, error) {
 			return conn.Connect()
 		},
@@ -65,8 +64,21 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 	cometCmds := cmtservice.NewCometBFTCommands()
 	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
 
+	// k, err := internal.NewKeyring(chainCmd.Flags(), addressCodec, cfg.Bech32Prefix)
+	// if err != nil {
+	// 	return nil, err
+	// }
+	// clientCtx := client.Context{}.WithKeyring(k)
+
 	// add autocli commands
-	err = autocli.EnhanceRootCommand(chainCmd, builder, conn.ModuleOptions)
+	autocliOptions := &autocli.AppOptions{
+		ModuleOptions:         conn.ModuleOptions,
+		AddressCodec:          addressCodec,
+		ValidatorAddressCodec: validatorAddressCodec,
+		ConsensusAddressCodec: consensusAddressCodec,
+	}
+
+	err = autocliOptions.EnhanceRootCommandWithBuilder(chainCmd, builder)
 	if err != nil {
 		return nil, err
 	}
