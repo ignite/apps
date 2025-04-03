@@ -66,9 +66,12 @@ func (c Chain) SimulateRequests(
 	}
 
 	c.ev.Send("Trying starting the network with the requests", events.ProgressStart())
+
 	if err := c.simulateChainStart(ctx); err != nil {
 		return err
 	}
+
+	c.ev.Send("")
 	c.ev.Send("The network can be started", events.ProgressFinish())
 
 	return nil
