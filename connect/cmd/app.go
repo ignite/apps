@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"cosmossdk.io/core/address"
+	"github.com/cosmos/cosmos-sdk/client"
 	sdkflags "github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
@@ -19,6 +20,7 @@ import (
 	"cosmossdk.io/client/v2/autocli"
 	"cosmossdk.io/client/v2/autocli/flag"
 	"github.com/ignite/apps/connect/chains"
+	"github.com/ignite/apps/connect/internal"
 )
 
 func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
@@ -64,21 +66,32 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 	cometCmds := cmtservice.NewCometBFTCommands()
 	conn.ModuleOptions[cometCmds.Name()] = cometCmds.AutoCLIOptions()
 
-	// k, err := internal.NewKeyring(chainCmd.Flags(), addressCodec, cfg.Bech32Prefix)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// clientCtx := client.Context{}.WithKeyring(k)
-
 	// add autocli commands
-	autocliOptions := &autocli.AppOptions{
+	appOpts := &autocli.AppOptions{
 		ModuleOptions:         conn.ModuleOptions,
 		AddressCodec:          addressCodec,
 		ValidatorAddressCodec: validatorAddressCodec,
 		ConsensusAddressCodec: consensusAddressCodec,
 	}
 
-	err = autocliOptions.EnhanceRootCommandWithBuilder(chainCmd, builder)
+	// keyring config
+	k, err := internal.NewKeyring(chainCmd.Flags(), addressCodec, cfg.Bech32Prefix)
+	if err != nil {
+		return nil, err
+	}
+
+	// create client context
+	clientCtx := client.Context{}.
+		WithKeyring(k)
+
+	// add to root command (autocli expects it there)
+	chainCmd.SetContext(context.WithValue(
+		context.Background(),
+		client.ClientContextKey,
+		&clientCtx,
+	))
+
+	err = appOpts.EnhanceRootCommandWithBuilder(chainCmd, builder)
 	if err != nil {
 		return nil, err
 	}
