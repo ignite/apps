@@ -3,6 +3,7 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"strings"
 
 	"cosmossdk.io/core/address"
@@ -11,6 +12,7 @@ import (
 	"github.com/cosmos/cosmos-sdk/client/grpc/cmtservice"
 	addresscodec "github.com/cosmos/cosmos-sdk/codec/address"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
 	"github.com/spf13/cobra"
 	"google.golang.org/grpc"
 	"google.golang.org/protobuf/reflect/protoreflect"
@@ -82,7 +84,10 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 
 	// create client context
 	clientCtx := client.Context{}.
-		WithKeyring(k)
+		WithKeyring(k).
+		WithInput(os.Stdin).
+		WithAccountRetriever(authtypes.AccountRetriever{}).
+		WithViper("")
 
 	// add to root command (autocli expects it there)
 	chainCmd.SetContext(context.WithValue(
