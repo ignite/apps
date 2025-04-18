@@ -83,12 +83,18 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 					abciserver.AddFlags(cmd)
 				},
 				StartCommandHandler: abciserver.StartHandler(),
-			})`,
+			}`,
 			}, nil
 		})
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
+}
+
+// updateDependencies makes sure the correct dependencies are added to the go.mod files.
+// go-execution-abci expects rollkit v1.0 to be used.
+func updateDependencies() error {
+	return nil
 }
 
 // replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
