@@ -32,6 +32,13 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	return g, nil
 }
 
+const (
+	ServerAddCommandsWithStartCmdOptions = "server.AddCommandsWithStartCmdOptions"
+
+	RollkitV0XStartHandler = "rollserv.StartHandler"
+	RollkitV1XStartHandler = "abciserver.StartHandler"
+)
+
 // commandsModify modifies the application start to use rollkit.
 func commandsModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
 	return func(r *genny.Runner) error {
@@ -64,14 +71,21 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 		// replace potential legacy boilerplate present in an ignite v28 chain.
 		content = replaceLegacyAddCommands(content)
 
-		// TODO(@julienrbrt): Requires xast to be able to modify function arguments.
-		// modifiers := []xast.Call{
-		// }
-
-		// content, err = xast.ModifyFunction(content, ServerAddCommandsWithStartCmdOptions, modifiers...)
-		// if err != nil {
-		// 	return err
-		// }
+		// modify the add commands arguments using xast.
+		content, err = xast.ModifyCaller(content, ServerAddCommandsWithStartCmdOptions, func(args []string) ([]string, error) {
+			return []string{
+				"rootCmd",
+				"app.DefaultNodeHome",
+				"newApp",
+				"appExport",
+				`server.StartCmdOptions{
+				AddFlags: func(cmd *cobra.Command) {
+					abciserver.AddFlags(cmd)
+				},
+				StartCommandHandler: abciserver.StartHandler(),
+			})`,
+			}, nil
+		})
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
@@ -80,5 +94,5 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 // replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
 // Atfterwards, we let the same xast function replace the `AddCommandsWithStartCmdOptions` argument.
 func replaceLegacyAddCommands(content string) string {
-	return strings.Replace(content, "AddCommands(", ServerAddCommandsWithStartCmdOptions+"(", 1)
+	return strings.Replace(content, "server.AddCommands(", ServerAddCommandsWithStartCmdOptions+"(", 1)
 }
