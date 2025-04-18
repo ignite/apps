@@ -3,6 +3,8 @@
 ## Unreleased
 
 * [#112](https://github.com/ignite/apps/pull/112) Use default command instead cobra commands.
+* []() Upgrade Rollkit to `v1.x` and use [`go-execution-abci`](https://github.com/rollkit/go-execution-abci) instead of [`cosmos-sdk-starter`](https://github.com/rollkit/cosmos-sdk-starter).
+  * Note, if you already have rollkit installed, you need to redo the wiring manually.
 
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.1)
 

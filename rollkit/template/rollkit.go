@@ -41,8 +41,12 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 			return err
 		}
 
-		if strings.Contains(f.String(), "rollserv.StartHandler[servertypes.Application]") {
-			return errors.New("rollkit is already installed")
+		if strings.Contains(f.String(), RollkitV0XStartHandler) {
+			return errors.New("rollkit v0.x is already installed. Please remove it before installing rollkit v1.x")
+		}
+
+		if strings.Contains(f.String(), RolltkitV1XStartHandler) {
+			return errors.New("rollkit is already installed.")
 		}
 
 		if version.LT(cosmosver.StargateFiftyVersion) {
@@ -51,41 +55,30 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("rollserv", "github.com/rollkit/cosmos-sdk-starter/server"),
-			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/config"),
+			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
 		}
 
-		// TODO(@julienrbrt) eventually use ast for simply replacing AddCommands or AddCommandsWithStartCmdOptions
-		const (
-			defaultv050ServerOptions       = "server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)"
-			secondv050DefaultServerOptions = `server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
-				AddFlags: func(startCmd *cobra.Command) {
-					addModuleInitFlags(startCmd)
-				},
-			})`
-			thirdv050DefaultServerOptions = "server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{})"
+		// replace potential legacy boilerplate present in an ignite v28 chain.
+		content = replaceLegacyAddCommands(content)
 
-			rollkitServerOptions = `server.AddCommandsWithStartCmdOptions(
-				rootCmd,
-				app.DefaultNodeHome,
-				newApp, appExport,
-				server.StartCmdOptions{
-					AddFlags: func(cmd *cobra.Command) {
-						rollconf.AddFlags(cmd)
-						addModuleInitFlags(cmd)
-					},
-					StartCommandHandler: rollserv.StartHandler[servertypes.Application],
-				})`
-		)
+		// TODO(@julienrbrt): Requires xast to be able to modify function arguments.
+		// modifiers := []xast.Call{
+		// }
 
-		// try all 3 possible default server options
-		content = strings.ReplaceAll(content, defaultv050ServerOptions, rollkitServerOptions)
-		content = strings.ReplaceAll(content, secondv050DefaultServerOptions, rollkitServerOptions)
-		content = strings.ReplaceAll(content, thirdv050DefaultServerOptions, rollkitServerOptions)
+		// content, err = xast.ModifyFunction(content, ServerAddCommandsWithStartCmdOptions, modifiers...)
+		// if err != nil {
+		// 	return err
+		// }
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
+}
+
+// replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
+// Atfterwards, we let the same xast function replace the `AddCommandsWithStartCmdOptions` argument.
+func replaceLegacyAddCommands(content string) string {
+	return strings.Replace(content, "AddCommands(", ServerAddCommandsWithStartCmdOptions+"(", 1)
 }
