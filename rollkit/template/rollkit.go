@@ -1,6 +1,8 @@
 package template
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/gomodule"
 	"github.com/ignite/cli/v28/ignite/pkg/xast"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -27,17 +30,16 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, err
 	}
 
-	g.RunFn(commandsModify(chain.AppPath(), binaryName, chain.Version))
+	appPath := chain.AppPath()
+
+	if err := updateDependencies(appPath); err != nil {
+		return nil, fmt.Errorf("failed to update go.mod: %w", err)
+	}
+
+	g.RunFn(commandsModify(appPath, binaryName, chain.Version))
 
 	return g, nil
 }
-
-const (
-	ServerAddCommandsWithStartCmdOptions = "server.AddCommandsWithStartCmdOptions"
-
-	RollkitV0XStartHandler = "rollserv.StartHandler"
-	RollkitV1XStartHandler = "abciserver.StartHandler"
-)
 
 // commandsModify modifies the application start to use rollkit.
 func commandsModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
@@ -93,8 +95,26 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 
 // updateDependencies makes sure the correct dependencies are added to the go.mod files.
 // go-execution-abci expects rollkit v1.0 to be used.
-func updateDependencies() error {
-	return nil
+func updateDependencies(appPath string) error {
+	gomod, err := gomodule.ParseAt(appPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse go.mod: %w", err)
+	}
+
+	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
+	gomod.AddNewRequire(RollkitPackage, RollkitVersion, true)
+
+	// temporarily add a replace for rollkit
+	// it can be removed once we have a tag
+	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
+
+	// save go.mod
+	data, err := gomod.Format()
+	if err != nil {
+		return fmt.Errorf("failed to format go.mod: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
 }
 
 // replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
