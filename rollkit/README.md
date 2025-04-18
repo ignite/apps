@@ -4,7 +4,7 @@ This Ignite App is aimed to extend [Ignite CLI](https://github.com/ignite/cli) a
 
 ## Prerequisites
 
-* Ignite CLI version v28.4.0 or greater.
+* Ignite CLI version v28.9.0 or greater.
 * Knowledge of blockchain development (Cosmos SDK).
 
 ## Usage

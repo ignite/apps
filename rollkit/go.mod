@@ -2,6 +2,8 @@ module github.com/ignite/apps/rollkit
 
 go 1.23.0
 
+replace github.com/ignite/cli/v28 => ../../cli
+
 require (
 	cosmossdk.io/math v1.5.0
 	github.com/cometbft/cometbft v0.38.17

@@ -1,6 +1,8 @@
 package template
 
 import (
+	"fmt"
+	"os"
 	"path/filepath"
 	"strings"
 
@@ -9,6 +11,7 @@ import (
 
 	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v28/ignite/pkg/gomodule"
 	"github.com/ignite/cli/v28/ignite/pkg/xast"
 	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v28/ignite/services/chain"
@@ -27,7 +30,13 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, err
 	}
 
-	g.RunFn(commandsModify(chain.AppPath(), binaryName, chain.Version))
+	appPath := chain.AppPath()
+
+	if err := updateDependencies(appPath); err != nil {
+		return nil, fmt.Errorf("failed to update go.mod: %w", err)
+	}
+
+	g.RunFn(commandsModify(appPath, binaryName, chain.Version))
 
 	return g, nil
 }
@@ -41,8 +50,12 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 			return err
 		}
 
-		if strings.Contains(f.String(), "rollserv.StartHandler[servertypes.Application]") {
-			return errors.New("rollkit is already installed")
+		if strings.Contains(f.String(), RollkitV0XStartHandler) {
+			return errors.New("rollkit v0.x is already installed. Please remove it before installing rollkit v1.x")
+		}
+
+		if strings.Contains(f.String(), RollkitV1XStartHandler) {
+			return errors.New("rollkit is already installed.")
 		}
 
 		if version.LT(cosmosver.StargateFiftyVersion) {
@@ -51,41 +64,61 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("rollserv", "github.com/rollkit/cosmos-sdk-starter/server"),
-			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/config"),
+			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"), // TODO(@julienrbrt): Download a specific version via go get beforehand
 		)
 		if err != nil {
 			return err
 		}
 
-		// TODO(@julienrbrt) eventually use ast for simply replacing AddCommands or AddCommandsWithStartCmdOptions
-		const (
-			defaultv050ServerOptions       = "server.AddCommands(rootCmd, app.DefaultNodeHome, newApp, appExport, addModuleInitFlags)"
-			secondv050DefaultServerOptions = `server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{
-				AddFlags: func(startCmd *cobra.Command) {
-					addModuleInitFlags(startCmd)
+		// replace potential legacy boilerplate present in an ignite v28 chain.
+		content = replaceLegacyAddCommands(content)
+
+		// modify the add commands arguments using xast.
+		content, err = xast.ModifyCaller(content, ServerAddCommandsWithStartCmdOptions, func(args []string) ([]string, error) {
+			return []string{
+				"rootCmd",
+				"app.DefaultNodeHome",
+				"newApp",
+				"appExport",
+				`server.StartCmdOptions{
+				AddFlags: func(cmd *cobra.Command) {
+					abciserver.AddFlags(cmd)
 				},
-			})`
-			thirdv050DefaultServerOptions = "server.AddCommandsWithStartCmdOptions(rootCmd, app.DefaultNodeHome, newApp, appExport, server.StartCmdOptions{})"
-
-			rollkitServerOptions = `server.AddCommandsWithStartCmdOptions(
-				rootCmd,
-				app.DefaultNodeHome,
-				newApp, appExport,
-				server.StartCmdOptions{
-					AddFlags: func(cmd *cobra.Command) {
-						rollconf.AddFlags(cmd)
-						addModuleInitFlags(cmd)
-					},
-					StartCommandHandler: rollserv.StartHandler[servertypes.Application],
-				})`
-		)
-
-		// try all 3 possible default server options
-		content = strings.ReplaceAll(content, defaultv050ServerOptions, rollkitServerOptions)
-		content = strings.ReplaceAll(content, secondv050DefaultServerOptions, rollkitServerOptions)
-		content = strings.ReplaceAll(content, thirdv050DefaultServerOptions, rollkitServerOptions)
+				StartCommandHandler: abciserver.StartHandler(),
+			}`,
+			}, nil
+		})
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
+}
+
+// updateDependencies makes sure the correct dependencies are added to the go.mod files.
+// go-execution-abci expects rollkit v1.0 to be used.
+func updateDependencies(appPath string) error {
+	gomod, err := gomodule.ParseAt(appPath)
+	if err != nil {
+		return fmt.Errorf("failed to parse go.mod: %w", err)
+	}
+
+	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
+	gomod.AddNewRequire(RollkitPackage, RollkitVersion, true)
+
+	// temporarily add a replace for rollkit
+	// it can be removed once we have a tag
+	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
+
+	// save go.mod
+	data, err := gomod.Format()
+	if err != nil {
+		return fmt.Errorf("failed to format go.mod: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
+}
+
+// replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
+// Atfterwards, we let the same xast function replace the `AddCommandsWithStartCmdOptions` argument.
+func replaceLegacyAddCommands(content string) string {
+	return strings.Replace(content, "server.AddCommands(", ServerAddCommandsWithStartCmdOptions+"(", 1)
 }
