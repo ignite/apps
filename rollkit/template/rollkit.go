@@ -45,7 +45,7 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 			return errors.New("rollkit v0.x is already installed. Please remove it before installing rollkit v1.x")
 		}
 
-		if strings.Contains(f.String(), RolltkitV1XStartHandler) {
+		if strings.Contains(f.String(), RollkitV1XStartHandler) {
 			return errors.New("rollkit is already installed.")
 		}
 
@@ -55,7 +55,7 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
+			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"), // TODO(@julienrbrt): Download a specific version via go get beforehand
 		)
 		if err != nil {
 			return err

@@ -3,9 +3,9 @@ package template
 const (
 	ServerAddCommandsWithStartCmdOptions = "AddCommandsWithStartCmdOptions"
 
-	RollkitV0XStartHandler  = "rollserv.StartHandler"
-	RolltkitV1XStartHandler = "abciserver.StartHandler"
-	RollkitServerOptions    = `server.AddCommandsWithStartCmdOptions(
+	RollkitV0XStartHandler = "rollserv.StartHandler"
+	RollkitV1XStartHandler = "abciserver.StartHandler"
+	RollkitServerOptions   = `server.AddCommandsWithStartCmdOptions(
 			rootCmd,
 			app.DefaultNodeHome,
 			newApp, appExport,
