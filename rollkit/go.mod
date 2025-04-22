@@ -2,8 +2,6 @@ module github.com/ignite/apps/rollkit
 
 go 1.23.0
 
-replace github.com/ignite/cli/v28 => ../../cli
-
 require (
 	cosmossdk.io/math v1.5.0
 	github.com/cometbft/cometbft v0.38.17
@@ -11,7 +9,7 @@ require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.19
 	github.com/hashicorp/go-plugin v1.6.1
-	github.com/ignite/cli/v28 v28.8.2
+	github.com/ignite/cli/v28 v28.9.0
 	github.com/stretchr/testify v1.10.0
 )
 
