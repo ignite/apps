@@ -18,6 +18,21 @@ ignite chain build
 ignite rollkit init
 ```
 
+Then start `local-da` or use Celestia mainnet as data availability layer.
+
+```sh
+# go install github.com/rollkit/rollkit/da/cmd/local-da@latest
+git clone github.com/rollkit/rollkit --depth 1
+cd rollkit/da/cmd/local-da
+go run .
+```
+
+Finally, run the rollup node:
+
+```sh
+gmd start --rollkit.node.aggregator
+```
+
 Learn more about Rollkit and Ignite in their respective documentation:
 
 * <https://docs.ignite.com>

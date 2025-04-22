@@ -36,13 +36,14 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, fmt.Errorf("failed to update go.mod: %w", err)
 	}
 
-	g.RunFn(commandsModify(appPath, binaryName, chain.Version))
+	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
+	g.RunFn(commandsGenesisModify(appPath, binaryName))
 
 	return g, nil
 }
 
-// commandsModify modifies the application start to use rollkit.
-func commandsModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
+// commandsStartModify modifies the application start to use rollkit.
+func commandsStartModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
 	return func(r *genny.Runner) error {
 		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
 		f, err := r.Disk.Find(cmdPath)
@@ -64,7 +65,7 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"), // TODO(@julienrbrt): Download a specific version via go get beforehand
+			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
@@ -93,6 +94,40 @@ func commandsModify(appPath, binaryName string, version cosmosver.Version) genny
 	}
 }
 
+// commandsGenesisModify modifies the application genesis command to use rollkit.
+func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
+	return func(r *genny.Runner) error {
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		f, err := r.Disk.Find(cmdPath)
+		if err != nil {
+			return err
+		}
+
+		content, err := xast.AppendImports(
+			f.String(),
+			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
+		)
+		if err != nil {
+			return err
+		}
+
+		// TODO add the following boilerplate
+
+		// update genesis command to use rollkit (only useful when not using `ignite rollkit init``)
+		// genesisCmd := genutilcli.InitCmd(basicManager, app.DefaultNodeHome)
+		// rollconf.AddFlags(genesisCmd)
+		// genesisCmdRunE := genesisCmd.RunE
+		// genesisCmd.RunE = func(cmd *cobra.Command, args []string) error {
+		// 	if err := genesisCmdRunE(cmd, args); err != nil {
+		// 		return err
+		// 	}
+		// 	return abciserver.InitRunE(cmd, args)
+		// }
+
+		return r.File(genny.NewFileS(cmdPath, content))
+	}
+}
+
 // updateDependencies makes sure the correct dependencies are added to the go.mod files.
 // go-execution-abci expects rollkit v1.0 to be used.
 func updateDependencies(appPath string) error {
@@ -102,11 +137,12 @@ func updateDependencies(appPath string) error {
 	}
 
 	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
-	gomod.AddNewRequire(RollkitPackage, RollkitVersion, true)
+	gomod.AddNewRequire(RollkitPackage, RollkitVersion, false)
 
 	// temporarily add a replace for rollkit
 	// it can be removed once we have a tag
 	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
+	gomod.AddReplace(GoExecPackage, "", GoExecPackage, RollkitVersion)
 
 	// save go.mod
 	data, err := gomod.Format()
