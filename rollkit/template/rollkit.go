@@ -106,23 +106,39 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 		content, err := xast.AppendImports(
 			f.String(),
 			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
+			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
 		}
 
-		// TODO add the following boilerplate
+		// use ast to modify the function that initializes genesisCmd
+		content, err = xast.ModifyFunction(content, "initRootCmd",
+			xast.AppendFuncAtLine(`
+		genesisCmd := genutilcli.InitCmd(basicManager, app.DefaultNodeHome)
+		rollconf.AddFlags(genesisCmd)
+		genesisCmdRunE := genesisCmd.RunE
+		genesisCmd.RunE = func(cmd *cobra.Command, args []string) error {
+		    if err := genesisCmdRunE(cmd, args); err != nil {
+		        return err
+		    }
+		    return abciserver.InitRunE(cmd, args)
+		}
+		        `,
+				1),
+		)
+		if err != nil {
+			return err
+		}
 
-		// update genesis command to use rollkit (only useful when not using `ignite rollkit init``)
-		// genesisCmd := genutilcli.InitCmd(basicManager, app.DefaultNodeHome)
-		// rollconf.AddFlags(genesisCmd)
-		// genesisCmdRunE := genesisCmd.RunE
-		// genesisCmd.RunE = func(cmd *cobra.Command, args []string) error {
-		// 	if err := genesisCmdRunE(cmd, args); err != nil {
-		// 		return err
-		// 	}
-		// 	return abciserver.InitRunE(cmd, args)
-		// }
+		// modify the add commands arguments using xast.
+		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
+			if strings.Contains(args[0], "InitCmd") {
+				args[0] = "genesisCmd"
+			}
+
+			return args, nil
+		})
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
