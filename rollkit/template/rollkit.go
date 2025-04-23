@@ -125,7 +125,7 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 		    return abciserver.InitRunE(cmd, args)
 		}
 		        `,
-				1),
+				0),
 		)
 		if err != nil {
 			return err
@@ -158,7 +158,7 @@ func updateDependencies(appPath string) error {
 	// temporarily add a replace for rollkit
 	// it can be removed once we have a tag
 	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
-	gomod.AddReplace(GoExecPackage, "", GoExecPackage, RollkitVersion)
+	gomod.AddReplace(GoExecPackage, "", GoExecPackage, GoExecVersion)
 
 	// save go.mod
 	data, err := gomod.Format()
