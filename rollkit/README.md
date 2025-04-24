@@ -12,7 +12,7 @@ This Ignite App is aimed to extend [Ignite CLI](https://github.com/ignite/cli) a
 ```sh
 ignite s chain gm --address-prefix gm --minimal
 cd gm
-ignite app install -g github.com/ignite/apps/rollkit@rollkit/v0.2.1
+ignite app install -g github.com/ignite/apps/rollkit@latest
 ignite rollkit add
 ignite chain build
 ignite rollkit init
