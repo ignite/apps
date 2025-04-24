@@ -13,10 +13,10 @@
     }
   ],
   "repositoryUrl": "https://github.com/lxgr-linux/ignite-app-cs-client",
-  "documentationUrl": "https://github.com/lxgr-linux/ignite-app-cs-client/blob/README.md",
+  "documentationUrl": "https://github.com/lxgr-linux/ignite-app-cs-client/blob/master/README.md",
   "license": {
     "name": "MIT",
-    "url": "https://github.com/lxgr-linux/ignite-app-cs-client/blob/main/LICENSE"
+    "url": "https://github.com/lxgr-linux/ignite-app-cs-client/blob/master/LICENSE"
   },
   "donations": {
     "cryptoAddresses": {
