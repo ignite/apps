@@ -1,7 +1,6 @@
 package template
 
 import (
-	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -33,7 +32,7 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	appPath := chain.AppPath()
 
 	if err := updateDependencies(appPath); err != nil {
-		return nil, fmt.Errorf("failed to update go.mod: %w", err)
+		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
 	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
@@ -149,7 +148,7 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 func updateDependencies(appPath string) error {
 	gomod, err := gomodule.ParseAt(appPath)
 	if err != nil {
-		return fmt.Errorf("failed to parse go.mod: %w", err)
+		return errors.Errorf("failed to parse go.mod: %w", err)
 	}
 
 	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
@@ -163,7 +162,7 @@ func updateDependencies(appPath string) error {
 	// save go.mod
 	data, err := gomod.Format()
 	if err != nil {
-		return fmt.Errorf("failed to format go.mod: %w", err)
+		return errors.Errorf("failed to format go.mod: %w", err)
 	}
 
 	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
