@@ -10,11 +10,11 @@ This Ignite App is aimed to extend [Ignite CLI](https://github.com/ignite/cli) a
 ## Usage
 
 ```sh
-ignite s chain gm --address-prefix gm --minimal
+ignite s chain gm --address-prefix gm --minimal --no-module
 cd gm
 ignite app install -g github.com/ignite/apps/rollkit@latest
 ignite rollkit add
-ignite chain build
+ignite chain build --skip-proto
 ignite rollkit init
 ```
 
