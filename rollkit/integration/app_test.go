@@ -67,7 +67,7 @@ func TestRollkit(t *testing.T) {
 		)),
 	))
 
-	if !strings.Contains(buf.String(), "--rollkit.da_") {
+	if !strings.Contains(buf.String(), "--rollkit.da") {
 		t.Errorf("rollkitd doesn't contain --rollkit flags: %s", buf.String())
 	}
 

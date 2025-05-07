@@ -19,9 +19,9 @@ func GetCommands() []*plugin.Command {
 				},
 				{
 					Use:     "add <chain> [endpoint]",
+					Aliases: []string{"to", "init"},
 					Short:   "Add a chain to interact with",
 					Long:    "Add a chain to interact with. If a chain and endpoint are provided, the chain will be added without prompting",
-					Aliases: []string{"init"},
 				},
 				{
 					Use:     "remove <chain>",

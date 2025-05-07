@@ -1,5 +1,8 @@
 version: 1
 apps:
+  network:
+    description: Launch new Cosmos blockchains by interacting with the Ignite Chain to coordinate with validators
+    path: ./spaceship
   spaceship:
     description: Deploy your chain into a remote server in minutes
     path: ./spaceship
