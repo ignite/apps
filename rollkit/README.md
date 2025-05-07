@@ -4,18 +4,33 @@ This Ignite App is aimed to extend [Ignite CLI](https://github.com/ignite/cli) a
 
 ## Prerequisites
 
-* Ignite CLI version v28.4.0 or greater.
+* Ignite CLI version v28.9.0 or greater.
 * Knowledge of blockchain development (Cosmos SDK).
 
 ## Usage
 
 ```sh
-ignite s chain gm --address-prefix gm --minimal
+ignite s chain gm --address-prefix gm --minimal --no-module
 cd gm
-ignite app install -g github.com/ignite/apps/rollkit@rollkit/v0.2.1
+ignite app install -g github.com/ignite/apps/rollkit@latest
 ignite rollkit add
-ignite chain build
+ignite chain build --skip-proto
 ignite rollkit init
+```
+
+Then start `local-da` or use Celestia mainnet as data availability layer.
+
+```sh
+# go install github.com/rollkit/rollkit/da/cmd/local-da@latest
+git clone github.com/rollkit/rollkit --depth 1
+cd rollkit/da/cmd/local-da
+go run .
+```
+
+Finally, run the rollup node:
+
+```sh
+gmd start --rollkit.node.aggregator
 ```
 
 Learn more about Rollkit and Ignite in their respective documentation:

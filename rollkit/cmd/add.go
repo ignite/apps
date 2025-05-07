@@ -59,11 +59,13 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 // finish finalize the scaffolded code (formating, dependencies).
 func finish(ctx context.Context, session *cliui.Session, path string) error {
+	session.StopSpinner()
 	session.StartSpinner("go mod tidy...")
 	if err := gocmd.ModTidy(ctx, path); err != nil {
 		return err
 	}
 
+	session.StopSpinner()
 	session.StartSpinner("Formatting code...")
 	if err := gocmd.Fmt(ctx, path); err != nil {
 		return err
