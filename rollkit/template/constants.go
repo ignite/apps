@@ -9,8 +9,8 @@ const (
 
 const (
 	GoExecPackage = "github.com/rollkit/go-execution-abci"
-	GoExecVersion = "v0.2.1-0.20250424150026-b82d5e904bb8" // TODO(@julienrbrt): use tag when available
+	GoExecVersion = "v0.14.2-0.20250506155912-dccebc0cab3e" // TODO(@julienrbrt): use tag when available
 
 	RollkitPackage = "github.com/rollkit/rollkit"
-	RollkitVersion = "v0.14.2-0.20250423102443-62dd136ae02e" // TODO(@julienrbrt): use tag when available
+	RollkitVersion = "v0.14.2-0.20250506085607-c574d7c79224" // TODO(@julienrbrt): use tag when available
 )
