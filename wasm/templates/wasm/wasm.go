@@ -137,11 +137,9 @@ ScopedWasmKeeper capabilitykeeper.ScopedKeeper
 
 		content, err = xast.ModifyFunction(content,
 			"New",
-			xast.NewFuncReturn(
-				"app",
-				"app.WasmKeeper.InitializePinnedCodes(app.NewUncachedContext(true, tmproto.Header{}))",
-			),
-		)
+			xast.AppendFuncCode(`if err := app.WasmKeeper.InitializePinnedCodes(app.NewUncachedContext(true, tmproto.Header{})); err != nil {
+		panic(err)
+	}`))
 		if err != nil {
 			return err
 		}
