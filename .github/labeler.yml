@@ -3,6 +3,15 @@
   - "!.github/labels.json"
   - .github/**/*
 
+"app:appregistry":
+  - appregistry/**/*
+
+"app:cca":
+  - cca/**/*
+
+"app:connect":
+  - connect/**/*
+
 "app:consumer":
   - consumer/**/*
 
@@ -12,11 +21,20 @@
 "app:explorer":
   - explorer/**/*
 
+"app:fee-abstraction":
+  - fee-abstraction/**/*
+
 "app:hermes":
   - hermes/**/*
 
-"app:appregistry":
-  - appregistry/**/*
+"app:network":
+  - network/**/*
+
+"app:rollkit":
+  - rollkit/**/*
+
+"app:spaceship":
+  - spaceship/**/*
 
 "app:wasm":
   - wasm/**/*
