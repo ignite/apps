@@ -81,13 +81,20 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 				"newApp",
 				"appExport",
 				`server.StartCmdOptions{
-				AddFlags: func(cmd *cobra.Command) {
-					abciserver.AddFlags(cmd)
-				},
+				AddFlags: addModuleInitFlags,
 				StartCommandHandler: abciserver.StartHandler(),
 			}`,
 			}, nil
 		})
+
+		// add the start command flags
+		content, err = xast.ModifyFunction(content,
+			"addModuleInitFlags",
+			xast.AppendFuncCode("abciserver.AddFlags(startCmd)"),
+		)
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
