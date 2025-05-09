@@ -43,14 +43,20 @@ func hasWasm(appPath string) bool {
 	if _, err := os.Stat(filepath.Join(appPath, "app/wasm.go")); err == nil {
 		return true
 	}
+
 	return false
 }
 
-// assertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by Ignite CLI.
+// assertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by the Wasm App.
 func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
+	if v.Semantic.GTE(semver.MustParse("0.53.0")) { // TODO: https://github.com/ignite/apps/issues/195
+		return errors.Errorf("Cosmos SDK version %s is not supported yet.", v)
+	}
+
 	if v.LT(cosmosver.StargateFiftyVersion) {
 		return errors.Errorf(errOldCosmosSDKVersionStr, v)
 	}
+
 	return nil
 }
 
