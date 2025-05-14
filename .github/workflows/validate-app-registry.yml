@@ -17,7 +17,7 @@ jobs:
       - name: Get list of added YAML files
         id: yaml_files
         run: |
-          files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^A' | awk '{print $2}' | grep -E '^your/folder/path/.*\.ya?ml$' || true)
+          files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^A' | awk '{print $2}' | grep -E '^_registry/.*\.ya?ml$' || true)
           echo "files=$files" >> "$GITHUB_OUTPUT"
 
       - name: Print found files
