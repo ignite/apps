@@ -12,13 +12,13 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2  # So we can diff with the base branch
+          fetch-depth: 2
 
       - name: Get list of added app files
         id: json_files
         run: |
           files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^A' | awk '{print $2}' | grep -E '^_registry/.*\.json$' || true)
-          echo "files=$files" >> "$GITHUB_OUTPUT"
+          printf "files<<EOF\n%s\nEOF\n" "$files" >> "$GITHUB_OUTPUT"
 
       - name: Print found files
         run: |
@@ -28,7 +28,7 @@ jobs:
       - name: Run Go command on each new file
         if: steps.json_files.outputs.files != ''
         run: |
-          for file in ${{ steps.json_files.outputs.files }}; do
+          echo "${{ steps.json_files.outputs.files }}" | while read file; do
             echo "Running test on $file"
             go run test/main.go "$file"
           done
