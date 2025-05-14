@@ -12,7 +12,12 @@ jobs:
       - name: Checkout PR code
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
 
       - name: Get list of added app files
         id: json_files
