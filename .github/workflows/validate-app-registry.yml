@@ -1,11 +1,11 @@
-name: Check new app YAML files
+name: Check new app registry files
 
 on:
   pull_request:
     types: [ opened, synchronize ]
 
 jobs:
-  check-yaml:
+  check-app-registry:
     runs-on: ubuntu-latest
 
     steps:
@@ -14,21 +14,21 @@ jobs:
         with:
           fetch-depth: 2  # So we can diff with the base branch
 
-      - name: Get list of added YAML files
-        id: yaml_files
+      - name: Get list of added app files
+        id: json_files
         run: |
-          files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^A' | awk '{print $2}' | grep -E '^_registry/.*\.ya?ml$' || true)
+          files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep '^A' | awk '{print $2}' | grep -E '^_registry/.*\.json$' || true)
           echo "files=$files" >> "$GITHUB_OUTPUT"
 
       - name: Print found files
         run: |
           echo "Found files:"
-          echo "${{ steps.yaml_files.outputs.files }}"
+          echo "${{ steps.json_files.outputs.files }}"
 
       - name: Run Go command on each new file
-        if: steps.yaml_files.outputs.files != ''
+        if: steps.json_files.outputs.files != ''
         run: |
-          for file in ${{ steps.yaml_files.outputs.files }}; do
+          for file in ${{ steps.json_files.outputs.files }}; do
             echo "Running test on $file"
             go run test/main.go "$file"
           done
