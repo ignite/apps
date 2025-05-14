@@ -1,23 +1,30 @@
 package registry
 
 import (
-	"github.com/Masterminds/semver"
-	"github.com/cosmos/cosmos-sdk/types/bech32"
-	"github.com/iancoleman/strcase"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"encoding/json"
+	"io"
 	"net/http"
 	"net/mail"
 	"net/url"
 	"strings"
+
+	"github.com/Masterminds/semver"
+	"github.com/cosmos/cosmos-sdk/types/bech32"
+	"github.com/iancoleman/strcase"
+	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
 type (
-	URL     string
-	URLs    []URL
-	Version string
-	Field   string
-	Address string
-	Email   string
+	Apps         []App
+	URL          string
+	URLs         []URL
+	Version      string
+	Field        string
+	Fields       []Field
+	Address      string
+	Email        string
+	Authors      []Author
+	Dependencies map[string]Version
 
 	Author struct {
 		Name    Field `json:"name,omitempty"`
@@ -31,7 +38,7 @@ type (
 	}
 
 	SocialMedia struct {
-		X        URL    `json:"x,omitempty"`
+		X        string `json:"x,omitempty"`
 		Telegram string `json:"telegram,omitempty"`
 		Discord  string `json:"discord,omitempty"`
 		Reddit   string `json:"reddit,omitempty"`
@@ -49,67 +56,81 @@ type (
 	}
 
 	App struct {
-		Name               string            `json:"appName,omitempty"`
-		Slug               string            `json:"slug,omitempty"`
-		Description        string            `json:"appDescription,omitempty"`
-		Ignite             Version           `json:"ignite,omitempty"`
-		Dependencies       map[string]string `json:"dependencies,omitempty"`
-		CosmosSDK          Version           `json:"cosmosSDK,omitempty"`
-		Authors            []Author          `json:"authors,omitempty"`
-		RepositoryURL      URL               `json:"repositoryUrl,omitempty"`
-		DocumentationURL   URL               `json:"documentationUrl,omitempty"`
-		License            License           `json:"license,omitempty"`
-		Keywords           []string          `json:"keywords,omitempty"`
-		SupportedPlatforms []string          `json:"supportedPlatforms,omitempty"`
-		SocialMedia        SocialMedia       `json:"socialMedia,omitempty"`
-		Donations          Donations         `json:"donations,omitempty"`
-		Icon               URL               `json:"icon,omitempty"`
-		Cover              URL               `json:"cover,omitempty"`
+		Name               Field        `json:"appName,omitempty"`
+		Slug               Field        `json:"slug,omitempty"`
+		Description        Field        `json:"appDescription,omitempty"`
+		Ignite             Version      `json:"ignite,omitempty"`
+		Dependencies       Dependencies `json:"dependencies,omitempty"`
+		CosmosSDK          Version      `json:"cosmosSDK,omitempty"`
+		Authors            Authors      `json:"authors,omitempty"`
+		RepositoryURL      URL          `json:"repositoryUrl,omitempty"`
+		DocumentationURL   URL          `json:"documentationUrl,omitempty"`
+		License            License      `json:"license,omitempty"`
+		Keywords           []string     `json:"keywords,omitempty"`
+		SupportedPlatforms []string     `json:"supportedPlatforms,omitempty"`
+		SocialMedia        SocialMedia  `json:"socialMedia,omitempty"`
+		Donations          Donations    `json:"donations,omitempty"`
+		Icon               URL          `json:"icon,omitempty"`
+		Cover              URL          `json:"cover,omitempty"`
 	}
 )
 
 type (
+	// FieldCase represents different cases for field validation
 	FieldCase int
 
+	// ValidateOption contains validation options for fields
 	ValidateOption struct {
 		required  bool
 		fieldCase FieldCase
 		minLength int
 	}
 
+	// ValidateOptions is a function type that configures validation options
 	ValidateOptions func(o *ValidateOption)
 )
 
+const (
+	// CaseNoSensitive indicates no case sensitivity check
+	CaseNoSensitive FieldCase = iota
+	// CaseLowerCamel indicates lowercase camel case check
+	CaseLowerCamel
+	// CaseUpperCamel indicates uppercase camel case check
+	CaseUpperCamel
+	// CaseLower indicates lowercase check
+	CaseLower
+	// CaseUpper indicates uppercase check
+	CaseUpper
+	// CaseKebab indicates kebab case check
+	CaseKebab
+	// CaseSnake indicates snake case check
+	CaseSnake
+)
+
+// ValidateFieldCase returns a ValidateOptions that sets the field case validation
 func ValidateFieldCase(fieldCase FieldCase) ValidateOptions {
 	return func(f *ValidateOption) {
 		f.fieldCase = fieldCase
 	}
 }
 
+// ValidateRequired returns a ValidateOptions that marks a field as required
 func ValidateRequired() ValidateOptions {
 	return func(f *ValidateOption) {
 		f.required = true
 	}
 }
 
+// ValidationLength returns a ValidateOptions that sets minimum length requirement
 func ValidationLength(minLength int) ValidateOptions {
 	return func(f *ValidateOption) {
 		f.minLength = minLength
 	}
 }
 
-const (
-	NoCaseSensitive FieldCase = iota
-	IsLowerCamel
-	IsUpperCamel
-	IsLowerCase
-	IsUpperCase
-	IsKebabCase
-	IsSnakeCase
-)
-
-func (f Field) ValidateField(opts ...ValidateOptions) error {
-	o := ValidateOption{fieldCase: NoCaseSensitive}
+// Validate validates a Field according to the provided options
+func (f Field) Validate(opts ...ValidateOptions) error {
+	o := ValidateOption{fieldCase: CaseNoSensitive}
 	for _, opt := range opts {
 		opt(&o)
 	}
@@ -127,29 +148,29 @@ func (f Field) ValidateField(opts ...ValidateOptions) error {
 	}
 
 	switch o.fieldCase {
-	case NoCaseSensitive:
+	case CaseNoSensitive:
 		break
-	case IsLowerCamel:
+	case CaseLowerCamel:
 		if field != strcase.ToLowerCamel(field) {
 			return errors.Errorf("field %s must be in lower camel case", field)
 		}
-	case IsUpperCamel:
+	case CaseUpperCamel:
 		if field != strcase.ToCamel(field) {
 			return errors.Errorf("field %s must be in upper camel case", field)
 		}
-	case IsLowerCase:
+	case CaseLower:
 		if field != strings.ToLower(field) {
 			return errors.Errorf("field %s must be in lower case", field)
 		}
-	case IsUpperCase:
+	case CaseUpper:
 		if field != strings.ToUpper(field) {
 			return errors.Errorf("field %s must be in upper case", field)
 		}
-	case IsKebabCase:
+	case CaseKebab:
 		if field != strcase.ToKebab(field) {
 			return errors.Errorf("field %s must be in kebab case", field)
 		}
-	case IsSnakeCase:
+	case CaseSnake:
 		if field != strcase.ToSnake(field) {
 			return errors.Errorf("field %s must be in snake case", field)
 		}
@@ -158,6 +179,57 @@ func (f Field) ValidateField(opts ...ValidateOptions) error {
 	return nil
 }
 
+// Validate validates a slice of Fields according to the provided options
+func (f Fields) Validate(opts ...ValidateOptions) error {
+	for _, field := range f {
+		if err := field.Validate(opts...); err != nil {
+			return errors.Wrapf(err, "invalid field %s", field)
+		}
+	}
+	return nil
+}
+
+// Validate validates Author fields
+func (a Author) Validate() error {
+	if a.Name != "" {
+		if err := a.Name.Validate(ValidateRequired()); err != nil {
+			return errors.Wrapf(err, "invalid author name %s", a.Name)
+		}
+	}
+	if a.Email != "" {
+		if err := a.Email.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid author email %s", a.Email)
+		}
+	}
+	if a.Website != "" {
+		if err := a.Website.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid author website %s", a.Website)
+		}
+	}
+	return nil
+}
+
+// Validate validates a slice of Authors
+func (a Authors) Validate() error {
+	for _, author := range a {
+		if err := author.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid author %s", author.Name)
+		}
+	}
+	return nil
+}
+
+// Validate validates Dependencies
+func (d Dependencies) Validate() error {
+	for name, dep := range d {
+		if err := dep.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid dependency %s", name)
+		}
+	}
+	return nil
+}
+
+// Validate validates Version format
 func (v Version) Validate() error {
 	_, err := semver.NewConstraint(string(v))
 	if err != nil {
@@ -166,6 +238,7 @@ func (v Version) Validate() error {
 	return nil
 }
 
+// Validate validates Email format
 func (e Email) Validate() error {
 	if e == "" {
 		return errors.Errorf("email must be defined")
@@ -180,6 +253,7 @@ func (e Email) Validate() error {
 	return nil
 }
 
+// Verify checks if the provided version satisfies the version constraint
 func (v Version) Verify(version string) error {
 	if version == "" {
 		return errors.Errorf("version must be defined")
@@ -199,6 +273,7 @@ func (v Version) Verify(version string) error {
 	return nil
 }
 
+// Validate validates Address format
 func (a Address) Validate() error {
 	if a == "" {
 		return errors.Errorf("address must be defined")
@@ -210,6 +285,18 @@ func (a Address) Validate() error {
 	return nil
 }
 
+// Validate validates License fields
+func (l License) Validate() error {
+	if err := l.Name.Validate(ValidateRequired()); err != nil {
+		return errors.Wrapf(err, "invalid license name %s", l.Name)
+	}
+	if err := l.URL.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid license URL %s", l.URL)
+	}
+	return nil
+}
+
+// Validate validates URLs
 func (us URLs) Validate() error {
 	for _, u := range us {
 		if err := u.Validate(); err != nil {
@@ -219,6 +306,37 @@ func (us URLs) Validate() error {
 	return nil
 }
 
+// FindBySlug finds an App by its slug
+func (apps Apps) FindBySlug(slug string) (App, error) {
+	var appEntry App
+	for _, app := range apps {
+		if strings.EqualFold(string(app.Slug), slug) {
+			appEntry = app
+		}
+	}
+
+	if appEntry.Name == "" && appEntry.Slug == "" {
+		return appEntry, errors.Errorf("app slug %s not found", slug)
+	}
+	return appEntry, nil
+}
+
+// FindByName finds an App by its name
+func (apps Apps) FindByName(name string) (App, error) {
+	var appEntry App
+	for _, app := range apps {
+		if strings.EqualFold(string(app.Name), name) {
+			appEntry = app
+		}
+	}
+
+	if appEntry.Name == "" && appEntry.Slug == "" {
+		return appEntry, errors.Errorf("app name %s not found", name)
+	}
+	return appEntry, nil
+}
+
+// Validate validates URL format and accessibility
 func (u URL) Validate() error {
 	if u == "" {
 		return errors.Errorf("%s must be defined", u)
@@ -236,4 +354,108 @@ func (u URL) Validate() error {
 		return errors.Errorf("%s returned status code %d", u, resp.StatusCode)
 	}
 	return nil
+}
+
+// Validate validates App fields
+func (a App) Validate() error {
+	if err := a.Name.Validate(ValidateRequired(), ValidateFieldCase(CaseUpperCamel)); err != nil {
+		return errors.Wrapf(err, "invalid app name %s", a.Name)
+	}
+
+	if err := a.Slug.Validate(ValidateRequired(), ValidateFieldCase(CaseKebab)); err != nil {
+		return errors.Wrapf(err, "invalid app slug %s", a.Slug)
+	}
+
+	if err := a.Description.Validate(ValidateRequired(), ValidationLength(10)); err != nil {
+		return errors.Wrapf(err, "invalid app description %s", a.Description)
+	}
+
+	if err := a.Ignite.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid ignite version %s", a.Ignite)
+	}
+
+	if err := a.Dependencies.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid dependencies %s", a.Dependencies)
+	}
+
+	if err := a.CosmosSDK.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid cosmos sdk version %s", a.CosmosSDK)
+	}
+
+	if err := a.Authors.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid authors %s", a.Authors)
+	}
+
+	if err := a.RepositoryURL.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid repository url %s", a.RepositoryURL)
+	}
+
+	if err := a.DocumentationURL.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid documentation url %s", a.DocumentationURL)
+	}
+
+	if err := a.License.Validate(); err != nil {
+		return errors.Wrapf(err, "invalid license %s", a.License)
+	}
+
+	if len(a.Keywords) == 0 {
+		return errors.Errorf("unless one keyword must be defined")
+	}
+
+	if len(a.SupportedPlatforms) == 0 {
+		return errors.Errorf("unless one supportedPlatforms must be defined")
+	}
+
+	if a.SocialMedia.Website != "" {
+		if err := a.SocialMedia.Website.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid social media website %s", a.SocialMedia)
+		}
+	}
+
+	if a.Donations.CryptoAddresses.Cosmos != "" {
+		if err := a.Donations.CryptoAddresses.Cosmos.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid cosmos crypto address %s", a.Donations.CryptoAddresses.Cosmos)
+		}
+	}
+
+	if len(a.Donations.FiatDonationLinks) > 0 {
+		if err := a.Donations.FiatDonationLinks.Validate(); err != nil {
+			return errors.Wrap(err, "invalid fiat donation link")
+		}
+	}
+
+	if a.Icon != "" {
+		if err := a.Icon.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid icon url %s", a.Icon)
+		}
+	}
+
+	if a.Cover != "" {
+		if err := a.Cover.Validate(); err != nil {
+			return errors.Wrapf(err, "invalid cover url %s", a.Cover)
+		}
+	}
+
+	return nil
+}
+
+func (f Field) String() string {
+	return string(f)
+}
+
+func (u URL) String() string {
+	return string(u)
+}
+
+func AppFromFile(r io.Reader) (*App, error) {
+	body, err := io.ReadAll(r)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read file content")
+	}
+
+	var entry *App
+	if err := json.Unmarshal(body, &entry); err != nil {
+		return nil, errors.Wrap(err, "failed to unmarshal file")
+	}
+	return entry, nil
 }

@@ -28,6 +28,7 @@ so it's recommended to use the --github-token flag you want to use appregistry c
 	c.AddCommand(
 		NewListCmd(),
 		NewDetailsCmd(),
+		NewValidateCmd(),
 		NewInstallCmd(),
 	)
 

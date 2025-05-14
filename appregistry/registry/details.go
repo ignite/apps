@@ -50,18 +50,12 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		return nil, err
 	}
 
-	var appEntry App
-	for _, app := range apps {
-		if strings.EqualFold(app.Name, appName) {
-			appEntry = app
-		}
+	appEntry, err := apps.FindByName(appName)
+	if err != nil {
+		return nil, err
 	}
 
-	if appEntry.Name == "" {
-		return nil, errors.Errorf("app %s not found", appName)
-	}
-
-	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL)
+	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL.String())
 	if err != nil {
 		return nil, err
 	}
@@ -87,14 +81,19 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", name)
 		}
 
+		cliVersion, err := findCLIVersion(goMod)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", name)
+		}
+
 		appDetails = AppDetails{
 			Name:             name,
-			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL), info.Path),
-			DocumentationURL: appEntry.DocumentationURL,
+			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL.String()), info.Path),
+			DocumentationURL: appEntry.DocumentationURL.String(),
 			Description:      info.Description,
 			Path:             info.Path,
 			GoVersion:        goMod.Go.Version,
-			IgniteVersion:    findCLIVersion(goMod),
+			IgniteVersion:    cliVersion,
 		}
 	}
 
@@ -147,14 +146,14 @@ func validateRepoURL(repoURL string) (owner, name string, err error) {
 	return matches[2], matches[3], nil
 }
 
-func findCLIVersion(modFile *modfile.File) string {
+func findCLIVersion(modFile *modfile.File) (string, error) {
 	for _, require := range modFile.Require {
 		if strings.HasPrefix(require.Mod.Path, igniteCLIPackage) {
-			return require.Mod.Version
+			return require.Mod.Version, nil
 		}
 	}
 
-	return ""
+	return "", errors.Errorf("couldn't find %s version in go.mod", igniteCLIPackage)
 }
 
 // stripHTTPOrHTTPSFromURL strips http or https scheme from a URL.

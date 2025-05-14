@@ -2,9 +2,7 @@ package registry
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -32,13 +30,13 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 }
 
 // List list apps from the ignite app appregistry/registry.
-func (r *Querier) List(ctx context.Context) ([]App, error) {
+func (r *Querier) List(ctx context.Context) (Apps, error) {
 	appsFiles, err := r.client.GetDirectoryFiles(ctx, igniteGitHubOrg, igniteAppsRepo, registryDir)
 	if err != nil {
 		return nil, err
 	}
 
-	entries := make([]App, 0)
+	entries := make(Apps, 0)
 	for _, file := range appsFiles {
 		if !appFormatRegex.MatchString(strings.TrimPrefix(file, registryDir+"/")) {
 			continue
@@ -63,15 +61,5 @@ func (r *Querier) getRegistryEntry(fileName string) (*App, error) {
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read %s file content", fileName)
-	}
-
-	var entry *App
-	if err := json.Unmarshal(body, &entry); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal %s file", fileName)
-	}
-
-	return entry, nil
+	return AppFromFile(resp.Body)
 }

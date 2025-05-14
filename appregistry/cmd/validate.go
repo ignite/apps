@@ -1,10 +1,6 @@
 package cmd
 
 import (
-	"fmt"
-	"strconv"
-	"text/tabwriter"
-
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/spf13/cobra"
 
@@ -12,12 +8,12 @@ import (
 	"github.com/ignite/apps/appregistry/registry"
 )
 
-// NewValidateCmd creates a new validate command that validates the ignite application yaml.
+// NewValidateCmd creates a new validate command that validates the Ignite application json.
 func NewValidateCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "validate [app name]",
+		Use:     "validate [app file]",
 		Aliases: []string{"v"},
-		Short:   "Validate the ignite application yaml",
+		Short:   "Validate the ignite application json",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
@@ -28,34 +24,13 @@ func NewValidateCmd() *cobra.Command {
 			client := xgithub.NewClient(githubToken)
 			registryQuerier := registry.NewRegistryQuerier(client)
 
-			appDetails, err := registryQuerier.ValidateApp(cmd.Context(), args[0])
-			if err != nil {
+			if err := registryQuerier.ValidateAppDetails(cmd.Context(), args[0]); err != nil {
 				return err
 			}
 
 			session.StopSpinner()
 
-			w := &tabwriter.Writer{}
-			printItem := func(s string, v interface{}) {
-				fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
-			}
-			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
-
-			printItem("Name", appDetails.App.Name)
-			printItem("Description", appDetails.App.Description)
-			printItem("Stars", strconv.Itoa(appDetails.Stars))
-			printItem("Go version", appDetails.App.GoVersion)
-			printItem("Ignite version", appDetails.App.IgniteVersion)
-			printItem("Documentation", appDetails.App.DocumentationURL)
-			printItem("Repository", linkStyle.Render(appDetails.URL))
-
-			fmt.Fprintln(w, installationStyle.Render(fmt.Sprintf(
-				"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", appDetails.App.PackageURL)),
-			)))
-
-			w.Flush()
-
-			return nil
+			return session.Printf("🚀 valid %s file", args[0])
 		},
 	}
 }
