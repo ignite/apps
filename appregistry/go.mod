@@ -3,10 +3,13 @@ module github.com/ignite/apps/appregistry
 go 1.21.1
 
 require (
+	github.com/Masterminds/semver v1.5.0
 	github.com/charmbracelet/lipgloss v0.9.1
+	github.com/cosmos/cosmos-sdk v0.50.9
 	github.com/goccy/go-yaml v1.11.2
 	github.com/google/go-github/v56 v56.0.0
 	github.com/hashicorp/go-plugin v1.6.1
+	github.com/iancoleman/strcase v0.3.0
 	github.com/ignite/cli/v28 v28.8.2
 	github.com/muesli/termenv v0.15.2
 	github.com/spf13/cobra v1.8.1
@@ -73,7 +76,6 @@ require (
 	github.com/cosmos/btcutil v1.0.5 // indirect
 	github.com/cosmos/cosmos-db v1.0.2 // indirect
 	github.com/cosmos/cosmos-proto v1.0.0-beta.5 // indirect
-	github.com/cosmos/cosmos-sdk v0.50.9 // indirect
 	github.com/cosmos/go-bip39 v1.0.0 // indirect
 	github.com/cosmos/gogogateway v1.2.0 // indirect
 	github.com/cosmos/gogoproto v1.7.0 // indirect
@@ -154,7 +156,6 @@ require (
 	github.com/hashicorp/yamux v0.1.1 // indirect
 	github.com/hdevalence/ed25519consensus v0.1.0 // indirect
 	github.com/huandu/skiplist v1.2.0 // indirect
-	github.com/iancoleman/strcase v0.3.0 // indirect
 	github.com/ignite/ignite-files/nodetime v0.0.4 // indirect
 	github.com/ignite/ignite-files/protoc v0.0.1 // indirect
 	github.com/ignite/web v0.6.1 // indirect

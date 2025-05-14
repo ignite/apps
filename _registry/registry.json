@@ -39,9 +39,13 @@
   "donations": {
     "cryptoAddresses": {
       "cosmos": "cosmos1...",
-      "otherSupportedCryptos": "address"
+      "otherSupportedCryptos": {
+        "protocol": "address"
+      }
     },
-    "fiatDonationLinks": "URL to Patreon, Ko-fi, etc."
+    "fiatDonationLinks": [
+      "URL to Patreon, Ko-fi, etc."
+    ]
   },
   "icon": "https://URL.to/icon",
   "cover": "https://URL.to/cover"

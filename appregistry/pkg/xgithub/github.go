@@ -7,22 +7,24 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
-// Client is a wrapper around GitHub client.
-type Client struct {
-	GithubClient *github.Client
-}
+type (
+	// Client is a wrapper around a GitHub client.
+	Client struct {
+		GithubClient *github.Client
+	}
 
-type Options struct {
-	Branch string
-}
+	Options struct {
+		Branch string
+	}
+
+	Option func(*Options)
+)
 
 func (o *Options) toGithubOptions() *github.RepositoryContentGetOptions {
 	return &github.RepositoryContentGetOptions{
 		Ref: o.Branch,
 	}
 }
-
-type Option func(*Options)
 
 func WithBranch(branch string) Option {
 	return func(o *Options) {

@@ -47,7 +47,7 @@ func NewListCmd() *cobra.Command {
 	return c
 }
 
-func formatAppsTree(entries []registry.AppEntry) string {
+func formatAppsTree(entries []registry.App) string {
 	b := &strings.Builder{}
 	for _, entry := range entries {
 		node := tree.NewNode(fmt.Sprintf(

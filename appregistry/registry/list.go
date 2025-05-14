@@ -32,13 +32,13 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 }
 
 // List list apps from the ignite app appregistry/registry.
-func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
+func (r *Querier) List(ctx context.Context) ([]App, error) {
 	appsFiles, err := r.client.GetDirectoryFiles(ctx, igniteGitHubOrg, igniteAppsRepo, registryDir)
 	if err != nil {
 		return nil, err
 	}
 
-	entries := make([]AppEntry, 0)
+	entries := make([]App, 0)
 	for _, file := range appsFiles {
 		if !appFormatRegex.MatchString(strings.TrimPrefix(file, registryDir+"/")) {
 			continue
@@ -55,7 +55,7 @@ func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 	return entries, nil
 }
 
-func (r *Querier) getRegistryEntry(fileName string) (*AppEntry, error) {
+func (r *Querier) getRegistryEntry(fileName string) (*App, error) {
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
 	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
 	if err != nil {
@@ -68,7 +68,7 @@ func (r *Querier) getRegistryEntry(fileName string) (*AppEntry, error) {
 		return nil, errors.Wrapf(err, "failed to read %s file content", fileName)
 	}
 
-	var entry *AppEntry
+	var entry *App
 	if err := json.Unmarshal(body, &entry); err != nil {
 		return nil, errors.Wrapf(err, "failed to unmarshal %s file", fileName)
 	}

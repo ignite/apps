@@ -3,48 +3,20 @@ package registry
 import (
 	"context"
 	"fmt"
-	"path"
-	"regexp"
-	"strings"
-	"time"
-
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
+	"github.com/iancoleman/strcase"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"golang.org/x/mod/modfile"
+	"net/http"
+	"net/url"
+	"path"
+	"strings"
 )
 
-const (
-	appYMLFileName = "app.ignite.yml"
-)
-
-var githubRepoPattern = regexp.MustCompile(`^(https?:\/\/)?github\.com\/([a-zA-Z0-9\-_]+)\/([a-zA-Z0-9\-_]+)(\/[a-zA-Z0-9\-_]+)*$`)
-
-// AppRepositoryDetails represents the details of an Ignite app repository.
-type AppRepositoryDetails struct {
-	Name        string
-	Description string
-	Stars       int
-	License     string
-	UpdatedAt   time.Time
-	URL         string
-	App         AppDetails
-}
-
-// AppDetails represents the details of an Ignite app.
-type AppDetails struct {
-	Name             string
-	PackageURL       string
-	DocumentationURL string
-	Description      string
-	Path             string
-	GoVersion        string
-	IgniteVersion    string
-}
-
-// GetAppDetails returns the details of an Ignite app repository.
-func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppRepositoryDetails, error) {
+// ValidateApp validates the app yaml file.
+func (r Querier) ValidateApp(ctx context.Context, appName string) (*AppRepositoryDetails, error) {
 	apps, err := r.List(ctx)
 	if err != nil {
 		return nil, err
@@ -57,8 +29,68 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		}
 	}
 
-	if appEntry.Name == "" {
+	if appEntry.Name == "" && appEntry.Slug == "" {
 		return nil, errors.Errorf("app %s not found", appName)
+	}
+
+	if appEntry.Name == "" {
+		return nil, errors.Errorf("app name must be defined")
+	} else if appEntry.Name != strings.ToUpper(appEntry.Name) {
+		return nil, errors.Errorf("app name must be uppercase: %s", appEntry.Name)
+	}
+
+	if appEntry.Slug == "" {
+		return nil, errors.Errorf("app slug must be defined")
+	} else if appEntry.Slug != strcase.ToKebab(appEntry.Name) && appEntry.Slug != strcase.ToSnake(appEntry.Name) {
+		return nil, errors.Errorf("app slug must be kebab or snake case: %s", appEntry.Slug)
+	}
+
+	if appEntry.AppDescription == "" {
+		return nil, errors.New("app description must be defined")
+	}
+
+	if err := validateVersion(appEntry.Ignite); err != nil {
+		return nil, errors.Wrap(err, "invalid ignite version")
+	}
+
+	if err := validateVersion(appEntry.CosmosSDK); err != nil {
+		return nil, errors.Wrap(err, "invalid cosmos-sdk version")
+	}
+
+	for depName, depVersion := range appEntry.Dependencies {
+		if err := validateVersion(depVersion); err != nil {
+			return nil, errors.Wrapf(err, "invalid %s version", depName)
+		}
+	}
+
+	for _, author := range appEntry.Authors {
+		if err := validateAuthor(author); err != nil {
+			return nil, errors.Wrap(err, "invalid author")
+		}
+	}
+
+	if err := validateURL(appEntry.RepositoryURL, "repository URL"); err != nil {
+		return nil, err
+	}
+
+	if err := validateURL(appEntry.DocumentationURL, "documentation URL"); err != nil {
+		return nil, err
+	}
+
+	if err := validateURL(appEntry.License.URL, "license URL"); err != nil {
+		return nil, err
+	}
+
+	if appEntry.License.Name == "" {
+		return nil, errors.New("license name must be defined")
+	}
+
+	if len(appEntry.Keywords) == 0 {
+		return nil, errors.New("keywords must be defined")
+	}
+
+	if err := validatePlatforms(appEntry.SupportedPlatforms); err != nil {
+		return nil, err
 	}
 
 	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL)

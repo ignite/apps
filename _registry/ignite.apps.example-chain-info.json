@@ -3,9 +3,7 @@
   "slug": "example-chain-info",
   "appDescription": "A simple chain information application",
   "ignite": ">28.3.0",
-  "dependencies": {
-    "docker": ">23.0.5"
-  },
+  "dependencies": {},
   "cosmosSDK": ">0.50.4",
   "authors": [
     {
