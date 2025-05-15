@@ -13,7 +13,7 @@ import (
 )
 
 // ValidateAppDetails validates the details of an Ignite app repository.
-func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
+func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string) error {
 	appBytes, err := os.ReadFile(appFile)
 	if err != nil {
 		return errors.Wrapf(err, "failed to get %s file content", appFile)
@@ -38,7 +38,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
 		return err
 	}
 
-	appYML, err := r.getAppsConfig(ctx, repo)
+	appYML, err := r.getAppsConfig(ctx, repo, branch)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
 				continue
 			}
 
-			goMod, err = r.getGoMod(ctx, repo, path.Clean(info.Path))
+			goMod, err = r.getGoMod(ctx, repo, path.Clean(info.Path), branch)
 			if err != nil {
 				return errors.Wrapf(err, "failed to get go.mod for app %s", slug)
 			}
@@ -60,7 +60,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
 			return errors.Errorf("oficial ignite app should be register into the %s file", appYMLFileName)
 		}
 	} else {
-		goMod, err = r.getGoMod(ctx, repo, "")
+		goMod, err = r.getGoMod(ctx, repo, "", branch)
 		if err != nil {
 			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.Slug)
 		}

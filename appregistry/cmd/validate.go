@@ -13,17 +13,24 @@ import (
 
 // NewValidateCmd creates a new validate command that validates the Ignite application json.
 func NewValidateCmd() *cobra.Command {
-	return &cobra.Command{
+	c := &cobra.Command{
 		Use:     "validate [app file]",
 		Aliases: []string{"v"},
 		Short:   "Validate the ignite application json",
 		Args:    cobra.ExactArgs(1),
 		RunE:    validateHandler,
 	}
+
+	c.Flags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
+
+	return c
 }
 
 func validateHandler(cmd *cobra.Command, args []string) error {
-	githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
+	var (
+		githubToken, _ = cmd.Flags().GetString(flagGithubToken)
+		branch, _      = cmd.Flags().GetString(flagBranch)
+	)
 
 	session := cliui.New(cliui.StartSpinnerWithText("🔎 Fetching repository details from GitHub..."))
 	defer session.End()
@@ -35,7 +42,7 @@ func validateHandler(cmd *cobra.Command, args []string) error {
 	if err != nil {
 		return errors.Wrapf(err, "failed to get absolute path for %s", args[0])
 	}
-	if err := registryQuerier.ValidateAppDetails(cmd.Context(), absPath); err != nil {
+	if err := registryQuerier.ValidateAppDetails(cmd.Context(), absPath, branch); err != nil {
 		return err
 	}
 

@@ -8,6 +8,8 @@ import (
 	"strings"
 	"time"
 
+	"github.com/ignite/apps/appregistry/pkg/xgithub"
+
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
@@ -45,7 +47,7 @@ type AppDetails struct {
 }
 
 // GetAppDetails returns the details of an Ignite app repository.
-func (r Querier) GetAppDetails(ctx context.Context, appSlug string) (*AppRepositoryDetails, error) {
+func (r Querier) GetAppDetails(ctx context.Context, appSlug, branch string) (*AppRepositoryDetails, error) {
 	apps, err := r.List(ctx)
 	if err != nil {
 		return nil, err
@@ -66,7 +68,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appSlug string) (*AppReposit
 		return nil, err
 	}
 
-	appYML, err := r.getAppsConfig(ctx, repo)
+	appYML, err := r.getAppsConfig(ctx, repo, branch)
 	if err != nil {
 		return nil, err
 	}
@@ -77,7 +79,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appSlug string) (*AppReposit
 			continue
 		}
 
-		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path))
+		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path), branch)
 		if err != nil {
 			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", slug)
 		}
@@ -112,8 +114,14 @@ func (r Querier) GetAppDetails(ctx context.Context, appSlug string) (*AppReposit
 	return result, nil
 }
 
-func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fpath string) (*modfile.File, error) {
-	contents, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), path.Join(fpath, "go.mod"))
+func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fPath, branch string) (*modfile.File, error) {
+	contents, err := r.client.GetFileContent(
+		ctx,
+		repo.GetOwner().GetLogin(),
+		repo.GetName(),
+		path.Join(fPath, "go.mod"),
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get file content")
 	}
@@ -126,8 +134,14 @@ func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fpath st
 	return mod, nil
 }
 
-func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository) (*plugin.AppsConfig, error) {
-	data, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
+func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository, branch string) (*plugin.AppsConfig, error) {
+	data, err := r.client.GetFileContent(
+		ctx,
+		repo.GetOwner().GetLogin(),
+		repo.GetName(),
+		appYMLFileName,
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
 	}

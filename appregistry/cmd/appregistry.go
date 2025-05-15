@@ -7,7 +7,8 @@ import (
 )
 
 const (
-	githubTokenFlag = "github-token"
+	flagGithubToken = "github-token"
+	flagBranch      = "branch"
 )
 
 // NewAppRegistry creates a new app registry command that holds
@@ -32,7 +33,7 @@ so it's recommended to use the --github-token flag you want to use appregistry c
 		NewInstallCmd(),
 	)
 
-	c.PersistentFlags().String(githubTokenFlag, "", "GitHub access token")
+	c.PersistentFlags().String(flagGithubToken, "", "GitHub access token")
 
 	return c
 }

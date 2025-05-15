@@ -18,7 +18,10 @@ func NewInstallCmd() *cobra.Command {
 		Short: "Install an ignite app by app slug",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
+			var (
+				githubToken, _ = cmd.Flags().GetString(flagGithubToken)
+				branch, _      = cmd.Flags().GetString(flagBranch)
+			)
 
 			session := cliui.New(cliui.WithStdout(os.Stdout))
 			defer session.End()
@@ -26,7 +29,7 @@ func NewInstallCmd() *cobra.Command {
 			client := xgithub.NewClient(githubToken)
 			registryQuerier := registry.NewRegistryQuerier(client)
 
-			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0])
+			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0], branch)
 			if err != nil {
 				return err
 			}
@@ -39,6 +42,8 @@ func NewInstallCmd() *cobra.Command {
 			return igniteAppInstallCmd.ExecuteContext(cmd.Context())
 		},
 	}
+
+	c.Flags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
 
 	return c
 }

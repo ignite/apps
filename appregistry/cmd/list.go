@@ -21,7 +21,7 @@ func NewListCmd() *cobra.Command {
 		Short: "List all the ignite apps from the app registry",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
+			githubToken, _ := cmd.Flags().GetString(flagGithubToken)
 
 			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))
 			defer session.End()
