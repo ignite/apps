@@ -40,5 +40,5 @@ func validateHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	session.StopSpinner()
-	return session.Printf("🚀 valid %s file", args[0])
+	return session.Printf("🚀 valid %s file\n", args[0])
 }

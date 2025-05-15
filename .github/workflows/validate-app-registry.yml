@@ -43,6 +43,8 @@ jobs:
         if: steps.json_files.outputs.files != ''
         run: |
           echo "${{ steps.json_files.outputs.files }}" | while read file; do
-            echo "Running ignite appregistry validate on $file"
-            ignite appregistry validate "$file"
+            if [[ $(basename "$file") != "registry.json" ]]; then
+              echo "Running ignite appregistry validate on $file"
+              ignite appregistry validate "$file"
+            fi
           done
