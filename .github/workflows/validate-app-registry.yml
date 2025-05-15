@@ -31,8 +31,7 @@ jobs:
           echo "${{ steps.json_files.outputs.files }}"
 
       - name: Install Ignite CLI
-        run: |
-          curl https://get.ignite.com/cli! | bash
+        run: curl https://get.ignite.com/cli! | bash
 
       - name: Run Ignite command on each file
         if: steps.json_files.outputs.files != ''
