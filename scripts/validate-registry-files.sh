@@ -16,8 +16,12 @@ fi
 # Find and validate each JSON file
 find "$FOLDER" -type f -name '*.json' | while read -r file; do
   if [[ $(basename "$file") != "registry.json" ]]; then
-    echo "Validating $file..."
-    ignite appregistry validate "$file" --branch "$(git rev-parse --abbrev-ref HEAD)"
+    echo "Running ignite appregistry validate on $file"
+    if [[ $(basename "$file") == ignite.apps* ]]; then
+      ignite appregistry validate "$file" --branch "$(git rev-parse --abbrev-ref HEAD)"
+    else
+      ignite appregistry validate "$file"
+    fi
   fi
 done
 
