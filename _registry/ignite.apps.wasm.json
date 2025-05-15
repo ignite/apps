@@ -2,9 +2,9 @@
   "appName": "Wasm",
   "slug": "wasm",
   "appDescription": "Scaffold a CosmosWasm-enabled chain with ease",
-  "ignite": ">28.3.0",
+  "ignite": ">=28.3.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.4",
+  "cosmosSDK": ">=0.50.4",
   "authors": [
     {
       "name": "Danilo Pantani",

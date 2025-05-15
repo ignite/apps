@@ -2,9 +2,9 @@
   "appName": "CCA",
   "slug": "cca",
   "appDescription": "Scaffold a blockchain frontend in seconds with Ignite",
-  "ignite": ">28.7.0",
+  "ignite": ">=28.7.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.1",
+  "cosmosSDK": ">=0.50.1",
   "authors": [
     {
       "name": "Julien Robert",

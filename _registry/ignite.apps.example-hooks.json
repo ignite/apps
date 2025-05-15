@@ -2,9 +2,9 @@
   "appName": "Hooks (example)",
   "slug": "example-hooks",
   "appDescription": "A simple hooks application",
-  "ignite": ">28.3.0",
+  "ignite": ">=28.3.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.4",
+  "cosmosSDK": ">=0.50.4",
   "authors": [
     {
       "name": "Ehsan Saradar",

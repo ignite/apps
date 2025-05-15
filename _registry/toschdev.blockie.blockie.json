@@ -4,7 +4,7 @@
   "appDescription": "Explore blocks of your running blockchain in real time!",
   "ignite": ">=28.0.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.1",
+  "cosmosSDK": ">=0.50.1",
   "authors": [
     {
       "name": "Tobias Schwarz",
