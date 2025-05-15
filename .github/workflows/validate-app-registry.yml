@@ -32,8 +32,7 @@ jobs:
 
       - name: Install Ignite CLI
         run: |
-          go install github.com/ignite/cli/v29@latest
-          echo "$HOME/go/bin" >> $GITHUB_PATH
+          curl https://get.ignite.com/cli! | bash
 
       - name: Run Ignite command on each file
         if: steps.json_files.outputs.files != ''
