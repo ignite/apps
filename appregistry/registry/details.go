@@ -35,6 +35,7 @@ type AppRepositoryDetails struct {
 // AppDetails represents the details of an Ignite app.
 type AppDetails struct {
 	Name             string
+	Slug             string
 	PackageURL       string
 	DocumentationURL string
 	Description      string
@@ -44,13 +45,13 @@ type AppDetails struct {
 }
 
 // GetAppDetails returns the details of an Ignite app repository.
-func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppRepositoryDetails, error) {
+func (r Querier) GetAppDetails(ctx context.Context, appSlug string) (*AppRepositoryDetails, error) {
 	apps, err := r.List(ctx)
 	if err != nil {
 		return nil, err
 	}
 
-	appEntry, err := apps.FindByName(appName)
+	appEntry, err := apps.FindBySlug(appSlug)
 	if err != nil {
 		return nil, err
 	}
@@ -71,23 +72,24 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 	}
 
 	var appDetails AppDetails
-	for name, info := range appYML.Apps {
-		if !strings.EqualFold(name, appName) {
+	for slug, info := range appYML.Apps {
+		if !strings.EqualFold(slug, appSlug) {
 			continue
 		}
 
 		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path))
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", name)
+			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", slug)
 		}
 
 		cliVersion, err := findCLIVersion(goMod)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", name)
+			return nil, errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", slug)
 		}
 
 		appDetails = AppDetails{
-			Name:             name,
+			Name:             appEntry.Name.String(),
+			Slug:             appEntry.Slug.String(),
 			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL.String()), info.Path),
 			DocumentationURL: appEntry.DocumentationURL.String(),
 			Description:      info.Description,

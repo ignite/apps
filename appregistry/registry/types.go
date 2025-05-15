@@ -10,8 +10,9 @@ import (
 
 	"github.com/Masterminds/semver"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
-	"github.com/iancoleman/strcase"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
+
+	"github.com/ignite/apps/appregistry/strcase"
 )
 
 type (
@@ -137,7 +138,7 @@ func (f Field) Validate(opts ...ValidateOptions) error {
 		opt(&o)
 	}
 
-	field := string(f)
+	field := f.String()
 	if field == "" {
 		if o.required {
 			return errors.Errorf("field %s is required", field)
@@ -157,15 +158,15 @@ func (f Field) Validate(opts ...ValidateOptions) error {
 			return errors.Errorf("field %s must be in lower camel case", field)
 		}
 	case CaseUpperCamel:
-		if field != strcase.ToCamel(field) {
+		if field != strcase.ToUpperCamel(field) {
 			return errors.Errorf("field %s must be in upper camel case", field)
 		}
 	case CaseLower:
-		if field != strings.ToLower(field) {
+		if field != strcase.ToLower(field) {
 			return errors.Errorf("field %s must be in lower case", field)
 		}
 	case CaseUpper:
-		if field != strings.ToUpper(field) {
+		if field != strcase.ToUpper(field) {
 			return errors.Errorf("field %s must be in upper case", field)
 		}
 	case CaseKebab:

@@ -14,8 +14,8 @@ import (
 
 func NewInstallCmd() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "install [app name]",
-		Short: "Install an ignite app by app name",
+		Use:   "install [app slug]",
+		Short: "Install an ignite app by app slug",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)

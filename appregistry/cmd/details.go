@@ -30,7 +30,7 @@ var (
 // NewDetailsCmd creates a new details command that shows the details of an ignite application repository.
 func NewDetailsCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "details [app name]",
+		Use:     "details [app slug]",
 		Aliases: []string{"info"},
 		Short:   "Show the details of an ignite application repository",
 		Args:    cobra.ExactArgs(1),
@@ -57,6 +57,7 @@ func NewDetailsCmd() *cobra.Command {
 			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
 
 			printItem("Name", appDetails.App.Name)
+			printItem("Slug", appDetails.App.Slug)
 			printItem("Description", appDetails.App.Description)
 			printItem("Stars", strconv.Itoa(appDetails.Stars))
 			printItem("Go version", appDetails.App.GoVersion)

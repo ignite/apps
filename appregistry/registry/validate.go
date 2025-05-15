@@ -44,31 +44,35 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
 	}
 
 	var goMod *modfile.File
-	for name, info := range appYML.Apps {
-		if !strings.EqualFold(name, appEntry.Name.String()) {
-			continue
-		}
+	if repoOwner == "ignite" && repoName == "apps" {
+		for slug, info := range appYML.Apps {
+			if !strings.EqualFold(slug, appEntry.Slug.String()) {
+				continue
+			}
 
-		goMod, err = r.getGoMod(ctx, repo, path.Clean(info.Path))
-		if err != nil {
-			return errors.Wrapf(err, "failed to get go.mod for app %s", name)
+			goMod, err = r.getGoMod(ctx, repo, path.Clean(info.Path))
+			if err != nil {
+				return errors.Wrapf(err, "failed to get go.mod for app %s", slug)
+			}
+			break
 		}
-		break
-	}
-	if goMod == nil {
+		if goMod == nil {
+			return errors.Errorf("oficial ignite app should be register into the %s file", appYMLFileName)
+		}
+	} else {
 		goMod, err = r.getGoMod(ctx, repo, "")
 		if err != nil {
-			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.Name)
+			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.Slug)
 		}
 	}
 
 	cliVersion, err := findCLIVersion(goMod)
 	if err != nil {
-		return errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", appEntry.Name)
+		return errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", appEntry.Slug)
 	}
 
 	if err := appEntry.Ignite.Verify(cliVersion); err != nil {
-		return errors.Wrapf(err, "failed to verify ignite version %s for app %s", cliVersion, appEntry.Name)
+		return errors.Wrapf(err, "failed to verify ignite version %s for app %s", cliVersion, appEntry.Slug)
 	}
 
 	return nil
