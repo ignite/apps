@@ -75,7 +75,7 @@ func Test_toUpperCamel(t *testing.T) {
 		{
 			name: "snake_case",
 			arg:  "snAke_caSe",
-			want: "Snake Case",
+			want: "SnAke CaSe",
 		},
 		{
 			name: "Pascal case",
@@ -85,22 +85,27 @@ func Test_toUpperCamel(t *testing.T) {
 		{
 			name: "kebab-case",
 			arg:  "keBab-case",
-			want: "Kebab Case",
+			want: "KeBab Case",
 		},
 		{
 			name: "Title Case",
 			arg:  "Title CAse",
-			want: "Title Case",
+			want: "Title CAse",
 		},
 		{
 			name: "upper case",
 			arg:  "UPPER CASE",
-			want: "Upper Case",
+			want: "UPPER CASE",
 		},
 		{
 			name: "single",
 			arg:  "single",
 			want: "Single",
+		},
+		{
+			name: "Single with uppers",
+			arg:  "singleWithUppers",
+			want: "SingleWithUppers",
 		},
 		{
 			name: "empty string",

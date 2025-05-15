@@ -72,7 +72,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
 	}
 
 	if err := appEntry.Ignite.Verify(cliVersion); err != nil {
-		return errors.Wrapf(err, "failed to verify ignite version %s for app %s", cliVersion, appEntry.Slug)
+		return errors.Wrapf(err, "wrong ignite version %s for app %s: %s", cliVersion, appEntry.Slug, appEntry.Ignite.String())
 	}
 
 	return nil

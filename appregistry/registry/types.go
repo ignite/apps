@@ -27,17 +27,20 @@ type (
 	Authors      []Author
 	Dependencies map[string]Version
 
+	// Author represents an author with name, email and website information
 	Author struct {
 		Name    Field `json:"name,omitempty"`
 		Email   Email `json:"email,omitempty"`
 		Website URL   `json:"website,omitempty"`
 	}
 
+	// License contains name and URL of a license
 	License struct {
 		Name Field `json:"name,omitempty"`
 		URL  URL   `json:"url,omitempty"`
 	}
 
+	// SocialMedia contains social media links and profiles
 	SocialMedia struct {
 		X        string `json:"x,omitempty"`
 		Telegram string `json:"telegram,omitempty"`
@@ -46,16 +49,19 @@ type (
 		Website  URL    `json:"website,omitempty"`
 	}
 
+	// CryptoAddresses contains Cosmos address and other crypto addresses
 	CryptoAddresses struct {
 		Cosmos                Address           `json:"cosmos,omitempty"`
 		OtherSupportedCryptos map[string]string `json:"otherSupportedCryptos,omitempty"`
 	}
 
+	// Donations contains crypto addresses and fiat donation links
 	Donations struct {
 		CryptoAddresses   CryptoAddresses `json:"cryptoAddresses,omitempty"`
 		FiatDonationLinks URLs            `json:"fiatDonationLinks,omitempty"`
 	}
 
+	// App represents an Ignite application with its metadata
 	App struct {
 		Name               Field        `json:"appName,omitempty"`
 		Slug               Field        `json:"slug,omitempty"`
@@ -276,6 +282,11 @@ func (v Version) Verify(version string) error {
 	return nil
 }
 
+// String returns the string representation of the Version
+func (v Version) String() string {
+	return string(v)
+}
+
 // Validate validates Address format
 func (a Address) Validate() error {
 	if a == "" {
@@ -447,14 +458,17 @@ func (a App) Validate() error {
 	return nil
 }
 
+// String returns the string representation of the Field
 func (f Field) String() string {
 	return string(f)
 }
 
+// String returns the string representation of the URL
 func (u URL) String() string {
 	return string(u)
 }
 
+// AppFromFile reads and parses an App from a JSON file
 func AppFromFile(r io.Reader) (*App, error) {
 	body, err := io.ReadAll(r)
 	if err != nil {
