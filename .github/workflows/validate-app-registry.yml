@@ -37,7 +37,7 @@ jobs:
 
       - name: Install Ignite AppRegistry plugin
         run: |
-          ignite app -g install ./appregistry
+          ignite app install -g ./appregistry
 
       - name: Run Ignite command on each file
         if: steps.json_files.outputs.files != ''
