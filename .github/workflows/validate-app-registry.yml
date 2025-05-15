@@ -30,10 +30,15 @@ jobs:
           echo "Found files:"
           echo "${{ steps.json_files.outputs.files }}"
 
-      - name: Run Go command on each file
+      - name: Install Ignite CLI
+        run: |
+          go install github.com/ignite/cli/v29@latest
+          echo "$HOME/go/bin" >> $GITHUB_PATH
+
+      - name: Run Ignite command on each file
         if: steps.json_files.outputs.files != ''
         run: |
           echo "${{ steps.json_files.outputs.files }}" | while read file; do
-            echo "Running test on $file"
-            go run appregistry/main.go validate "$file"
+            echo "Running ignite validate on $file"
+            ignite appregistry validate "$file"
           done
