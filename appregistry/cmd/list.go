@@ -53,7 +53,7 @@ func formatAppsTree(entries []registry.App) string {
 		node := tree.NewNode(fmt.Sprintf(
 			"%s : %s",
 			entry.Name,
-			limitTextLength(entry.Description, descriptionLimit),
+			limitTextLength(entry.Description.String(), descriptionLimit),
 		))
 		node.AddChild(tree.NewNode(fmt.Sprintf(
 			"📦 %s",

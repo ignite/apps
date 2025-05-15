@@ -107,6 +107,8 @@ const (
 	CaseSnake
 )
 
+const appsRepoURL = "github.com/ignite/apps/"
+
 // ValidateFieldCase returns a ValidateOptions that sets the field case validation
 func ValidateFieldCase(fieldCase FieldCase) ValidateOptions {
 	return func(f *ValidateOption) {
@@ -340,6 +342,11 @@ func (apps Apps) FindByName(name string) (App, error) {
 func (u URL) Validate() error {
 	if u == "" {
 		return errors.Errorf("%s must be defined", u)
+	}
+	if strings.Contains(string(u), appsRepoURL) &&
+		!strings.Contains(string(u), "/tree/") &&
+		!strings.Contains(string(u), "/blob/") {
+		u = URL(strings.ReplaceAll(string(u), appsRepoURL, appsRepoURL+"tree/main/"))
 	}
 	_, err := url.Parse(string(u))
 	if err != nil {

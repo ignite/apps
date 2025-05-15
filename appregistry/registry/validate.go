@@ -4,15 +4,19 @@ import (
 	"bytes"
 	"context"
 	"os"
+	"path"
+	"strings"
+
+	"golang.org/x/mod/modfile"
 
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 )
 
 // ValidateAppDetails validates the details of an Ignite app repository.
-func (r Querier) ValidateAppDetails(ctx context.Context, AppFile string) error {
-	appBytes, err := os.ReadFile(AppFile)
+func (r Querier) ValidateAppDetails(ctx context.Context, appFile string) error {
+	appBytes, err := os.ReadFile(appFile)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get %s file content", AppFile)
+		return errors.Wrapf(err, "failed to get %s file content", appFile)
 	}
 
 	appEntry, err := AppFromFile(bytes.NewReader(appBytes))
@@ -34,9 +38,28 @@ func (r Querier) ValidateAppDetails(ctx context.Context, AppFile string) error {
 		return err
 	}
 
-	goMod, err := r.getGoMod(ctx, repo, "")
+	appYML, err := r.getAppsConfig(ctx, repo)
 	if err != nil {
-		return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.Name)
+		return err
+	}
+
+	var goMod *modfile.File
+	for name, info := range appYML.Apps {
+		if !strings.EqualFold(name, appEntry.Name.String()) {
+			continue
+		}
+
+		goMod, err = r.getGoMod(ctx, repo, path.Clean(info.Path))
+		if err != nil {
+			return errors.Wrapf(err, "failed to get go.mod for app %s", name)
+		}
+		break
+	}
+	if goMod == nil {
+		goMod, err = r.getGoMod(ctx, repo, "")
+		if err != nil {
+			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.Name)
+		}
 	}
 
 	cliVersion, err := findCLIVersion(goMod)
