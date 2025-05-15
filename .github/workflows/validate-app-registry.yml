@@ -2,7 +2,7 @@ name: Check new app registry files
 
 on:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
 
 jobs:
   check-app-registry:
@@ -31,12 +31,18 @@ jobs:
           echo "${{ steps.json_files.outputs.files }}"
 
       - name: Install Ignite CLI
-        run: curl https://get.ignite.com/cli! | bash
+        run: |
+          curl https://get.ignite.com/cli! | bash
+          echo "$HOME/.ignite/bin" >> $GITHUB_PATH
+
+      - name: Install Ignite AppRegistry plugin
+        run: |
+          ignite app install ./appregistry
 
       - name: Run Ignite command on each file
         if: steps.json_files.outputs.files != ''
         run: |
           echo "${{ steps.json_files.outputs.files }}" | while read file; do
-            echo "Running ignite validate on $file"
+            echo "Running ignite appregistry validate on $file"
             ignite appregistry validate "$file"
           done
