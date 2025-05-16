@@ -1,6 +1,6 @@
 {
   "appName": "Spinner (example)",
-  "slug": "example-spinner",
+  "id": "example-spinner",
   "appDescription": "A simple spinner application",
   "ignite": ">=28.3.0",
   "dependencies": {},

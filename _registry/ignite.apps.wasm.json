@@ -1,6 +1,6 @@
 {
   "appName": "Wasm",
-  "slug": "wasm",
+  "id": "wasm",
   "appDescription": "Scaffold a CosmosWasm-enabled chain with ease",
   "ignite": ">=28.3.0",
   "dependencies": {},

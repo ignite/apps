@@ -14,8 +14,8 @@ import (
 
 func NewInstallCmd() *cobra.Command {
 	c := &cobra.Command{
-		Use:   "install [app slug]",
-		Short: "Install an ignite app by app slug",
+		Use:   "install [app id]",
+		Short: "Install an ignite app by app id",
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (

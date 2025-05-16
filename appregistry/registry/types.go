@@ -64,7 +64,7 @@ type (
 	// App represents an Ignite application with its metadata
 	App struct {
 		Name               Field        `json:"appName,omitempty"`
-		Slug               Field        `json:"slug,omitempty"`
+		ID                 Field        `json:"id,omitempty"`
 		Description        Field        `json:"appDescription,omitempty"`
 		Ignite             Version      `json:"ignite,omitempty"`
 		Dependencies       Dependencies `json:"dependencies,omitempty"`
@@ -320,17 +320,17 @@ func (us URLs) Validate() error {
 	return nil
 }
 
-// FindBySlug finds an App by its slug
-func (apps Apps) FindBySlug(slug string) (App, error) {
+// FindByID finds an App by its id
+func (apps Apps) FindByID(id string) (App, error) {
 	var appEntry App
 	for _, app := range apps {
-		if strings.EqualFold(string(app.Slug), slug) {
+		if strings.EqualFold(string(app.ID), id) {
 			appEntry = app
 		}
 	}
 
-	if appEntry.Name == "" && appEntry.Slug == "" {
-		return appEntry, errors.Errorf("app slug %s not found", slug)
+	if appEntry.Name == "" && appEntry.ID == "" {
+		return appEntry, errors.Errorf("app id %s not found", id)
 	}
 	return appEntry, nil
 }
@@ -344,7 +344,7 @@ func (apps Apps) FindByName(name string) (App, error) {
 		}
 	}
 
-	if appEntry.Name == "" && appEntry.Slug == "" {
+	if appEntry.Name == "" && appEntry.ID == "" {
 		return appEntry, errors.Errorf("app name %s not found", name)
 	}
 	return appEntry, nil
@@ -381,8 +381,8 @@ func (a App) Validate() error {
 		return errors.Wrapf(err, "invalid app name %s", a.Name)
 	}
 
-	if err := a.Slug.Validate(ValidateRequired(), ValidateFieldCase(CaseKebab)); err != nil {
-		return errors.Wrapf(err, "invalid app slug %s", a.Slug)
+	if err := a.ID.Validate(ValidateRequired(), ValidateFieldCase(CaseKebab)); err != nil {
+		return errors.Wrapf(err, "invalid app id %s", a.ID)
 	}
 
 	if err := a.Description.Validate(ValidateRequired(), ValidationLength(10)); err != nil {

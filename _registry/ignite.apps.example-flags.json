@@ -1,6 +1,6 @@
 {
   "appName": "Flags (example)",
-  "slug": "example-flags",
+  "id": "example-flags",
   "appDescription": "A simple flags usage application",
   "ignite": ">=28.3.0",
   "dependencies": {},

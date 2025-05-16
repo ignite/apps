@@ -1,6 +1,6 @@
 {
   "appName": "Explorer",
-  "slug": "explorer",
+  "id": "explorer",
   "appDescription": "Shows real time feed of your blockchain",
   "ignite": ">=28.3.0",
   "dependencies": {},

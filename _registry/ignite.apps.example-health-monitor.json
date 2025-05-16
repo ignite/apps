@@ -1,6 +1,6 @@
 {
   "appName": "Health Monitor (example)",
-  "slug": "example-health-monitor",
+  "id": "example-health-monitor",
   "appDescription": "A simple health monitor application",
   "ignite": ">=28.3.0",
   "dependencies": {},
