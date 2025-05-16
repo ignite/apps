@@ -13,6 +13,8 @@ import (
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	"golang.org/x/mod/modfile"
+
+	"github.com/ignite/apps/appregistry/pkg/xgithub"
 )
 
 const (
@@ -35,6 +37,7 @@ type AppRepositoryDetails struct {
 // AppDetails represents the details of an Ignite app.
 type AppDetails struct {
 	Name             string
+	AppID            string
 	PackageURL       string
 	DocumentationURL string
 	Description      string
@@ -44,24 +47,18 @@ type AppDetails struct {
 }
 
 // GetAppDetails returns the details of an Ignite app repository.
-func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppRepositoryDetails, error) {
-	apps, err := r.List(ctx)
+func (r Querier) GetAppDetails(ctx context.Context, appID, branch string) (*AppRepositoryDetails, error) {
+	apps, err := r.List(ctx, branch)
 	if err != nil {
 		return nil, err
 	}
 
-	var appEntry AppEntry
-	for _, app := range apps {
-		if strings.EqualFold(app.Name, appName) {
-			appEntry = app
-		}
+	appEntry, err := apps.FindByID(appID)
+	if err != nil {
+		return nil, err
 	}
 
-	if appEntry.Name == "" {
-		return nil, errors.Errorf("app %s not found", appName)
-	}
-
-	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL)
+	repoOwner, repoName, err := validateRepoURL(appEntry.RepositoryURL.String())
 	if err != nil {
 		return nil, err
 	}
@@ -71,30 +68,36 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 		return nil, err
 	}
 
-	appYML, err := r.getAppsConfig(ctx, repo)
+	appYML, err := r.getAppsConfig(ctx, repo, branch)
 	if err != nil {
 		return nil, err
 	}
 
 	var appDetails AppDetails
-	for name, info := range appYML.Apps {
-		if !strings.EqualFold(name, appName) {
+	for id, info := range appYML.Apps {
+		if !strings.EqualFold(id, appID) {
 			continue
 		}
 
-		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path))
+		goMod, err := r.getGoMod(ctx, repo, path.Clean(info.Path), branch)
 		if err != nil {
-			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", name)
+			return nil, errors.Wrapf(err, "failed to get go.mod for app %s", id)
+		}
+
+		cliVersion, err := findCLIVersion(goMod)
+		if err != nil {
+			return nil, errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", id)
 		}
 
 		appDetails = AppDetails{
-			Name:             name,
-			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL), info.Path),
-			DocumentationURL: appEntry.DocumentationURL,
+			Name:             appEntry.Name.String(),
+			AppID:            appEntry.AppID.String(),
+			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL.String()), info.Path),
+			DocumentationURL: appEntry.DocumentationURL.String(),
 			Description:      info.Description,
 			Path:             info.Path,
 			GoVersion:        goMod.Go.Version,
-			IgniteVersion:    findCLIVersion(goMod),
+			IgniteVersion:    cliVersion,
 		}
 	}
 
@@ -111,8 +114,14 @@ func (r Querier) GetAppDetails(ctx context.Context, appName string) (*AppReposit
 	return result, nil
 }
 
-func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fpath string) (*modfile.File, error) {
-	contents, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), path.Join(fpath, "go.mod"))
+func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fPath, branch string) (*modfile.File, error) {
+	contents, err := r.client.GetFileContent(
+		ctx,
+		repo.GetOwner().GetLogin(),
+		repo.GetName(),
+		path.Join(fPath, "go.mod"),
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to get file content")
 	}
@@ -125,8 +134,14 @@ func (r Querier) getGoMod(ctx context.Context, repo *github.Repository, fpath st
 	return mod, nil
 }
 
-func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository) (*plugin.AppsConfig, error) {
-	data, err := r.client.GetFileContent(ctx, repo.GetOwner().GetLogin(), repo.GetName(), appYMLFileName)
+func (r Querier) getAppsConfig(ctx context.Context, repo *github.Repository, branch string) (*plugin.AppsConfig, error) {
+	data, err := r.client.GetFileContent(
+		ctx,
+		repo.GetOwner().GetLogin(),
+		repo.GetName(),
+		appYMLFileName,
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", appYMLFileName)
 	}
@@ -147,14 +162,14 @@ func validateRepoURL(repoURL string) (owner, name string, err error) {
 	return matches[2], matches[3], nil
 }
 
-func findCLIVersion(modFile *modfile.File) string {
+func findCLIVersion(modFile *modfile.File) (string, error) {
 	for _, require := range modFile.Require {
 		if strings.HasPrefix(require.Mod.Path, igniteCLIPackage) {
-			return require.Mod.Version
+			return require.Mod.Version, nil
 		}
 	}
 
-	return ""
+	return "", errors.Errorf("couldn't find %s version in go.mod", igniteCLIPackage)
 }
 
 // stripHTTPOrHTTPSFromURL strips http or https scheme from a URL.

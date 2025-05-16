@@ -1,10 +1,10 @@
 {
   "appName": "Hermes",
-  "slug": "hermes",
+  "appID": "hermes",
   "appDescription": "A wrapper around the hermes IBC relayer",
-  "ignite": ">0.27.0",
+  "ignite": ">=0.27.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.1",
+  "cosmosSDK": ">=0.50.1",
   "authors": [
     {
       "name": "Danilo Pantani",

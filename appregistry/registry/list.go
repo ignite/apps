@@ -2,9 +2,7 @@ package registry
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"io"
 	"net/http"
 	"regexp"
 	"strings"
@@ -32,19 +30,25 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 }
 
 // List list apps from the ignite app appregistry/registry.
-func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
-	appsFiles, err := r.client.GetDirectoryFiles(ctx, igniteGitHubOrg, igniteAppsRepo, registryDir)
+func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
+	appsFiles, err := r.client.GetDirectoryFiles(
+		ctx,
+		igniteGitHubOrg,
+		igniteAppsRepo,
+		registryDir,
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, err
 	}
 
-	entries := make([]AppEntry, 0)
+	entries := make(Apps, 0)
 	for _, file := range appsFiles {
 		if !appFormatRegex.MatchString(strings.TrimPrefix(file, registryDir+"/")) {
 			continue
 		}
 
-		entry, err := r.getRegistryEntry(file)
+		entry, err := r.getRegistryEntry(file, branch)
 		if err != nil {
 			return nil, err
 		}
@@ -55,23 +59,16 @@ func (r *Querier) List(ctx context.Context) ([]AppEntry, error) {
 	return entries, nil
 }
 
-func (r *Querier) getRegistryEntry(fileName string) (*AppEntry, error) {
+func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
+	if branch == "" {
+		branch = "main"
+	}
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
+	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", igniteGitHubOrg, igniteAppsRepo, branch, fileName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}
 	defer resp.Body.Close()
 
-	body, err := io.ReadAll(resp.Body)
-	if err != nil {
-		return nil, errors.Wrapf(err, "failed to read %s file content", fileName)
-	}
-
-	var entry *AppEntry
-	if err := json.Unmarshal(body, &entry); err != nil {
-		return nil, errors.Wrapf(err, "failed to unmarshal %s file", fileName)
-	}
-
-	return entry, nil
+	return AppFromFile(resp.Body)
 }

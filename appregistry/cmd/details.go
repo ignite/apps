@@ -30,12 +30,15 @@ var (
 // NewDetailsCmd creates a new details command that shows the details of an ignite application repository.
 func NewDetailsCmd() *cobra.Command {
 	return &cobra.Command{
-		Use:     "details [app name]",
+		Use:     "details [app id]",
 		Aliases: []string{"info"},
 		Short:   "Show the details of an ignite application repository",
 		Args:    cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
-			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
+			var (
+				githubToken, _ = cmd.Flags().GetString(flagGithubToken)
+				branch, _      = cmd.Flags().GetString(flagBranch)
+			)
 
 			session := cliui.New(cliui.StartSpinnerWithText("🔎 Fetching repository details from GitHub..."))
 			defer session.End()
@@ -43,7 +46,7 @@ func NewDetailsCmd() *cobra.Command {
 			client := xgithub.NewClient(githubToken)
 			registryQuerier := registry.NewRegistryQuerier(client)
 
-			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0])
+			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0], branch)
 			if err != nil {
 				return err
 			}
@@ -57,6 +60,7 @@ func NewDetailsCmd() *cobra.Command {
 			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
 
 			printItem("Name", appDetails.App.Name)
+			printItem("ID", appDetails.App.AppID)
 			printItem("Description", appDetails.App.Description)
 			printItem("Stars", strconv.Itoa(appDetails.Stars))
 			printItem("Go version", appDetails.App.GoVersion)

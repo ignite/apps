@@ -1,12 +1,10 @@
 {
   "appName": "Health Monitor (example)",
-  "slug": "example-health-monitor",
+  "appID": "example-health-monitor",
   "appDescription": "A simple health monitor application",
-  "ignite": ">28.3.0",
-  "dependencies": {
-    "docker": ">23.0.5"
-  },
-  "cosmosSDK": ">0.50.4",
+  "ignite": ">=28.3.0",
+  "dependencies": {},
+  "cosmosSDK": ">=0.50.4",
   "authors": [
     {
       "name": "Ehsan Saradar",
