@@ -48,7 +48,7 @@ func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 			continue
 		}
 
-		entry, err := r.getRegistryEntry(file)
+		entry, err := r.getRegistryEntry(file, branch)
 		if err != nil {
 			return nil, err
 		}
@@ -59,9 +59,9 @@ func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 	return entries, nil
 }
 
-func (r *Querier) getRegistryEntry(fileName string) (*App, error) {
+func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/main/%s", igniteGitHubOrg, igniteAppsRepo, fileName))
+	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", igniteGitHubOrg, igniteAppsRepo, branch, fileName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}

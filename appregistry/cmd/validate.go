@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"path/filepath"
+	"strings"
 
 	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
@@ -34,7 +35,7 @@ func validateHandler(cmd *cobra.Command, args []string) error {
 	client := xgithub.NewClient(githubToken)
 	registryQuerier := registry.NewRegistryQuerier(client)
 
-	absPath, err := filepath.Abs(args[0])
+	absPath, err := filepath.Abs(strings.TrimSpace(args[0]))
 	if err != nil {
 		return errors.Wrapf(err, "failed to get absolute path for %s", args[0])
 	}
