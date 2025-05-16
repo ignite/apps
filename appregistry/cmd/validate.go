@@ -13,17 +13,13 @@ import (
 
 // NewValidateCmd creates a new validate command that validates the Ignite application json.
 func NewValidateCmd() *cobra.Command {
-	c := &cobra.Command{
+	return &cobra.Command{
 		Use:     "validate [app file]",
 		Aliases: []string{"v"},
 		Short:   "Validate the ignite application json",
 		Args:    cobra.ExactArgs(1),
 		RunE:    validateHandler,
 	}
-
-	c.Flags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
-
-	return c
 }
 
 func validateHandler(cmd *cobra.Command, args []string) error {

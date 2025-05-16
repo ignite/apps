@@ -29,7 +29,7 @@ var (
 
 // NewDetailsCmd creates a new details command that shows the details of an ignite application repository.
 func NewDetailsCmd() *cobra.Command {
-	c := &cobra.Command{
+	return &cobra.Command{
 		Use:     "details [app id]",
 		Aliases: []string{"info"},
 		Short:   "Show the details of an ignite application repository",
@@ -77,8 +77,4 @@ func NewDetailsCmd() *cobra.Command {
 			return nil
 		},
 	}
-
-	c.Flags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
-
-	return c
 }

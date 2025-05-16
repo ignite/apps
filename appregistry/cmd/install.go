@@ -13,7 +13,7 @@ import (
 )
 
 func NewInstallCmd() *cobra.Command {
-	c := &cobra.Command{
+	return &cobra.Command{
 		Use:   "install [app id]",
 		Short: "Install an ignite app by app id",
 		Args:  cobra.ExactArgs(1),
@@ -42,8 +42,4 @@ func NewInstallCmd() *cobra.Command {
 			return igniteAppInstallCmd.ExecuteContext(cmd.Context())
 		},
 	}
-
-	c.Flags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
-
-	return c
 }

@@ -16,12 +16,15 @@ const descriptionLimit = 75
 
 // NewListCmd creates a new list command that lists all the ignite apps from the app registry.
 func NewListCmd() *cobra.Command {
-	c := &cobra.Command{
+	return &cobra.Command{
 		Use:   "list",
 		Short: "List all the ignite apps from the app registry",
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
-			githubToken, _ := cmd.Flags().GetString(flagGithubToken)
+			var (
+				githubToken, _ = cmd.Flags().GetString(flagGithubToken)
+				branch, _      = cmd.Flags().GetString(flagBranch)
+			)
 
 			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))
 			defer session.End()
@@ -29,7 +32,7 @@ func NewListCmd() *cobra.Command {
 			client := xgithub.NewClient(githubToken)
 			registryQuerier := registry.NewRegistryQuerier(client)
 
-			apps, err := registryQuerier.List(cmd.Context())
+			apps, err := registryQuerier.List(cmd.Context(), branch)
 			if err != nil {
 				return err
 			}
@@ -43,8 +46,6 @@ func NewListCmd() *cobra.Command {
 			return session.Print(formatAppsTree(apps))
 		},
 	}
-
-	return c
 }
 
 func formatAppsTree(entries []registry.App) string {

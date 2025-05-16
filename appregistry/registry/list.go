@@ -30,8 +30,14 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 }
 
 // List list apps from the ignite app appregistry/registry.
-func (r *Querier) List(ctx context.Context) (Apps, error) {
-	appsFiles, err := r.client.GetDirectoryFiles(ctx, igniteGitHubOrg, igniteAppsRepo, registryDir)
+func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
+	appsFiles, err := r.client.GetDirectoryFiles(
+		ctx,
+		igniteGitHubOrg,
+		igniteAppsRepo,
+		registryDir,
+		xgithub.WithBranch(branch),
+	)
 	if err != nil {
 		return nil, err
 	}

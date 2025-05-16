@@ -16,31 +16,41 @@ import (
 )
 
 type (
-	Apps         []App
-	URL          string
-	URLs         []URL
-	Version      string
-	Field        string
-	Fields       []Field
-	Address      string
-	Email        string
-	Authors      []Author
+	// Apps represents a collection of App entries.
+	Apps []App
+	// URL represents a URL string.
+	URL string
+	// URLs represents a collection of URL strings.
+	URLs []URL
+	// Version represents a semantic version string.
+	Version string
+	// Field represents a general text field.
+	Field string
+	// Fields represents a collection of Field entries.
+	Fields []Field
+	// Address represents a crypto address string.
+	Address string
+	// Email represents an email address string.
+	Email string
+	// Authors represents a collection of Author entries.
+	Authors []Author
+	// Dependencies maps package names to their version constraints.
 	Dependencies map[string]Version
 
-	// Author represents an author with name, email and website information
+	// Author represents an author with name, email and website information.
 	Author struct {
 		Name    Field `json:"name,omitempty"`
 		Email   Email `json:"email,omitempty"`
 		Website URL   `json:"website,omitempty"`
 	}
 
-	// License contains name and URL of a license
+	// License contains name and URL of a license.
 	License struct {
 		Name Field `json:"name,omitempty"`
 		URL  URL   `json:"url,omitempty"`
 	}
 
-	// SocialMedia contains social media links and profiles
+	// SocialMedia contains social media links and profiles.
 	SocialMedia struct {
 		X        string `json:"x,omitempty"`
 		Telegram string `json:"telegram,omitempty"`
@@ -49,19 +59,19 @@ type (
 		Website  URL    `json:"website,omitempty"`
 	}
 
-	// CryptoAddresses contains Cosmos address and other crypto addresses
+	// CryptoAddresses contains Cosmos address and other crypto addresses.
 	CryptoAddresses struct {
 		Cosmos                Address           `json:"cosmos,omitempty"`
 		OtherSupportedCryptos map[string]string `json:"otherSupportedCryptos,omitempty"`
 	}
 
-	// Donations contains crypto addresses and fiat donation links
+	// Donations contains crypto addresses and fiat donation links.
 	Donations struct {
 		CryptoAddresses   CryptoAddresses `json:"cryptoAddresses,omitempty"`
 		FiatDonationLinks URLs            `json:"fiatDonationLinks,omitempty"`
 	}
 
-	// App represents an Ignite application with its metadata
+	// App represents an Ignite application with its metadata.
 	App struct {
 		Name               Field        `json:"appName,omitempty"`
 		ID                 Field        `json:"id,omitempty"`
@@ -83,61 +93,61 @@ type (
 )
 
 type (
-	// FieldCase represents different cases for field validation
+	// FieldCase represents different cases for field validation.
 	FieldCase int
 
-	// ValidateOption contains validation options for fields
+	// ValidateOption contains validation options for fields.
 	ValidateOption struct {
 		required  bool
 		fieldCase FieldCase
 		minLength int
 	}
 
-	// ValidateOptions is a function type that configures validation options
+	// ValidateOptions is a function type that configures validation options.
 	ValidateOptions func(o *ValidateOption)
 )
 
 const (
-	// CaseNoSensitive indicates no case sensitivity check
+	// CaseNoSensitive indicates no case sensitivity check.
 	CaseNoSensitive FieldCase = iota
-	// CaseLowerCamel indicates lowercase camel case check
+	// CaseLowerCamel indicates lowercase camel case check.
 	CaseLowerCamel
-	// CaseUpperCamel indicates uppercase camel case check
+	// CaseUpperCamel indicates uppercase camel case check.
 	CaseUpperCamel
-	// CaseLower indicates lowercase check
+	// CaseLower indicates lowercase check.
 	CaseLower
-	// CaseUpper indicates uppercase check
+	// CaseUpper indicates uppercase check.
 	CaseUpper
-	// CaseKebab indicates kebab case check
+	// CaseKebab indicates kebab case check.
 	CaseKebab
-	// CaseSnake indicates snake case check
+	// CaseSnake indicates snake case check.
 	CaseSnake
 )
 
 const appsRepoURL = "github.com/ignite/apps/"
 
-// ValidateFieldCase returns a ValidateOptions that sets the field case validation
+// ValidateFieldCase returns a ValidateOptions that sets the field case validation.
 func ValidateFieldCase(fieldCase FieldCase) ValidateOptions {
 	return func(f *ValidateOption) {
 		f.fieldCase = fieldCase
 	}
 }
 
-// ValidateRequired returns a ValidateOptions that marks a field as required
+// ValidateRequired returns a ValidateOptions that marks a field as required.
 func ValidateRequired() ValidateOptions {
 	return func(f *ValidateOption) {
 		f.required = true
 	}
 }
 
-// ValidationLength returns a ValidateOptions that sets minimum length requirement
+// ValidationLength returns a ValidateOptions that sets minimum length requirement.
 func ValidationLength(minLength int) ValidateOptions {
 	return func(f *ValidateOption) {
 		f.minLength = minLength
 	}
 }
 
-// Validate validates a Field according to the provided options
+// Validate validates a Field according to the provided options.
 func (f Field) Validate(opts ...ValidateOptions) error {
 	o := ValidateOption{fieldCase: CaseNoSensitive}
 	for _, opt := range opts {
@@ -188,7 +198,7 @@ func (f Field) Validate(opts ...ValidateOptions) error {
 	return nil
 }
 
-// Validate validates a slice of Fields according to the provided options
+// Validate validates a slice of Fields according to the provided options.
 func (f Fields) Validate(opts ...ValidateOptions) error {
 	for _, field := range f {
 		if err := field.Validate(opts...); err != nil {
@@ -198,7 +208,7 @@ func (f Fields) Validate(opts ...ValidateOptions) error {
 	return nil
 }
 
-// Validate validates Author fields
+// Validate validates Author fields.
 func (a Author) Validate() error {
 	if a.Name != "" {
 		if err := a.Name.Validate(ValidateRequired()); err != nil {
@@ -218,7 +228,7 @@ func (a Author) Validate() error {
 	return nil
 }
 
-// Validate validates a slice of Authors
+// Validate validates a slice of Authors.
 func (a Authors) Validate() error {
 	for _, author := range a {
 		if err := author.Validate(); err != nil {
@@ -228,7 +238,7 @@ func (a Authors) Validate() error {
 	return nil
 }
 
-// Validate validates Dependencies
+// Validate validates Dependencies.
 func (d Dependencies) Validate() error {
 	for name, dep := range d {
 		if err := dep.Validate(); err != nil {
@@ -238,7 +248,7 @@ func (d Dependencies) Validate() error {
 	return nil
 }
 
-// Validate validates Version format
+// Validate validates Version format.
 func (v Version) Validate() error {
 	_, err := semver.NewConstraint(string(v))
 	if err != nil {
@@ -247,7 +257,7 @@ func (v Version) Validate() error {
 	return nil
 }
 
-// Validate validates Email format
+// Validate validates Email format.
 func (e Email) Validate() error {
 	if e == "" {
 		return errors.Errorf("email must be defined")
@@ -262,7 +272,7 @@ func (e Email) Validate() error {
 	return nil
 }
 
-// Verify checks if the provided version satisfies the version constraint
+// Verify checks if the provided version satisfies the version constraint.
 func (v Version) Verify(version string) error {
 	if version == "" {
 		return errors.Errorf("version must be defined")
@@ -282,12 +292,12 @@ func (v Version) Verify(version string) error {
 	return nil
 }
 
-// String returns the string representation of the Version
+// String returns the string representation of the Version.
 func (v Version) String() string {
 	return string(v)
 }
 
-// Validate validates Address format
+// Validate validates Address format.
 func (a Address) Validate() error {
 	if a == "" {
 		return errors.Errorf("address must be defined")
@@ -299,7 +309,7 @@ func (a Address) Validate() error {
 	return nil
 }
 
-// Validate validates License fields
+// Validate validates License fields.
 func (l License) Validate() error {
 	if err := l.Name.Validate(ValidateRequired()); err != nil {
 		return errors.Wrapf(err, "invalid license name %s", l.Name)
@@ -310,7 +320,7 @@ func (l License) Validate() error {
 	return nil
 }
 
-// Validate validates URLs
+// Validate validates URLs.
 func (us URLs) Validate() error {
 	for _, u := range us {
 		if err := u.Validate(); err != nil {
@@ -320,7 +330,7 @@ func (us URLs) Validate() error {
 	return nil
 }
 
-// FindByID finds an App by its id
+// FindByID finds an App by its id.
 func (apps Apps) FindByID(id string) (App, error) {
 	var appEntry App
 	for _, app := range apps {
@@ -335,7 +345,7 @@ func (apps Apps) FindByID(id string) (App, error) {
 	return appEntry, nil
 }
 
-// FindByName finds an App by its name
+// FindByName finds an App by its name.
 func (apps Apps) FindByName(name string) (App, error) {
 	var appEntry App
 	for _, app := range apps {
@@ -350,7 +360,7 @@ func (apps Apps) FindByName(name string) (App, error) {
 	return appEntry, nil
 }
 
-// Validate validates URL format and accessibility
+// Validate validates URL format and accessibility.
 func (u URL) Validate() error {
 	if u == "" {
 		return errors.Errorf("%s must be defined", u)
@@ -375,7 +385,29 @@ func (u URL) Validate() error {
 	return nil
 }
 
-// Validate validates App fields
+// CheckUnique checks if the apps has unique names and IDs.
+func (a Apps) CheckUnique() error {
+	uniqueNames := make(map[string]bool)
+	uniqueIDs := make(map[string]bool)
+
+	for _, app := range a {
+		name := string(app.Name)
+		id := string(app.ID)
+
+		if uniqueNames[strings.ToLower(name)] {
+			return errors.Errorf("duplicate app name found: %s", name)
+		}
+		uniqueNames[strings.ToLower(name)] = true
+
+		if uniqueIDs[strings.ToLower(id)] {
+			return errors.Errorf("duplicate app ID found: %s", id)
+		}
+		uniqueIDs[strings.ToLower(id)] = true
+	}
+	return nil
+}
+
+// Validate validates App fields.
 func (a App) Validate() error {
 	if err := a.Name.Validate(ValidateRequired(), ValidateFieldCase(CaseUpperCamel)); err != nil {
 		return errors.Wrapf(err, "invalid app name %s", a.Name)
@@ -458,17 +490,17 @@ func (a App) Validate() error {
 	return nil
 }
 
-// String returns the string representation of the Field
+// String returns the string representation of the Field.
 func (f Field) String() string {
 	return string(f)
 }
 
-// String returns the string representation of the URL
+// String returns the string representation of the URL.
 func (u URL) String() string {
 	return string(u)
 }
 
-// AppFromFile reads and parses an App from a JSON file
+// AppFromFile reads and parses an App from a JSON file.
 func AppFromFile(r io.Reader) (*App, error) {
 	body, err := io.ReadAll(r)
 	if err != nil {

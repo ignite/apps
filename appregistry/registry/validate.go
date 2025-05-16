@@ -19,12 +19,24 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 		return errors.Wrapf(err, "failed to get %s file content", appFile)
 	}
 
+	// load app entry from file.
 	appEntry, err := AppFromFile(bytes.NewReader(appBytes))
 	if err != nil {
 		return err
 	}
 
+	// validate all JSON fields
 	if err := appEntry.Validate(); err != nil {
+		return err
+	}
+
+	// check if the name and ID is unique
+	apps, err := r.List(ctx, branch)
+	if err != nil {
+		return err
+	}
+
+	if err := apps.CheckUnique(); err != nil {
 		return err
 	}
 
@@ -43,6 +55,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 		return err
 	}
 
+	// get the go.mod file from the app repository
 	var goMod *modfile.File
 	if repoOwner == "ignite" && repoName == "apps" {
 		for id, info := range appYML.Apps {
