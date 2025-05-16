@@ -45,8 +45,8 @@ jobs:
           echo "${{ steps.json_files.outputs.files }}" | while read file; do
             if [[ $(basename "$file") != "registry.json" ]]; then
               if [[ $(basename "$file") == ignite.apps* ]]; then
-                echo "Running ignite appregistry validate on $file" and branch ${{ github.event.pull_request.base.ref }}
-                ignite appregistry validate "$file" --branch "${{ github.event.pull_request.base.ref }}"
+                echo "Running ignite appregistry validate on $file" and branch ${{ github.event.pull_request.head.ref }}
+                ignite appregistry validate "$file" --branch "${{ github.event.pull_request.head.ref }}"
               else
                 echo "Running ignite appregistry validate on $file"
                 ignite appregistry validate "$file"
