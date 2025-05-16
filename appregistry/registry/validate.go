@@ -50,14 +50,14 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 		return err
 	}
 
-	appYML, err := r.getAppsConfig(ctx, repo, branch)
-	if err != nil {
-		return err
-	}
-
 	// get the go.mod file from the app repository
 	var goMod *modfile.File
 	if repoOwner == "ignite" && repoName == "apps" {
+		appYML, err := r.getAppsConfig(ctx, repo, branch)
+		if err != nil {
+			return err
+		}
+
 		for id, info := range appYML.Apps {
 			if !strings.EqualFold(id, appEntry.AppID.String()) {
 				continue
@@ -73,7 +73,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 			return errors.Errorf("oficial ignite app should be register into the %s file", appYMLFileName)
 		}
 	} else {
-		goMod, err = r.getGoMod(ctx, repo, "", branch)
+		goMod, err = r.getGoMod(ctx, repo, "", "main")
 		if err != nil {
 			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.AppID)
 		}
