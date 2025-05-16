@@ -34,7 +34,7 @@ so it's recommended to use the --github-token flag you want to use appregistry c
 	)
 
 	c.PersistentFlags().String(flagGithubToken, "", "GitHub access token")
-	c.PersistentFlags().StringP(flagBranch, "b", "", "The app branch to use (default: main)")
+	c.PersistentFlags().StringP(flagBranch, "b", "main", "The app branch to use (default: main)")
 
 	return c
 }

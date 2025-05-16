@@ -60,6 +60,9 @@ func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 }
 
 func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
+	if branch == "" {
+		branch = "main"
+	}
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
 	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", igniteGitHubOrg, igniteAppsRepo, branch, fileName))
 	if err != nil {
