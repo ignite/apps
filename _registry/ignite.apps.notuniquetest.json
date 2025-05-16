@@ -1,6 +1,6 @@
 {
-  "appName": "CCA",
-  "appID": "ccas",
+  "appName": "CCAs (Cosmos Chain Adapters)",
+  "appID": "cca",
   "appDescription": "Scaffold a blockchain frontend in seconds with Ignite",
   "ignite": ">=28.7.0",
   "dependencies": {},
