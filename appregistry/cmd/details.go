@@ -60,7 +60,7 @@ func NewDetailsCmd() *cobra.Command {
 			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
 
 			printItem("Name", appDetails.App.Name)
-			printItem("ID", appDetails.App.ID)
+			printItem("ID", appDetails.App.AppID)
 			printItem("Description", appDetails.App.Description)
 			printItem("Stars", strconv.Itoa(appDetails.Stars))
 			printItem("Go version", appDetails.App.GoVersion)

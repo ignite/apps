@@ -1,6 +1,6 @@
 {
   "appName": "Network",
-  "id": "network",
+  "appID": "network",
   "appDescription": "Launch a blockchain in production",
   "ignite": ">=0.28.2",
   "dependencies": {},

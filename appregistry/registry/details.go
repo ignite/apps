@@ -37,7 +37,7 @@ type AppRepositoryDetails struct {
 // AppDetails represents the details of an Ignite app.
 type AppDetails struct {
 	Name             string
-	ID               string
+	AppID            string
 	PackageURL       string
 	DocumentationURL string
 	Description      string
@@ -91,7 +91,7 @@ func (r Querier) GetAppDetails(ctx context.Context, appID, branch string) (*AppR
 
 		appDetails = AppDetails{
 			Name:             appEntry.Name.String(),
-			ID:               appEntry.ID.String(),
+			AppID:            appEntry.AppID.String(),
 			PackageURL:       path.Join(stripHTTPOrHTTPSFromURL(appEntry.RepositoryURL.String()), info.Path),
 			DocumentationURL: appEntry.DocumentationURL.String(),
 			Description:      info.Description,

@@ -1,6 +1,6 @@
 {
   "appName": "Hooks (example)",
-  "id": "example-hooks",
+  "appID": "example-hooks",
   "appDescription": "A simple hooks application",
   "ignite": ">=28.3.0",
   "dependencies": {},

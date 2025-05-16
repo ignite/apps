@@ -1,6 +1,6 @@
 {
   "appName": "Chain Info (example)",
-  "id": "example-chain-info",
+  "appID": "example-chain-info",
   "appDescription": "A simple chain information application",
   "ignite": ">=28.3.0",
   "dependencies": {},

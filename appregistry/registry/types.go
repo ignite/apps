@@ -74,7 +74,7 @@ type (
 	// App represents an Ignite application with its metadata.
 	App struct {
 		Name               Field        `json:"appName,omitempty"`
-		ID                 Field        `json:"id,omitempty"`
+		AppID              Field        `json:"appID,omitempty"`
 		Description        Field        `json:"appDescription,omitempty"`
 		Ignite             Version      `json:"ignite,omitempty"`
 		Dependencies       Dependencies `json:"dependencies,omitempty"`
@@ -334,12 +334,12 @@ func (us URLs) Validate() error {
 func (apps Apps) FindByID(id string) (App, error) {
 	var appEntry App
 	for _, app := range apps {
-		if strings.EqualFold(string(app.ID), id) {
+		if strings.EqualFold(string(app.AppID), id) {
 			appEntry = app
 		}
 	}
 
-	if appEntry.Name == "" && appEntry.ID == "" {
+	if appEntry.Name == "" && appEntry.AppID == "" {
 		return appEntry, errors.Errorf("app id %s not found", id)
 	}
 	return appEntry, nil
@@ -354,7 +354,7 @@ func (apps Apps) FindByName(name string) (App, error) {
 		}
 	}
 
-	if appEntry.Name == "" && appEntry.ID == "" {
+	if appEntry.Name == "" && appEntry.AppID == "" {
 		return appEntry, errors.Errorf("app name %s not found", name)
 	}
 	return appEntry, nil
@@ -392,7 +392,7 @@ func (a Apps) CheckUnique() error {
 
 	for _, app := range a {
 		name := string(app.Name)
-		id := string(app.ID)
+		id := string(app.AppID)
 
 		if uniqueNames[strings.ToLower(name)] {
 			return errors.Errorf("duplicate app name found: %s", name)
@@ -413,8 +413,8 @@ func (a App) Validate() error {
 		return errors.Wrapf(err, "invalid app name %s", a.Name)
 	}
 
-	if err := a.ID.Validate(ValidateRequired(), ValidateFieldCase(CaseKebab)); err != nil {
-		return errors.Wrapf(err, "invalid app id %s", a.ID)
+	if err := a.AppID.Validate(ValidateRequired(), ValidateFieldCase(CaseKebab)); err != nil {
+		return errors.Wrapf(err, "invalid app id %s", a.AppID)
 	}
 
 	if err := a.Description.Validate(ValidateRequired(), ValidationLength(10)); err != nil {

@@ -59,7 +59,7 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 	var goMod *modfile.File
 	if repoOwner == "ignite" && repoName == "apps" {
 		for id, info := range appYML.Apps {
-			if !strings.EqualFold(id, appEntry.ID.String()) {
+			if !strings.EqualFold(id, appEntry.AppID.String()) {
 				continue
 			}
 
@@ -75,17 +75,17 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 	} else {
 		goMod, err = r.getGoMod(ctx, repo, "", branch)
 		if err != nil {
-			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.ID)
+			return errors.Wrapf(err, "failed to get go.mod for app %s", appEntry.AppID)
 		}
 	}
 
 	cliVersion, err := findCLIVersion(goMod)
 	if err != nil {
-		return errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", appEntry.ID)
+		return errors.Wrapf(err, "failed to find ignite version in go.mod for app %s", appEntry.AppID)
 	}
 
 	if err := appEntry.Ignite.Verify(cliVersion); err != nil {
-		return errors.Wrapf(err, "wrong ignite version %s for app %s: %s", cliVersion, appEntry.ID, appEntry.Ignite.String())
+		return errors.Wrapf(err, "wrong ignite version %s for app %s: %s", cliVersion, appEntry.AppID, appEntry.Ignite.String())
 	}
 
 	return nil

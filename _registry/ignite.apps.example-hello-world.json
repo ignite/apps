@@ -1,6 +1,6 @@
 {
   "appName": "Hello World (example)",
-  "id": "example-hello-world",
+  "appID": "example-hello-world",
   "appDescription": "A simple hello world application",
   "ignite": ">=28.3.0",
   "dependencies": {},

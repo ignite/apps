@@ -1,6 +1,6 @@
 {
   "appName": "Consumer",
-  "id": "consumer",
+  "appID": "consumer",
   "appDescription": "Internal Ignite App for scaffolding consumer chains (not to be installed manually)",
   "ignite": ">=28.3.0",
   "dependencies": {

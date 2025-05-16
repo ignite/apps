@@ -1,6 +1,6 @@
 {
   "appName": "Your App Name",
-  "id": "your-app-id",
+  "appID": "your-app-id",
   "appDescription": "A brief description of what your app does.",
   "ignite": ">=28.3.0",
   "dependencies": {
