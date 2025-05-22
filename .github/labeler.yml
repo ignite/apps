@@ -39,6 +39,9 @@
 "app:wasm":
   - wasm/**/*
 
+"app:evm":
+  - evm/**/*
+
 "configs":
   - .gitignore
   - .golangci.yml

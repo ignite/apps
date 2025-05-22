@@ -1,0 +1,31 @@
+{
+  "appName": "EVM",
+  "slug": "evm",
+  "appDescription": "Scaffold a Cosmos EVM-enabled chain with ease",
+  "ignite": ">28.10.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.1",
+  "authors": [
+    {
+      "name": "Julien Robert",
+      "github": "julienrbrt"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/evm",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/evm/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "evm",
+    "ethereum",
+    "cli",
+    "cosmos-sdk",
+    "ignite app"
+  ],
+  "supportedPlatforms": [
+    "mac",
+    "linux"
+  ]
+}
