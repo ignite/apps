@@ -1,4 +1,4 @@
-name: Rollkit Liveness Test
+name: Liveness Tests
 
 on:
   push:
@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  rollkit-test:
-    name: Test with Rollkit Chain
+  rollkit-liveness:
+    name: Ignite Rollkit App Liveness Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -23,7 +23,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version-file: ./go.mod
+          go-version: "stable"
           cache: true
 
       - name: Install Ignite CLI
@@ -44,35 +44,23 @@ jobs:
 
       - name: Scaffold Rollkit Chain
         run: |
+          # get the path to the current checkout of ignite apps
+          CURRENT_DIR=$(pwd)/rollkit
+
           # scaffold a new chain
           ignite scaffold chain gm --no-module --skip-git
           cd gm
 
           # install rollkit app
-          ignite app install github.com/ignite/apps/rollkit@main
+          ignite app install $CURRENT_DIR
 
           # add rollkit to the chain
           ignite rollkit add
 
-      - name: Replace ABCI Module with Current Branch And Prepare Chain
+      - name: Prepare Chain
         run: |
-          # get the path to the current checkout of go-execution-abci
-          CURRENT_DIR=$(pwd)
-          GO_EXECUTION_ABCI_DIR=$CURRENT_DIR
-
           # enter the gm directory
           cd gm
-
-          # replace the github.com/rollkit/rollkit module with latest main
-          # TODO(@julienrbrt) this should be replaced with a specific commit hash
-          go get github.com/rollkit/rollkit@main
-          UPGRADED_ROLLKIT=$(go list -m -json github.com/rollkit/rollkit | jq -r .Version)
-          go mod edit -replace github.com/rollkit/rollkit=github.com/rollkit/rollkit@$UPGRADED_ROLLKIT
-
-          # replace the github.com/rollkit/go-execution-abci module with the local version
-          go mod edit -replace github.com/rollkit/go-execution-abci=$GO_EXECUTION_ABCI_DIR
-
-          # download dependencies and update go.mod/go.sum
           go mod tidy
 
           # build the chain
