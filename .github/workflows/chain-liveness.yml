@@ -32,9 +32,9 @@ jobs:
 
       - name: Start Local DA
         run: |
-          # clone rollkit repository
-          git clone https://github.com/rollkit/rollkit --depth 1
-          cd rollkit/da/cmd/local-da
+          # clone rollkit repository (#TODO install via go install when possible)
+          git clone https://github.com/rollkit/rollkit --depth 1 rollkit-repo
+          cd rollkit-repo/da/cmd/local-da
           # start the local da in the background
           go run . &
           # capture the background process PID
@@ -42,25 +42,20 @@ jobs:
           # give it a moment to start
           sleep 3
 
-      - name: Scaffold Rollkit Chain
+      - name: Scaffold & Init Rollkit Chain
         run: |
           # get the path to the current checkout of ignite apps
-          CURRENT_DIR=$(pwd)/rollkit
+          ROLLKIT_APP_DIR=$(pwd)/rollkit
 
           # scaffold a new chain
           ignite scaffold chain gm --no-module --skip-git
           cd gm
 
           # install rollkit app
-          ignite app install $CURRENT_DIR
+          ignite app install $ROLLKIT_APP_DIR
 
           # add rollkit to the chain
           ignite rollkit add
-
-      - name: Prepare Chain
-        run: |
-          # enter the gm directory
-          cd gm
           go mod tidy
 
           # build the chain
