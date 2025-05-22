@@ -19,6 +19,11 @@ jobs:
         run: |
           git fetch origin ${{ github.event.pull_request.base.ref }}
 
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          cache: 'true'
+
       - name: Get list of added or modified app files
         id: json_files
         run: |
