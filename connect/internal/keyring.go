@@ -20,10 +20,8 @@ func NewKeyring(
 	addressCodec address.Codec,
 	bech32Prefix string,
 ) (keyring.Keyring, error) {
-	keyringBackend, err := flagSet.GetString(flagKeyringBackend)
-	if err != nil {
-		return nil, err
-	} else if keyringBackend == "" {
+	keyringBackend, _ := flagSet.GetString(flagKeyringBackend)
+	if keyringBackend == "" {
 		keyringBackend = keyring.BackendTest
 	}
 

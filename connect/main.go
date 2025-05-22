@@ -26,7 +26,7 @@ func (app) Manifest(ctx context.Context) (*plugin.Manifest, error) {
 
 	if cfg, err := chains.ReadConfig(); err == nil {
 		for chainName, chainCfg := range cfg.Chains {
-			cobraCmd, err := cmd.AppHandler(ctx, chainName, chainCfg)
+			cobraCmd, err := cmd.AppManifest(ctx, chainName, chainCfg)
 			if err != nil {
 				return nil, err
 			}

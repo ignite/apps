@@ -25,6 +25,15 @@ import (
 	"github.com/ignite/apps/connect/internal"
 )
 
+func AppManifest(ctx context.Context, name string, cfg *chains.ChainConfig) (*cobra.Command, error) {
+	chainCmd := &cobra.Command{
+		Use:   name,
+		Short: fmt.Sprintf("Commands for %s chain", name),
+	}
+
+	return chainCmd, nil
+}
+
 func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args ...string) (*cobra.Command, error) {
 	chainCmd := &cobra.Command{
 		Use:   name,
