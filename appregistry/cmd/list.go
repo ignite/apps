@@ -22,8 +22,8 @@ func NewListCmd() *cobra.Command {
 		Args:  cobra.NoArgs,
 		RunE: func(cmd *cobra.Command, _ []string) error {
 			var (
-				githubToken, _ = cmd.Flags().GetString(flagGithubToken)
-				branch, _      = cmd.Flags().GetString(flagBranch)
+				githubToken = getGitHubToken(cmd)
+				branch      = getBranchFlag(cmd)
 			)
 
 			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))

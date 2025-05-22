@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"os"
+
 	"github.com/charmbracelet/lipgloss"
 	"github.com/muesli/termenv"
 	"github.com/spf13/cobra"
@@ -37,6 +39,23 @@ so it's recommended to use the --github-token flag you want to use appregistry c
 	c.PersistentFlags().StringP(flagBranch, "b", "main", "The app branch to use (default: main)")
 
 	return c
+}
+
+func getBranchFlag(cmd *cobra.Command) string {
+	if branch, _ := cmd.Flags().GetString(flagBranch); branch != "" {
+		return branch
+	}
+	return "main"
+}
+
+func getGitHubToken(cmd *cobra.Command) string {
+	if githubToken, _ := cmd.Flags().GetString(flagGithubToken); githubToken != "" {
+		return githubToken
+	}
+	if envToken := os.Getenv("GITHUB_TOKEN"); envToken != "" {
+		return envToken
+	}
+	return ""
 }
 
 func init() {

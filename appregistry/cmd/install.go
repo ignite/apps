@@ -19,8 +19,8 @@ func NewInstallCmd() *cobra.Command {
 		Args:  cobra.ExactArgs(1),
 		RunE: func(cmd *cobra.Command, args []string) error {
 			var (
-				githubToken, _ = cmd.Flags().GetString(flagGithubToken)
-				branch, _      = cmd.Flags().GetString(flagBranch)
+				githubToken = getGitHubToken(cmd)
+				branch      = getBranchFlag(cmd)
 			)
 
 			session := cliui.New(cliui.WithStdout(os.Stdout))
