@@ -2,21 +2,24 @@ package integration_test
 
 import (
 	"bytes"
+	"flag"
 	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
 
-	"github.com/stretchr/testify/require"
-
 	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
 	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 	envtest "github.com/ignite/cli/v28/integration"
+	"github.com/stretchr/testify/require"
 )
 
+var flagBranch = flag.String("branch", "", "The app branch to use")
+
 func TestAppRegistry(t *testing.T) {
+	flag.Parse()
 	var (
 		require   = require.New(t)
 		env       = envtest.New(t)
@@ -76,7 +79,12 @@ func TestAppRegistry(t *testing.T) {
 
 func getGitBranch(t *testing.T) string {
 	t.Helper()
-	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	gitBranch := *flagBranch
+	if gitBranch != "" {
+		return gitBranch
+	}
+
+	cmd := exec.Command("git", "branch", "--show-current")
 	output, err := cmd.Output()
 	require.NoError(t, err)
 	branch := strings.TrimSpace(string(output))
