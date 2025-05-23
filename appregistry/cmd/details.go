@@ -34,47 +34,49 @@ func NewDetailsCmd() *cobra.Command {
 		Aliases: []string{"info"},
 		Short:   "Show the details of an ignite application repository",
 		Args:    cobra.ExactArgs(1),
-		RunE: func(cmd *cobra.Command, args []string) error {
-			var (
-				githubToken = getGitHubToken(cmd)
-				branch      = getBranchFlag(cmd)
-			)
-
-			session := cliui.New(cliui.StartSpinnerWithText("🔎 Fetching repository details from GitHub..."))
-			defer session.End()
-
-			client := xgithub.NewClient(githubToken)
-			registryQuerier := registry.NewRegistryQuerier(client)
-
-			appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0], branch)
-			if err != nil {
-				return err
-			}
-
-			session.StopSpinner()
-
-			w := &tabwriter.Writer{}
-			printItem := func(s string, v interface{}) {
-				fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
-			}
-			w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
-
-			printItem("Name", appDetails.App.Name)
-			printItem("ID", appDetails.App.AppID)
-			printItem("Description", appDetails.App.Description)
-			printItem("Stars", strconv.Itoa(appDetails.Stars))
-			printItem("Go version", appDetails.App.GoVersion)
-			printItem("Ignite version", appDetails.App.IgniteVersion)
-			printItem("Documentation", appDetails.App.DocumentationURL)
-			printItem("Repository", linkStyle.Render(appDetails.URL))
-
-			fmt.Fprintln(w, installationStyle.Render(fmt.Sprintf(
-				"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", appDetails.App.PackageURL)),
-			)))
-
-			w.Flush()
-
-			return nil
-		},
+		RunE:    detailsHandler,
 	}
+}
+
+func detailsHandler(cmd *cobra.Command, args []string) error {
+	var (
+		githubToken = getGitHubToken(cmd)
+		branch      = getBranchFlag(cmd)
+	)
+
+	session := cliui.New(cliui.StartSpinnerWithText("🔎 Fetching repository details from GitHub..."))
+	defer session.End()
+
+	client := xgithub.NewClient(githubToken)
+	registryQuerier := registry.NewRegistryQuerier(client)
+
+	appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0], branch)
+	if err != nil {
+		return err
+	}
+
+	session.StopSpinner()
+
+	w := &tabwriter.Writer{}
+	printItem := func(s string, v interface{}) {
+		fmt.Fprintf(w, "\t%s:\t%v\n", s, v)
+	}
+	w.Init(cmd.OutOrStdout(), 0, 8, 0, '\t', 0)
+
+	printItem("Name", appDetails.App.Name)
+	printItem("ID", appDetails.App.AppID)
+	printItem("Description", appDetails.App.Description)
+	printItem("Stars", strconv.Itoa(appDetails.Stars))
+	printItem("Go version", appDetails.App.GoVersion)
+	printItem("Ignite version", appDetails.App.IgniteVersion)
+	printItem("Documentation", appDetails.App.DocumentationURL)
+	printItem("Repository", linkStyle.Render(appDetails.URL))
+
+	fmt.Fprintln(w, installationStyle.Render(fmt.Sprintf(
+		"🚀 Install via: %s", commandStyle.Render(fmt.Sprintf("ignite app -g install %s", appDetails.App.PackageURL)),
+	)))
+
+	w.Flush()
+
+	return nil
 }

@@ -331,31 +331,16 @@ func (us URLs) Validate() error {
 }
 
 // FindByID finds an App by its id.
-func (apps Apps) FindByID(id string) (App, error) {
+func (a Apps) FindByID(id string) (App, error) {
 	var appEntry App
-	for _, app := range apps {
+	for _, app := range a {
 		if strings.EqualFold(string(app.AppID), id) {
 			appEntry = app
 		}
 	}
 
-	if appEntry.Name == "" && appEntry.AppID == "" {
+	if appEntry.Name == "" || appEntry.AppID == "" {
 		return appEntry, errors.Errorf("app id %s not found", id)
-	}
-	return appEntry, nil
-}
-
-// FindByName finds an App by its name.
-func (apps Apps) FindByName(name string) (App, error) {
-	var appEntry App
-	for _, app := range apps {
-		if strings.EqualFold(string(app.Name), name) {
-			appEntry = app
-		}
-	}
-
-	if appEntry.Name == "" && appEntry.AppID == "" {
-		return appEntry, errors.Errorf("app name %s not found", name)
 	}
 	return appEntry, nil
 }

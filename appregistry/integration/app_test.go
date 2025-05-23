@@ -3,6 +3,7 @@ package integration_test
 import (
 	"bytes"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"strings"
 	"testing"
@@ -17,8 +18,9 @@ import (
 
 func TestAppRegistry(t *testing.T) {
 	var (
-		require = require.New(t)
-		env     = envtest.New(t)
+		require   = require.New(t)
+		env       = envtest.New(t)
+		gitBranch = getGitBranch(t)
 	)
 
 	dir, err := os.Getwd()
@@ -41,6 +43,7 @@ func TestAppRegistry(t *testing.T) {
 				envtest.IgniteApp,
 				"appregistry",
 				"list",
+				"--branch", gitBranch,
 			),
 			// all test outputs are going to the stdErr for no reason, but
 			// it's ok when we run the app. The output goes to stdout.
@@ -59,6 +62,7 @@ func TestAppRegistry(t *testing.T) {
 				"appregistry",
 				"info",
 				"explorer",
+				"--branch", gitBranch,
 			),
 			// all test outputs are going to the stdErr for no reason, but
 			// it's ok when we run the app. The output goes to stdout.
@@ -68,6 +72,15 @@ func TestAppRegistry(t *testing.T) {
 	))
 	gotInfo := infoOutput.String()
 	require.Contains(gotInfo, "Description:\tEasy to use terminal chain explorer for testing your Ignite blockchains")
+}
+
+func getGitBranch(t *testing.T) string {
+	t.Helper()
+	cmd := exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD")
+	output, err := cmd.Output()
+	require.NoError(t, err)
+	branch := strings.TrimSpace(string(output))
+	return branch
 }
 
 func assertGlobalPlugins(t *testing.T, expectedPlugins []pluginsconfig.Plugin) {
