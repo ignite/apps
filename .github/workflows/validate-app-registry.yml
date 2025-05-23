@@ -1,0 +1,55 @@
+name: Validate app registry files
+
+on:
+  pull_request:
+    types: [ opened, synchronize ]
+
+jobs:
+  check-app-registry:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout PR code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Fetch base branch
+        run: |
+          git fetch origin ${{ github.event.pull_request.base.ref }}
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version: 'stable'
+          cache: 'true'
+
+      - name: Get list of added or modified app files
+        id: json_files
+        run: |
+          files=$(git diff --name-status origin/${{ github.event.pull_request.base.ref }}...HEAD | grep -E '^[AM]' | awk '{print $2}' | grep -E '^_registry/.*\.json$' || true)
+          printf "files<<EOF\n%s\nEOF\n" "$files" >> "$GITHUB_OUTPUT"
+
+      - name: Print found files
+        run: |
+          echo "Found files:"
+          echo "${{ steps.json_files.outputs.files }}"
+
+      - name: Install Ignite CLI
+        run: |
+          curl https://get.ignite.com/cli! | bash
+          echo "$HOME/.ignite/bin" >> $GITHUB_PATH
+
+      - name: Install Ignite AppRegistry plugin
+        run: |
+          ignite app install -g ./appregistry
+
+      - name: Run Ignite command on each file
+        if: steps.json_files.outputs.files != ''
+        run: |
+          echo "${{ steps.json_files.outputs.files }}" | while read file; do
+            if [[ $(basename "$file") != "registry.json" ]]; then
+              echo "Running ignite appregistry validate on $file and branch ${{ github.event.pull_request.head.ref }}"
+              ignite appregistry validate "$file" --branch "${{ github.event.pull_request.head.ref }}" --github-token "${{ secrets.GITHUB_TOKEN }}"
+            fi
+          done

@@ -1,10 +1,10 @@
 {
   "appName": "Rollkit",
-  "slug": "rollkit",
+  "appID": "rollkit",
   "appDescription": "Scaffold a RollKit application with ease",
-  "ignite": ">28.4.0",
+  "ignite": ">=28.4.0",
   "dependencies": {},
-  "cosmosSDK": ">0.50.6",
+  "cosmosSDK": ">=0.50.6",
   "authors": [
     {
       "name": "Julien Robert",

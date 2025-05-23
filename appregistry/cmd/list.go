@@ -12,48 +12,52 @@ import (
 	"github.com/ignite/apps/appregistry/registry"
 )
 
-const descriptionLimit = 75
+const descriptionLimit = 120
 
 // NewListCmd creates a new list command that lists all the ignite apps from the app registry.
 func NewListCmd() *cobra.Command {
-	c := &cobra.Command{
+	return &cobra.Command{
 		Use:   "list",
 		Short: "List all the ignite apps from the app registry",
 		Args:  cobra.NoArgs,
-		RunE: func(cmd *cobra.Command, _ []string) error {
-			githubToken, _ := cmd.Flags().GetString(githubTokenFlag)
-
-			session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))
-			defer session.End()
-
-			client := xgithub.NewClient(githubToken)
-			registryQuerier := registry.NewRegistryQuerier(client)
-
-			apps, err := registryQuerier.List(cmd.Context())
-			if err != nil {
-				return err
-			}
-
-			if len(apps) == 0 {
-				session.Println("❌ No ignite application were found")
-				return nil
-			}
-
-			session.StopSpinner()
-			return session.Print(formatAppsTree(apps))
-		},
+		RunE:  listHandler,
 	}
-
-	return c
 }
 
-func formatAppsTree(entries []registry.AppEntry) string {
+func listHandler(cmd *cobra.Command, _ []string) error {
+	var (
+		githubToken = getGitHubToken(cmd)
+		branch      = getBranchFlag(cmd)
+	)
+
+	session := cliui.New(cliui.StartSpinnerWithText("🔎 Searching for ignite apps on app registry..."))
+	defer session.End()
+
+	client := xgithub.NewClient(githubToken)
+	registryQuerier := registry.NewRegistryQuerier(client)
+
+	apps, err := registryQuerier.List(cmd.Context(), branch)
+	if err != nil {
+		return err
+	}
+
+	if len(apps) == 0 {
+		session.Println("❌ No ignite application were found")
+		return nil
+	}
+
+	session.StopSpinner()
+	return session.Print(formatAppsTree(apps))
+}
+
+func formatAppsTree(entries []registry.App) string {
 	b := &strings.Builder{}
 	for _, entry := range entries {
 		node := tree.NewNode(fmt.Sprintf(
-			"%s : %s",
+			"%s (id: %s): %s",
 			entry.Name,
-			limitTextLength(entry.Description, descriptionLimit),
+			entry.AppID,
+			limitTextLength(entry.Description.String(), descriptionLimit),
 		))
 		node.AddChild(tree.NewNode(fmt.Sprintf(
 			"📦 %s",
