@@ -12,7 +12,7 @@ import (
 	"github.com/ignite/apps/appregistry/registry"
 )
 
-const descriptionLimit = 75
+const descriptionLimit = 120
 
 // NewListCmd creates a new list command that lists all the ignite apps from the app registry.
 func NewListCmd() *cobra.Command {
