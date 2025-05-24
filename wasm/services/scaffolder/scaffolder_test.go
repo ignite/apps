@@ -30,6 +30,7 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 		{
 			name: "Supported Cosmos SDK version (greater than)",
 			v:    v100,
+			err:  errors.Errorf("Cosmos SDK version %s is not supported yet.", v100),
 		},
 		{
 			name: "Unsupported Cosmos SDK version",
