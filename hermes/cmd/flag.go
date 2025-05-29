@@ -86,7 +86,7 @@ const (
 	flagChannelVersion                = "channel-version"
 
 	flagConfig        = "config"
-	flagHermesVersion = "version"
+	flagHermesVersion = "hermes-version"
 
 	mnemonicEntropySize = 256
 )
