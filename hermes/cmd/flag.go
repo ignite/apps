@@ -79,12 +79,18 @@ const (
 	flagOverwriteConfig               = "overwrite-config"
 	flagChannelVersion                = "channel-version"
 
-	flagConfig = "config"
+	flagConfig  = "config"
+	flagVersion = "version"
 
 	mnemonicEntropySize = 256
 )
 
 func getConfig(flags plugin.Flags) string {
 	config, _ := flags.GetString(flagConfig)
+	return config
+}
+
+func getVersion(flags plugin.Flags) string {
+	config, _ := flags.GetString(flagVersion)
 	return config
 }

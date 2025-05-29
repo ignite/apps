@@ -39,6 +39,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		chainBPortID, _    = flags.GetString(flagChainBPortID)
 		chainBFaucet, _    = flags.GetString(flagChainBFaucet)
 		channelVersion, _  = flags.GetString(flagChannelVersion)
+		hermesVersion      = getVersion(flags)
 		customCfg          = getConfig(flags)
 	)
 
@@ -86,11 +87,11 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
 
-	h, err := hermes.New()
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
 
 	session.StartSpinner(fmt.Sprintf("Verifying chain A (%s) keys", chainAID))
 

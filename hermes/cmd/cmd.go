@@ -24,6 +24,13 @@ func GetCommands() []*plugin.Command {
 							Persistent: true,
 							Type:       plugin.FlagTypeString,
 						},
+						{
+							Name:       flagVersion,
+							Usage:      "set the version of the Hermes binary to use",
+							Shorthand:  "v",
+							Persistent: true,
+							Type:       plugin.FlagTypeString,
+						},
 					},
 					Commands: []*plugin.Command{
 						{

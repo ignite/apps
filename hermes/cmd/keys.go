@@ -2,20 +2,30 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 func KeysAddMnemonicHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	args := cmd.Args
-	h, err := hermes.New()
+	var (
+		args          = cmd.Args
+		flags         = plugin.Flags(cmd.Flags)
+		hermesVersion = getVersion(flags)
+		session       = cliui.New()
+	)
+	defer session.End()
+
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
+	session.StopSpinner()
 
 	return h.AddMnemonic(
 		ctx,
@@ -28,12 +38,20 @@ func KeysAddMnemonicHandler(ctx context.Context, cmd *plugin.ExecutedCommand) er
 }
 
 func KeysAddFileHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	args := cmd.Args
-	h, err := hermes.New()
+	var (
+		args          = cmd.Args
+		flags         = plugin.Flags(cmd.Flags)
+		hermesVersion = getVersion(flags)
+		session       = cliui.New()
+	)
+	defer session.End()
+
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
+	session.StopSpinner()
 
 	return h.AddKey(
 		ctx,
@@ -46,12 +64,20 @@ func KeysAddFileHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error 
 }
 
 func KeysListHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	args := cmd.Args
-	h, err := hermes.New()
+	var (
+		args          = cmd.Args
+		flags         = plugin.Flags(cmd.Flags)
+		hermesVersion = getVersion(flags)
+		session       = cliui.New()
+	)
+	defer session.End()
+
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
+	session.StopSpinner()
 
 	return h.KeysList(
 		ctx,
@@ -63,11 +89,19 @@ func KeysListHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 }
 
 func KeysDeleteHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	h, err := hermes.New()
+	var (
+		flags         = plugin.Flags(cmd.Flags)
+		hermesVersion = getVersion(flags)
+		session       = cliui.New()
+	)
+	defer session.End()
+
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
+	session.StopSpinner()
 
 	args := cmd.Args
 	return h.DeleteKey(

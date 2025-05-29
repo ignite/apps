@@ -2,9 +2,11 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"os"
 	"strings"
 
+	"github.com/ignite/cli/v28/ignite/pkg/cliui"
 	"github.com/ignite/cli/v28/ignite/pkg/errors"
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 
@@ -13,12 +15,16 @@ import (
 
 func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) {
 	var (
-		flags     = cmd.Flags
-		args      = cmd.Args
-		customCfg = getConfig(flags)
-		cfgName   = strings.Join(args, hermes.ConfigNameSeparator)
+		flags         = cmd.Flags
+		args          = cmd.Args
+		hermesVersion = getVersion(flags)
+		customCfg     = getConfig(flags)
+		cfgName       = strings.Join(args, hermes.ConfigNameSeparator)
+		session       = cliui.New()
 	)
+	defer session.End()
 
+	session.StartSpinner("Fetching hermes config")
 	cfgPath := customCfg
 	if cfgPath == "" {
 		cfgPath, err = hermes.ConfigPath(cfgName)
@@ -31,11 +37,12 @@ func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) 
 		return errors.Errorf("config file (%s) not exist, try to configure you relayer first", cfgPath)
 	}
 
-	h, err := hermes.New()
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
+	session.StopSpinner()
 
 	return h.Start(
 		ctx,
