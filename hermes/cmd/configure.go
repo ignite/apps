@@ -42,10 +42,12 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		customCfg          = getConfig(flags)
 	)
 
-	var (
-		hermesCfg *hermes.Config
-		err       error
-	)
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
+
+	var hermesCfg *hermes.Config
 	if customCfg != "" {
 		hermesCfg, err = hermes.LoadConfig(customCfg)
 		if err != nil {
@@ -86,11 +88,11 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	session.StopSpinner()
 	_ = session.Println(color.Green.Sprintf("Hermes config created at %s", cfgPath))
 
-	h, err := hermes.New()
+	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
+	h, err := hermes.New(hermesVersion)
 	if err != nil {
 		return err
 	}
-	defer h.Cleanup()
 
 	session.StartSpinner(fmt.Sprintf("Verifying chain A (%s) keys", chainAID))
 
