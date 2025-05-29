@@ -179,8 +179,8 @@ func main() {
 			{Name: flagAutoRegisterCounterpartyPayee, DefaultValue: "false", Usage: "auto register the counterparty payee on a destination chain to the relayer's address on the source chain", Type: plugin.FlagTypeBool},
 			{Name: flagGenerateWallets, DefaultValue: "true", Usage: "automatically generate wallets if they do not exist", Type: plugin.FlagTypeBool},
 			{Name: flagOverwriteConfig, DefaultValue: "true", Usage: "overwrite the current config if it already exists", Type: plugin.FlagTypeBool},
-			{Name: flagChainAFaucet, DefaultValue: "http://0.0.0.0:4278", Type: plugin.FlagTypeString},
-			{Name: flagChainBFaucet, DefaultValue: "http://0.0.0.0:4741", Type: plugin.FlagTypeString},
+			{Name: flagChainAFaucet, DefaultValue: "http://0.0.0.0:4493", Type: plugin.FlagTypeString},
+			{Name: flagChainBFaucet, DefaultValue: "http://0.0.0.0:4321", Type: plugin.FlagTypeString},
 		}...)
 		if err := cmd.ConfigureHandler(ctx, c); err != nil {
 			fmt.Fprintln(os.Stderr, err)

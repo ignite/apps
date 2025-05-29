@@ -15,14 +15,18 @@ import (
 
 func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) {
 	var (
-		flags         = cmd.Flags
-		args          = cmd.Args
-		hermesVersion = getVersion(flags)
-		customCfg     = getConfig(flags)
-		cfgName       = strings.Join(args, hermes.ConfigNameSeparator)
-		session       = cliui.New()
+		flags     = cmd.Flags
+		args      = cmd.Args
+		customCfg = getConfig(flags)
+		cfgName   = strings.Join(args, hermes.ConfigNameSeparator)
+		session   = cliui.New()
 	)
 	defer session.End()
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
 
 	session.StartSpinner("Fetching hermes config")
 	cfgPath := customCfg

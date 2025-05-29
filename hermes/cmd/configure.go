@@ -39,14 +39,15 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		chainBPortID, _    = flags.GetString(flagChainBPortID)
 		chainBFaucet, _    = flags.GetString(flagChainBFaucet)
 		channelVersion, _  = flags.GetString(flagChannelVersion)
-		hermesVersion      = getVersion(flags)
 		customCfg          = getConfig(flags)
 	)
 
-	var (
-		hermesCfg *hermes.Config
-		err       error
-	)
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
+
+	var hermesCfg *hermes.Config
 	if customCfg != "" {
 		hermesCfg, err = hermes.LoadConfig(customCfg)
 		if err != nil {

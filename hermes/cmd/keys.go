@@ -13,12 +13,16 @@ import (
 
 func KeysAddMnemonicHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	var (
-		args          = cmd.Args
-		flags         = plugin.Flags(cmd.Flags)
-		hermesVersion = getVersion(flags)
-		session       = cliui.New()
+		args    = cmd.Args
+		flags   = plugin.Flags(cmd.Flags)
+		session = cliui.New()
 	)
 	defer session.End()
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
 
 	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
 	h, err := hermes.New(hermesVersion)
@@ -39,12 +43,16 @@ func KeysAddMnemonicHandler(ctx context.Context, cmd *plugin.ExecutedCommand) er
 
 func KeysAddFileHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	var (
-		args          = cmd.Args
-		flags         = plugin.Flags(cmd.Flags)
-		hermesVersion = getVersion(flags)
-		session       = cliui.New()
+		args    = cmd.Args
+		flags   = plugin.Flags(cmd.Flags)
+		session = cliui.New()
 	)
 	defer session.End()
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
 
 	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
 	h, err := hermes.New(hermesVersion)
@@ -65,12 +73,16 @@ func KeysAddFileHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error 
 
 func KeysListHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	var (
-		args          = cmd.Args
-		flags         = plugin.Flags(cmd.Flags)
-		hermesVersion = getVersion(flags)
-		session       = cliui.New()
+		args    = cmd.Args
+		flags   = plugin.Flags(cmd.Flags)
+		session = cliui.New()
 	)
 	defer session.End()
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
 
 	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
 	h, err := hermes.New(hermesVersion)
@@ -90,11 +102,15 @@ func KeysListHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 func KeysDeleteHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	var (
-		flags         = plugin.Flags(cmd.Flags)
-		hermesVersion = getVersion(flags)
-		session       = cliui.New()
+		flags   = plugin.Flags(cmd.Flags)
+		session = cliui.New()
 	)
 	defer session.End()
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
 
 	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))
 	h, err := hermes.New(hermesVersion)

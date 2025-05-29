@@ -13,10 +13,15 @@ import (
 
 func ExecuteHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	var (
-		flags         = plugin.Flags(cmd.Flags)
-		hermesVersion = getVersion(flags)
-		session       = cliui.New()
+		flags   = plugin.Flags(cmd.Flags)
+		session = cliui.New()
 	)
+
+	hermesVersion, err := getVersion(flags)
+	if err != nil {
+		return err
+	}
+
 	defer session.End()
 
 	session.StartSpinner(fmt.Sprintf("Fetching hermes binary %s", hermesVersion))

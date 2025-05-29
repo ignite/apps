@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	defaultVersion       = "v1.13.1"
+	DefaultVersion       = "v1.13.1"
 	apiURL               = "https://api.github.com/repos/informalsystems/hermes/releases/tags/"
 	binaryCacheDirectory = "apps/hermes/bin"
 )
@@ -62,7 +62,7 @@ func binCachePath(version string) (string, error) {
 	if err != nil {
 		return "", errors.Errorf("failed to get binary cache directory: %w", err)
 	}
-	return filepath.Join(cachePath, "hermes-"+version), nil
+	return filepath.Join(cachePath, version), nil
 }
 
 // hermesBin returns the path to the Hermes binary, downloading and extracting it if necessary.
@@ -109,6 +109,10 @@ func getHermesAssetURL(version string) (string, error) {
 		return "", errors.Errorf("failed to fetch release info: %w", err)
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode == http.StatusNotFound {
+		return "", errors.Errorf("Hermes %s not found", version)
+	}
 
 	if resp.StatusCode != http.StatusOK {
 		return "", errors.Errorf("GitHub API returned status: %d", resp.StatusCode)
@@ -207,7 +211,7 @@ func extractHermesBinary(tarGzPath, version string) (string, error) {
 // New returns a usable Hermes instance for the given version (or default version if empty).
 func New(version string) (*Hermes, error) {
 	if version == "" {
-		version = defaultVersion
+		version = DefaultVersion
 	}
 	binPath, err := hermesBin(version)
 	if err != nil {

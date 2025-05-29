@@ -25,6 +25,8 @@ import (
 	envtest "github.com/ignite/cli/v28/integration"
 	"github.com/stretchr/testify/require"
 	"gopkg.in/yaml.v3"
+
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 const (
@@ -420,6 +422,7 @@ func TestCustomIBCTx(t *testing.T) {
 				marsChainID,
 				marsRPC,
 				marsGRPC,
+				"--hermes-version", hermes.DefaultVersion,
 				"--chain-a-faucet", earthFaucet,
 				"--chain-b-faucet", marsFaucet,
 				"--chain-a-port-id", name,
