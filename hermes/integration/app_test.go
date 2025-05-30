@@ -287,16 +287,15 @@ func TestCustomIBCTx(t *testing.T) {
 	require.NoError(t, err)
 	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "hermes")
 
-	env.Must(env.Exec("install hermes app locally",
+	env.Must(env.Exec("install hermes locally",
 		step.NewSteps(step.New(
-			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
+			step.Exec(envtest.IgniteApp, "app", "install", "-g", pluginPath),
 			step.Workdir(app.SourcePath()),
 		)),
 	))
 
-	// One local plugin expected
-	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
-	assertGlobalPlugins(t, nil)
+	assertLocalPlugins(t, app, nil)
+	assertGlobalPlugins(t, []pluginsconfig.Plugin{{Path: pluginPath}})
 
 	// prepare the chain
 	env.Must(env.Exec("create an IBC module",
