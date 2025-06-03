@@ -1,12 +1,14 @@
 package cmd
 
 import (
+	"fmt"
 	"os"
+	"strings"
 
 	"github.com/spf13/cobra"
 
-	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	ignitecmd "github.com/ignite/cli/v29/ignite/cmd"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 
 	"github.com/ignite/apps/appregistry/pkg/xgithub"
 	"github.com/ignite/apps/appregistry/registry"
@@ -36,6 +38,12 @@ func installHandler(cmd *cobra.Command, args []string) error {
 	appDetails, err := registryQuerier.GetAppDetails(cmd.Context(), args[0], branch)
 	if err != nil {
 		return err
+	}
+
+	if !strings.HasPrefix(appDetails.App.PackageURL, fmt.Sprintf("github.com/%s/%s", registry.IgniteGitHubOrg, registry.IgniteAppsRepo)) {
+		if err := session.AskConfirm("You are about to install an app from outside the ignite apps repository. Do you want to continue?"); err != nil {
+			return err
+		}
 	}
 
 	// here we are using the ignite app install command to install the app
