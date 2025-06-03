@@ -41,7 +41,7 @@ func installHandler(cmd *cobra.Command, args []string) error {
 	}
 
 	if !strings.HasPrefix(appDetails.App.PackageURL, fmt.Sprintf("github.com/%s/%s", registry.IgniteGitHubOrg, registry.IgniteAppsRepo)) {
-		if err := session.AskConfirm("You are about to install an app from outside the ignite apps repository. Do you want to continue?"); err != nil {
+		if err := session.AskConfirm("You are about to install an app from the Ignite App Registry that is not maintained by Ignite. Do you want to continue?"); err != nil {
 			return err
 		}
 	}
