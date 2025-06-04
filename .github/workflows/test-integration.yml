@@ -67,11 +67,7 @@ jobs:
           GOTOOLCHAIN: local+path
           GOSUMDB: off
         run: |
-          if [[ "${{ matrix.test-path }}" == "appregistry" ]]; then
-            go test -race -failfast -v -timeout 120m ./integration/... -branch ${{ github.event.pull_request.head.ref }}
-          else
-            go test -race -failfast -v -timeout 120m ./integration/...
-          fi
+          go test -race -failfast -v -timeout 120m ./integration/...
         working-directory: ${{ matrix.test-path }}
 
   status:
