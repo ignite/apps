@@ -9,7 +9,7 @@ import (
 
 	"golang.org/x/mod/modfile"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
 // ValidateAppDetails validates the details of an Ignite app repository.

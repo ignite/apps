@@ -10,8 +10,8 @@ import (
 
 	"github.com/goccy/go-yaml"
 	"github.com/google/go-github/v56/github"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 	"golang.org/x/mod/modfile"
 
 	"github.com/ignite/apps/appregistry/pkg/xgithub"

@@ -7,14 +7,14 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 
 	"github.com/ignite/apps/appregistry/pkg/xgithub"
 )
 
 const (
-	igniteGitHubOrg  = "ignite"
-	igniteAppsRepo   = "apps"
+	IgniteGitHubOrg  = "ignite"
+	IgniteAppsRepo   = "apps"
 	registryDir      = "_registry"
 	igniteCLIPackage = "github.com/ignite/cli"
 )
@@ -33,8 +33,8 @@ func NewRegistryQuerier(client *xgithub.Client) *Querier {
 func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 	appsFiles, err := r.client.GetDirectoryFiles(
 		ctx,
-		igniteGitHubOrg,
-		igniteAppsRepo,
+		IgniteGitHubOrg,
+		IgniteAppsRepo,
 		registryDir,
 		xgithub.WithBranch(branch),
 	)
@@ -64,7 +64,7 @@ func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
 		branch = "main"
 	}
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", igniteGitHubOrg, igniteAppsRepo, branch, fileName))
+	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", IgniteGitHubOrg, IgniteAppsRepo, branch, fileName))
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}
