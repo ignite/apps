@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"net/mail"
 	"net/url"
+	"path"
 	"strings"
 
 	"github.com/Masterminds/semver"
@@ -73,8 +74,9 @@ type (
 
 	// App represents an Ignite application with its metadata.
 	App struct {
-		Name               Field        `json:"appName,omitempty"`
-		AppID              Field        `json:"appID,omitempty"`
+		Namespace          string       `json:"namespace,omitempty"`
+		Name               Field        `json:"appName"`
+		AppID              Field        `json:"appID"`
 		Description        Field        `json:"appDescription,omitempty"`
 		Ignite             Version      `json:"ignite,omitempty"`
 		Dependencies       Dependencies `json:"dependencies,omitempty"`
@@ -426,6 +428,10 @@ func (a App) Validate() error {
 		return errors.Wrapf(err, "invalid repository url %s", a.RepositoryURL)
 	}
 
+	if err := a.validateNamespace(); err != nil {
+		return errors.Wrapf(err, "invalid namespace %s", a.Namespace)
+	}
+
 	if err := a.DocumentationURL.Validate(); err != nil {
 		return errors.Wrapf(err, "invalid documentation url %s", a.DocumentationURL)
 	}
@@ -485,8 +491,23 @@ func (u URL) String() string {
 	return string(u)
 }
 
+func (a App) validateNamespace() error {
+	namespaceURL := strings.ReplaceAll(a.Namespace, ".", "/")
+	extNamespaceURL := path.Dir(namespaceURL)
+	if !strings.HasSuffix(a.RepositoryURL.String(), namespaceURL) &&
+		!strings.HasSuffix(a.RepositoryURL.String(), extNamespaceURL) {
+		return errors.Errorf("namespace (%s) name must with the repository URL (%s)", a.Namespace, a.RepositoryURL.String())
+	}
+	return nil
+}
+
+// namespaceFromFilePath returns the namespace based in the file path.
+func namespaceFromFilePath(filename string) string {
+	return strings.TrimSuffix(path.Base(filename), path.Ext(filename))
+}
+
 // AppFromFile reads and parses an App from a JSON file.
-func AppFromFile(r io.Reader) (*App, error) {
+func AppFromFile(namespace string, r io.Reader) (*App, error) {
 	body, err := io.ReadAll(r)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to read file content")
@@ -496,5 +517,6 @@ func AppFromFile(r io.Reader) (*App, error) {
 	if err := json.Unmarshal(body, &entry); err != nil {
 		return nil, errors.Wrap(err, "failed to unmarshal file")
 	}
+	entry.Namespace = namespace
 	return entry, nil
 }

@@ -70,5 +70,6 @@ func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
 	}
 	defer resp.Body.Close()
 
-	return AppFromFile(resp.Body)
+	namespace := namespaceFromFilePath(fileName)
+	return AppFromFile(namespace, resp.Body)
 }
