@@ -19,8 +19,9 @@ func (r Querier) ValidateAppDetails(ctx context.Context, appFile, branch string)
 		return errors.Wrapf(err, "failed to get %s file content", appFile)
 	}
 
-	// load app entry from file.
-	appEntry, err := AppFromFile(bytes.NewReader(appBytes))
+	// load app entry from the file.
+	namespace := namespaceFromFilePath(appFile)
+	appEntry, err := AppFromFile(namespace, bytes.NewReader(appBytes))
 	if err != nil {
 		return err
 	}
