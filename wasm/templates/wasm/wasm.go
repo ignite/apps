@@ -3,17 +3,18 @@ package wasm
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xast"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
-	"github.com/ignite/cli/v28/ignite/templates/module"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/templates/module"
 )
 
 const funcRegisterIBCWasm = `
@@ -46,15 +47,14 @@ type Options struct {
 
 // NewWasmGenerator returns the generator to scaffold a wasm integration inside an app.
 func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Generator, error) {
-	var (
-		g       = genny.New()
-		appWasm = xgenny.NewEmbedWalker(
-			fsAppWasm,
-			"files/",
-			opts.AppPath,
-		)
-	)
-	if err := g.Box(appWasm); err != nil {
+	appWasm, err := fs.Sub(fsAppWasm, "files")
+	if err != nil {
+		return nil, errors.Errorf("fail to generate sub: %w", err)
+	}
+
+	g := genny.New()
+
+	if err := g.OnlyFS(appWasm, nil, nil); err != nil {
 		return g, err
 	}
 
@@ -81,7 +81,7 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
+			xast.WithNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
 		)
 		if err != nil {
 			return err
@@ -118,8 +118,8 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
-			xast.WithLastNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
+			xast.WithNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
+			xast.WithNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
 		)
 		if err != nil {
 			return err
@@ -163,8 +163,8 @@ func ibcModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastImport("github.com/CosmWasm/wasmd/x/wasm"),
-			xast.WithLastNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
+			xast.WithImport("github.com/CosmWasm/wasmd/x/wasm"),
+			xast.WithNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
 		)
 		if err != nil {
 			return err
@@ -206,8 +206,8 @@ func cmdModify(opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastImport("github.com/CosmWasm/wasmd/x/wasm"),
-			xast.WithLastNamedImport("wasmcli", "github.com/CosmWasm/wasmd/x/wasm/client/cli"),
+			xast.WithImport("github.com/CosmWasm/wasmd/x/wasm"),
+			xast.WithNamedImport("wasmcli", "github.com/CosmWasm/wasmd/x/wasm/client/cli"),
 		)
 		if err != nil {
 			return err

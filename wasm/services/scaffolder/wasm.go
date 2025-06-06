@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 
 	"github.com/ignite/apps/wasm/pkg/config"
 	"github.com/ignite/apps/wasm/pkg/xgit"
