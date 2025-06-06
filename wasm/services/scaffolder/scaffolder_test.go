@@ -3,8 +3,8 @@ package scaffolder
 import (
 	"testing"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/stretchr/testify/require"
 )
 

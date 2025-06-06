@@ -6,9 +6,9 @@ import (
 	"os"
 
 	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 
 	"github.com/ignite/apps/wasm/pkg/config"
 	"github.com/ignite/apps/wasm/pkg/xgit"
@@ -139,7 +139,8 @@ After, run the "ignite wasm config" command to add the wasm config
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
-	sm, err := xgenny.RunWithValidation(tracer, g)
+
+	sm, err := xgenny.NewRunner(ctx, opts.AppPath).RunAndApply(g)
 	if err != nil {
 		return sm, err
 	}
