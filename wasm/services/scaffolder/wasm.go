@@ -139,7 +139,8 @@ After, run the "ignite wasm config" command to add the wasm config
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
-	sm, err := xgenny.RunWithValidation(tracer, g)
+
+	sm, err := xgenny.NewRunner(ctx, opts.AppPath).RunAndApply(g)
 	if err != nil {
 		return sm, err
 	}
