@@ -52,7 +52,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand, api plugin.Cli
 		return err
 	}
 
-	modificationsStr, err := sourceModificationToString(sm)
+	modificationsStr, err := sm.String()
 	if err != nil {
 		return err
 	}

@@ -21,16 +21,18 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 	tests := []struct {
 		name string
 		v    cosmosver.Version
+		want bool
 		err  error
 	}{
 		{
 			name: "Supported Cosmos SDK version (equal)",
 			v:    v0501,
+			want: true,
 		},
 		{
 			name: "Supported Cosmos SDK version (greater than)",
 			v:    v100,
-			err:  errors.Errorf("Cosmos SDK version %s is not supported yet.", v100),
+			want: false,
 		},
 		{
 			name: "Unsupported Cosmos SDK version",
@@ -45,13 +47,14 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			err := assertSupportedCosmosSDKVersion(tt.v)
+			got, err := assertSupportedCosmosSDKVersion(tt.v)
 			if tt.err != nil {
 				require.Error(t, err)
 				require.Equal(t, tt.err.Error(), err.Error())
 				return
 			}
 			require.NoError(t, err)
+			require.Equal(t, tt.want, got, "assertSupportedCosmosSDKVersion(%v)", tt.v)
 		})
 	}
 }
