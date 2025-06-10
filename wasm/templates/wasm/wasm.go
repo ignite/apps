@@ -17,7 +17,7 @@ import (
 	"github.com/ignite/cli/v29/ignite/templates/module"
 )
 
-const funcRegisterIBCWasm = `
+const funcRegisterIBCWasmLegacy = `
 	modules := map[string]appmodule.AppModule{
 		ibcexported.ModuleName:      ibc.AppModule{},
 		ibctransfertypes.ModuleName: ibctransfer.AppModule{},
@@ -35,6 +35,24 @@ const funcRegisterIBCWasm = `
 
 	return modules`
 
+const funcRegisterIBCWasm = `
+	modules := map[string]appmodule.AppModule{
+		ibcexported.ModuleName:      ibc.AppModule{},
+		ibctransfertypes.ModuleName: ibctransfer.AppModule{},
+		icatypes.ModuleName:         icamodule.AppModule{},
+		ibctm.ModuleName:            ibctm.AppModule{},
+		solomachine.ModuleName:      solomachine.AppModule{},
+		wasmtypes.ModuleName:        wasm.AppModule{},
+	}
+
+	for _, m := range modules {
+		if mr, ok := m.(module.AppModuleBasic); ok {
+			mr.RegisterInterfaces(cdc.InterfaceRegistry())
+		}
+	}
+
+	return modules`
+
 //go:embed files/* files/**/*
 var fsAppWasm embed.FS
 
@@ -43,6 +61,7 @@ type Options struct {
 	BinaryName string
 	AppPath    string
 	Home       string
+	Legacy     bool
 }
 
 // NewWasmGenerator returns the generator to scaffold a wasm integration inside an app.
@@ -128,11 +147,19 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		// Keeper declaration
 		template := `
 // CosmWasm
+WasmKeeper wasmkeeper.Keeper
+
+%[1]v`
+		templateLegacy := `
+// CosmWasm
 WasmKeeper       wasmkeeper.Keeper
 ScopedWasmKeeper capabilitykeeper.ScopedKeeper
 
 %[1]v`
 		replacement := fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
+		if opts.Legacy {
+			replacement = fmt.Sprintf(templateLegacy, module.PlaceholderSgAppKeeperDeclaration)
+		}
 		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
 
 		content, err = xast.ModifyFunction(content,
@@ -181,12 +208,11 @@ ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
 		replacementIBCModule := fmt.Sprintf(templateIBCModule, module.PlaceholderIBCNewModule)
 		content = replacer.Replace(content, module.PlaceholderIBCNewModule, replacementIBCModule)
 
-		content, err = xast.ModifyFunction(content,
-			"RegisterIBC",
-			xast.ReplaceFuncBody(
-				funcRegisterIBCWasm,
-			),
-		)
+		funcBody := funcRegisterIBCWasm
+		if opts.Legacy {
+			funcBody = funcRegisterIBCWasmLegacy
+		}
+		content, err = xast.ModifyFunction(content, "RegisterIBC", xast.ReplaceFuncBody(funcBody))
 		if err != nil {
 			return err
 		}
