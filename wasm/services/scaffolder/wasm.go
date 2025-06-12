@@ -152,10 +152,13 @@ After, run the "ignite wasm config" command to add the wasm config
 	}
 
 	opts := &wasm.Options{
-		BinaryName: binaryName,
-		AppPath:    path,
-		Home:       home,
-		Legacy:     legacyWasm,
+		BinaryName:         binaryName,
+		AppPath:            path,
+		Home:               home,
+		Legacy:             legacyWasm,
+		SimulationGasLimit: scaffoldingOpts.simulationGasLimit,
+		SmartQueryGasLimit: scaffoldingOpts.smartQueryGasLimit,
+		MemoryCacheSize:    scaffoldingOpts.memoryCacheSize,
 	}
 	g, err := wasm.NewWasmGenerator(tracer, opts)
 	if err != nil {

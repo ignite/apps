@@ -19,6 +19,27 @@ const (
 	statusAddingConfig = "Adding config..."
 )
 
+var cfgFlags = []*plugin.Flag{
+	{
+		Name:         flagSimulationGasLimit,
+		Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
+		DefaultValue: "0",
+		Type:         plugin.FlagTypeUint64,
+	},
+	{
+		Name:         flagSmartQueryGasLimit,
+		Usage:        "the max gas to be used in a smart query contract call",
+		DefaultValue: "3000000",
+		Type:         plugin.FlagTypeUint64,
+	},
+	{
+		Name:         flagMemoryCacheSize,
+		Usage:        "memory cache size in MiB not bytes",
+		DefaultValue: "100",
+		Type:         plugin.FlagTypeUint64,
+	},
+}
+
 // GetCommands returns the list of extension commands.
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
@@ -30,57 +51,20 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:   "add",
 					Short: "Add wasm support",
-					Flags: []*plugin.Flag{
-						{
-							Name:         flagSimulationGasLimit,
-							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
-							DefaultValue: "0",
-							Type:         plugin.FlagTypeUint64,
-						},
-						{
-							Name:         flagSmartQueryGasLimit,
-							Usage:        "the max gas to be used in a smart query contract call",
-							DefaultValue: "3000000",
-							Type:         plugin.FlagTypeUint64,
-						},
-						{
-							Name:         flagMemoryCacheSize,
-							Usage:        "memory cache size in MiB not bytes",
-							DefaultValue: "100",
-							Type:         plugin.FlagTypeUint64,
-						},
-						{
+					Flags: append(cfgFlags,
+						&plugin.Flag{
 							Name:         flagVersion,
 							Usage:        "wasmd semantic version",
 							Shorthand:    "v",
 							DefaultValue: scaffolder.DefaultWasmVersion.String(),
 							Type:         plugin.FlagTypeString,
 						},
-					},
+					),
 				},
 				{
 					Use:   "config",
 					Short: "Add wasm config support",
-					Flags: []*plugin.Flag{
-						{
-							Name:         flagSimulationGasLimit,
-							Usage:        "the max gas to be used in a tx simulation call. When not set the consensus max block gas is used instead",
-							DefaultValue: "0",
-							Type:         plugin.FlagTypeUint64,
-						},
-						{
-							Name:         flagSmartQueryGasLimit,
-							Usage:        "the max gas to be used in a smart query contract call",
-							DefaultValue: "3000000",
-							Type:         plugin.FlagTypeUint64,
-						},
-						{
-							Name:         flagMemoryCacheSize,
-							Usage:        "memory cache size in MiB not bytes",
-							DefaultValue: "100",
-							Type:         plugin.FlagTypeUint64,
-						},
-					},
+					Flags: cfgFlags,
 				},
 			},
 		},
@@ -123,7 +107,7 @@ func newChain(ctx context.Context, api plugin.ClientAPI, chainOption ...chain.Op
 		return nil, err
 	}
 
-	// Check if custom home is provided
+	// Check if a custom home is provided
 	if info.Home != "" {
 		chainOption = append(chainOption, chain.HomePath(info.Home))
 	}

@@ -49,23 +49,11 @@ func WithMemoryCacheSize(memoryCacheSize uint64) Option {
 	}
 }
 
-// AddWasm add wasm parameters to the chain TOML config.
-func AddWasm(configPath string, options ...Option) error {
+func New(options ...Option) string {
 	// Create the options.
 	opts := newOptions()
 	for _, apply := range options {
 		apply(&opts)
-	}
-
-	f, err := os.OpenFile(configPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
-	if err != nil {
-		return err
-	}
-	defer f.Close()
-
-	// Check if the wasm section already exist.
-	if hasWasm(configPath) {
-		return errors.Errorf("config file already have wasm %s", configPath)
 	}
 
 	// Add default configs.
@@ -76,8 +64,27 @@ func AddWasm(configPath string, options ...Option) error {
 	config.SmartQueryGasLimit = opts.smartQueryGasLimit
 	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
+	return wasmtypes.ConfigTemplate(config)
+}
+
+// AddWasm add wasm parameters to the chain TOML config.
+func AddWasm(configPath string, options ...Option) error {
+	f, err := os.OpenFile(configPath, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0o600)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+
+	// Check if the wasm section already exists.
+	if hasWasm(configPath) {
+		return errors.Errorf("config file already have wasm %s", configPath)
+	}
+
+	// Create the config with the provided options.
+	cfg := New(options...)
+
 	// Save new configs to the TOML file.
-	if _, err = f.WriteString(wasmtypes.ConfigTemplate(config)); err != nil {
+	if _, err = f.WriteString(cfg); err != nil {
 		return err
 	}
 

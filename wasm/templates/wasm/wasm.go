@@ -15,6 +15,8 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 	"github.com/ignite/cli/v29/ignite/templates/module"
+
+	"github.com/ignite/apps/wasm/pkg/config"
 )
 
 const funcRegisterIBCWasmLegacy = `
@@ -58,10 +60,13 @@ var fsAppWasm embed.FS
 
 // Options wasm scaffold options.
 type Options struct {
-	BinaryName string
-	AppPath    string
-	Home       string
-	Legacy     bool
+	BinaryName         string
+	AppPath            string
+	Home               string
+	Legacy             bool
+	SimulationGasLimit uint64
+	SmartQueryGasLimit uint64
+	MemoryCacheSize    uint64
 }
 
 // NewWasmGenerator returns the generator to scaffold a wasm integration inside an app.
@@ -121,6 +126,17 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 %[1]v`
 		replacement = fmt.Sprintf(template, module.PlaceholderSgAppMaccPerms)
 		content = replacer.Replace(content, module.PlaceholderSgAppMaccPerms, replacement)
+
+		// Wasm configs
+		funcBody := config.New(
+			config.WithSimulationGasLimit(opts.SimulationGasLimit),
+			config.WithSmartQueryGasLimit(opts.SmartQueryGasLimit),
+			config.WithMemoryCacheSize(opts.MemoryCacheSize),
+		)
+		content, err = xast.ModifyFunction(content, "initAppConfig", xast.AppendFuncCode(funcBody))
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
