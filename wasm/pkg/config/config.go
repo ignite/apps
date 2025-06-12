@@ -58,7 +58,9 @@ func New(options ...Option) string {
 
 	// Add default configs.
 	config := wasmtypes.DefaultNodeConfig()
-	config.SimulationGasLimit = &opts.simulationGasLimit
+	if opts.simulationGasLimit != 0 {
+		config.SimulationGasLimit = &opts.simulationGasLimit
+	}
 	config.SmartQueryGasLimit = opts.smartQueryGasLimit
 	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
