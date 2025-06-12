@@ -9,7 +9,7 @@ import (
 )
 
 type (
-	// options represents configuration for the wasm config.
+	// options represent configuration for the wasm config.
 	options struct {
 		simulationGasLimit uint64
 		smartQueryGasLimit uint64
@@ -58,9 +58,7 @@ func New(options ...Option) string {
 
 	// Add default configs.
 	config := wasmtypes.DefaultNodeConfig()
-	if opts.simulationGasLimit != 0 {
-		config.SimulationGasLimit = &opts.simulationGasLimit
-	}
+	config.SimulationGasLimit = &opts.simulationGasLimit
 	config.SmartQueryGasLimit = opts.smartQueryGasLimit
 	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
