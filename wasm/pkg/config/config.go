@@ -63,7 +63,7 @@ func New(options ...Option) string {
 	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
 	tpl := wasmtypes.ConfigTemplate(config)
-	return strings.TrimSpace(tpl)
+	return "\n" + strings.TrimSpace(tpl)
 }
 
 // AddWasm add wasm parameters to the chain TOML config.
