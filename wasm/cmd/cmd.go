@@ -53,7 +53,7 @@ func GetCommands() []*plugin.Command {
 							Name:         flagVersion,
 							Usage:        "wasmd semantic version",
 							Shorthand:    "v",
-							DefaultValue: scaffolder.DefaultWasmVersion,
+							DefaultValue: scaffolder.DefaultWasmVersion.String(),
 							Type:         plugin.FlagTypeString,
 						},
 					},

@@ -135,30 +135,39 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 			return err
 		}
 
-		// Import
-		content, err := xast.AppendImports(f.String(),
+		imports := []xast.ImportOptions{
 			xast.WithNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
 			xast.WithNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
-		)
+		}
+		// Adds feegrantkeeper import if not already present
+		if !opts.Legacy && !strings.Contains(f.String(), "feegrantkeeper") {
+			imports = append(imports, xast.WithNamedImport("feegrantkeeper", "cosmossdk.io/x/feegrant/keeper"))
+		}
+		// Import
+		content, err := xast.AppendImports(f.String(), imports...)
 		if err != nil {
 			return err
 		}
 
 		// Keeper declaration
-		template := `
-// CosmWasm
-WasmKeeper wasmkeeper.Keeper
-
-%[1]v`
 		templateLegacy := `
 // CosmWasm
 WasmKeeper       wasmkeeper.Keeper
 ScopedWasmKeeper capabilitykeeper.ScopedKeeper
 
 %[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
-		if opts.Legacy {
-			replacement = fmt.Sprintf(templateLegacy, module.PlaceholderSgAppKeeperDeclaration)
+		template := `
+// CosmWasm
+WasmKeeper wasmkeeper.Keeper
+
+%[1]v`
+		replacement := fmt.Sprintf(templateLegacy, module.PlaceholderSgAppKeeperDeclaration)
+		if !opts.Legacy {
+			// Adds feegrantkeeper.Keeper if not already present
+			if !strings.Contains(content, "feegrantkeeper.Keeper") {
+				template = fmt.Sprintf("FeeGrantKeeper feegrantkeeper.Keeper\n\n%[1]v", template)
+			}
+			replacement = fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
 		}
 		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
 

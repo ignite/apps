@@ -9,19 +9,8 @@ import (
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosanalysis"
-	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v29/ignite/services/chain"
-)
-
-const (
-	LegacyWasmVersion  = "v0.54.0"
-	DefaultWasmVersion = "v0.60.0"
-
-	errOldCosmosSDKVersionStr = `Your chain has been scaffolded with an older version of Cosmos SDK: %s
-
-Please, follow the migration guide to upgrade your chain to the latest version at https://docs.ignite.com/migration`
 )
 
 // Scaffolder is Wasm app scaffolder.
@@ -35,10 +24,6 @@ func New(c *chain.Chain, session *cliui.Session) (Scaffolder, error) {
 	if err := cosmosanalysis.IsChainPath(c.AppPath()); err != nil {
 		return Scaffolder{}, err
 	}
-	_, err := assertSupportedCosmosSDKVersion(c.Version)
-	if err != nil {
-		return Scaffolder{}, err
-	}
 	return Scaffolder{chain: c, session: session}, nil
 }
 
@@ -49,18 +34,6 @@ func hasWasm(appPath string) bool {
 	}
 
 	return false
-}
-
-// assertSupportedCosmosSDKVersion asserts that a Cosmos SDK version is supported by the Wasm App.
-func assertSupportedCosmosSDKVersion(v cosmosver.Version) (legacy bool, err error) {
-	switch {
-	case v.LT(cosmosver.StargateFiftyVersion):
-		return false, errors.Errorf(errOldCosmosSDKVersionStr, v)
-	case v.LT(cosmosver.StargateFiftyThreeVersion):
-		return true, nil
-	default:
-		return false, nil
-	}
 }
 
 // finish finalize the scaffolded code downloading the wasm and formatting the code.
