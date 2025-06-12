@@ -201,11 +201,19 @@ WasmKeeper wasmkeeper.Keeper
 		}
 		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
 
-		content, err = xast.ModifyFunction(content,
-			"New",
+		funcModifiers := []xast.FunctionOptions{
 			xast.AppendFuncCode(`if err := app.WasmKeeper.InitializePinnedCodes(app.NewUncachedContext(true, tmproto.Header{})); err != nil {
 		panic(err)
-	}`))
+	}`),
+		}
+
+		if !opts.Legacy {
+			funcModifiers = append(
+				funcModifiers,
+				xast.AppendInsideFuncCall("Inject", "&app.FeeGrantKeeper", -1),
+			)
+		}
+		content, err = xast.ModifyFunction(content, "New", funcModifiers...)
 		if err != nil {
 			return err
 		}
