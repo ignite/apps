@@ -62,7 +62,7 @@ var fsAppWasm embed.FS
 type Options struct {
 	BinaryName         string
 	AppPath            string
-	Legacy             bool
+	Legacy             bool // TODO: remove it after this one https://github.com/ignite/apps/issues/206
 	SimulationGasLimit uint64
 	SmartQueryGasLimit uint64
 	MemoryCacheSize    uint64
