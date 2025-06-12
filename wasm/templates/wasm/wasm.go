@@ -62,7 +62,6 @@ var fsAppWasm embed.FS
 type Options struct {
 	BinaryName         string
 	AppPath            string
-	Home               string
 	Legacy             bool
 	SimulationGasLimit uint64
 	SmartQueryGasLimit uint64
@@ -86,12 +85,38 @@ func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Gene
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
+	g.RunFn(cmdConfigModify(opts))
 	g.RunFn(appModify(replacer, opts))
 	g.RunFn(appConfigModify(replacer, opts))
 	g.RunFn(ibcModify(replacer, opts))
 	g.RunFn(cmdModify(opts))
 
 	return g, nil
+}
+
+// cmdConfigModify cmd/config.go modification when adding wasm integration.
+func cmdConfigModify(opts *Options) genny.RunFn {
+	return func(r *genny.Runner) error {
+		configPath := filepath.Join(opts.AppPath, "cmd", opts.BinaryName, "cmd/config.go")
+		f, err := r.Disk.Find(configPath)
+		if err != nil {
+			return err
+		}
+
+		// Wasm configs
+		funcBody := config.SetToCustomTemplate(config.New(
+			config.WithSimulationGasLimit(opts.SimulationGasLimit),
+			config.WithSmartQueryGasLimit(opts.SmartQueryGasLimit),
+			config.WithMemoryCacheSize(opts.MemoryCacheSize),
+		))
+
+		content, err := xast.ModifyFunction(f.String(), "initAppConfig", xast.AppendFuncCode(funcBody))
+		if err != nil {
+			return err
+		}
+
+		return r.File(genny.NewFileS(configPath, content))
+	}
 }
 
 // appConfigModify app_config.go modification when adding wasm integration.
@@ -126,17 +151,6 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 %[1]v`
 		replacement = fmt.Sprintf(template, module.PlaceholderSgAppMaccPerms)
 		content = replacer.Replace(content, module.PlaceholderSgAppMaccPerms, replacement)
-
-		// Wasm configs
-		funcBody := config.New(
-			config.WithSimulationGasLimit(opts.SimulationGasLimit),
-			config.WithSmartQueryGasLimit(opts.SmartQueryGasLimit),
-			config.WithMemoryCacheSize(opts.MemoryCacheSize),
-		)
-		content, err = xast.ModifyFunction(content, "initAppConfig", xast.AppendFuncCode(funcBody))
-		if err != nil {
-			return err
-		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}

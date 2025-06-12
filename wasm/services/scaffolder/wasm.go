@@ -3,7 +3,6 @@ package scaffolder
 import (
 	"context"
 	"fmt"
-	"os"
 
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
@@ -11,7 +10,6 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 
-	"github.com/ignite/apps/wasm/pkg/config"
 	"github.com/ignite/apps/wasm/pkg/xgit"
 	"github.com/ignite/apps/wasm/templates/wasm"
 )
@@ -116,35 +114,6 @@ func (s Scaffolder) AddWasm(
 		return xgenny.SourceModification{}, errors.Errorf("wasm integration already exist for path %s", path)
 	}
 
-	// Prepare scaffold.
-	home, err := s.chain.Home()
-	if err != nil {
-		return xgenny.SourceModification{}, err
-	}
-
-	appTOMLPath, err := s.chain.AppTOMLPath()
-	if err != nil {
-		return xgenny.SourceModification{}, err
-	}
-	if _, err := os.Stat(appTOMLPath); os.IsNotExist(err) {
-		s.session.Printf(`Cannot find the chain config. If the chain %[1]v is not initialized yet, run "%[1]vd init" or "ignite chain serve" to init the chain. 
-After, run the "ignite wasm config" command to add the wasm config
-
-`,
-			s.chain.Name(),
-		)
-	} else if err == nil {
-		// Add wasm options to the chain config.
-		if err := config.AddWasm(
-			appTOMLPath,
-			config.WithSimulationGasLimit(scaffoldingOpts.simulationGasLimit),
-			config.WithSmartQueryGasLimit(scaffoldingOpts.smartQueryGasLimit),
-			config.WithMemoryCacheSize(scaffoldingOpts.memoryCacheSize),
-		); err != nil {
-			return xgenny.SourceModification{}, err
-		}
-	}
-
 	// Scaffold wasm changes.
 	binaryName, err := s.chain.Binary()
 	if err != nil {
@@ -154,7 +123,6 @@ After, run the "ignite wasm config" command to add the wasm config
 	opts := &wasm.Options{
 		BinaryName:         binaryName,
 		AppPath:            path,
-		Home:               home,
 		Legacy:             legacyWasm,
 		SimulationGasLimit: scaffoldingOpts.simulationGasLimit,
 		SmartQueryGasLimit: scaffoldingOpts.smartQueryGasLimit,

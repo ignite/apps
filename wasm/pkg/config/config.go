@@ -64,7 +64,8 @@ func New(options ...Option) string {
 	config.SmartQueryGasLimit = opts.smartQueryGasLimit
 	config.MemoryCacheSize = uint32(opts.memoryCacheSize)
 
-	return wasmtypes.ConfigTemplate(config)
+	tpl := wasmtypes.ConfigTemplate(config)
+	return strings.TrimSpace(tpl)
 }
 
 // AddWasm add wasm parameters to the chain TOML config.
@@ -89,6 +90,11 @@ func AddWasm(configPath string, options ...Option) error {
 	}
 
 	return nil
+}
+
+// SetToCustomTemplate formats the given text to be used as a custom template in the TOML config.
+func SetToCustomTemplate(text string) string {
+	return "customAppTemplate += `" + text + "`"
 }
 
 // hasWasm check if the TOML config already have the wasm section.
