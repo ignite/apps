@@ -94,7 +94,13 @@ func (s Scaffolder) AddWasm(
 		apply(&scaffoldingOpts)
 	}
 
-	// Check if the wasm version exist
+	// check if the wasm version is valid and compatible with the SDK.
+	legacyWasm, err := assertVersions(scaffoldingOpts.wasmVersion, s.chain.Version)
+	if err != nil {
+		return xgenny.SourceModification{}, err
+	}
+
+	// Check if the wasm version exists.
 	versions, err := xgit.FetchGitTags(fmt.Sprintf("https://%s", wasmRepo))
 	if err != nil {
 		return xgenny.SourceModification{}, err
@@ -141,12 +147,6 @@ After, run the "ignite wasm config" command to add the wasm config
 
 	// Scaffold wasm changes.
 	binaryName, err := s.chain.Binary()
-	if err != nil {
-		return xgenny.SourceModification{}, err
-	}
-
-	// Scaffold wasm changes.
-	legacyWasm, err := assertVersions(scaffoldingOpts.wasmVersion, s.chain.Version)
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
