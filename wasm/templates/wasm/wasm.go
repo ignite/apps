@@ -3,20 +3,23 @@ package wasm
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xast"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
-	"github.com/ignite/cli/v28/ignite/templates/module"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/templates/module"
+
+	"github.com/ignite/apps/wasm/pkg/config"
 )
 
-const funcRegisterIBCWasm = `
+const funcRegisterIBCWasmLegacy = `
 	modules := map[string]appmodule.AppModule{
 		ibcexported.ModuleName:      ibc.AppModule{},
 		ibctransfertypes.ModuleName: ibctransfer.AppModule{},
@@ -34,27 +37,47 @@ const funcRegisterIBCWasm = `
 
 	return modules`
 
+const funcRegisterIBCWasm = `
+	modules := map[string]appmodule.AppModule{
+		ibcexported.ModuleName:      ibc.AppModule{},
+		ibctransfertypes.ModuleName: ibctransfer.AppModule{},
+		icatypes.ModuleName:         icamodule.AppModule{},
+		ibctm.ModuleName:            ibctm.AppModule{},
+		solomachine.ModuleName:      solomachine.AppModule{},
+		wasmtypes.ModuleName:        wasm.AppModule{},
+	}
+
+	for _, m := range modules {
+		if mr, ok := m.(module.AppModuleBasic); ok {
+			mr.RegisterInterfaces(cdc.InterfaceRegistry())
+		}
+	}
+
+	return modules`
+
 //go:embed files/* files/**/*
 var fsAppWasm embed.FS
 
 // Options wasm scaffold options.
 type Options struct {
-	BinaryName string
-	AppPath    string
-	Home       string
+	BinaryName         string
+	AppPath            string
+	Legacy             bool // TODO: remove it after this one https://github.com/ignite/apps/issues/206
+	SimulationGasLimit uint64
+	SmartQueryGasLimit uint64
+	MemoryCacheSize    uint64
 }
 
 // NewWasmGenerator returns the generator to scaffold a wasm integration inside an app.
 func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Generator, error) {
-	var (
-		g       = genny.New()
-		appWasm = xgenny.NewEmbedWalker(
-			fsAppWasm,
-			"files/",
-			opts.AppPath,
-		)
-	)
-	if err := g.Box(appWasm); err != nil {
+	appWasm, err := fs.Sub(fsAppWasm, "files")
+	if err != nil {
+		return nil, errors.Errorf("fail to generate sub: %w", err)
+	}
+
+	g := genny.New()
+
+	if err := g.OnlyFS(appWasm, nil, nil); err != nil {
 		return g, err
 	}
 
@@ -62,12 +85,38 @@ func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Gene
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
+	g.RunFn(cmdConfigModify(opts))
 	g.RunFn(appModify(replacer, opts))
 	g.RunFn(appConfigModify(replacer, opts))
 	g.RunFn(ibcModify(replacer, opts))
 	g.RunFn(cmdModify(opts))
 
 	return g, nil
+}
+
+// cmdConfigModify cmd/config.go modification when adding wasm integration.
+func cmdConfigModify(opts *Options) genny.RunFn {
+	return func(r *genny.Runner) error {
+		configPath := filepath.Join(opts.AppPath, "cmd", opts.BinaryName, "cmd/config.go")
+		f, err := r.Disk.Find(configPath)
+		if err != nil {
+			return err
+		}
+
+		// Wasm configs
+		funcBody := config.SetToCustomTemplate(config.New(
+			config.WithSimulationGasLimit(opts.SimulationGasLimit),
+			config.WithSmartQueryGasLimit(opts.SmartQueryGasLimit),
+			config.WithMemoryCacheSize(opts.MemoryCacheSize),
+		))
+
+		content, err := xast.ModifyFunction(f.String(), "initAppConfig", xast.AppendFuncCode(funcBody))
+		if err != nil {
+			return err
+		}
+
+		return r.File(genny.NewFileS(configPath, content))
+	}
 }
 
 // appConfigModify app_config.go modification when adding wasm integration.
@@ -81,7 +130,7 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
+			xast.WithNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
 		)
 		if err != nil {
 			return err
@@ -116,30 +165,55 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 			return err
 		}
 
+		imports := []xast.ImportOptions{
+			xast.WithNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
+			xast.WithNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
+		}
+		// Adds feegrantkeeper import if not already present
+		if !opts.Legacy && !strings.Contains(f.String(), "feegrantkeeper") {
+			imports = append(imports, xast.WithNamedImport("feegrantkeeper", "cosmossdk.io/x/feegrant/keeper"))
+		}
 		// Import
-		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
-			xast.WithLastNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
-		)
+		content, err := xast.AppendImports(f.String(), imports...)
 		if err != nil {
 			return err
 		}
 
 		// Keeper declaration
-		template := `
+		templateLegacy := `
 // CosmWasm
 WasmKeeper       wasmkeeper.Keeper
 ScopedWasmKeeper capabilitykeeper.ScopedKeeper
 
 %[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
+		template := `
+// CosmWasm
+WasmKeeper wasmkeeper.Keeper
+
+%[1]v`
+		replacement := fmt.Sprintf(templateLegacy, module.PlaceholderSgAppKeeperDeclaration)
+		if !opts.Legacy {
+			// Adds feegrantkeeper.Keeper if not already present
+			if !strings.Contains(content, "feegrantkeeper.Keeper") {
+				template = fmt.Sprintf("FeeGrantKeeper feegrantkeeper.Keeper\n\n%[1]v", template)
+			}
+			replacement = fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
+		}
 		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
 
-		content, err = xast.ModifyFunction(content,
-			"New",
+		funcModifiers := []xast.FunctionOptions{
 			xast.AppendFuncCode(`if err := app.WasmKeeper.InitializePinnedCodes(app.NewUncachedContext(true, tmproto.Header{})); err != nil {
 		panic(err)
-	}`))
+	}`),
+		}
+
+		if !opts.Legacy {
+			funcModifiers = append(
+				funcModifiers,
+				xast.AppendInsideFuncCall("Inject", "&app.FeeGrantKeeper", -1),
+			)
+		}
+		content, err = xast.ModifyFunction(content, "New", funcModifiers...)
 		if err != nil {
 			return err
 		}
@@ -163,8 +237,8 @@ func ibcModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastImport("github.com/CosmWasm/wasmd/x/wasm"),
-			xast.WithLastNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
+			xast.WithImport("github.com/CosmWasm/wasmd/x/wasm"),
+			xast.WithNamedImport("wasmtypes", "github.com/CosmWasm/wasmd/x/wasm/types"),
 		)
 		if err != nil {
 			return err
@@ -181,12 +255,11 @@ ibcRouter.AddRoute(wasmtypes.ModuleName, wasmStack)
 		replacementIBCModule := fmt.Sprintf(templateIBCModule, module.PlaceholderIBCNewModule)
 		content = replacer.Replace(content, module.PlaceholderIBCNewModule, replacementIBCModule)
 
-		content, err = xast.ModifyFunction(content,
-			"RegisterIBC",
-			xast.ReplaceFuncBody(
-				funcRegisterIBCWasm,
-			),
-		)
+		funcBody := funcRegisterIBCWasm
+		if opts.Legacy {
+			funcBody = funcRegisterIBCWasmLegacy
+		}
+		content, err = xast.ModifyFunction(content, "RegisterIBC", xast.ReplaceFuncBody(funcBody))
 		if err != nil {
 			return err
 		}
@@ -206,8 +279,8 @@ func cmdModify(opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastImport("github.com/CosmWasm/wasmd/x/wasm"),
-			xast.WithLastNamedImport("wasmcli", "github.com/CosmWasm/wasmd/x/wasm/client/cli"),
+			xast.WithImport("github.com/CosmWasm/wasmd/x/wasm"),
+			xast.WithNamedImport("wasmcli", "github.com/CosmWasm/wasmd/x/wasm/client/cli"),
 		)
 		if err != nil {
 			return err
