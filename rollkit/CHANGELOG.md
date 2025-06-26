@@ -8,6 +8,7 @@
 * [#192](https://github.com/ignite/apps/pull/192) Upgrade Rollkit to `v1.x` and use [`go-execution-abci`](https://github.com/rollkit/go-execution-abci) instead of [`cosmos-sdk-starter`](https://github.com/rollkit/cosmos-sdk-starter).
   * Note, if you already have rollkit installed, you need to redo the wiring manually.
 * [#194](https://github.com/ignite/apps/pull/194) Uniform the flag addition with other apps.
+* [#209](https://github.com/ignite/apps/pull/209) Wire `MigrateToRollkitCmd` in the scaffolded app.
 
 ## [`v0.2.3`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.3)
 

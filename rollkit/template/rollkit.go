@@ -143,6 +143,9 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 				args[0] = "genesisCmd"
 			}
 
+			// add migrate command
+			args = append(args, rollkitV1MigrateCmd)
+
 			return args, nil
 		})
 
