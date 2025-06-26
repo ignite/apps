@@ -63,7 +63,6 @@ func GetHooks() []*plugin.Hook {
 				{
 					Name:         flagVersion,
 					Usage:        "fee abstraction semantic version",
-					Shorthand:    "v",
 					DefaultValue: defaultFeeAbsVersion,
 					Type:         plugin.FlagTypeString,
 				},
