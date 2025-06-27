@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"fmt"
-
 	"github.com/ignite/cli/v28/ignite/services/plugin"
 )
 
 // GetCommands returns the list of app commands.
-func GetCommands(availableChains []string) []*plugin.Command {
+func GetCommands() []*plugin.Command {
 	cmd := []*plugin.Command{
 		{
 			Use:     "connect [command]",
@@ -36,15 +34,6 @@ func GetCommands(availableChains []string) []*plugin.Command {
 				},
 			},
 		},
-	}
-
-	for _, name := range availableChains {
-		cmd[0].Commands = append(cmd[0].Commands,
-			&plugin.Command{
-				Use:   name,
-				Short: fmt.Sprintf("Commands for %s chain", name),
-			},
-		)
 	}
 
 	return cmd
