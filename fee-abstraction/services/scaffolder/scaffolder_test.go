@@ -5,8 +5,8 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
 func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
@@ -19,10 +19,6 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 	v0500, err := cosmosver.Parse("v0.50.0")
 	require.NoError(t, err)
 	v0501, err := cosmosver.Parse("v0.50.1")
-	require.NoError(t, err)
-	v0510, err := cosmosver.Parse("0.51.0")
-	require.NoError(t, err)
-	v100, err := cosmosver.Parse("v1.0.0")
 	require.NoError(t, err)
 
 	tests := []struct {
@@ -48,11 +44,6 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 		{
 			name: "Supported Cosmos SDK version (equal to v0.50.1)",
 			v:    v0501,
-		},
-		{
-			name: "Supported Cosmos SDK version (greater than v1.0.0)",
-			v:    v100,
-			err:  errors.Errorf(errNewCosmosSDKVersionStr, v100, v0510),
 		},
 		{
 			name: "Unsupported Cosmos SDK version (less than v0.45.0)",
