@@ -5,10 +5,10 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	"github.com/ignite/cli/v28/ignite/services/scaffolder"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/scaffolder"
 
 	"github.com/ignite/apps/cca/templates"
 )
@@ -40,7 +40,7 @@ func ExecuteScaffold(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	sc, err := scaffolder.New(absPath)
+	sc, err := scaffolder.New(ctx, absPath, "proto")
 	if err != nil {
 		return err
 	}

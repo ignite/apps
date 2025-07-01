@@ -3,13 +3,12 @@ package cmd
 import (
 	"path/filepath"
 
-	"github.com/ignite/cli/v28/ignite/config"
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/ignite/cli/v28/ignite/pkg/events"
-	"github.com/ignite/cli/v28/ignite/pkg/gitpod"
+	"github.com/ignite/cli/v29/ignite/config"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
@@ -230,13 +229,6 @@ func getNetworkCosmosClient(cmd *cobra.Command) (cosmosclient.Client, error) {
 	}
 
 	keyringBackend := getKeyringBackend(cmd)
-	// use test keyring backend on Gitpod in order to prevent prompting for keyring
-	// password. This happens because Gitpod uses containers.
-	//
-	// when not on Gitpod, OS keyring backend is used which only asks password once.
-	if gitpod.IsOnGitpod() {
-		keyringBackend = cosmosaccount.KeyringTest
-	}
 	if keyringBackend != "" {
 		cosmosOptions = append(cosmosOptions, cosmosclient.WithKeyringBackend(keyringBackend))
 	}

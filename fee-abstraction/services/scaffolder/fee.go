@@ -6,9 +6,9 @@ import (
 	"path/filepath"
 
 	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 
 	"github.com/ignite/apps/fee-abstraction/pkg/xgit"
 	"github.com/ignite/apps/fee-abstraction/template"
@@ -83,12 +83,14 @@ func (s Scaffolder) AddFeeAbstraction(
 		AppPath:    path,
 		Home:       home,
 	}
-	g, err := template.NewFeeAbstractionGenerator(tracer, opts)
+
+	runner := xgenny.NewRunner(ctx, path)
+	g, err := template.NewFeeAbstractionGenerator(runner.Tracer(), opts)
 	if err != nil {
 		return xgenny.SourceModification{}, err
 	}
 
-	sm, err := xgenny.RunWithValidation(tracer, g)
+	sm, err := runner.RunAndApply(g)
 	if err != nil {
 		return sm, err
 	}

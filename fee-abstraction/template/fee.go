@@ -3,15 +3,16 @@ package template
 import (
 	"embed"
 	"fmt"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xast"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
-	"github.com/ignite/cli/v28/ignite/templates/module"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
+	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/templates/module"
 )
 
 const funcRegisterIBCFeeAbs = `
@@ -44,15 +45,13 @@ var fsAppFeeAbs embed.FS
 
 // NewFeeAbstractionGenerator returns the generator to scaffold a fee abstraction integration inside an app.
 func NewFeeAbstractionGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Generator, error) {
-	var (
-		g         = genny.New()
-		appFeeAbs = xgenny.NewEmbedWalker(
-			fsAppFeeAbs,
-			"files/",
-			opts.AppPath,
-		)
-	)
-	if err := g.Box(appFeeAbs); err != nil {
+	appFeeAbs, err := fs.Sub(fsAppFeeAbs, "files")
+	if err != nil {
+		return nil, fmt.Errorf("fail to generate sub: %w", err)
+	}
+
+	g := genny.New()
+	if err := g.OnlyFS(appFeeAbs, nil, nil); err != nil {
 		return g, err
 	}
 
@@ -78,7 +77,7 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("feeabskeeper", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/keeper"),
+			xast.WithNamedImport("feeabskeeper", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/keeper"),
 		)
 		if err != nil {
 			return err
@@ -109,7 +108,7 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("feeabstypes", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/types"),
+			xast.WithNamedImport("feeabstypes", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/types"),
 		)
 		if err != nil {
 			return err
@@ -146,8 +145,8 @@ func ibcModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		// Import
 		content, err := xast.AppendImports(f.String(),
-			xast.WithLastNamedImport("feeabsmodule", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs"),
-			xast.WithLastNamedImport("feeabstypes", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/types"),
+			xast.WithNamedImport("feeabsmodule", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs"),
+			xast.WithNamedImport("feeabstypes", "github.com/osmosis-labs/fee-abstraction/v8/x/feeabs/types"),
 		)
 		if err != nil {
 			return err

@@ -167,7 +167,7 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		imports := []xast.ImportOptions{
 			xast.WithNamedImport("wasmkeeper", "github.com/CosmWasm/wasmd/x/wasm/keeper"),
-			xast.WithNamedImport("tmproto", "github.com/cometbft/cometbft/proto/tendermint/types"),
+			xast.WithNamedImport("tmproto", "github.com/cometbft/cometbft/proto/cometbft/types"),
 		}
 		// Adds feegrantkeeper import if not already present
 		if !opts.Legacy && !strings.Contains(f.String(), "feegrantkeeper") {

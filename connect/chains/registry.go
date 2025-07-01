@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
+	"github.com/ignite/cli/v29/ignite/pkg/chainregistry"
 )
 
 const (

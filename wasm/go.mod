@@ -5,7 +5,7 @@ go 1.24.3
 require (
 	github.com/CosmWasm/wasmd v0.55.0
 	github.com/blang/semver/v4 v4.0.0
-	github.com/go-git/go-git/v5 v5.16.1
+	github.com/go-git/go-git/v5 v5.16.2
 	github.com/gobuffalo/genny/v2 v2.1.1
 	github.com/gobuffalo/plush/v4 v4.1.22
 	github.com/hashicorp/go-plugin v1.6.3

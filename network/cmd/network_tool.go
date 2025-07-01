@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/ignite/cli/v29/ignite/pkg/ctxticker"
 	"github.com/spf13/cobra"
 	"golang.org/x/sync/errgroup"
 
-	"github.com/ignite/cli/v28/ignite/pkg/ctxticker"
-	"github.com/ignite/cli/v28/ignite/pkg/xchisel"
-
 	"github.com/ignite/apps/network/network/networkchain"
+	"github.com/ignite/apps/network/network/xchisel"
 )
 
 func NewNetworkTool() *cobra.Command {

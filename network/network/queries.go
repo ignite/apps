@@ -7,7 +7,7 @@ import (
 	"sync"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/ignite/cli/v28/ignite/pkg/events"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
 	launchtypes "github.com/ignite/network/x/launch/types"
 	projecttypes "github.com/ignite/network/x/project/types"
 	rewardtypes "github.com/ignite/network/x/reward/types"
