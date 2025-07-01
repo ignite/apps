@@ -2,13 +2,14 @@ package script
 
 import (
 	"embed"
+	"io/fs"
 	"path/filepath"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
 //go:embed files/*
@@ -16,16 +17,14 @@ var fsRunScript embed.FS
 
 // NewRunScripts returns the generator to scaffold a chain and faucet run script.
 func NewRunScripts(path, log, home, binDirPath, chainBinPath, faucetBinPath, account, denoms, output string) error {
-	var (
-		g         = genny.New()
-		runScript = xgenny.NewEmbedWalker(
-			fsRunScript,
-			"files/",
-			output,
-		)
-	)
-	if err := g.Box(runScript); err != nil {
+	runScript, err := fs.Sub(fsRunScript, "files")
+	if err != nil {
 		return err
+	}
+
+	g := genny.New()
+	if err := g.OnlyFS(runScript, nil, nil); err != nil {
+		return errors.Errorf("generator fs: %w", err)
 	}
 
 	ctx := plush.NewContext()
@@ -42,6 +41,6 @@ func NewRunScripts(path, log, home, binDirPath, chainBinPath, faucetBinPath, acc
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
-	_, err := xgenny.RunWithValidation(placeholder.New(), g)
+	_, err = xgenny.NewRunner(ctx, output).RunAndApply(g)
 	return err
 }

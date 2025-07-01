@@ -1,8 +1,10 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 )
@@ -10,17 +12,18 @@ import (
 var ErrServerNotInitialized = errors.New("server not initialized")
 
 const (
-	flagPort        = "port"
-	flagUser        = "user"
-	flagPassword    = "password"
-	flagKey         = "key"
-	flagRawKey      = "raw-key"
-	flagKeyPassword = "key-password"
+	flagPort         = "port"
+	flagUser         = "user"
+	flagUserPassword = "user-password"
+	flagPassword     = "password"
+	flagKey          = "key"
+	flagRawKey       = "raw-key"
+	flagKeyPassword  = "key-password"
 
 	statusConnecting = "Connecting..."
 )
 
-func executeSSH(cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH, error) {
+func executeSSH(session *cliui.Session, cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH, error) {
 	args := cmd.Args
 	if len(args) < 1 {
 		return nil, errors.New("must specify unless a uri host")
@@ -29,21 +32,38 @@ func executeSSH(cmd *plugin.ExecutedCommand, chain *plugin.ChainInfo) (*ssh.SSH,
 	var (
 		host = args[0]
 
-		flags          = plugin.Flags(cmd.Flags)
-		user, _        = flags.GetString(flagUser)
-		port, _        = flags.GetString(flagPort)
-		password, _    = flags.GetString(flagPassword)
-		key, _         = flags.GetString(flagKey)
-		rawKey, _      = flags.GetString(flagRawKey)
-		keyPassword, _ = flags.GetString(flagKeyPassword)
+		flags           = plugin.Flags(cmd.Flags)
+		user, _         = flags.GetString(flagUser)
+		userPassword, _ = flags.GetString(flagUserPassword)
+		password, _     = flags.GetBool(flagPassword)
+		port, _         = flags.GetString(flagPort)
+		key, _          = flags.GetString(flagKey)
+		rawKey, _       = flags.GetString(flagRawKey)
+		keyPassword, _  = flags.GetString(flagKeyPassword)
 	)
+
+	if password {
+		restart := session.PauseSpinner()
+		if err := session.Ask(
+			bubbleconfirm.NewQuestion(
+				"Enter the SSH user password: ",
+				&userPassword,
+				bubbleconfirm.Required(),
+				bubbleconfirm.HideAnswer(),
+			),
+		); err != nil {
+			return nil, errors.Wrap(err, "you must provide a password")
+		}
+		restart()
+	}
 
 	// Connect to the SSH.
 	c, err := ssh.New(
 		host,
 		ssh.WithUser(user),
 		ssh.WithPort(port),
-		ssh.WithPassword(password),
+		ssh.WithUserPassword(userPassword),
+		ssh.AskPassword(password),
 		ssh.WithKey(key),
 		ssh.WithRawKey(rawKey),
 		ssh.WithKeyPassword(keyPassword),

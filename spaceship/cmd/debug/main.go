@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/cmd"
 	"github.com/ignite/apps/spaceship/pkg/ssh"
@@ -34,12 +34,18 @@ func main() {
 			OsArgs: os.Args,
 			With:   nil,
 			Flags: []*plugin.Flag{
+				//{
+				//	Name:      "key",
+				//	Shorthand: "k",
+				//	Usage:     "ssh key",
+				//	Type:      plugin.FlagTypeString,
+				//	Value:     filepath.Join(home, ".ssh/id_rsa"),
+				//},
 				{
-					Name:      "key",
-					Shorthand: "k",
-					Usage:     "ssh key",
-					Type:      plugin.FlagTypeString,
-					Value:     filepath.Join(home, ".ssh/id_rsa"),
+					Name:  "password",
+					Usage: "ask the ssh user password",
+					Type:  plugin.FlagTypeBool,
+					Value: "true",
 				},
 			},
 		}

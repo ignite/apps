@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/randstr"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/randstr"
 	"github.com/manifoldco/promptui"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
@@ -26,6 +26,7 @@ const workdir = "spaceship"
 type SSH struct {
 	username    string
 	password    string
+	askPassword bool
 	host        string
 	port        string
 	rawKey      string
@@ -50,8 +51,16 @@ func WithUser(username string) Option {
 	}
 }
 
-// WithPassword sets the SSH password.
-func WithPassword(password string) Option {
+// AskPassword asks the SSH user password for stdin.
+func AskPassword(ask bool) Option {
+	return func(o *SSH) error {
+		o.askPassword = ask
+		return nil
+	}
+}
+
+// WithUserPassword sets the SSH user password.
+func WithUserPassword(password string) Option {
 	return func(o *SSH) error {
 		if o.password != "" {
 			return nil
@@ -120,11 +129,12 @@ func New(host string, options ...Option) (*SSH, error) {
 		return nil, err
 	}
 	s := &SSH{
-		username:  username,
-		host:      host,
-		port:      port,
-		password:  password,
-		workspace: randstr.Runes(10),
+		username:    username,
+		host:        host,
+		port:        port,
+		password:    password,
+		askPassword: false,
+		workspace:   randstr.Runes(10),
 	}
 	for _, apply := range options {
 		if err := apply(s); err != nil {
