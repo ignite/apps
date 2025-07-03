@@ -49,7 +49,7 @@ func (s Scaffolder) AddFeeAbstraction(
 		apply(&scaffoldingOpts)
 	}
 
-	// Check if the fee abstraction version exist
+	// Check if the fee abstraction version exists
 	versions, err := xgit.FetchGitTags(fmt.Sprintf("https://%s", feeAbsRepo))
 	if err != nil {
 		return xgenny.SourceModification{}, err

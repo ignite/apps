@@ -15,7 +15,7 @@ const (
 	flagNoModule     = "no-module"
 	flagPath         = "path"
 
-	statusScaffolding = "Scaffolding..."
+	statusAdding = "Adding Fee Abstraction Module..."
 
 	defaultFeeAbsVersion = "v8.0.2"
 	feeAbsModuleName     = "feeabs"

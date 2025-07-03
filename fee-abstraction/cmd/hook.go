@@ -13,7 +13,7 @@ import (
 	"github.com/ignite/apps/fee-abstraction/services/scaffolder"
 )
 
-// ExecuteScaffoldPreHook executes the scaffold pre hook.
+// ExecuteScaffoldPreHook executes the scaffold pre-hook.
 func ExecuteScaffoldPreHook(h *plugin.ExecutedHook) error {
 	var (
 		flags       = plugin.Flags(h.Hook.Flags)
@@ -37,7 +37,7 @@ func ExecuteScaffoldChainPostHook(ctx context.Context, h *plugin.ExecutedHook) e
 		return nil
 	}
 
-	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
+	session := cliui.New(cliui.StartSpinnerWithText(statusAdding))
 	defer session.End()
 
 	pathInfo, err := gomodulepath.Parse(name)
