@@ -76,7 +76,6 @@ func Test_assertSupportedCosmosSDKVersion(t *testing.T) {
 		{
 			name: "Lower boundary case: supported version v0.50.0 (if supported)",
 			v:    v0500,
-			err:  errors.Errorf(errOldCosmosSDKVersionStr, v0500),
 		},
 		{
 			name: "Lower boundary case: unsupported version v0.44.9 (if unsupported)",
