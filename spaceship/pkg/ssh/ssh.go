@@ -11,8 +11,8 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/randstr"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/randstr"
 	"github.com/manifoldco/promptui"
 	"github.com/melbahja/goph"
 	"github.com/pkg/sftp"
@@ -24,16 +24,16 @@ const workdir = "spaceship"
 // SSH represents the SSH configuration and clients for connecting and interacting
 // with remote servers via SSH.
 type SSH struct {
-	username    string
-	password    string
-	host        string
-	port        string
-	rawKey      string
-	key         string
-	keyPassword string
-	workspace   string
-	client      *goph.Client
-	sftpClient  *sftp.Client
+	username     string
+	userPassword string
+	host         string
+	port         string
+	rawKey       string
+	key          string
+	keyPassword  string
+	workspace    string
+	client       *goph.Client
+	sftpClient   *sftp.Client
 }
 
 // Option configures SSH settings.
@@ -50,13 +50,13 @@ func WithUser(username string) Option {
 	}
 }
 
-// WithPassword sets the SSH password.
-func WithPassword(password string) Option {
+// WithUserPassword sets the SSH user password.
+func WithUserPassword(password string) Option {
 	return func(o *SSH) error {
-		if o.password != "" {
+		if o.userPassword != "" {
 			return nil
 		}
-		o.password = strings.TrimSpace(password)
+		o.userPassword = strings.TrimSpace(password)
 		return nil
 	}
 }
@@ -120,11 +120,11 @@ func New(host string, options ...Option) (*SSH, error) {
 		return nil, err
 	}
 	s := &SSH{
-		username:  username,
-		host:      host,
-		port:      port,
-		password:  password,
-		workspace: randstr.Runes(10),
+		username:     username,
+		userPassword: password,
+		host:         host,
+		port:         port,
+		workspace:    randstr.Runes(10),
 	}
 	for _, apply := range options {
 		if err := apply(s); err != nil {
@@ -160,6 +160,11 @@ func parseURI(uri string) (host string, port string, username string, password s
 	return host, port, username, password, nil
 }
 
+// NeedsUserPassword checks if the SSH configuration needs a user password set.
+func (s *SSH) NeedsUserPassword() bool {
+	return s.userPassword == "" && s.rawKey == "" && s.key == ""
+}
+
 // validate checks if the SSH configuration is valid.
 func (s *SSH) validate() error {
 	switch {
@@ -167,9 +172,9 @@ func (s *SSH) validate() error {
 		return fmt.Errorf("ssh username is required")
 	case s.key != "" && s.rawKey != "":
 		return errors.New("ssh key and raw key are both set")
-	case s.key != "" && s.password != "":
+	case s.key != "" && s.userPassword != "":
 		return errors.New("ssh key and password are both set")
-	case s.rawKey != "" && s.password != "":
+	case s.rawKey != "" && s.userPassword != "":
 		return errors.New("ssh raw key and password are both set")
 	default:
 		return nil
@@ -183,10 +188,10 @@ func (s *SSH) auth() (goph.Auth, error) {
 		return goph.RawKey(s.rawKey, s.keyPassword)
 	case s.key != "":
 		return goph.Key(s.key, s.keyPassword)
-	case s.password != "":
-		return goph.Password(s.password), nil
+	case s.userPassword != "":
+		return goph.Password(s.userPassword), nil
 	default:
-		return goph.KeyboardInteractive(s.password), nil
+		return goph.KeyboardInteractive(s.userPassword), nil
 	}
 }
 

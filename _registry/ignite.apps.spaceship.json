@@ -2,9 +2,9 @@
   "appName": "Spaceship",
   "appID": "spaceship",
   "appDescription": "Deploy a chain remote through SSH using ignite build system",
-  "ignite": ">=28.3.0",
+  "ignite": ">=29.0.0",
   "dependencies": {},
-  "cosmosSDK": ">=0.50.4",
+  "cosmosSDK": ">=0.53.2",
   "authors": [
     {
       "name": "Danilo Pantani",
