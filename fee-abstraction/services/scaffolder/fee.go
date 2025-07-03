@@ -7,7 +7,6 @@ import (
 
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 
 	"github.com/ignite/apps/fee-abstraction/pkg/xgit"
@@ -43,7 +42,6 @@ func WithVersion(version semver.Version) Option {
 // AddFeeAbstraction add fee abstraction support.
 func (s Scaffolder) AddFeeAbstraction(
 	ctx context.Context,
-	tracer *placeholder.Tracer,
 	options ...Option,
 ) (xgenny.SourceModification, error) {
 	scaffoldingOpts := newOptions()

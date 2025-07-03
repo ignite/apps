@@ -7,7 +7,6 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/gomodulepath"
-	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 
@@ -62,18 +61,11 @@ func ExecuteScaffoldChainPostHook(ctx context.Context, h *plugin.ExecutedHook) e
 		return err
 	}
 
-	sm, err := sc.AddFeeAbstraction(ctx, placeholder.New(), scaffolder.WithVersion(semVersion))
+	sm, err := sc.AddFeeAbstraction(ctx, scaffolder.WithVersion(semVersion))
 	if err != nil {
 		return err
 	}
 
-	modificationsStr, err := sourceModificationToString(sm)
-	if err != nil {
-		return err
-	}
-
-	session.Println(modificationsStr)
-	session.Printf("\n🎉 Fee Abstraction added (`%[1]v`).\n\n", c.AppPath())
-
-	return nil
+	_ = session.Println(sm.String())
+	return session.Printf("\n🎉 Fee Abstraction added (`%[1]v`).\n\n", c.AppPath())
 }
