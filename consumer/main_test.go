@@ -15,9 +15,9 @@ import (
 	ccvconsumertypes "github.com/cosmos/interchain-security/v5/x/ccv/consumer/types"
 	ccvtypes "github.com/cosmos/interchain-security/v5/x/ccv/types"
 
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	v1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
-	"github.com/ignite/cli/v28/ignite/services/plugin/mocks"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	v1 "github.com/ignite/cli/v29/ignite/services/plugin/grpc/v1"
+	"github.com/ignite/cli/v29/ignite/services/plugin/mocks"
 )
 
 func TestExecute(t *testing.T) {

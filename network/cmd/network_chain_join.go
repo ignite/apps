@@ -4,11 +4,9 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/v28/ignite/pkg/gitpod"
-	"github.com/ignite/cli/v28/ignite/pkg/xchisel"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
 	"github.com/manifoldco/promptui"
 	"github.com/pkg/errors"
 	"github.com/rdegges/go-ipify"
@@ -211,16 +209,6 @@ func networkChainJoinHandler(cmd *cobra.Command, args []string) error {
 // askPublicAddress prepare questions to interactively ask for a publicAddress
 // when peer isn't provided and not running through chisel proxy.
 func askPublicAddress(cmd *cobra.Command, session *cliui.Session) (publicAddress string, err error) {
-	ctx := cmd.Context()
-
-	if gitpod.IsOnGitpod() {
-		publicAddress, err = gitpod.URLForPort(ctx, xchisel.DefaultServerPort)
-		if err != nil {
-			return "", errors.Wrap(err, "cannot read public Gitpod address of the node")
-		}
-		return publicAddress, nil
-	}
-
 	peerAddress, _ := cmd.Flags().GetString(flagPeerAddress)
 
 	// The `--peer-address` flag is required when "--yes" is present
@@ -239,12 +227,12 @@ func askPublicAddress(cmd *cobra.Command, session *cliui.Session) (publicAddress
 		peerAddress = fmt.Sprintf("%s:26656", ip)
 	}
 
-	options := []cliquiz.Option{cliquiz.Required()}
+	options := []bubbleconfirm.Option{bubbleconfirm.Required()}
 	if peerAddress != "" {
-		options = append(options, cliquiz.DefaultAnswer(peerAddress))
+		options = append(options, bubbleconfirm.DefaultAnswer(peerAddress))
 	}
 
-	questions := []cliquiz.Question{cliquiz.NewQuestion(
+	questions := []bubbleconfirm.Question{bubbleconfirm.NewQuestion(
 		"Peer's address",
 		&publicAddress,
 		options...,

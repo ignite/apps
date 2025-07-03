@@ -10,8 +10,8 @@ import (
 	"github.com/ignite/apps/connect/chains"
 	"github.com/ignite/apps/connect/cmd"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 var _ plugin.Interface = app{}

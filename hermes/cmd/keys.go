@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
 )

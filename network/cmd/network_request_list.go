@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosutil"
 	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/spf13/cobra"
 

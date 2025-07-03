@@ -10,14 +10,13 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	chainconfig "github.com/ignite/cli/v28/ignite/config/chain"
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/chaincmd"
-	"github.com/ignite/cli/v28/ignite/pkg/checksum"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/events"
-	"github.com/ignite/cli/v28/ignite/pkg/gitpod"
-	"github.com/ignite/cli/v28/ignite/services/chain"
+	chainconfig "github.com/ignite/cli/v29/ignite/config/chain"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
+	"github.com/ignite/cli/v29/ignite/pkg/checksum"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
+	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/network/pkg/chainid"
 
 	"github.com/ignite/apps/network/network/networktypes"
@@ -177,13 +176,6 @@ func New(ctx context.Context, ar cosmosaccount.Registry, source SourceOption, op
 	if c.checkDependencies {
 		chainOption = append(chainOption, chain.CheckDependencies())
 	}
-
-	// use test keyring backend on Gitpod in order to prevent prompting for keyring
-	// password. This happens because Gitpod uses containers.
-	if gitpod.IsOnGitpod() {
-		c.keyringBackend = chaincmd.KeyringBackendTest
-	}
-
 	chainOption = append(chainOption, chain.KeyringBackend(c.keyringBackend))
 
 	chain, err := chain.New(c.path, chainOption...)

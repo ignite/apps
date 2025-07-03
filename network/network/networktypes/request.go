@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/cometbft/cometbft/crypto/ed25519"
-	"github.com/ignite/cli/v28/ignite/pkg/xtime"
+	"github.com/ignite/cli/v29/ignite/pkg/xtime"
 	launchtypes "github.com/ignite/network/x/launch/types"
 
 	"github.com/ignite/apps/network/network/address"

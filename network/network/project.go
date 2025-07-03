@@ -5,7 +5,7 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/events"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
 	projecttypes "github.com/ignite/network/x/project/types"
 
 	"github.com/ignite/apps/network/network/networktypes"

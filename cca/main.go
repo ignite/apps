@@ -8,7 +8,7 @@ import (
 
 	"github.com/ignite/apps/cca/cmd"
 
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 type app struct{}

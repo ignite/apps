@@ -4,13 +4,14 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/ignite/cli/v28/ignite/pkg/chaincmd"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	cosmosgenesis "github.com/ignite/cli/v28/ignite/pkg/cosmosutil/genesis"
-	"github.com/ignite/cli/v28/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
+
+	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	cosmosgenesis "github.com/ignite/cli/v29/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/manifoldco/promptui"
 	"github.com/spf13/cobra"
 
@@ -223,26 +224,26 @@ func askValidatorInfo(
 		GasPrices:         gasPrice,
 	}
 
-	questions := append([]cliquiz.Question{},
-		cliquiz.NewQuestion("Staking amount",
+	questions := append([]bubbleconfirm.Question{},
+		bubbleconfirm.NewQuestion("Staking amount",
 			&v.StakingAmount,
-			cliquiz.DefaultAnswer(defaultSelfDel),
-			cliquiz.Required(),
+			bubbleconfirm.DefaultAnswer(defaultSelfDel),
+			bubbleconfirm.Required(),
 		),
-		cliquiz.NewQuestion("Commission rate",
+		bubbleconfirm.NewQuestion("Commission rate",
 			&v.CommissionRate,
-			cliquiz.DefaultAnswer(defaultCommissionMax),
-			cliquiz.Required(),
+			bubbleconfirm.DefaultAnswer(defaultCommissionMax),
+			bubbleconfirm.Required(),
 		),
-		cliquiz.NewQuestion("Commission max rate",
+		bubbleconfirm.NewQuestion("Commission max rate",
 			&v.CommissionMaxRate,
-			cliquiz.DefaultAnswer(defaultCommissionMaxRate),
-			cliquiz.Required(),
+			bubbleconfirm.DefaultAnswer(defaultCommissionMaxRate),
+			bubbleconfirm.Required(),
 		),
-		cliquiz.NewQuestion("Commission max change rate",
+		bubbleconfirm.NewQuestion("Commission max change rate",
 			&v.CommissionMaxChangeRate,
-			cliquiz.DefaultAnswer(defaultCommissionMaxChangeRate),
-			cliquiz.Required(),
+			bubbleconfirm.DefaultAnswer(defaultCommissionMaxChangeRate),
+			bubbleconfirm.Required(),
 		),
 	)
 	return v, session.Ask(questions...)

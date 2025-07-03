@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
@@ -97,7 +97,7 @@ func networkProjectUpdateHandler(cmd *cobra.Command, args []string) error {
 	}
 	session.Println()
 
-	info, err := yaml.Marshal(cmd.Context(), project)
+	info, err := xyaml.Marshal(cmd.Context(), project)
 	if err != nil {
 		return err
 	}

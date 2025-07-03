@@ -7,7 +7,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	igniteconfig "github.com/ignite/cli/v28/ignite/config"
+	igniteconfig "github.com/ignite/cli/v29/ignite/config"
 )
 
 var (

@@ -3,8 +3,8 @@ package cmd
 import (
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 )
 
 // NewNetworkCoordinatorShow creates a command to show coordinator information.
@@ -39,7 +39,7 @@ func networkCoordinatorShowHandler(cmd *cobra.Command, args []string) error {
 
 	// convert the request object to YAML to be more readable
 	// and convert the byte array fields to string.
-	coordinatorYaml, err := yaml.Marshal(cmd.Context(), struct {
+	coordinatorYaml, err := xyaml.Marshal(cmd.Context(), struct {
 		Identity string
 		Details  string
 		Website  string

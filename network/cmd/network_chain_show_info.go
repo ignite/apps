@@ -3,8 +3,8 @@ package cmd
 import (
 	"errors"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
@@ -44,7 +44,7 @@ func networkChainShowInfoHandler(cmd *cobra.Command, args []string) error {
 	}
 	chainLaunch.Reward = reward.RemainingCoins.String()
 
-	info, err := yaml.Marshal(cmd.Context(), chainLaunch)
+	info, err := xyaml.Marshal(cmd.Context(), chainLaunch)
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@ import (
 
 	launchtypes "github.com/ignite/network/x/launch/types"
 
-	"github.com/ignite/cli/v28/ignite/pkg/xurl"
+	"github.com/ignite/cli/v29/ignite/pkg/xurl"
 )
 
 // VerifyPeerFormat checks if the peer address format is valid.

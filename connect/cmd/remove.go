@@ -7,7 +7,7 @@ import (
 	"os"
 	"path"
 
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/connect/chains"
 )
