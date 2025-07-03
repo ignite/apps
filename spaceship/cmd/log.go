@@ -3,9 +3,9 @@ package cmd
 import (
 	"context"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
@@ -34,7 +34,7 @@ func ExecuteSSHLog(ctx context.Context, cmd *plugin.ExecutedCommand, chain *plug
 		return err
 	}
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}

@@ -9,11 +9,11 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/gookit/color"
-	ignitecmd "github.com/ignite/cli/v28/ignite/cmd"
-	config "github.com/ignite/cli/v28/ignite/config/chain"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	ignitecmd "github.com/ignite/cli/v29/ignite/cmd"
+	config "github.com/ignite/cli/v29/ignite/config/chain"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 	"github.com/schollz/progressbar/v3"
 
 	"github.com/ignite/apps/spaceship/pkg/tarball"
@@ -29,7 +29,7 @@ func ExecuteSSHStatus(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -66,7 +66,7 @@ func ExecuteSSHRestart(ctx context.Context, cmd *plugin.ExecutedCommand, chain *
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -108,7 +108,7 @@ func ExecuteSSHSStop(ctx context.Context, cmd *plugin.ExecutedCommand, chain *pl
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -163,7 +163,7 @@ func ExecuteSSHDeploy(ctx context.Context, cmd *plugin.ExecutedCommand, chain *p
 		localBinOutput = filepath.Join(localDir, "bin")
 	)
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}

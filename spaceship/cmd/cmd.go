@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/spaceship/pkg/ssh"
 )
@@ -23,7 +23,7 @@ var defaultFlags = []*plugin.Flag{
 		Type:      plugin.FlagTypeString,
 	},
 	{
-		Name:  flagPassword,
+		Name:  flagUserPassword,
 		Usage: "ssh user password",
 		Type:  plugin.FlagTypeString,
 	},
