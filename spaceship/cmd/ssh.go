@@ -1,6 +1,8 @@
 package cmd
 
 import (
+	"time"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
@@ -15,7 +17,6 @@ const (
 	flagPort         = "port"
 	flagUser         = "user"
 	flagUserPassword = "user-password"
-	flagPassword     = "password"
 	flagKey          = "key"
 	flagRawKey       = "raw-key"
 	flagKeyPassword  = "key-password"
@@ -35,14 +36,29 @@ func executeSSH(session *cliui.Session, cmd *plugin.ExecutedCommand, chain *plug
 		flags           = plugin.Flags(cmd.Flags)
 		user, _         = flags.GetString(flagUser)
 		userPassword, _ = flags.GetString(flagUserPassword)
-		password, _     = flags.GetBool(flagPassword)
 		port, _         = flags.GetString(flagPort)
 		key, _          = flags.GetString(flagKey)
 		rawKey, _       = flags.GetString(flagRawKey)
 		keyPassword, _  = flags.GetString(flagKeyPassword)
 	)
 
-	if password {
+	// Connect to the SSH.
+	c, err := ssh.New(
+		host,
+		ssh.WithUser(user),
+		ssh.WithPort(port),
+		ssh.WithUserPassword(userPassword),
+		ssh.WithKey(key),
+		ssh.WithRawKey(rawKey),
+		ssh.WithKeyPassword(keyPassword),
+		ssh.WithWorkspace(chain.ChainId),
+	)
+	if err != nil {
+		return nil, err
+	}
+
+	if c.NeedsUserPassword() {
+		time.Sleep(10 * time.Millisecond) // Give some time to the spinner to start
 		restart := session.PauseSpinner()
 		if err := session.Ask(
 			bubbleconfirm.NewQuestion(
@@ -55,22 +71,6 @@ func executeSSH(session *cliui.Session, cmd *plugin.ExecutedCommand, chain *plug
 			return nil, errors.Wrap(err, "you must provide a password")
 		}
 		restart()
-	}
-
-	// Connect to the SSH.
-	c, err := ssh.New(
-		host,
-		ssh.WithUser(user),
-		ssh.WithPort(port),
-		ssh.WithUserPassword(userPassword),
-		ssh.AskPassword(password),
-		ssh.WithKey(key),
-		ssh.WithRawKey(rawKey),
-		ssh.WithKeyPassword(keyPassword),
-		ssh.WithWorkspace(chain.ChainId),
-	)
-	if err != nil {
-		return nil, err
 	}
 
 	return c, c.Connect()

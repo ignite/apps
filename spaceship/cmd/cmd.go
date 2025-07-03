@@ -28,11 +28,6 @@ var defaultFlags = []*plugin.Flag{
 		Type:  plugin.FlagTypeString,
 	},
 	{
-		Name:  flagPassword,
-		Usage: "ask the ssh user password",
-		Type:  plugin.FlagTypeBool,
-	},
-	{
 		Name:      flagKey,
 		Shorthand: "k",
 		Usage:     "ssh key",
