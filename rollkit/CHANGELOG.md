@@ -18,6 +18,14 @@
 
 * [#168](https://github.com/ignite/apps/pull/168) Update expected template.
 
+## [`v0.2.3`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.3)
+
+* Dependency bumps
+
+## [`v0.2.2`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.2)
+
+* [#168](https://github.com/ignite/apps/pull/168) Update expected template.
+
 ## [`v0.2.1`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.1)
 
 * [#106](https://github.com/ignite/apps/pull/106) Improve bonded tokens setting.
