@@ -5,12 +5,12 @@ go 1.24.0
 require (
 	github.com/Masterminds/semver v1.5.0
 	github.com/charmbracelet/lipgloss v1.1.0
-	github.com/cosmos/cosmos-sdk v0.53.0
+	github.com/cosmos/cosmos-sdk v0.53.2
 	github.com/goccy/go-yaml v1.18.0
 	github.com/google/go-github/v56 v56.0.0
 	github.com/hashicorp/go-plugin v1.6.3
 	github.com/iancoleman/strcase v0.3.0
-	github.com/ignite/cli/v29 v29.0.0
+	github.com/ignite/cli/v29 v29.1.0
 	github.com/muesli/termenv v0.16.0
 	github.com/spf13/cobra v1.9.1
 	github.com/stretchr/testify v1.10.0
@@ -45,23 +45,24 @@ require (
 	github.com/bgentry/speakeasy v0.2.0 // indirect
 	github.com/blang/semver/v4 v4.0.0 // indirect
 	github.com/briandowns/spinner v1.23.2 // indirect
+	github.com/buger/jsonparser v1.1.1 // indirect
 	github.com/bytedance/sonic v1.13.2 // indirect
 	github.com/bytedance/sonic/loader v0.2.4 // indirect
 	github.com/calmh/randomart v1.1.0 // indirect
 	github.com/cenkalti/backoff v2.2.1+incompatible // indirect
 	github.com/cenkalti/backoff/v4 v4.3.0 // indirect
 	github.com/cespare/xxhash/v2 v2.3.0 // indirect
-	github.com/charmbracelet/bubbles v0.20.0 // indirect
-	github.com/charmbracelet/bubbletea v1.3.3 // indirect
+	github.com/charmbracelet/bubbles v0.21.0 // indirect
+	github.com/charmbracelet/bubbletea v1.3.5 // indirect
 	github.com/charmbracelet/charm v0.8.7 // indirect
-	github.com/charmbracelet/colorprofile v0.2.3-0.20250311203215-f60798e515dc // indirect
+	github.com/charmbracelet/colorprofile v0.3.0 // indirect
 	github.com/charmbracelet/glamour v0.6.0 // indirect
 	github.com/charmbracelet/glow v1.5.1 // indirect
 	github.com/charmbracelet/x/ansi v0.8.0 // indirect
-	github.com/charmbracelet/x/cellbuf v0.0.13-0.20250311204145-2c3ea96c31dd // indirect
+	github.com/charmbracelet/x/cellbuf v0.0.13 // indirect
 	github.com/charmbracelet/x/term v0.2.1 // indirect
 	github.com/cilium/ebpf v0.16.0 // indirect
-	github.com/cloudflare/circl v1.3.7 // indirect
+	github.com/cloudflare/circl v1.6.1 // indirect
 	github.com/cloudwego/base64x v0.1.5 // indirect
 	github.com/cockroachdb/errors v1.12.0 // indirect
 	github.com/cockroachdb/fifo v0.0.0-20240606204812-0bbfbd93a7ce // indirect
@@ -119,7 +120,7 @@ require (
 	github.com/go-openapi/spec v0.21.0 // indirect
 	github.com/go-openapi/strfmt v0.23.0 // indirect
 	github.com/go-openapi/swag v0.23.0 // indirect
-	github.com/go-viper/mapstructure/v2 v2.2.1 // indirect
+	github.com/go-viper/mapstructure/v2 v2.3.0 // indirect
 	github.com/gobuffalo/flect v0.3.0 // indirect
 	github.com/gobuffalo/genny/v2 v2.1.0 // indirect
 	github.com/gobuffalo/github_flavored_markdown v1.1.4 // indirect
@@ -159,7 +160,7 @@ require (
 	github.com/hashicorp/yamux v0.1.2 // indirect
 	github.com/hdevalence/ed25519consensus v0.2.0 // indirect
 	github.com/huandu/skiplist v1.2.1 // indirect
-	github.com/ignite/web v0.6.1 // indirect
+	github.com/ignite/web v1.0.8 // indirect
 	github.com/imdario/mergo v0.3.15 // indirect
 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
