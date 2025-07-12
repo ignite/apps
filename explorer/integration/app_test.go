@@ -20,7 +20,7 @@ func TestGexExplorer(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/explorer")
+		app         = env.ScaffoldApp("github.com/test/explorer")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -64,7 +64,7 @@ func TestGexExplorer(t *testing.T) {
 		wg.Done()
 	}()
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	app.MustServe(ctx)
 	wg.Wait()
 
 	require.Empty(execErr.String())
@@ -74,7 +74,7 @@ func TestPingPubExplorer(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/pingpub-explorer")
+		app         = env.ScaffoldApp("github.com/test/pingpub-explorer")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -123,7 +123,7 @@ func TestPingPubExplorer(t *testing.T) {
 		wg.Done()
 	}()
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	app.MustServe(ctx)
 	wg.Wait()
 
 	require.Empty(execErr.String())

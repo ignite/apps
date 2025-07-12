@@ -17,7 +17,7 @@ func TestWasm(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/wasmapp")
+		app         = env.ScaffoldApp("github.com/apps/wasmapp")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -72,7 +72,7 @@ func TestWasm(t *testing.T) {
 		isBodyRetrieved = env.Exec("add wasm to the config", steps, envtest.ExecRetry())
 	}()
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	app.MustServe(ctx)
 
 	if !isBodyRetrieved {
 		t.FailNow()

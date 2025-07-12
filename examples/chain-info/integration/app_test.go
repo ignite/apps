@@ -18,7 +18,7 @@ func TestChainInfo(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/apps/chain-info")
+		app     = env.ScaffoldApp("github.com/apps/chain-info")
 	)
 
 	dir, err := os.Getwd()

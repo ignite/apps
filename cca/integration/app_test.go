@@ -18,7 +18,7 @@ func TestCCA(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("cca-app")
+		app     = env.ScaffoldApp("cca-app")
 	)
 
 	dir, err := os.Getwd()
