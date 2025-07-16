@@ -6,7 +6,7 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-permissions: read-all
+permissions: { }
 
 jobs:
   labeler:
@@ -19,4 +19,5 @@ jobs:
       - uses: actions/labeler@v5
         with:
           repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          sync-labels: true
+          sync-labels: 'true'
+          dot: 'true'
