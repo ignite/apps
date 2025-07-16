@@ -2,7 +2,7 @@
   "appName": "CsClient",
   "appID": "cs-client",
   "appDescription": "Generates a C# client library for your cosmos-sdk blockchain",
-  "ignite": ">28.1.1",
+  "ignite": ">=28.1.1",
   "dependencies": {},
   "cosmosSDK": ">0.50.4",
   "authors": [
