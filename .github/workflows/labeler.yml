@@ -2,18 +2,15 @@ name: "Pull Request Labeler"
 on:
   - pull_request_target
 
-permissions:
-  contents: read
-  issues: write
-  pull-requests: write
-  actions: read
-
 concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
 jobs:
   labeler:
+    permissions:
+      contents: read
+      pull-requests: write
     runs-on: ubuntu-latest
     steps:
       - uses: actions/labeler@v5
