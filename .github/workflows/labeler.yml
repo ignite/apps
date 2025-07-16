@@ -6,11 +6,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
-permissions: read-all
-
 jobs:
   labeler:
     permissions:
+      id-token: write
       contents: read
       pull-requests: write
       issues: write
