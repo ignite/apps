@@ -9,7 +9,6 @@ concurrency:
 jobs:
   labeler:
     permissions:
-      id-token: write
       contents: read
       pull-requests: write
       issues: write
