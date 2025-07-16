@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/hermes/v0.3.0)
 
 * [#199](https://github.com/ignite/apps/pull/199) Download hermes binary instead use `ignite-files` repo

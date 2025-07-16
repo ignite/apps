@@ -1,5 +1,9 @@
 # App Registry App Changelog
 
+## Unreleased
+
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
 ## [`v0.1.3`](https://github.com/ignite/apps/releases/tag/appregistry/v0.1.3)
 
 * [#201](https://github.com/ignite/apps/pull/201) Update app to Ignite v29.
