@@ -19,6 +19,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/labeler@v5
         with:
-          repo-token: "${{ secrets.GITHUB_TOKEN }}"
-          sync-labels: 'true'
-          dot: 'true'
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          sync-labels: true
+          dot: true
