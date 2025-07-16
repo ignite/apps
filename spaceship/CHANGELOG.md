@@ -1,5 +1,9 @@
 # Spaceship App Changelog
 
+## Unreleased
+
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
 ## [`v0.1.2`](https://github.com/ignite/apps/releases/tag/spaceship/v0.1.2)
 
 * [#213](https://github.com/ignite/apps/pull/213) Fix spaceship tarball compression

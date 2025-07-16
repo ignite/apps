@@ -6,11 +6,11 @@ import (
 	"os"
 	"path/filepath"
 
-	chaincmdrunner "github.com/ignite/cli/v28/ignite/pkg/chaincmd/runner"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosutil"
-	"github.com/ignite/cli/v28/ignite/pkg/randstr"
-	"github.com/ignite/cli/v28/ignite/pkg/xos"
-	"github.com/ignite/cli/v28/ignite/services/chain"
+	chaincmdrunner "github.com/ignite/cli/v29/ignite/pkg/chaincmd/runner"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v29/ignite/pkg/randstr"
+	"github.com/ignite/cli/v29/ignite/pkg/xos"
+	"github.com/ignite/cli/v29/ignite/services/chain"
 )
 
 const (
@@ -98,7 +98,7 @@ func (c Chain) detectPrefix(ctx context.Context) (string, error) {
 	acc, err = chainCmd.ShowAccount(ctx, sampleAccount)
 	if errors.Is(err, chaincmdrunner.ErrAccountDoesNotExist) {
 		// the sample account doesn't exist, we create it
-		acc, err = chainCmd.AddAccount(ctx, sampleAccount, "", "")
+		acc, err = chainCmd.AddAccount(ctx, sampleAccount, "", "", "", "")
 	}
 	if err != nil {
 		return "", err

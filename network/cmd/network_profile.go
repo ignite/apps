@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
@@ -50,7 +50,7 @@ func networkProfileHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	profileInfo, err := yaml.Marshal(cmd.Context(), profile)
+	profileInfo, err := xyaml.Marshal(cmd.Context(), profile)
 	if err != nil {
 		return err
 	}

@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/ignite/cli/v28/ignite/pkg/chainregistry"
+	"github.com/ignite/cli/v29/ignite/pkg/chainregistry"
 )
 
 func TestCleanGRPCEntries(t *testing.T) {

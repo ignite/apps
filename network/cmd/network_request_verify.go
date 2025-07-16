@@ -4,11 +4,11 @@ import (
 	"context"
 	"os"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/chaincmd"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/v28/ignite/pkg/numbers"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v29/ignite/pkg/numbers"
 	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/spf13/cobra"
 

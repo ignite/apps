@@ -135,7 +135,7 @@ func TestSpaceship(t *testing.T) {
 	var (
 		require  = require.New(t)
 		env      = envtest.New(t)
-		app      = env.Scaffold("spaceship-app")
+		app      = env.ScaffoldApp("spaceship-app")
 		user     = "spaceship"
 		password = "spaceship_pass"
 	)

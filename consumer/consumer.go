@@ -17,8 +17,8 @@ import (
 	ibctmtypes "github.com/cosmos/ibc-go/v8/modules/light-clients/07-tendermint"
 	ccvconsumertypes "github.com/cosmos/interchain-security/v5/x/ccv/consumer/types"
 	ccvtypes "github.com/cosmos/interchain-security/v5/x/ccv/types"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	pluginv1 "github.com/ignite/cli/v28/ignite/services/plugin/grpc/v1"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	pluginv1 "github.com/ignite/cli/v29/ignite/services/plugin/grpc/v1"
 )
 
 // writeConsumerGenesis writes the consumer module genesis in the genesis file.

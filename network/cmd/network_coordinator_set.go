@@ -6,8 +6,8 @@ import (
 	profiletypes "github.com/ignite/network/x/profile/types"
 	"github.com/spf13/cobra"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
 )
 
 // NewNetworkCoordinatorSet creates a command to set an information in a coordinator profile.

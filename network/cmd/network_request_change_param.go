@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/spf13/cobra"
 

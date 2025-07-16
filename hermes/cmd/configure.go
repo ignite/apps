@@ -7,13 +7,14 @@ import (
 	"math/big"
 	"os"
 
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
+
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/cosmos/go-bip39"
 	"github.com/gookit/color"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/cliquiz"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 	"github.com/manifoldco/promptui"
 
 	"github.com/ignite/apps/hermes/pkg/hermes"
@@ -332,7 +333,7 @@ GetKey:
 		var mnemonic string
 		if !generateWallets {
 			session.StopSpinner()
-			if err := session.Ask(cliquiz.NewQuestion(
+			if err := session.Ask(bubbleconfirm.NewQuestion(
 				fmt.Sprintf(
 					"Chain %s doesn't have a default Hermes key. Type your mnemonic to continue or type enter to generate a new one",
 					chainID,

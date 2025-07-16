@@ -8,13 +8,13 @@ import (
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/gomodule"
-	"github.com/ignite/cli/v28/ignite/pkg/xast"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
+	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
 // NewRollKitGenerator returns the generator to scaffold a rollkit integration inside an app.
@@ -64,7 +64,7 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
+			xast.WithNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
@@ -111,8 +111,8 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
+			xast.WithNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
+			xast.WithNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err

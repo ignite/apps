@@ -1,5 +1,9 @@
 # Wasm App Changelog
 
+## Unreleased
+
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
 ## [`v0.4.0`](https://github.com/ignite/apps/releases/tag/wasm/v0.4.0)
 
 * [#205](https://github.com/ignite/apps/pull/205) Bump wasm version to `v0.60.1`.

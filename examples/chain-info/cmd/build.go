@@ -6,10 +6,10 @@ import (
 	"os"
 	"path"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 // ExecuteBuild executes the build subcommand.
