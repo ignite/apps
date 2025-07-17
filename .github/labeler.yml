@@ -1,51 +1,67 @@
 "ci":
-  - "!.github/labeler.yml"
-  - "!.github/labels.json"
-  - .github/**/*
+  - changed-files:
+      - "!.github/labeler.yml"
+      - "!.github/labels.json"
+      - .github/**/*
 
 "app:appregistry":
-  - appregistry/**/*
+  - changed-files:
+      - appregistry/**/*
 
 "app:cca":
-  - cca/**/*
+  - changed-files:
+      - cca/**/*
 
 "app:connect":
-  - connect/**/*
+  - changed-files:
+      - connect/**/*
 
 "app:consumer":
-  - consumer/**/*
+  - changed-files:
+      - consumer/**/*
 
 "app:examples":
-  - examples/**/*
+  - changed-files:
+      - examples/**/*
 
 "app:explorer":
-  - explorer/**/*
+  - changed-files:
+      - explorer/**/*
 
 "app:fee-abstraction":
-  - fee-abstraction/**/*
+  - changed-files:
+      - fee-abstraction/**/*
 
 "app:hermes":
-  - hermes/**/*
+  - changed-files:
+      - hermes/**/*
 
 "app:network":
-  - network/**/*
+  - changed-files:
+      - network/**/*
 
 "app:rollkit":
-  - rollkit/**/*
+  - changed-files:
+      - rollkit/**/*
 
 "app:spaceship":
-  - spaceship/**/*
+  - changed-files:
+      - spaceship/**/*
 
 "app:wasm":
-  - wasm/**/*
+  - changed-files:
+      - wasm/**/*
 
 "configs":
-  - .gitignore
-  - .golangci.yml
-  - app.ignite.yml
-  - CODE_OF_CONDUCT.md
-  - CONTRIBUTING.md
-  - go.work.example
-  - LICENSE
-  - Makefile
-  - README.md
+  - changed-files:
+      - .gitignore
+      - .gitattributes
+      - .markdownlint.yaml
+      - .golangci.yml
+      - app.ignite.yml
+      - CODE_OF_CONDUCT.md
+      - CONTRIBUTING.md
+      - go.work.example
+      - LICENSE
+      - Makefile
+      - README.md
