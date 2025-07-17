@@ -37,6 +37,19 @@ func GetCommands() []*plugin.Command {
 						},
 					},
 				},
+				{
+					Use:     "migrate-from-cometbft",
+					Aliases: []string{"migrate-from-comet"},
+					Short:   "Migrate from CometBFT to Rollkit",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+					},
+				},
 			},
 		},
 	}
