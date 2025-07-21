@@ -2,8 +2,6 @@ module github.com/ignite/apps/connect
 
 go 1.24.0
 
-toolchain go1.24.4
-
 require (
 	cosmossdk.io/api v0.9.2
 	cosmossdk.io/client/v2 v2.0.0-beta.6
