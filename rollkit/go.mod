@@ -2,8 +2,6 @@ module github.com/ignite/apps/rollkit
 
 go 1.24.0
 
-toolchain go1.24.4
-
 require (
 	cosmossdk.io/math v1.5.3
 	github.com/cometbft/cometbft v0.38.17
