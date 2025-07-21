@@ -32,11 +32,9 @@ jobs:
 
       - name: Start Local DA
         run: |
-          # clone rollkit repository (#TODO install via go install when possible)
-          git clone https://github.com/rollkit/rollkit --depth 1 rollkit-repo
-          cd rollkit-repo/da/cmd/local-da
+          go install github.com/rollkit/rollkit/da/cmd/local-da@v1.0.0-beta.1
           # start the local da in the background
-          go run . &
+          local-da &
           # capture the background process PID
           echo "DA_PID=$!" >> $GITHUB_ENV
           # give it a moment to start
