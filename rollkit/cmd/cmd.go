@@ -28,6 +28,20 @@ func GetCommands() []*plugin.Command {
 				{
 					Use:   "init",
 					Short: "Init rollkit support",
+					Long:  "Initialize the chain and add rollkit sequencer",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+					},
+				},
+				{
+					Use:   "edit-genesis",
+					Short: "Edit the genesis file to add the rollkit sequencer",
+					Long:  "Edit the genesis file to add the rollkit sequencer module. This is an alternative to the `ignite rollkit init` command, where a chain is already initialized (but not yet started).",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,

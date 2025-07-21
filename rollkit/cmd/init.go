@@ -25,6 +25,14 @@ import (
 const defaultValPower = 1
 
 func InitHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+	return initRollkit(ctx, cmd, true)
+}
+
+func initRollkit(
+	ctx context.Context,
+	cmd *plugin.ExecutedCommand,
+	initChain bool,
+) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New()
@@ -44,26 +52,28 @@ func InitHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	// use val power to set validator power in ignite config.yaml
-	igniteConfig, err := rc.Config()
-	if err != nil {
-		return err
-	}
-
-	coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
-	igniteConfig.Validators[0].Bonded = coins.String()
-	for i, account := range igniteConfig.Accounts {
-		if account.Name == igniteConfig.Validators[0].Name {
-			igniteConfig.Accounts[i].Coins = []string{coins.String()}
+	if initChain {
+		// use val power to set validator power in ignite config.yaml
+		igniteConfig, err := rc.Config()
+		if err != nil {
+			return err
 		}
-	}
 
-	if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
-		return err
-	}
+		coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
+		igniteConfig.Validators[0].Bonded = coins.String()
+		for i, account := range igniteConfig.Accounts {
+			if account.Name == igniteConfig.Validators[0].Name {
+				igniteConfig.Accounts[i].Coins = []string{coins.String()}
+			}
+		}
 
-	if err := rc.Init(ctx, chain.InitArgsAll); err != nil {
-		return err
+		if err := configchain.Save(*igniteConfig, rc.ConfigPath()); err != nil {
+			return err
+		}
+
+		if err := rc.Init(ctx, chain.InitArgsAll); err != nil {
+			return err
+		}
 	}
 
 	home, err := rc.Home()

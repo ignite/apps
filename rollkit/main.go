@@ -34,6 +34,8 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 		return cmd.AddHandler(ctx, c)
 	case "init":
 		return cmd.InitHandler(ctx, c)
+	case "edit-genesis":
+		return cmd.EditGenesisHandler(ctx, c)
 	case "migrate-from-cometbft", "migrate-from-comet":
 		return cmd.MigrateFromCometHandler(ctx, c)
 	default:
