@@ -21,9 +21,9 @@ apps:
   consumer:
     description: Internal Ignite App for scaffolding consumer chains (not to be installed manually)
     path: ./consumer
-  rollkit:
-    description: Scaffold a RollKit application with ease
-    path: ./rollkit
+  evolve:
+    description: Scaffold a Evolve application with ease
+    path: ./evolve
   wasm:
     description: Scaffold a CosmosWasm-enabled chain with ease
     path: ./wasm

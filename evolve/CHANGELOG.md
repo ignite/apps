@@ -1,11 +1,15 @@
-# Rollkit App Changelog
+# Evolve App Changelog
 
 ## Unreleased
+
+## [`v0.4.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.0)
+
+* []() Rename app, flags and commands from `rollkit` to `evolve` following the rebranding of Rollkit to Evolve.
 
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/rollkit/v0.3.0)
 
 * [#112](https://github.com/ignite/apps/pull/112) Use default command instead cobra commands.
-* [#192](https://github.com/ignite/apps/pull/192) Upgrade Rollkit to `v1.x` and use [`go-execution-abci`](https://github.com/rollkit/go-execution-abci) instead of [`cosmos-sdk-starter`](https://github.com/rollkit/cosmos-sdk-starter).
+* [#192](https://github.com/ignite/apps/pull/192) Upgrade Rollkit to `v1.x` and use [`go-execution-abci`](https://github.com/evstack/ev-abci) instead of [`cosmos-sdk-starter`](https://github.com/rollkit/cosmos-sdk-starter).
   * Note, if you already have rollkit installed, you need to redo the wiring manually.
 * [#194](https://github.com/ignite/apps/pull/194) Uniform the flag addition with other apps.
 * [#209](https://github.com/ignite/apps/pull/209) Wire `MigrateToRollkitCmd` in the scaffolded app.

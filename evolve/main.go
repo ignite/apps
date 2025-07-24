@@ -8,7 +8,7 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 
-	"github.com/ignite/apps/rollkit/cmd"
+	"github.com/ignite/apps/evolve/cmd"
 )
 
 var _ plugin.Interface = app{}
@@ -17,7 +17,7 @@ type app struct{}
 
 func (app) Manifest(context.Context) (*plugin.Manifest, error) {
 	return &plugin.Manifest{
-		Name:     "rollkit",
+		Name:     "evolve",
 		Commands: cmd.GetCommands(),
 	}, nil
 }
@@ -26,8 +26,8 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.
-	// Remove the first arg "ignite" from OSArgs because our rollkit
-	// command root is "rollkit" not "ignite".
+	// Remove the first arg "ignite" from OSArgs because our evolve
+	// command root is "evolve" not "ignite".
 	args := c.OsArgs[2:]
 	switch args[0] {
 	case "add":
@@ -57,7 +57,7 @@ func main() {
 	hplugin.Serve(&hplugin.ServeConfig{
 		HandshakeConfig: plugin.HandshakeConfig(),
 		Plugins: map[string]hplugin.Plugin{
-			"rollkit": plugin.NewGRPC(&app{}),
+			"evolve": plugin.NewGRPC(&app{}),
 		},
 		GRPCServer: hplugin.DefaultGRPCServer,
 	})
