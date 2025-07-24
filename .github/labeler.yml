@@ -40,9 +40,9 @@
   - changed-files:
       - network/**/*
 
-"app:rollkit":
+"app:evolve":
   - changed-files:
-      - rollkit/**/*
+      - evolve/**/*
 
 "app:spaceship":
   - changed-files:

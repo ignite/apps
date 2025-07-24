@@ -25,10 +25,10 @@ import (
 const defaultValPower = 1
 
 func InitHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	return initRollkit(ctx, cmd, true)
+	return initEVABCI(ctx, cmd, true)
 }
 
-func initRollkit(
+func initEVABCI(
 	ctx context.Context,
 	cmd *plugin.ExecutedCommand,
 	initChain bool,
@@ -99,7 +99,7 @@ func initRollkit(
 
 	genesis.Consensus.Validators = []cmttypes.GenesisValidator{
 		{
-			Name:    "Rollkit Sequencer",
+			Name:    "EV-node Sequencer",
 			Address: pubKey.Address(),
 			PubKey:  pubKey,
 			Power:   defaultValPower,
@@ -110,7 +110,7 @@ func initRollkit(
 		return err
 	}
 
-	return session.Printf("🗃 Initialized. Checkout your rollkit chain's home (data) directory: %s\n", colors.Info(home))
+	return session.Printf("🗃 Initialized. Checkout your evolve chain's home (data) directory: %s\n", colors.Info(home))
 }
 
 // getPubKey returns the validator public key.

@@ -16,18 +16,18 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func TestRollkit(t *testing.T) {
+func TestEvolve(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.ScaffoldApp("github.com/apps/rollkit")
+		app     = env.ScaffoldApp("github.com/apps/evolve")
 	)
 
 	dir, err := os.Getwd()
 	require.NoError(err)
-	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "rollkit")
+	pluginPath := filepath.Join(filepath.Dir(filepath.Dir(dir)), "evolve")
 
-	env.Must(env.Exec("install rollkit app locally",
+	env.Must(env.Exec("install evolve app locally",
 		step.NewSteps(step.New(
 			step.Exec(envtest.IgniteApp, "app", "install", pluginPath),
 			step.Workdir(app.SourcePath()),
@@ -38,11 +38,11 @@ func TestRollkit(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	env.Must(env.Exec("run rollkit add",
+	env.Must(env.Exec("run evolve add",
 		step.NewSteps(step.New(
 			step.Exec(
 				envtest.IgniteApp,
-				"rollkit",
+				"evolve",
 				"add",
 			),
 			step.Workdir(app.SourcePath()),
@@ -51,7 +51,7 @@ func TestRollkit(t *testing.T) {
 
 	buf := &bytes.Buffer{}
 	bin := path.Join(goenv.Bin(), app.Binary())
-	env.Must(env.Exec("check rollkitd", step.NewSteps(
+	env.Must(env.Exec("check evolved", step.NewSteps(
 		step.New(
 			step.Exec(
 				envtest.IgniteApp,
@@ -68,16 +68,16 @@ func TestRollkit(t *testing.T) {
 	))
 
 	if !strings.Contains(buf.String(), "--rollkit.da") {
-		t.Errorf("rollkitd doesn't contain --rollkit flags: %s", buf.String())
+		t.Errorf("evolved doesn't contain --rollkit flags: %s", buf.String())
 	}
 
 	buf.Reset()
 
-	env.Must(env.Exec("run rollkit init", step.NewSteps(
+	env.Must(env.Exec("run evolve init", step.NewSteps(
 		step.New(
 			step.Exec(
 				envtest.IgniteApp,
-				"rollkit",
+				"evolve",
 				"init",
 			),
 			step.PostExec(func(exitErr error) error {
@@ -88,8 +88,8 @@ func TestRollkit(t *testing.T) {
 		),
 	)))
 
-	if !strings.Contains(buf.String(), "Initialized. Checkout your rollkit chain's home") {
-		t.Errorf("ignite rollkit init has failed: %s", buf.String())
+	if !strings.Contains(buf.String(), "Initialized. Checkout your evolve chain's home") {
+		t.Errorf("ignite evolve init has failed: %s", buf.String())
 	}
 }
 

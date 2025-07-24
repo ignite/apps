@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 jobs:
-  rollkit-liveness:
-    name: Ignite Rollkit App Liveness Test
+  evolve-liveness:
+    name: Ignite Evolve App Liveness Test
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
@@ -30,33 +30,33 @@ jobs:
         run: |
           curl https://get.ignite.com/cli! | bash
 
-      - name: Scaffold & Init Rollkit Chain
+      - name: Scaffold & Init Evolve Chain
         run: |
           # get the path to the current checkout of ignite apps
-          ROLLKIT_APP_DIR=$(pwd)/rollkit
+          EVOLVE_APP_DIR=$(pwd)/evolve
 
           # scaffold a new chain
           ignite scaffold chain gm --no-module --skip-git
           cd gm
 
-          # install rollkit app
-          ignite app install $ROLLKIT_APP_DIR
+          # install evolve app
+          ignite app install $EVOLVE_APP_DIR
 
-          # add rollkit to the chain
-          ignite rollkit add
+          # add evolve to the chain
+          ignite evolve add
           go mod tidy
 
           # build the chain
           ignite chain build --skip-proto
 
-          # initialize rollkit
-          ignite rollkit init
+          # initialize ev-abci
+          ignite evolve init
 
       - name: Start Local DA
         run: |
           cd gm
           # start the local da in the background
-          go tool github.com/rollkit/rollkit/da/cmd/local-da &
+          go tool github.com/evolve/ev-node/da/cmd/local-da &
           # capture the background process PID
           echo "DA_PID=$!" >> $GITHUB_ENV
           # give it a moment to start

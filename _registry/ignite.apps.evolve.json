@@ -1,7 +1,7 @@
 {
-  "appName": "Rollkit",
-  "appID": "rollkit",
-  "appDescription": "Scaffold a RollKit application with ease",
+  "appName": "Evolve",
+  "appID": "evolve",
+  "appDescription": "Scaffold a ev-abci network with ease",
   "ignite": ">=28.4.0",
   "dependencies": {},
   "cosmosSDK": ">=0.50.6",
@@ -11,8 +11,8 @@
       "github": "julienrbrt"
     }
   ],
-  "repositoryUrl": "https://github.com/ignite/apps/rollkit",
-  "documentationUrl": "https://github.com/ignite/apps/blob/main/rollkit/README.md",
+  "repositoryUrl": "https://github.com/ignite/apps/evolve",
+  "documentationUrl": "https://github.com/ignite/apps/blob/main/evolve/README.md",
   "license": {
     "name": "MIT",
     "url": "https://github.com/ignite/apps/blob/main/LICENSE"
@@ -21,6 +21,10 @@
     "scaffolder",
     "rollup",
     "rollkit",
+    "network",
+    "ev-node",
+    "ev-abci",
+    "evolve",
     "cli",
     "cosmos-sdk",
     "ignite app"

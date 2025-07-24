@@ -25,9 +25,9 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 
 		// Import rollkitmngr module
 		content, err := xast.AppendImports(f.String(),
-			xast.WithNamedImport("rollkitmngrmodule", "github.com/rollkit/go-execution-abci/modules/rollkitmngr/module"),
-			xast.WithNamedImport("rollkitmngrtypes", "github.com/rollkit/go-execution-abci/modules/rollkitmngr/types"),
-			xast.WithNamedImport("_", "github.com/rollkit/go-execution-abci/modules/rollkitmngr"),
+			xast.WithNamedImport("rollkitmngrmodule", "github.com/evstack/ev-abci/modules/rollkitmngr/module"),
+			xast.WithNamedImport("rollkitmngrtypes", "github.com/evstack/ev-abci/modules/rollkitmngr/types"),
+			xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/rollkitmngr"),
 		)
 		if err != nil {
 			return err
@@ -40,7 +40,7 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
 
 		// replace staking blank import
-		content = strings.Replace(content, "github.com/cosmos/cosmos-sdk/x/staking", "github.com/rollkit/go-execution-abci/modules/staking", 1)
+		content = strings.Replace(content, "github.com/cosmos/cosmos-sdk/x/staking", "github.com/evstack/ev-abci/modules/staking", 1)
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
@@ -52,7 +52,7 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 			return err
 		}
 
-		content := strings.ReplaceAll(f.String(), "github.com/cosmos/cosmos-sdk/x/staking/keeper", "github.com/rollkit/go-execution-abci/modules/staking/keeper")
+		content := strings.ReplaceAll(f.String(), "github.com/cosmos/cosmos-sdk/x/staking/keeper", "github.com/evstack/ev-abci/modules/staking/keeper")
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
