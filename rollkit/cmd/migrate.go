@@ -7,11 +7,10 @@ import (
 
 	"github.com/gobuffalo/genny/v2"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 func MigrateFromCometHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
@@ -36,7 +35,7 @@ func MigrateFromCometHandler(ctx context.Context, cmd *plugin.ExecutedCommand) e
 
 	g := &genny.Generator{} // TODO
 
-	_, err = xgenny.RunWithValidation(placeholder.New(), g)
+	_, err = xgenny.NewRunner(ctx, appPath).RunAndApply(g)
 	if err != nil {
 		return err
 	}
