@@ -21,10 +21,8 @@ ignite rollkit init
 Then start `local-da` or use Celestia mainnet as data availability layer.
 
 ```sh
-# go install github.com/rollkit/rollkit/da/cmd/local-da@latest
-git clone github.com/rollkit/rollkit --depth 1
-cd rollkit/da/cmd/local-da
-go run .
+cd gm
+go tool github.com/rollkit/rollkit/da/cmd/local-da
 ```
 
 Finally, run the rollup node:

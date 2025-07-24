@@ -28,19 +28,7 @@ jobs:
 
       - name: Install Ignite CLI
         run: |
-          curl -sSL https://get.ignite.com/cli@v28.10.0! | bash
-
-      - name: Start Local DA
-        run: |
-          # clone rollkit repository (#TODO install via go install when possible)
-          git clone https://github.com/rollkit/rollkit --depth 1 rollkit-repo
-          cd rollkit-repo/da/cmd/local-da
-          # start the local da in the background
-          go run . &
-          # capture the background process PID
-          echo "DA_PID=$!" >> $GITHUB_ENV
-          # give it a moment to start
-          sleep 3
+          curl https://get.ignite.com/cli! | bash
 
       - name: Scaffold & Init Rollkit Chain
         run: |
@@ -63,6 +51,16 @@ jobs:
 
           # initialize rollkit
           ignite rollkit init
+
+      - name: Start Local DA
+        run: |
+          cd gm
+          # start the local da in the background
+          go tool github.com/rollkit/rollkit/da/cmd/local-da &
+          # capture the background process PID
+          echo "DA_PID=$!" >> $GITHUB_ENV
+          # give it a moment to start
+          sleep 3
 
       - name: Start Chain and Wait for Blocks
         run: |

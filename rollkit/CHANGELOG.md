@@ -9,6 +9,9 @@
   * Note, if you already have rollkit installed, you need to redo the wiring manually.
 * [#194](https://github.com/ignite/apps/pull/194) Uniform the flag addition with other apps.
 * [#209](https://github.com/ignite/apps/pull/209) Wire `MigrateToRollkitCmd` in the scaffolded app.
+* [#212](https://github.com/ignite/apps/pull/212) Add `--migrate` flag to `rollkit add` command to scaffold modules and migration helpers for CometBFT to Rollkit migration.
+* [#212](https://github.com/ignite/apps/pull/212) Add `edit` command to edit an existing genesis file without overwriting it (compared to `init`).
+
 
 ## [`v0.2.3`](https://github.com/ignite/apps/releases/tag/rollkit/v0.2.3)
 
