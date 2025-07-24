@@ -36,8 +36,6 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 		return cmd.InitHandler(ctx, c)
 	case "edit-genesis":
 		return cmd.EditGenesisHandler(ctx, c)
-	case "migrate-from-cometbft", "migrate-from-comet":
-		return cmd.MigrateFromCometHandler(ctx, c)
 	default:
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}

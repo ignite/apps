@@ -29,7 +29,7 @@ jobs:
 
       - name: Install Ignite CLI
         run: |
-          curl -sSL https://get.ignite.com/cli | bash
+          curl -sSL https://get.ignite.com/cli@v28.10.0! | bash
 
       - name: Start Local DA
         run: |

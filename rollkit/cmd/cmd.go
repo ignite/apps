@@ -23,6 +23,11 @@ func GetCommands() []*plugin.Command {
 							Shorthand: "p",
 							Type:      plugin.FlagTypeString,
 						},
+						{
+							Name:  flagMigrateFromCometBFT,
+							Usage: "migrate from CometBFT to Rollkit",
+							Type:  plugin.FlagTypeBool,
+						},
 					},
 				},
 				{
@@ -42,19 +47,6 @@ func GetCommands() []*plugin.Command {
 					Use:   "edit-genesis",
 					Short: "Edit the genesis file to add the rollkit sequencer",
 					Long:  "Edit the genesis file to add the rollkit sequencer module. This is an alternative to the `ignite rollkit init` command, where a chain is already initialized (but not yet started).",
-					Flags: []*plugin.Flag{
-						{
-							Name:      flagPath,
-							Usage:     "path of the app",
-							Shorthand: "p",
-							Type:      plugin.FlagTypeString,
-						},
-					},
-				},
-				{
-					Use:     "migrate-from-cometbft",
-					Aliases: []string{"migrate-from-comet"},
-					Short:   "Migrate from CometBFT to Rollkit",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,

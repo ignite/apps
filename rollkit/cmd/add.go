@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
@@ -16,7 +17,8 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath = "path"
+	flagPath                = "path"
+	flagMigrateFromCometBFT = "migrate-from-cometbft"
 )
 
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
@@ -29,6 +31,12 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	if err != nil {
 		return err
 	}
+
+	migrateCometBFT, err := flags.GetBool(flagMigrateFromCometBFT)
+	if err != nil {
+		return err
+	}
+
 	absPath, err := filepath.Abs(appPath)
 	if err != nil {
 		return err
@@ -39,7 +47,12 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	g, err := template.NewRollKitGenerator(c)
+	binaryName, err := c.Binary()
+	if err != nil {
+		return err
+	}
+
+	g, err := template.NewRollKitGenerator(c, migrateCometBFT)
 	if err != nil {
 		return err
 	}
@@ -53,7 +66,15 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	return session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
+	err = session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
+
+	if migrateCometBFT {
+		err = errors.Join(err, session.Println("Additionally, rollkit migration commands and modules successfully scaffolded 🎉"))
+		err = errors.Join(err, session.Printf("If %s is already live, check out the newly added rollkit manager to prepare the chain for migration\n", c.Name()))
+		err = errors.Join(err, session.Printf("Run `%s rollkit-migrate` to migrate CometBFT state to the rollkit state.\n", binaryName))
+	}
+
+	return err
 }
 
 // finish finalize the scaffolded code (formating, dependencies).

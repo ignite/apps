@@ -18,7 +18,7 @@ import (
 )
 
 // NewRollKitGenerator returns the generator to scaffold a rollkit integration inside an app.
-func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
+func NewRollKitGenerator(chain *chain.Chain, withCometMigration bool) (*genny.Generator, error) {
 	g := genny.New()
 	ctx := plush.NewContext()
 	plushhelpers.ExtendPlushContext(ctx)
@@ -37,6 +37,9 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 
 	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 	g.RunFn(commandsGenesisModify(appPath, binaryName))
+	if withCometMigration {
+		g.RunFn(migrateFromCometModify(appPath))
+	}
 
 	return g, nil
 }
