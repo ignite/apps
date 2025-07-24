@@ -14,4 +14,7 @@ const (
 
 	RollkitPackage = "github.com/rollkit/rollkit"
 	RollkitVersion = "v1.0.0-beta.2"
+
+	RollkitDaCmd     = "github.com/rollkit/rollkit/da/cmd/local-da"
+	RollkitDaVersion = "v1.0.0-beta.1"
 )

@@ -141,13 +141,17 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 		}
 
 		// modify the add commands arguments using xast.
+		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
 		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
 			if strings.Contains(args[0], "InitCmd") {
 				args[0] = "genesisCmd"
 			}
 
 			// add migrate command
-			args = append(args, rollkitV1MigrateCmd)
+			if !alreadyAdded {
+				args = append(args, rollkitV1MigrateCmd)
+				alreadyAdded = true
+			}
 
 			return args, nil
 		})
@@ -157,7 +161,7 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 }
 
 // updateDependencies makes sure the correct dependencies are added to the go.mod files.
-// go-execution-abci expects rollkit v1.0 to be used.
+// go-execution-abci expects rollkit v1 to be used.
 func updateDependencies(appPath string) error {
 	gomod, err := gomodule.ParseAt(appPath)
 	if err != nil {
@@ -167,10 +171,10 @@ func updateDependencies(appPath string) error {
 	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
 	gomod.AddNewRequire(RollkitPackage, RollkitVersion, false)
 
-	// temporarily add a replace for rollkit
-	// it can be removed once we have a tag
-	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
-	gomod.AddReplace(GoExecPackage, "", GoExecPackage, GoExecVersion)
+	// add local-da as go tool dependency (useful for local development)
+	if err := gomod.AddTool(RollkitDaCmd); err != nil {
+		return errors.Errorf("failed to add local-da tool: %w", err)
+	}
 
 	// save go.mod
 	data, err := gomod.Format()

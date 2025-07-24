@@ -24,8 +24,8 @@ func GetCommands() []*plugin.Command {
 							Type:      plugin.FlagTypeString,
 						},
 						{
-							Name:  flagMigrateFromCometBFT,
-							Usage: "migrate from CometBFT to Rollkit",
+							Name:  flagMigrate,
+							Usage: "scaffolds the migrations helpers and modules (to use when migrating from CometBFT)",
 							Type:  plugin.FlagTypeBool,
 						},
 					},

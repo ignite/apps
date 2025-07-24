@@ -17,8 +17,8 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath                = "path"
-	flagMigrateFromCometBFT = "migrate-from-cometbft"
+	flagPath    = "path"
+	flagMigrate = "migrate"
 )
 
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
@@ -32,7 +32,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	migrateCometBFT, err := flags.GetBool(flagMigrateFromCometBFT)
+	migrateCometBFT, err := flags.GetBool(flagMigrate)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,8 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	err = session.Printf("🎉 RollKit added (`%[1]v`).\n", c.AppPath(), c.Name())
 
 	if migrateCometBFT {
-		err = errors.Join(err, session.Println("Additionally, rollkit migration commands and modules successfully scaffolded 🎉"))
+		err = errors.Join(session.Printf("\n"))
+		err = errors.Join(err, session.Println("Additionally, rollkit migration commands and modules successfully scaffolded!"))
 		err = errors.Join(err, session.Printf("If %s is already live, check out the newly added rollkit manager to prepare the chain for migration\n", c.Name()))
 		err = errors.Join(err, session.Printf("Run `%s rollkit-migrate` to migrate CometBFT state to the rollkit state.\n", binaryName))
 	}
