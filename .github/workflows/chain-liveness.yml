@@ -28,7 +28,7 @@ jobs:
 
       - name: Install Ignite CLI
         run: |
-          curl -sSL https://get.ignite.com/cli@v28.10.0! | bash
+          curl https://get.ignite.com/cli! | bash
 
       - name: Scaffold & Init Rollkit Chain
         run: |
