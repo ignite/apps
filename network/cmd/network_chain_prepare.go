@@ -4,13 +4,12 @@ import (
 	"fmt"
 	"path/filepath"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/chaincmd"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/colors"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/icons"
-	"github.com/ignite/cli/v28/ignite/pkg/gitpod"
-	"github.com/ignite/cli/v28/ignite/pkg/goenv"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/colors"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v29/ignite/pkg/goenv"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
@@ -146,13 +145,6 @@ use --force to prepare anyway`,
 	session.Printf("%s Chain is prepared for launch\n", icons.OK)
 	session.Println("\nYou can start your node by running the following command:")
 	commandStr := fmt.Sprintf("%s start --home %s", binaryName, chainHome)
-	if gitpod.IsOnGitpod() {
-		// Gitpod requires to enable proxy-tunnel tool
-		commandStr = fmt.Sprintf(
-			"ignite network tool proxy-tunnel %s/spn.yml & %s",
-			chainHome, commandStr,
-		)
-	}
 	session.Printf("\t%s/%s\n", binaryDir, colors.Info(commandStr))
 
 	return nil

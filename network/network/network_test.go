@@ -5,8 +5,8 @@ import (
 	"testing"
 	"time"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v28/ignite/pkg/xtime"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v29/ignite/pkg/xtime"
 	"github.com/stretchr/testify/require"
 
 	"github.com/ignite/apps/network/network/testutil"

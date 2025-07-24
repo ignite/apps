@@ -11,9 +11,9 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosclient"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosfaucet"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosfaucet"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/pelletier/go-toml/v2"
 )
 
@@ -620,7 +620,7 @@ func (c *Chain) Balance(ctx context.Context, addr string) (sdk.Coins, error) {
 
 // TryRetrieve tries to receive some coins to the account and returns the total balance.
 func (c *Chain) TryRetrieve(ctx context.Context, addr, faucetAddr string) (sdk.Coins, error) {
-	if err := cosmosfaucet.TryRetrieve(ctx, c.ID, c.RPCAddr, faucetAddr, addr); err != nil {
+	if _, err := cosmosfaucet.TryRetrieve(ctx, c.ID, c.RPCAddr, faucetAddr, addr); err != nil {
 		return nil, err
 	}
 	return c.Balance(ctx, addr)

@@ -3,7 +3,7 @@ package address
 import (
 	"github.com/cosmos/cosmos-sdk/codec/address"
 	"github.com/cosmos/cosmos-sdk/types/bech32"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
 // ChangeValidatorAddressPrefix returns the address with another prefix from the validator address.

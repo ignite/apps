@@ -5,22 +5,22 @@ import (
 	"context"
 	"os"
 	"path/filepath"
-	"sync"
 	"testing"
 	"time"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 	"github.com/stretchr/testify/require"
+	"golang.org/x/sync/errgroup"
 )
 
 func TestGexExplorer(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/explorer")
+		app         = env.ScaffoldApp("github.com/test/explorer")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -40,41 +40,38 @@ func TestGexExplorer(t *testing.T) {
 	assertLocalPlugins(t, app, []pluginsconfig.Plugin{{Path: pluginPath}})
 	assertGlobalPlugins(t, nil)
 
-	execErr := &bytes.Buffer{}
+	b := &bytes.Buffer{}
 	steps := step.NewSteps(
 		step.New(
-			step.Stderr(execErr),
+			step.Stdout(b),
 			step.Workdir(app.SourcePath()),
 			step.PreExec(func() error {
 				return env.IsAppServed(ctx, servers.API)
 			}),
 			step.Exec(envtest.IgniteApp, "e", "gex", "--rpc-address", servers.RPC),
 			step.InExec(func() error {
+				defer cancel()
 				time.Sleep(5 * time.Second)
-				cancel()
 				return nil
 			}),
 		),
 	)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
 		env.Must(env.Exec("run gex", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
-		wg.Done()
-	}()
+		return nil
+	})
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-	wg.Wait()
-
-	require.Empty(execErr.String())
+	env.Must(app.Serve("serve app", envtest.ExecCtx(ctx)))
+	require.NoError(g.Wait())
 }
 
 func TestPingPubExplorer(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/test/pingpub-explorer")
+		app         = env.ScaffoldApp("github.com/test/pingpub-explorer")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -116,15 +113,14 @@ func TestPingPubExplorer(t *testing.T) {
 		),
 	)
 
-	var wg sync.WaitGroup
-	wg.Add(1)
-	go func() {
+	g, ctx := errgroup.WithContext(ctx)
+	g.Go(func() error {
 		env.Must(env.Exec("run pingpub", steps, envtest.ExecRetry(), envtest.ExecCtx(ctx)))
-		wg.Done()
-	}()
+		return nil
+	})
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-	wg.Wait()
+	app.MustServe(ctx)
+	require.NoError(g.Wait())
 
 	require.Empty(execErr.String())
 

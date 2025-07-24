@@ -49,7 +49,7 @@ const socialLinks = [
   },
   {
     icon: <Icon name="discord" color="$blackAlpha600" />,
-    href: 'https://discord.com/invite/ignite',
+    href: 'https://discord.com/invite/ignitecli',
   },
   {
     icon: (

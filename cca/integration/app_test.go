@@ -8,17 +8,17 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 )
 
 func TestCCA(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("cca-app")
+		app     = env.ScaffoldApp("cca-app")
 	)
 
 	dir, err := os.Getwd()

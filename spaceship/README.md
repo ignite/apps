@@ -4,7 +4,7 @@ Spaceship is an Ignite App designed to extend the [Ignite CLI](https://github.co
 
 ## Prerequisites
 
-* **Ignite CLI**: Version `v28.4.0` or higher is required.
+* **Ignite CLI**: Version `v29.0.0` or higher is required.
 * **Blockchain Scaffold**: A blockchain scaffolded using Ignite.
 
 ## Usage
@@ -13,8 +13,9 @@ Spaceship provides multiple ways to connect to your SSH server for deployment:
 
 ```sh
 ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa
+ignite spaceship deploy <user>@<ip-address> --password
 ignite spaceship deploy <ip-address> --user root --key $HOME/.ssh/id_rsa
-ignite spaceship deploy <ip-address> --user root --password password
+ignite spaceship deploy <ip-address> --user root --user-password password
 ignite spaceship deploy <user>@<ip-address> --key $HOME/.ssh/id_rsa --key-password key_password
 ```
 

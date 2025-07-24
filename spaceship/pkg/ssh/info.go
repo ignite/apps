@@ -4,7 +4,7 @@ import (
 	"context"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
+	"github.com/ignite/cli/v29/ignite/pkg/gocmd"
 )
 
 // OS returns the operating system type of the remote server.

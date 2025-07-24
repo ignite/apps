@@ -1,6 +1,6 @@
 package cmd
 
-import "github.com/ignite/cli/v28/ignite/services/plugin"
+import "github.com/ignite/cli/v29/ignite/services/plugin"
 
 const flagOutput = "output"
 
