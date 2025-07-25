@@ -7,7 +7,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"golang.org/x/sync/errgroup"
 
 	"github.com/ignite/apps/spaceship/pkg/faucet"

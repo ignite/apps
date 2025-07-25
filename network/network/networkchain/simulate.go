@@ -9,11 +9,11 @@ import (
 
 	"github.com/cenkalti/backoff"
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
-	"github.com/ignite/cli/v28/ignite/pkg/availableport"
-	"github.com/ignite/cli/v28/ignite/pkg/cache"
-	"github.com/ignite/cli/v28/ignite/pkg/events"
-	"github.com/ignite/cli/v28/ignite/pkg/httpstatuschecker"
-	"github.com/ignite/cli/v28/ignite/pkg/xurl"
+	"github.com/ignite/cli/v29/ignite/pkg/availableport"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
+	"github.com/ignite/cli/v29/ignite/pkg/httpstatuschecker"
+	"github.com/ignite/cli/v29/ignite/pkg/xurl"
 	"github.com/pelletier/go-toml"
 	"github.com/pkg/errors"
 

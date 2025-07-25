@@ -8,12 +8,12 @@ import (
 	"strconv"
 	"testing"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/availableport"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/availableport"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/terminal"
@@ -135,7 +135,7 @@ func TestSpaceship(t *testing.T) {
 	var (
 		require  = require.New(t)
 		env      = envtest.New(t)
-		app      = env.Scaffold("spaceship-app")
+		app      = env.ScaffoldApp("spaceship-app")
 		user     = "spaceship"
 		password = "spaceship_pass"
 	)

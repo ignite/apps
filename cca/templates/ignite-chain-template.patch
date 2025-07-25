@@ -1472,7 +1472,7 @@ index 95e1658c..5bb5388a 100644
    {
      icon: <Icon name="discord" color="$blackAlpha600" />,
 -    href: 'https://discord.com/invite/xh3ZwHj2qQ',
-+    href: 'https://discord.com/invite/ignite',
++    href: 'https://discord.com/invite/ignitecli',
    },
    {
      icon: (

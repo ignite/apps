@@ -9,10 +9,10 @@ import (
 	"testing"
 	"time"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +20,7 @@ func TestHealthMonitor(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/health-monitor")
+		app         = env.ScaffoldApp("github.com/apps/health-monitor")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -70,9 +70,9 @@ func TestHealthMonitor(t *testing.T) {
 		wg.Done()
 	}()
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
-
+	app.MustServe(ctx)
 	wg.Wait()
+
 	got := output.String()
 	require.Contains(got, "Chain ID: healthmonitor")
 	require.Contains(got, "Version:")

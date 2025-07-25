@@ -1,5 +1,9 @@
 # Explorer App Changelog
 
+## Unreleased
+
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
 ## [`v0.4.1`](https://github.com/ignite/apps/releases/tag/explorer/v0.4.1)
 
 * Fix spinner not stopping.

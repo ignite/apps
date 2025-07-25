@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 // GetCommands returns the list of app commands.
@@ -23,11 +23,30 @@ func GetCommands() []*plugin.Command {
 							Shorthand: "p",
 							Type:      plugin.FlagTypeString,
 						},
+						{
+							Name:  flagMigrate,
+							Usage: "scaffolds the migrations helpers and modules (to use when migrating from CometBFT)",
+							Type:  plugin.FlagTypeBool,
+						},
 					},
 				},
 				{
 					Use:   "init",
 					Short: "Init rollkit support",
+					Long:  "Initialize the chain and add rollkit sequencer",
+					Flags: []*plugin.Flag{
+						{
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
+						},
+					},
+				},
+				{
+					Use:   "edit-genesis",
+					Short: "Edit the genesis file to add the rollkit sequencer",
+					Long:  "Edit the genesis file to add the rollkit sequencer module. This is an alternative to the `ignite rollkit init` command, where a chain is already initialized (but not yet started).",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,

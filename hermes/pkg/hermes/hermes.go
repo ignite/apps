@@ -1,20 +1,16 @@
 package hermes
 
 import (
-	"archive/tar"
 	"bytes"
-	"compress/gzip"
 	"context"
 	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/exec"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/localfs"
-	"github.com/ignite/ignite-files/hermes"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/exec"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
 const (
@@ -89,7 +85,7 @@ type (
 	// Hermes represents the hermes binary structure.
 	Hermes struct {
 		path    string
-		cleanup func()
+		version string
 	}
 
 	// Option configures Generate configs.
@@ -240,43 +236,6 @@ func WithStdErr(stderr io.Writer) Option {
 	return func(c *configs) {
 		c.stderr = stderr
 	}
-}
-
-// New returns the hermes binary executable.
-func New() (*Hermes, error) {
-	// untar the binary.
-	gzr, err := gzip.NewReader(bytes.NewReader(hermes.Binary()))
-	if err != nil {
-		panic(err)
-	}
-	defer gzr.Close()
-
-	tr := tar.NewReader(gzr)
-
-	if _, err := tr.Next(); err != nil {
-		return nil, err
-	}
-
-	binary, err := io.ReadAll(tr)
-	if err != nil {
-		return nil, err
-	}
-
-	path, cleanup, err := localfs.SaveBytesTemp(binary, "hermes", 0o755)
-	if err != nil {
-		return nil, err
-	}
-
-	return &Hermes{
-		path:    path,
-		cleanup: cleanup,
-	}, nil
-}
-
-// Cleanup clean the temporary Hermes binary.
-func (h *Hermes) Cleanup() error {
-	h.cleanup()
-	return os.RemoveAll(h.path)
 }
 
 // AddKey adds a new key file into the Hermes.

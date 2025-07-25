@@ -8,17 +8,17 @@ import (
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/gomodule"
-	"github.com/ignite/cli/v28/ignite/pkg/xast"
-	"github.com/ignite/cli/v28/ignite/pkg/xgenny"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/templates/field/plushhelpers"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
+	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
 // NewRollKitGenerator returns the generator to scaffold a rollkit integration inside an app.
-func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
+func NewRollKitGenerator(chain *chain.Chain, withCometMigration bool) (*genny.Generator, error) {
 	g := genny.New()
 	ctx := plush.NewContext()
 	plushhelpers.ExtendPlushContext(ctx)
@@ -37,6 +37,9 @@ func NewRollKitGenerator(chain *chain.Chain) (*genny.Generator, error) {
 
 	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 	g.RunFn(commandsGenesisModify(appPath, binaryName))
+	if withCometMigration {
+		g.RunFn(migrateFromCometModify(appPath))
+	}
 
 	return g, nil
 }
@@ -64,7 +67,7 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
+			xast.WithNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
@@ -111,8 +114,8 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 
 		content, err := xast.AppendImports(
 			f.String(),
-			xast.WithLastNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
-			xast.WithLastNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
+			xast.WithNamedImport("rollconf", "github.com/rollkit/rollkit/pkg/config"),
+			xast.WithNamedImport("abciserver", "github.com/rollkit/go-execution-abci/server"),
 		)
 		if err != nil {
 			return err
@@ -138,9 +141,16 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 		}
 
 		// modify the add commands arguments using xast.
+		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
 		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
 			if strings.Contains(args[0], "InitCmd") {
 				args[0] = "genesisCmd"
+			}
+
+			// add migrate command
+			if !alreadyAdded {
+				args = append(args, rollkitV1MigrateCmd)
+				alreadyAdded = true
 			}
 
 			return args, nil
@@ -151,7 +161,7 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 }
 
 // updateDependencies makes sure the correct dependencies are added to the go.mod files.
-// go-execution-abci expects rollkit v1.0 to be used.
+// go-execution-abci expects rollkit v1 to be used.
 func updateDependencies(appPath string) error {
 	gomod, err := gomodule.ParseAt(appPath)
 	if err != nil {
@@ -161,10 +171,10 @@ func updateDependencies(appPath string) error {
 	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
 	gomod.AddNewRequire(RollkitPackage, RollkitVersion, false)
 
-	// temporarily add a replace for rollkit
-	// it can be removed once we have a tag
-	gomod.AddReplace(RollkitPackage, "", RollkitPackage, RollkitVersion)
-	gomod.AddReplace(GoExecPackage, "", GoExecPackage, GoExecVersion)
+	// add local-da as go tool dependency (useful for local development)
+	if err := gomod.AddTool(RollkitDaCmd); err != nil {
+		return errors.Errorf("failed to add local-da tool: %w", err)
+	}
 
 	// save go.mod
 	data, err := gomod.Format()

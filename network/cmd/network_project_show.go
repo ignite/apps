@@ -1,8 +1,8 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
@@ -44,7 +44,7 @@ func networkProjectShowHandler(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	info, err := yaml.Marshal(cmd.Context(), project)
+	info, err := xyaml.Marshal(cmd.Context(), project)
 	if err != nil {
 		return err
 	}

@@ -6,10 +6,10 @@ import (
 	"path/filepath"
 	"testing"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 	"github.com/stretchr/testify/require"
 )
 
@@ -17,7 +17,7 @@ func TestWasm(t *testing.T) {
 	var (
 		require     = require.New(t)
 		env         = envtest.New(t)
-		app         = env.Scaffold("github.com/apps/wasmapp")
+		app         = env.ScaffoldApp("github.com/apps/wasmapp")
 		servers     = app.RandomizeServerPorts()
 		ctx, cancel = context.WithCancel(env.Ctx())
 	)
@@ -72,7 +72,7 @@ func TestWasm(t *testing.T) {
 		isBodyRetrieved = env.Exec("add wasm to the config", steps, envtest.ExecRetry())
 	}()
 
-	env.Must(app.Serve("should serve", envtest.ExecCtx(ctx)))
+	app.MustServe(ctx)
 
 	if !isBodyRetrieved {
 		t.FailNow()

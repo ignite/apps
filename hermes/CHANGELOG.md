@@ -2,6 +2,19 @@
 
 ## Unreleased
 
+* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+
+## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/hermes/v0.3.0)
+
+* [#199](https://github.com/ignite/apps/pull/199) Download hermes binary instead use `ignite-files` repo
+* [#200](https://github.com/ignite/apps/pull/200) Add hermes global installation into the integration tests
+
+## [`v0.2.8`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.8)
+
+* [#183](https://github.com/ignite/apps/pull/183) Downgrade hermes bin to v1.11
+* [#181](https://github.com/ignite/apps/pull/181) Remove debug message
+* [#180](https://github.com/ignite/apps/pull/180) Bump ignite for all apps
+
 ## [`v0.2.6`](https://github.com/ignite/apps/releases/tag/hermes/v0.2.6)
 
 * [#164](https://github.com/ignite/apps/pull/164) `trust_threshold` is not aligned for latest hermes

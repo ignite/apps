@@ -1,10 +1,10 @@
 {
   "appName": "Network",
-  "slug": "network",
+  "appID": "network",
   "appDescription": "Launch a blockchain in production",
-  "ignite": ">0.28.2",
+  "ignite": ">=0.28.2",
   "dependencies": {},
-  "cosmosSDK": ">0.50.13",
+  "cosmosSDK": ">=0.50.13",
   "authors": [
     {
       "name": "Danilo Pantani",

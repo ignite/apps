@@ -3,10 +3,10 @@ package cmd
 import (
 	"context"
 
-	"github.com/ignite/cli/v28/ignite/pkg/availableport"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/availableport"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
 const (
@@ -46,7 +46,7 @@ func ExecuteSSHFaucetStatus(ctx context.Context, cmd *plugin.ExecutedCommand, ch
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func ExecuteSSHFaucetStart(ctx context.Context, cmd *plugin.ExecutedCommand, cha
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -96,7 +96,7 @@ func ExecuteSSHFaucetRestart(ctx context.Context, cmd *plugin.ExecutedCommand, c
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}
@@ -123,7 +123,7 @@ func ExecuteSSHSFaucetStop(ctx context.Context, cmd *plugin.ExecutedCommand, cha
 	session := cliui.New(cliui.StartSpinnerWithText(statusConnecting))
 	defer session.End()
 
-	c, err := executeSSH(cmd, chain)
+	c, err := executeSSH(session, cmd, chain)
 	if err != nil {
 		return err
 	}

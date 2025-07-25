@@ -1,7 +1,9 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 // GetCommands returns the list of app commands.
@@ -23,6 +25,14 @@ func GetCommands() []*plugin.Command {
 							Shorthand:  "c",
 							Persistent: true,
 							Type:       plugin.FlagTypeString,
+						},
+						{
+							Name:         flagHermesVersion,
+							Usage:        "set the version of the Hermes binary to use",
+							Shorthand:    "v",
+							DefaultValue: hermes.DefaultVersion,
+							Persistent:   true,
+							Type:         plugin.FlagTypeString,
 						},
 					},
 					Commands: []*plugin.Command{

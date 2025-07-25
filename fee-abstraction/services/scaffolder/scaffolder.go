@@ -5,12 +5,12 @@ import (
 	"fmt"
 
 	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosanalysis"
-	"github.com/ignite/cli/v28/ignite/pkg/cosmosver"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/gocmd"
-	"github.com/ignite/cli/v28/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosanalysis"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/gocmd"
+	"github.com/ignite/cli/v29/ignite/services/chain"
 )
 
 const (
@@ -20,7 +20,7 @@ Please, follow the migration guide to upgrade your chain to the latest version a
 	errNewCosmosSDKVersionStr = "Your chain has been scaffolded with the new version (%s) of Cosmos SDK greater than %s"
 )
 
-// Scaffolder is fee abstraction app scaffolder.
+// Scaffolder is a fee abstraction app scaffolder.
 type Scaffolder struct {
 	chain   *chain.Chain
 	session *cliui.Session
@@ -55,7 +55,7 @@ func assertSupportedCosmosSDKVersion(v cosmosver.Version) error {
 
 // finish finalize the scaffolded code downloading the fee abstraction and formatting the code.
 func finish(ctx context.Context, session *cliui.Session, path string, version semver.Version) error {
-	// Add fee-abstraction module to the go.mod
+	// Add a fee-abstraction module to the go.mod
 	session.StartSpinner("Downloading fee abstraction module...")
 
 	URL := fmt.Sprintf("%s@v%s", feeAbsPkg, version.String())

@@ -6,8 +6,8 @@ import (
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui/entrywriter"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/entrywriter"
 	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"

@@ -1,7 +1,13 @@
 package cmd
 
 import (
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"strings"
+
+	"github.com/blang/semver/v4"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+
+	"github.com/ignite/apps/hermes/pkg/hermes"
 )
 
 const (
@@ -79,7 +85,8 @@ const (
 	flagOverwriteConfig               = "overwrite-config"
 	flagChannelVersion                = "channel-version"
 
-	flagConfig = "config"
+	flagConfig        = "config"
+	flagHermesVersion = "hermes-version"
 
 	mnemonicEntropySize = 256
 )
@@ -87,4 +94,16 @@ const (
 func getConfig(flags plugin.Flags) string {
 	config, _ := flags.GetString(flagConfig)
 	return config
+}
+
+func getVersion(flags plugin.Flags) (string, error) {
+	version, _ := flags.GetString(flagHermesVersion)
+	if version == "" {
+		version = hermes.DefaultVersion
+	}
+	sv, err := semver.Parse(strings.TrimPrefix(version, "v"))
+	if err != nil {
+		return version, errors.Wrapf(err, "invalid version format %s", version)
+	}
+	return "v" + sv.String(), nil
 }

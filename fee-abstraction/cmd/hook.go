@@ -4,17 +4,16 @@ import (
 	"context"
 
 	"github.com/blang/semver/v4"
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/errors"
-	"github.com/ignite/cli/v28/ignite/pkg/gomodulepath"
-	"github.com/ignite/cli/v28/ignite/pkg/placeholder"
-	"github.com/ignite/cli/v28/ignite/services/chain"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/gomodulepath"
+	"github.com/ignite/cli/v29/ignite/services/chain"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/fee-abstraction/services/scaffolder"
 )
 
-// ExecuteScaffoldPreHook executes the scaffold pre hook.
+// ExecuteScaffoldPreHook executes the scaffold pre-hook.
 func ExecuteScaffoldPreHook(h *plugin.ExecutedHook) error {
 	var (
 		flags       = plugin.Flags(h.Hook.Flags)
@@ -38,7 +37,7 @@ func ExecuteScaffoldChainPostHook(ctx context.Context, h *plugin.ExecutedHook) e
 		return nil
 	}
 
-	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
+	session := cliui.New(cliui.StartSpinnerWithText(statusAdding))
 	defer session.End()
 
 	pathInfo, err := gomodulepath.Parse(name)
@@ -62,18 +61,11 @@ func ExecuteScaffoldChainPostHook(ctx context.Context, h *plugin.ExecutedHook) e
 		return err
 	}
 
-	sm, err := sc.AddFeeAbstraction(ctx, placeholder.New(), scaffolder.WithVersion(semVersion))
+	sm, err := sc.AddFeeAbstraction(ctx, scaffolder.WithVersion(semVersion))
 	if err != nil {
 		return err
 	}
 
-	modificationsStr, err := sourceModificationToString(sm)
-	if err != nil {
-		return err
-	}
-
-	session.Println(modificationsStr)
-	session.Printf("\n🎉 Fee Abstraction added (`%[1]v`).\n\n", c.AppPath())
-
-	return nil
+	_ = session.Println(sm.String())
+	return session.Printf("\n🎉 Fee Abstraction added (`%[1]v`).\n\n", c.AppPath())
 }

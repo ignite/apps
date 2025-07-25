@@ -3,8 +3,8 @@ package cmd
 import (
 	"strconv"
 
-	"github.com/ignite/cli/v28/ignite/pkg/cliui"
-	"github.com/ignite/cli/v28/ignite/pkg/yaml"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/xyaml"
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 
@@ -56,7 +56,7 @@ func networkRequestShowHandler(cmd *cobra.Command, args []string) error {
 
 	// convert the request object to YAML to be more readable
 	// and convert the byte array fields to string.
-	requestYaml, err := yaml.Marshal(cmd.Context(), request,
+	requestYaml, err := xyaml.Marshal(cmd.Context(), request,
 		"$.Content.content.genesisValidator.genTx",
 		"$.Content.content.genesisValidator.consPubKey",
 		"$.Content.content.paramChange.value",

@@ -54,7 +54,7 @@ ignite app install -g $(pwd)
 
 ## Community
 
-- Join the community conversations on [Discord](https://discord.com/invite/ignite) or [X/Twitter](https://twitter.com/ignite).
+- Join the community conversations on [Discord](https://discord.com/invite/ignitecli) or [X/Twitter](https://twitter.com/ignite).
 - Follow the project's progress and updates.
 
 ## Pull Request Process*

@@ -8,17 +8,17 @@ import (
 
 	"github.com/stretchr/testify/require"
 
-	pluginsconfig "github.com/ignite/cli/v28/ignite/config/plugins"
-	"github.com/ignite/cli/v28/ignite/pkg/cmdrunner/step"
-	"github.com/ignite/cli/v28/ignite/services/plugin"
-	envtest "github.com/ignite/cli/v28/integration"
+	pluginsconfig "github.com/ignite/cli/v29/ignite/config/plugins"
+	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
+	"github.com/ignite/cli/v29/ignite/services/plugin"
+	envtest "github.com/ignite/cli/v29/integration"
 )
 
 func TestChainInfo(t *testing.T) {
 	var (
 		require = require.New(t)
 		env     = envtest.New(t)
-		app     = env.Scaffold("github.com/apps/chain-info")
+		app     = env.ScaffoldApp("github.com/apps/chain-info")
 	)
 
 	dir, err := os.Getwd()
