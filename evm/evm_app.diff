@@ -1,0 +1,863 @@
+diff --git a/app/app.go b/app/app.go
+index 007ca26..4873295 100644
+--- a/app/app.go
++++ b/app/app.go
+@@ -9,8 +9,14 @@ import (
+ 	"cosmossdk.io/log"
+ 	storetypes "cosmossdk.io/store/types"
+ 	circuitkeeper "cosmossdk.io/x/circuit/keeper"
++	feegrantkeeper "cosmossdk.io/x/feegrant/keeper"
+ 	upgradekeeper "cosmossdk.io/x/upgrade/keeper"
+ 
++	// Force-load the tracer engines to trigger registration due to Go-Ethereum v1.10.15 changes
++	_ "github.com/ethereum/go-ethereum/eth/tracers/js"
++	_ "github.com/ethereum/go-ethereum/eth/tracers/native"
++	"github.com/spf13/cast"
++
+ 	abci "github.com/cometbft/cometbft/abci/types"
+ 	dbm "github.com/cosmos/cosmos-db"
+ 	"github.com/cosmos/cosmos-sdk/baseapp"
+@@ -40,11 +46,16 @@ import (
+ 	paramstypes "github.com/cosmos/cosmos-sdk/x/params/types"
+ 	slashingkeeper "github.com/cosmos/cosmos-sdk/x/slashing/keeper"
+ 	stakingkeeper "github.com/cosmos/cosmos-sdk/x/staking/keeper"
++	ibctransferkeeper "github.com/cosmos/evm/x/ibc/transfer/keeper"
+ 	icacontrollerkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/controller/keeper"
+ 	icahostkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/keeper"
+-	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
+ 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+ 
++	evmsrvflags "github.com/cosmos/evm/server/flags"
++	erc20keeper "github.com/cosmos/evm/x/erc20/keeper"
++	feemarketkeeper "github.com/cosmos/evm/x/feemarket/keeper"
++	evmkeeper "github.com/cosmos/evm/x/vm/keeper"
++
+ 	"mars/docs"
+ )
+ 
+@@ -90,6 +101,7 @@ type App struct {
+ 	ConsensusParamsKeeper consensuskeeper.Keeper
+ 	CircuitBreakerKeeper  circuitkeeper.Keeper
+ 	ParamsKeeper          paramskeeper.Keeper
++	FeeGrantKeeper        feegrantkeeper.Keeper
+ 
+ 	// ibc keepers
+ 	IBCKeeper           *ibckeeper.Keeper
+@@ -97,6 +109,11 @@ type App struct {
+ 	ICAHostKeeper       icahostkeeper.Keeper
+ 	TransferKeeper      ibctransferkeeper.Keeper
+ 
++	// cosmos evm keepers
++	FeeMarketKeeper feemarketkeeper.Keeper
++	EVMKeeper       *evmkeeper.Keeper
++	Erc20Keeper     erc20keeper.Keeper
++
+ 	// this line is used by starport scaffolding # stargate/app/keeperDeclaration
+ 
+ 	// simulation manager
+@@ -176,6 +193,7 @@ func New(
+ 		&app.ConsensusParamsKeeper,
+ 		&app.CircuitBreakerKeeper,
+ 		&app.ParamsKeeper,
++		&app.FeeGrantKeeper,
+ 	); err != nil {
+ 		panic(err)
+ 	}
+@@ -188,6 +206,12 @@ func New(
+ 	app.App = appBuilder.Build(db, traceStore, baseAppOptions...)
+ 
+ 	// register legacy modules
++
++	// evm must be instantiated before IBC modules
++	if err := app.registerEVMModules(appOpts); err != nil {
++		panic(err)
++	}
++
+ 	if err := app.registerIBCModules(appOpts); err != nil {
+ 		panic(err)
+ 	}
+@@ -213,6 +237,10 @@ func New(
+ 		return app.App.InitChainer(ctx, req)
+ 	})
+ 
++	// set ante handlers
++	maxGasWanted := cast.ToUint64(appOpts.Get(evmsrvflags.EVMMaxTxGasWanted))
++	app.setAnteHandler(app.txConfig, maxGasWanted)
++
+ 	if err := app.Load(loadLatest); err != nil {
+ 		panic(err)
+ 	}
+@@ -255,6 +283,19 @@ func (app *App) GetKey(storeKey string) *storetypes.KVStoreKey {
+ 	return kvStoreKey
+ }
+ 
++// GetStoreKeysMap returns a map of store keys.
++func (app *App) GetStoreKeysMap() map[string]*storetypes.KVStoreKey {
++	storeKeysMap := make(map[string]*storetypes.KVStoreKey)
++	for _, storeKey := range app.GetStoreKeys() {
++		kvStoreKey, ok := app.UnsafeFindStoreKey(storeKey.Name()).(*storetypes.KVStoreKey)
++		if ok {
++			storeKeysMap[storeKey.Name()] = kvStoreKey
++		}
++	}
++
++	return storeKeysMap
++}
++
+ // SimulationManager implements the SimulationApp interface
+ func (app *App) SimulationManager() *module.SimulationManager {
+ 	return app.sm
+diff --git a/app/app_config.go b/app/app_config.go
+index c2247b3..cae7a59 100644
+--- a/app/app_config.go
++++ b/app/app_config.go
+@@ -68,6 +68,11 @@ import (
+ 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
+ 	ibcexported "github.com/cosmos/ibc-go/v10/modules/core/exported"
+ 	"google.golang.org/protobuf/types/known/durationpb"
++
++	erc20types "github.com/cosmos/evm/x/erc20/types"
++	feemarkettypes "github.com/cosmos/evm/x/feemarket/types"
++	precisebanktypes "github.com/cosmos/evm/x/precisebank/types"
++	evmtypes "github.com/cosmos/evm/x/vm/types"
+ )
+ 
+ var (
+@@ -81,6 +86,10 @@ var (
+ 		{Account: nft.ModuleName},
+ 		{Account: ibctransfertypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+ 		{Account: icatypes.ModuleName},
++		{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
++		{Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
++		{Account: feemarkettypes.ModuleName},
++		{Account: precisebanktypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}},
+ 		// this line is used by starport scaffolding # stargate/app/maccPerms
+ 	}
+ 
+@@ -121,6 +130,10 @@ var (
+ 						stakingtypes.ModuleName,
+ 						authz.ModuleName,
+ 						epochstypes.ModuleName,
++						// cosmos evm modules
++						erc20types.ModuleName,
++						feemarkettypes.ModuleName,
++						evmtypes.ModuleName,
+ 						// ibc modules
+ 						ibcexported.ModuleName,
+ 						// chain modules
+@@ -131,6 +144,10 @@ var (
+ 						stakingtypes.ModuleName,
+ 						feegrant.ModuleName,
+ 						group.ModuleName,
++						// cosmos evm modules
++						evmtypes.ModuleName,
++						erc20types.ModuleName,
++						feemarkettypes.ModuleName,
+ 						// chain modules
+ 						// this line is used by starport scaffolding # stargate/app/endBlockers
+ 					},
+@@ -144,6 +161,9 @@ var (
+ 					// NOTE: The genutils module must occur after staking so that pools are
+ 					// properly initialized with tokens from genesis accounts.
+ 					// NOTE: The genutils module must also occur after auth so that it can access the params from auth.
++					// NOTE: feemarket module needs to be initialized before genutil module:
++					// gentx transactions use MinGasPriceDecorator.AnteHandle
++
+ 					InitGenesis: []string{
+ 						consensustypes.ModuleName,
+ 						authtypes.ModuleName,
+@@ -153,7 +173,6 @@ var (
+ 						slashingtypes.ModuleName,
+ 						govtypes.ModuleName,
+ 						minttypes.ModuleName,
+-						genutiltypes.ModuleName,
+ 						evidencetypes.ModuleName,
+ 						authz.ModuleName,
+ 						feegrant.ModuleName,
+@@ -163,6 +182,12 @@ var (
+ 						upgradetypes.ModuleName,
+ 						circuittypes.ModuleName,
+ 						epochstypes.ModuleName,
++						// cosmos evm modules
++						evmtypes.ModuleName,
++						feemarkettypes.ModuleName,
++						erc20types.ModuleName,
++						// moved down because of evm modules
++						genutiltypes.ModuleName,
+ 						// ibc modules
+ 						ibcexported.ModuleName,
+ 						ibctransfertypes.ModuleName,
+@@ -190,7 +215,7 @@ var (
+ 			{
+ 				Name: banktypes.ModuleName,
+ 				Config: appconfig.WrapAny(&bankmodulev1.Module{
+-					BlockedModuleAccountsOverride: blockAccAddrs,
++					BlockedModuleAccountsOverride: getBlockAccAddrs(),
+ 				}),
+ 			},
+ 			{
+@@ -268,3 +293,13 @@ var (
+ 		},
+ 	})
+ )
++
++// getBlockAccAddrs returns the list of block accounts addresses.
++// it appends the addresses of the static precompiles to the blockAccAddrs slice.
++func getBlockAccAddrs() []string {
++	for _, precompile := range evmtypes.AvailableStaticPrecompiles {
++		blockAccAddrs = append(blockAccAddrs, precompile)
++	}
++
++	return blockAccAddrs
++}
+diff --git a/app/ibc.go b/app/ibc.go
+index 420b49b..37b19ea 100644
+--- a/app/ibc.go
++++ b/app/ibc.go
+@@ -9,6 +9,9 @@ import (
+ 	"github.com/cosmos/cosmos-sdk/types/module"
+ 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
+ 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
++	ibctransfer "github.com/cosmos/evm/x/ibc/transfer" // NOTE: override ICS20 keeper to support IBC transfers of ERC20 tokens
++	ibctransferkeeper "github.com/cosmos/evm/x/ibc/transfer/keeper"
++	ibctransferv2 "github.com/cosmos/evm/x/ibc/transfer/v2" // NOTE: override ICS20 keeper to support IBC transfers of ERC20 tokens
+ 	icamodule "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts"
+ 	icacontroller "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/controller"
+ 	icacontrollerkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/controller/keeper"
+@@ -17,10 +20,7 @@ import (
+ 	icahostkeeper "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/keeper"
+ 	icahosttypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/host/types"
+ 	icatypes "github.com/cosmos/ibc-go/v10/modules/apps/27-interchain-accounts/types"
+-	ibctransfer "github.com/cosmos/ibc-go/v10/modules/apps/transfer"
+-	ibctransferkeeper "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"
+ 	ibctransfertypes "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"
+-	ibctransferv2 "github.com/cosmos/ibc-go/v10/modules/apps/transfer/v2"
+ 	ibc "github.com/cosmos/ibc-go/v10/modules/core"
+ 	ibcclienttypes "github.com/cosmos/ibc-go/v10/modules/core/02-client/types" // nolint:staticcheck // Deprecated: params key table is needed for params migration
+ 	ibcconnectiontypes "github.com/cosmos/ibc-go/v10/modules/core/03-connection/types"
+@@ -30,6 +30,9 @@ import (
+ 	ibckeeper "github.com/cosmos/ibc-go/v10/modules/core/keeper"
+ 	solomachine "github.com/cosmos/ibc-go/v10/modules/light-clients/06-solomachine"
+ 	ibctm "github.com/cosmos/ibc-go/v10/modules/light-clients/07-tendermint"
++
++	erc20 "github.com/cosmos/evm/x/erc20"
++	erc20v2 "github.com/cosmos/evm/x/erc20/v2"
+ )
+ 
+ // registerIBCModules register IBC keepers and non dependency inject modules.
+@@ -73,6 +76,7 @@ func (app *App) registerIBCModules(appOpts servertypes.AppOptions) error {
+ 		app.MsgServiceRouter(),
+ 		app.AuthKeeper,
+ 		app.BankKeeper,
++		app.Erc20Keeper,
+ 		govModuleAddr,
+ 	)
+ 
+@@ -107,6 +111,10 @@ func (app *App) registerIBCModules(appOpts servertypes.AppOptions) error {
+ 		icaHostStack       porttypes.IBCModule = icahost.NewIBCModule(app.ICAHostKeeper)
+ 	)
+ 
++	// add evm capabilities
++	transferStack = erc20.NewIBCMiddleware(app.Erc20Keeper, transferStack)
++	transferStackV2 = erc20v2.NewIBCMiddleware(transferStackV2, app.Erc20Keeper)
++
+ 	// create IBC v1 router, add transfer route, then set it on the keeper
+ 	ibcRouter := porttypes.NewRouter().
+ 		AddRoute(ibctransfertypes.ModuleName, transferStack).
+diff --git a/cmd/marsd/cmd/root.go b/cmd/marsd/cmd/root.go
+index 06c0014..1da2dc3 100644
+--- a/cmd/marsd/cmd/root.go
++++ b/cmd/marsd/cmd/root.go
+@@ -82,6 +82,15 @@ func NewRootCmd() *cobra.Command {
+ 		autoCliOpts.Modules[name] = mod
+ 	}
+ 
++	// Since the EVM modules don't support dependency injection, we need to
++	// manually register the modules on the client side.
++	// This needs to be removed after EVM supports App Wiring.
++	evmModules := app.RegisterEVM(clientCtx.Codec)
++	for name, mod := range evmModules {
++		moduleBasicManager[name] = module.CoreAppModuleBasicAdaptor(name, mod)
++		autoCliOpts.Modules[name] = mod
++	}
++
+ 	initRootCmd(rootCmd, clientCtx.TxConfig, moduleBasicManager)
+ 
+ 	if err := autoCliOpts.EnhanceRootCommand(rootCmd); err != nil {
+diff --git a/docs/static/openapi.json b/docs/static/openapi.json
+index b06a7ee..661dda2 100644
+--- a/docs/static/openapi.json
++++ b/docs/static/openapi.json
+@@ -1,41 +1 @@
+-{
+-  "id": "mars",
+-  "consumes": ["application/json"],
+-  "produces": ["application/json"],
+-  "swagger": "2.0",
+-  "info":
+-    {
+-      "description": "Chain mars REST API",
+-      "title": "HTTP API Console",
+-      "contact": { "name": "mars" },
+-      "version": "version not set",
+-    },
+-  "paths": {},
+-  "definitions":
+-    {
+-      "google.protobuf.Any":
+-        {
+-          "type": "object",
+-          "properties": { "@type": { "type": "string" } },
+-          "additionalProperties": {},
+-        },
+-      "google.rpc.Status":
+-        {
+-          "type": "object",
+-          "properties":
+-            {
+-              "code": { "type": "integer", "format": "int32" },
+-              "details":
+-                {
+-                  "type": "array",
+-                  "items":
+-                    {
+-                      "type": "object",
+-                      "$ref": "#/definitions/google.protobuf.Any",
+-                    },
+-                },
+-              "message": { "type": "string" },
+-            },
+-        },
+-    },
+-}
+\ No newline at end of file
++{"id":"mars","consumes":["application/json"],"produces":["application/json"],"swagger":"2.0","info":{"description":"Chain mars REST API","title":"HTTP API Console","contact":{"name":"mars"},"version":"version not set"},"paths":{"/cosmos.evm.erc20.v1.Msg/RegisterERC20":{"post":{"tags":["Msg"],"summary":"RegisterERC20 defines a governance operation for registering a token pair\nfor the specified erc20 contract. The authority is hard-coded to the Cosmos\nSDK x/gov module account","operationId":"Erc20Msg_RegisterERC20","parameters":[{"description":"MsgRegisterERC20 is the Msg/RegisterERC20 request type for registering\nan Erc20 contract token pair.","name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgRegisterERC20"}}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgRegisterERC20Response"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos.evm.erc20.v1.Msg/ToggleConversion":{"post":{"tags":["Msg"],"summary":"ToggleConversion defines a governance operation for enabling/disabling a\ntoken pair conversion. The authority is hard-coded to the Cosmos SDK x/gov\nmodule account","operationId":"Erc20Msg_ToggleConversion","parameters":[{"description":"MsgToggleConversion is the Msg/MsgToggleConversion request type for toggling\nan Erc20 contract conversion capability.","name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgToggleConversion"}}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgToggleConversionResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos.evm.erc20.v1.Msg/UpdateParams":{"post":{"tags":["Msg"],"summary":"UpdateParams defines a governance operation for updating the x/erc20 module\nparameters. The authority is hard-coded to the Cosmos SDK x/gov module\naccount","operationId":"Erc20Msg_UpdateParams","parameters":[{"name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgUpdateParams"}}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgUpdateParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos.evm.feemarket.v1.Msg/UpdateParams":{"post":{"tags":["Msg"],"summary":"UpdateParams defined a governance operation for updating the x/feemarket\nmodule parameters. The authority is hard-coded to the Cosmos SDK x/gov\nmodule account","operationId":"Erc20Msg_UpdateParamsMixin12","parameters":[{"description":"MsgUpdateParams defines a Msg for updating the x/feemarket module parameters.","name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/cosmos.evm.feemarket.v1.MsgUpdateParams"}}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.feemarket.v1.MsgUpdateParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos.evm.vm.v1.Msg/UpdateParams":{"post":{"tags":["Msg"],"summary":"UpdateParams defined a governance operation for updating the x/vm module\nparameters. The authority is hard-coded to the Cosmos SDK x/gov module\naccount","operationId":"Erc20Msg_UpdateParamsMixin22","parameters":[{"description":"MsgUpdateParams defines a Msg for updating the x/vm module parameters.","name":"body","in":"body","required":true,"schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.MsgUpdateParams"}}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.MsgUpdateParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/erc20/v1/params":{"get":{"tags":["Query"],"summary":"Params retrieves the erc20 module params","operationId":"Erc20Query_Params","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.QueryParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/erc20/v1/token_pairs":{"get":{"tags":["Query"],"summary":"TokenPairs retrieves registered token pairs","operationId":"Erc20Query_TokenPairs","parameters":[{"type":"string","format":"byte","description":"key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.","name":"pagination.key","in":"query"},{"type":"string","format":"uint64","description":"offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.","name":"pagination.offset","in":"query"},{"type":"string","format":"uint64","description":"limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.","name":"pagination.limit","in":"query"},{"type":"boolean","description":"count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.","name":"pagination.count_total","in":"query"},{"type":"boolean","description":"reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43","name":"pagination.reverse","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.QueryTokenPairsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/erc20/v1/token_pairs/{token}":{"get":{"tags":["Query"],"summary":"TokenPair retrieves a registered token pair","operationId":"Erc20Query_TokenPair","parameters":[{"type":"string","description":"token identifier can be either the hex contract address of the ERC20 or the\nCosmos base denomination","name":"token","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.QueryTokenPairResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/erc20/v1/tx/convert_coin":{"get":{"tags":["Msg"],"summary":"ConvertCoin mints a ERC20 token representation of the native Cosmos coin\nthat is registered on the token mapping.","operationId":"Erc20Msg_ConvertCoin","parameters":[{"type":"string","name":"coin.denom","in":"query"},{"type":"string","name":"coin.amount","in":"query"},{"type":"string","description":"receiver is the hex address to receive ERC20 token","name":"receiver","in":"query"},{"type":"string","description":"sender is the cosmos bech32 address from the owner of the given Cosmos\ncoins","name":"sender","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgConvertCoinResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/erc20/v1/tx/convert_erc20":{"get":{"tags":["Msg"],"summary":"ConvertERC20 mints a native Cosmos coin representation of the ERC20 token\ncontract that is registered on the token mapping.","operationId":"Erc20Msg_ConvertERC20","parameters":[{"type":"string","description":"contract_address of an ERC20 token contract, that is registered in a token\npair","name":"contract_address","in":"query"},{"type":"string","description":"amount of ERC20 tokens to convert","name":"amount","in":"query"},{"type":"string","description":"receiver is the bech32 address to receive native Cosmos coins","name":"receiver","in":"query"},{"type":"string","description":"sender is the hex address from the owner of the given ERC20 tokens","name":"sender","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.erc20.v1.MsgConvertERC20Response"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/feemarket/v1/base_fee":{"get":{"tags":["Query"],"summary":"BaseFee queries the base fee of the parent block of the current block.","operationId":"Erc20Query_BaseFee","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.feemarket.v1.QueryBaseFeeResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/feemarket/v1/block_gas":{"get":{"tags":["Query"],"summary":"BlockGas queries the gas used at a given block height","operationId":"Erc20Query_BlockGas","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.feemarket.v1.QueryBlockGasResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/feemarket/v1/params":{"get":{"tags":["Query"],"summary":"Params queries the parameters of x/feemarket module.","operationId":"Erc20Query_ParamsMixin11","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.feemarket.v1.QueryParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/precisebank/v1/fractional_balance/{address}":{"get":{"tags":["Query"],"summary":"FractionalBalance returns only the fractional balance of an address. This\ndoes not include any integer balance.","operationId":"Erc20Query_FractionalBalance","parameters":[{"type":"string","description":"address is the account address to query  fractional balance for.","name":"address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.precisebank.v1.QueryFractionalBalanceResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/precisebank/v1/remainder":{"get":{"tags":["Query"],"summary":"Remainder returns the amount backed by the reserve, but not yet owned by\nany account, i.e. not in circulation.","operationId":"Erc20Query_Remainder","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.precisebank.v1.QueryRemainderResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/account/{address}":{"get":{"tags":["Query"],"summary":"Account queries an Ethereum account.","operationId":"Erc20Query_Account","parameters":[{"type":"string","description":"address is the ethereum hex address to query the account for.","name":"address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryAccountResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/balances/{address}":{"get":{"tags":["Query"],"summary":"Balance queries the balance of a the EVM denomination for a single\naccount.","operationId":"Erc20Query_Balance","parameters":[{"type":"string","description":"address is the ethereum hex address to query the balance for.","name":"address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryBalanceResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/base_fee":{"get":{"tags":["Query"],"summary":"BaseFee queries the base fee of the parent block of the current block,\nit's similar to feemarket module's method, but also checks london hardfork\nstatus.","operationId":"Erc20Query_BaseFeeMixin21","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryBaseFeeResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/codes/{address}":{"get":{"tags":["Query"],"summary":"Code queries the balance of all coins for a single account.","operationId":"Erc20Query_Code","parameters":[{"type":"string","description":"address is the ethereum hex address to query the code for.","name":"address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryCodeResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/config":{"get":{"tags":["Query"],"summary":"Config queries the EVM configuration","operationId":"Erc20Query_Config","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryConfigResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/cosmos_account/{address}":{"get":{"tags":["Query"],"summary":"CosmosAccount queries an Ethereum account's Cosmos Address.","operationId":"Erc20Query_CosmosAccount","parameters":[{"type":"string","description":"address is the ethereum hex address to query the account for.","name":"address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryCosmosAccountResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/estimate_gas":{"get":{"tags":["Query"],"summary":"EstimateGas implements the `eth_estimateGas` rpc api","operationId":"Erc20Query_EstimateGas","parameters":[{"type":"string","format":"byte","description":"args uses the same json format as the json rpc api.","name":"args","in":"query"},{"type":"string","format":"uint64","description":"gas_cap defines the default gas cap to be used","name":"gas_cap","in":"query"},{"type":"string","format":"byte","description":"proposer_address of the requested block in hex format","name":"proposer_address","in":"query"},{"type":"string","format":"int64","description":"chain_id is the eip155 chain id parsed from the requested block header","name":"chain_id","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.EstimateGasResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/eth_call":{"get":{"tags":["Query"],"summary":"EthCall implements the `eth_call` rpc api","operationId":"Erc20Query_EthCall","parameters":[{"type":"string","format":"byte","description":"args uses the same json format as the json rpc api.","name":"args","in":"query"},{"type":"string","format":"uint64","description":"gas_cap defines the default gas cap to be used","name":"gas_cap","in":"query"},{"type":"string","format":"byte","description":"proposer_address of the requested block in hex format","name":"proposer_address","in":"query"},{"type":"string","format":"int64","description":"chain_id is the eip155 chain id parsed from the requested block header","name":"chain_id","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.MsgEthereumTxResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/ethereum_tx":{"post":{"tags":["Msg"],"summary":"EthereumTx defines a method submitting Ethereum transactions.","operationId":"Erc20Msg_EthereumTx","parameters":[{"type":"string","description":"A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com. As of May 2023, there are no widely used type server\nimplementations and no plans to implement one.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics.","name":"data.type_url","in":"query"},{"type":"string","format":"byte","description":"Must be a valid serialized protocol buffer of the above specified type.","name":"data.value","in":"query"},{"type":"number","format":"double","description":"size is the encoded storage size of the transaction (DEPRECATED)","name":"size","in":"query"},{"type":"string","description":"hash of the transaction in hex format","name":"hash","in":"query"},{"type":"string","description":"from is the ethereum signer address in hex format. This address value is\nchecked against the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve","name":"from","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.MsgEthereumTxResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/min_gas_price":{"get":{"tags":["Query"],"summary":"GlobalMinGasPrice queries the MinGasPrice\nit's similar to feemarket module's method,\nbut makes the conversion to 18 decimals\nwhen the evm denom is represented with a different precision.","operationId":"Erc20Query_GlobalMinGasPrice","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryGlobalMinGasPriceResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/params":{"get":{"tags":["Query"],"summary":"Params queries the parameters of x/vm module.","operationId":"Erc20Query_ParamsMixin21","responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryParamsResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/storage/{address}/{key}":{"get":{"tags":["Query"],"summary":"Storage queries the balance of all coins for a single account.","operationId":"Erc20Query_Storage","parameters":[{"type":"string","description":"address is the ethereum hex address to query the storage state for.","name":"address","in":"path","required":true},{"type":"string","description":"key defines the key of the storage state","name":"key","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryStorageResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/trace_block":{"get":{"tags":["Query"],"summary":"TraceBlock implements the `debug_traceBlockByNumber` and\n`debug_traceBlockByHash` rpc api","operationId":"Erc20Query_TraceBlock","parameters":[{"type":"string","description":"tracer is a custom javascript tracer","name":"trace_config.tracer","in":"query"},{"type":"string","description":"timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls","name":"trace_config.timeout","in":"query"},{"type":"string","format":"uint64","description":"reexec defines the number of blocks the tracer is willing to go back","name":"trace_config.reexec","in":"query"},{"type":"boolean","description":"disable_stack switches stack capture","name":"trace_config.disable_stack","in":"query"},{"type":"boolean","description":"disable_storage switches storage capture","name":"trace_config.disable_storage","in":"query"},{"type":"boolean","description":"debug can be used to print output during capture end","name":"trace_config.debug","in":"query"},{"type":"integer","format":"int32","description":"limit defines the maximum length of output, but zero means unlimited","name":"trace_config.limit","in":"query"},{"type":"string","description":"homestead_block switch (nil no fork, 0 = already homestead)","name":"trace_config.overrides.homestead_block","in":"query"},{"type":"string","description":"dao_fork_block corresponds to TheDAO hard-fork switch block (nil no fork)","name":"trace_config.overrides.dao_fork_block","in":"query"},{"type":"boolean","description":"dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork","name":"trace_config.overrides.dao_fork_support","in":"query"},{"type":"string","description":"eip150_block: EIP150 implements the Gas price changes\n(https://github.com/ethereum/EIPs/issues/150) EIP150 HF block (nil no fork)","name":"trace_config.overrides.eip150_block","in":"query"},{"type":"string","description":"eip155_block: EIP155Block HF block","name":"trace_config.overrides.eip155_block","in":"query"},{"type":"string","description":"eip158_block: EIP158 HF block","name":"trace_config.overrides.eip158_block","in":"query"},{"type":"string","description":"byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)","name":"trace_config.overrides.byzantium_block","in":"query"},{"type":"string","description":"constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)","name":"trace_config.overrides.constantinople_block","in":"query"},{"type":"string","description":"petersburg_block: Petersburg switch block (nil same as Constantinople)","name":"trace_config.overrides.petersburg_block","in":"query"},{"type":"string","description":"istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)","name":"trace_config.overrides.istanbul_block","in":"query"},{"type":"string","description":"muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)","name":"trace_config.overrides.muir_glacier_block","in":"query"},{"type":"string","description":"berlin_block: Berlin switch block (nil = no fork, 0 = already on berlin)","name":"trace_config.overrides.berlin_block","in":"query"},{"type":"string","description":"london_block: London switch block (nil = no fork, 0 = already on london)","name":"trace_config.overrides.london_block","in":"query"},{"type":"string","description":"arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)","name":"trace_config.overrides.arrow_glacier_block","in":"query"},{"type":"string","description":"gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)","name":"trace_config.overrides.gray_glacier_block","in":"query"},{"type":"string","description":"merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter","name":"trace_config.overrides.merge_netsplit_block","in":"query"},{"type":"string","format":"uint64","description":"chain_id is the id of the chain (EIP-155)","name":"trace_config.overrides.chain_id","in":"query"},{"type":"string","description":"denom is the denomination used on the EVM","name":"trace_config.overrides.denom","in":"query"},{"type":"string","format":"uint64","description":"decimals is the real decimal precision of the denomination used on the EVM","name":"trace_config.overrides.decimals","in":"query"},{"type":"string","description":"shanghai_time: Shanghai switch time (nil = no fork, 0 = already on\nshanghai)","name":"trace_config.overrides.shanghai_time","in":"query"},{"type":"string","description":"cancun_time: Cancun switch time (nil = no fork, 0 = already on cancun)","name":"trace_config.overrides.cancun_time","in":"query"},{"type":"string","description":"prague_time: Prague switch time (nil = no fork, 0 = already on prague)","name":"trace_config.overrides.prague_time","in":"query"},{"type":"string","description":"verkle_time: Verkle switch time (nil = no fork, 0 = already on verkle)","name":"trace_config.overrides.verkle_time","in":"query"},{"type":"string","description":"osaka_time: Osaka switch time (nil = no fork, 0 = already on osaka)","name":"trace_config.overrides.osaka_time","in":"query"},{"type":"boolean","description":"enable_memory switches memory capture","name":"trace_config.enable_memory","in":"query"},{"type":"boolean","description":"enable_return_data switches the capture of return data","name":"trace_config.enable_return_data","in":"query"},{"type":"string","description":"tracer_json_config configures the tracer using a JSON string","name":"trace_config.tracer_json_config","in":"query"},{"type":"string","format":"int64","description":"block_number of the traced block","name":"block_number","in":"query"},{"type":"string","description":"block_hash (hex) of the traced block","name":"block_hash","in":"query"},{"type":"string","format":"date-time","description":"block_time of the traced block","name":"block_time","in":"query"},{"type":"string","format":"byte","description":"proposer_address is the address of the requested block","name":"proposer_address","in":"query"},{"type":"string","format":"int64","description":"chain_id is the eip155 chain id parsed from the requested block header","name":"chain_id","in":"query"},{"type":"string","format":"int64","description":"block_max_gas of the traced block","name":"block_max_gas","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryTraceBlockResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/trace_tx":{"get":{"tags":["Query"],"summary":"TraceTx implements the `debug_traceTransaction` rpc api","operationId":"Erc20Query_TraceTx","parameters":[{"type":"string","description":"A URL/resource name that uniquely identifies the type of the serialized\nprotocol buffer message. This string must contain at least\none \"/\" character. The last segment of the URL's path must represent\nthe fully qualified name of the type (as in\n`path/google.protobuf.Duration`). The name should be in a canonical form\n(e.g., leading \".\" is not accepted).\n\nIn practice, teams usually precompile into the binary all types that they\nexpect it to use in the context of Any. However, for URLs which use the\nscheme `http`, `https`, or no scheme, one can optionally set up a type\nserver that maps type URLs to message definitions as follows:\n\n* If no scheme is provided, `https` is assumed.\n* An HTTP GET on the URL must yield a [google.protobuf.Type][]\n  value in binary format, or produce an error.\n* Applications are allowed to cache lookup results based on the\n  URL, or have them precompiled into a binary to avoid any\n  lookup. Therefore, binary compatibility needs to be preserved\n  on changes to types. (Use versioned type names to manage\n  breaking changes.)\n\nNote: this functionality is not currently available in the official\nprotobuf release, and it is not used for type URLs beginning with\ntype.googleapis.com. As of May 2023, there are no widely used type server\nimplementations and no plans to implement one.\n\nSchemes other than `http`, `https` (or the empty scheme) might be\nused with implementation specific semantics.","name":"msg.data.type_url","in":"query"},{"type":"string","format":"byte","description":"Must be a valid serialized protocol buffer of the above specified type.","name":"msg.data.value","in":"query"},{"type":"number","format":"double","description":"size is the encoded storage size of the transaction (DEPRECATED)","name":"msg.size","in":"query"},{"type":"string","description":"hash of the transaction in hex format","name":"msg.hash","in":"query"},{"type":"string","description":"from is the ethereum signer address in hex format. This address value is\nchecked against the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve","name":"msg.from","in":"query"},{"type":"string","description":"tracer is a custom javascript tracer","name":"trace_config.tracer","in":"query"},{"type":"string","description":"timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls","name":"trace_config.timeout","in":"query"},{"type":"string","format":"uint64","description":"reexec defines the number of blocks the tracer is willing to go back","name":"trace_config.reexec","in":"query"},{"type":"boolean","description":"disable_stack switches stack capture","name":"trace_config.disable_stack","in":"query"},{"type":"boolean","description":"disable_storage switches storage capture","name":"trace_config.disable_storage","in":"query"},{"type":"boolean","description":"debug can be used to print output during capture end","name":"trace_config.debug","in":"query"},{"type":"integer","format":"int32","description":"limit defines the maximum length of output, but zero means unlimited","name":"trace_config.limit","in":"query"},{"type":"string","description":"homestead_block switch (nil no fork, 0 = already homestead)","name":"trace_config.overrides.homestead_block","in":"query"},{"type":"string","description":"dao_fork_block corresponds to TheDAO hard-fork switch block (nil no fork)","name":"trace_config.overrides.dao_fork_block","in":"query"},{"type":"boolean","description":"dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork","name":"trace_config.overrides.dao_fork_support","in":"query"},{"type":"string","description":"eip150_block: EIP150 implements the Gas price changes\n(https://github.com/ethereum/EIPs/issues/150) EIP150 HF block (nil no fork)","name":"trace_config.overrides.eip150_block","in":"query"},{"type":"string","description":"eip155_block: EIP155Block HF block","name":"trace_config.overrides.eip155_block","in":"query"},{"type":"string","description":"eip158_block: EIP158 HF block","name":"trace_config.overrides.eip158_block","in":"query"},{"type":"string","description":"byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)","name":"trace_config.overrides.byzantium_block","in":"query"},{"type":"string","description":"constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)","name":"trace_config.overrides.constantinople_block","in":"query"},{"type":"string","description":"petersburg_block: Petersburg switch block (nil same as Constantinople)","name":"trace_config.overrides.petersburg_block","in":"query"},{"type":"string","description":"istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)","name":"trace_config.overrides.istanbul_block","in":"query"},{"type":"string","description":"muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)","name":"trace_config.overrides.muir_glacier_block","in":"query"},{"type":"string","description":"berlin_block: Berlin switch block (nil = no fork, 0 = already on berlin)","name":"trace_config.overrides.berlin_block","in":"query"},{"type":"string","description":"london_block: London switch block (nil = no fork, 0 = already on london)","name":"trace_config.overrides.london_block","in":"query"},{"type":"string","description":"arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)","name":"trace_config.overrides.arrow_glacier_block","in":"query"},{"type":"string","description":"gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)","name":"trace_config.overrides.gray_glacier_block","in":"query"},{"type":"string","description":"merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter","name":"trace_config.overrides.merge_netsplit_block","in":"query"},{"type":"string","format":"uint64","description":"chain_id is the id of the chain (EIP-155)","name":"trace_config.overrides.chain_id","in":"query"},{"type":"string","description":"denom is the denomination used on the EVM","name":"trace_config.overrides.denom","in":"query"},{"type":"string","format":"uint64","description":"decimals is the real decimal precision of the denomination used on the EVM","name":"trace_config.overrides.decimals","in":"query"},{"type":"string","description":"shanghai_time: Shanghai switch time (nil = no fork, 0 = already on\nshanghai)","name":"trace_config.overrides.shanghai_time","in":"query"},{"type":"string","description":"cancun_time: Cancun switch time (nil = no fork, 0 = already on cancun)","name":"trace_config.overrides.cancun_time","in":"query"},{"type":"string","description":"prague_time: Prague switch time (nil = no fork, 0 = already on prague)","name":"trace_config.overrides.prague_time","in":"query"},{"type":"string","description":"verkle_time: Verkle switch time (nil = no fork, 0 = already on verkle)","name":"trace_config.overrides.verkle_time","in":"query"},{"type":"string","description":"osaka_time: Osaka switch time (nil = no fork, 0 = already on osaka)","name":"trace_config.overrides.osaka_time","in":"query"},{"type":"boolean","description":"enable_memory switches memory capture","name":"trace_config.enable_memory","in":"query"},{"type":"boolean","description":"enable_return_data switches the capture of return data","name":"trace_config.enable_return_data","in":"query"},{"type":"string","description":"tracer_json_config configures the tracer using a JSON string","name":"trace_config.tracer_json_config","in":"query"},{"type":"string","format":"int64","description":"block_number of requested transaction","name":"block_number","in":"query"},{"type":"string","description":"block_hash of requested transaction","name":"block_hash","in":"query"},{"type":"string","format":"date-time","description":"block_time of requested transaction","name":"block_time","in":"query"},{"type":"string","format":"byte","description":"proposer_address is the proposer of the requested block","name":"proposer_address","in":"query"},{"type":"string","format":"int64","description":"chain_id is the eip155 chain id parsed from the requested block header","name":"chain_id","in":"query"},{"type":"string","format":"int64","description":"block_max_gas of the block of the requested transaction","name":"block_max_gas","in":"query"}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryTraceTxResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}},"/cosmos/evm/vm/v1/validator_account/{cons_address}":{"get":{"tags":["Query"],"summary":"ValidatorAccount queries an Ethereum account's from a validator consensus\nAddress.","operationId":"Erc20Query_ValidatorAccount","parameters":[{"type":"string","description":"cons_address is the validator cons address to query the account for.","name":"cons_address","in":"path","required":true}],"responses":{"200":{"description":"A successful response.","schema":{"$ref":"#/definitions/cosmos.evm.vm.v1.QueryValidatorAccountResponse"}},"default":{"description":"An unexpected error response.","schema":{"$ref":"#/definitions/google.rpc.Status"}}}}}},"definitions":{"cosmos.base.query.v1beta1.PageRequest":{"description":"message SomeRequest {\n         Foo some_parameter = 1;\n         PageRequest pagination = 2;\n }","type":"object","title":"PageRequest is to be embedded in gRPC request messages for efficient\npagination. Ex:","properties":{"count_total":{"description":"count_total is set to true  to indicate that the result set should include\na count of the total number of items available for pagination in UIs.\ncount_total is only respected when offset is used. It is ignored when key\nis set.","type":"boolean"},"key":{"description":"key is a value returned in PageResponse.next_key to begin\nquerying the next page most efficiently. Only one of offset or key\nshould be set.","type":"string","format":"byte"},"limit":{"description":"limit is the total number of results to be returned in the result page.\nIf left empty it will default to a value to be set by each app.","type":"string","format":"uint64"},"offset":{"description":"offset is a numeric offset that can be used when key is unavailable.\nIt is less efficient than using key. Only one of offset or key should\nbe set.","type":"string","format":"uint64"},"reverse":{"description":"reverse is set to true if results are to be returned in the descending order.\n\nSince: cosmos-sdk 0.43","type":"boolean"}}},"cosmos.base.query.v1beta1.PageResponse":{"description":"PageResponse is to be embedded in gRPC response messages where the\ncorresponding request message has used PageRequest.\n\n message SomeResponse {\n         repeated Bar results = 1;\n         PageResponse page = 2;\n }","type":"object","properties":{"next_key":{"description":"next_key is the key to be passed to PageRequest.key to\nquery the next page most efficiently. It will be empty if\nthere are no more results.","type":"string","format":"byte"},"total":{"type":"string","format":"uint64","title":"total is total number of results available if PageRequest.count_total\nwas set, its value is undefined otherwise"}}},"cosmos.base.v1beta1.Coin":{"description":"Coin defines a token with a denomination and an amount.\n\nNOTE: The amount field is an Int which implements the custom method\nsignatures required by gogoproto.","type":"object","properties":{"amount":{"type":"string"},"denom":{"type":"string"}}},"cosmos.evm.erc20.v1.MsgConvertCoinResponse":{"type":"object","title":"MsgConvertCoinResponse returns no fields"},"cosmos.evm.erc20.v1.MsgConvertERC20Response":{"type":"object","title":"MsgConvertERC20Response returns no fields"},"cosmos.evm.erc20.v1.MsgRegisterERC20":{"description":"MsgRegisterERC20 is the Msg/RegisterERC20 request type for registering\nan Erc20 contract token pair.","type":"object","properties":{"erc20addresses":{"type":"array","title":"erc20addresses is a slice of ERC20 token contract hex addresses","items":{"type":"string"}},"signer":{"type":"string","title":"signer is the address registering the erc20 pairs"}}},"cosmos.evm.erc20.v1.MsgRegisterERC20Response":{"description":"MsgRegisterERC20Response defines the response structure for executing a\nMsgRegisterERC20 message.","type":"object"},"cosmos.evm.erc20.v1.MsgToggleConversion":{"description":"MsgToggleConversion is the Msg/MsgToggleConversion request type for toggling\nan Erc20 contract conversion capability.","type":"object","properties":{"authority":{"description":"authority is the address of the governance account.","type":"string"},"token":{"type":"string","title":"token identifier can be either the hex contract address of the ERC20 or the\nCosmos base denomination"}}},"cosmos.evm.erc20.v1.MsgToggleConversionResponse":{"description":"MsgToggleConversionResponse defines the response structure for executing a\nToggleConversion message.","type":"object"},"cosmos.evm.erc20.v1.MsgUpdateParams":{"type":"object","title":"MsgUpdateParams is the Msg/UpdateParams request type for Erc20 parameters.\nSince: cosmos-sdk 0.47","properties":{"authority":{"description":"authority is the address of the governance account.","type":"string"},"params":{"description":"params defines the x/vm parameters to update.\nNOTE: All parameters must be supplied.","$ref":"#/definitions/cosmos.evm.erc20.v1.Params"}}},"cosmos.evm.erc20.v1.MsgUpdateParamsResponse":{"type":"object","title":"MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message.\nSince: cosmos-sdk 0.47"},"cosmos.evm.erc20.v1.Owner":{"description":"Owner enumerates the ownership of a ERC20 contract.\n\n - OWNER_UNSPECIFIED: OWNER_UNSPECIFIED defines an invalid/undefined owner.\n - OWNER_MODULE: OWNER_MODULE - erc20 is owned by the erc20 module account.\n - OWNER_EXTERNAL: OWNER_EXTERNAL - erc20 is owned by an external account.","type":"string","default":"OWNER_UNSPECIFIED","enum":["OWNER_UNSPECIFIED","OWNER_MODULE","OWNER_EXTERNAL"]},"cosmos.evm.erc20.v1.Params":{"type":"object","title":"Params defines the erc20 module params","properties":{"enable_erc20":{"description":"enable_erc20 is the parameter to enable the conversion of Cosmos coins \u003c--\u003e\nERC20 tokens.","type":"boolean"},"permissionless_registration":{"type":"boolean","title":"permissionless_registration is the parameter that allows ERC20s to be\npermissionlessly registered to be converted to bank tokens and vice versa"}}},"cosmos.evm.erc20.v1.QueryParamsResponse":{"description":"QueryParamsResponse is the response type for the Query/Params RPC\nmethod.","type":"object","properties":{"params":{"title":"params are the erc20 module parameters","$ref":"#/definitions/cosmos.evm.erc20.v1.Params"}}},"cosmos.evm.erc20.v1.QueryTokenPairResponse":{"description":"QueryTokenPairResponse is the response type for the Query/TokenPair RPC\nmethod.","type":"object","properties":{"token_pair":{"title":"token_pairs returns the info about a registered token pair for the erc20\nmodule","$ref":"#/definitions/cosmos.evm.erc20.v1.TokenPair"}}},"cosmos.evm.erc20.v1.QueryTokenPairsResponse":{"description":"QueryTokenPairsResponse is the response type for the Query/TokenPairs RPC\nmethod.","type":"object","properties":{"pagination":{"description":"pagination defines the pagination in the response.","$ref":"#/definitions/cosmos.base.query.v1beta1.PageResponse"},"token_pairs":{"type":"array","title":"token_pairs is a slice of registered token pairs for the erc20 module","items":{"type":"object","$ref":"#/definitions/cosmos.evm.erc20.v1.TokenPair"}}}},"cosmos.evm.erc20.v1.TokenPair":{"description":"TokenPair defines an instance that records a pairing consisting of a native\nCosmos Coin and an ERC20 token address.","type":"object","properties":{"contract_owner":{"title":"contract_owner is the an ENUM specifying the type of ERC20 owner (0\ninvalid, 1 ModuleAccount, 2 external address)","$ref":"#/definitions/cosmos.evm.erc20.v1.Owner"},"denom":{"type":"string","title":"denom defines the cosmos base denomination to be mapped to"},"enabled":{"type":"boolean","title":"enabled defines the token mapping enable status"},"erc20_address":{"type":"string","title":"erc20_address is the hex address of ERC20 contract token"}}},"cosmos.evm.feemarket.v1.MsgUpdateParams":{"description":"MsgUpdateParams defines a Msg for updating the x/feemarket module parameters.","type":"object","properties":{"authority":{"description":"authority is the address of the governance account.","type":"string"},"params":{"description":"params defines the x/feemarket parameters to update.\nNOTE: All parameters must be supplied.","$ref":"#/definitions/cosmos.evm.feemarket.v1.Params"}}},"cosmos.evm.feemarket.v1.MsgUpdateParamsResponse":{"description":"MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message.","type":"object"},"cosmos.evm.feemarket.v1.Params":{"type":"object","title":"Params defines the EVM module parameters","properties":{"base_fee":{"description":"base_fee for EIP-1559 blocks.","type":"string"},"base_fee_change_denominator":{"description":"base_fee_change_denominator bounds the amount the base fee can change\nbetween blocks.","type":"integer","format":"int64"},"elasticity_multiplier":{"description":"elasticity_multiplier bounds the maximum gas limit an EIP-1559 block may\nhave.","type":"integer","format":"int64"},"enable_height":{"description":"enable_height defines at which block height the base fee calculation is\nenabled.","type":"string","format":"int64"},"min_gas_multiplier":{"type":"string","title":"min_gas_multiplier bounds the minimum gas used to be charged\nto senders based on gas limit"},"min_gas_price":{"type":"string","title":"min_gas_price defines the minimum gas price value for cosmos and eth\ntransactions"},"no_base_fee":{"type":"boolean","title":"no_base_fee forces the EIP-1559 base fee to 0 (needed for 0 price calls)"}}},"cosmos.evm.feemarket.v1.QueryBaseFeeResponse":{"description":"QueryBaseFeeResponse returns the EIP1559 base fee.","type":"object","properties":{"base_fee":{"type":"string","title":"base_fee is the EIP1559 base fee"}}},"cosmos.evm.feemarket.v1.QueryBlockGasResponse":{"description":"QueryBlockGasResponse returns block gas used for a given height.","type":"object","properties":{"gas":{"type":"string","format":"int64","title":"gas is the returned block gas"}}},"cosmos.evm.feemarket.v1.QueryParamsResponse":{"description":"QueryParamsResponse defines the response type for querying x/vm parameters.","type":"object","properties":{"params":{"description":"params define the evm module parameters.","$ref":"#/definitions/cosmos.evm.feemarket.v1.Params"}}},"cosmos.evm.precisebank.v1.QueryFractionalBalanceResponse":{"description":"QueryFractionalBalanceResponse defines the response type for Query/FractionalBalance method.","type":"object","properties":{"fractional_balance":{"description":"fractional_balance is the fractional balance of the address.","$ref":"#/definitions/cosmos.base.v1beta1.Coin"}}},"cosmos.evm.precisebank.v1.QueryRemainderResponse":{"description":"QueryRemainderResponse defines the response type for Query/Remainder method.","type":"object","properties":{"remainder":{"description":"remainder is the amount backed by the reserve, but not yet owned by any\naccount, i.e. not in circulation.","$ref":"#/definitions/cosmos.base.v1beta1.Coin"}}},"cosmos.evm.vm.v1.AccessControl":{"type":"object","title":"AccessControl defines the permission policy of the EVM\nfor creating and calling contracts","properties":{"call":{"title":"call defines the permission policy for calling contracts","$ref":"#/definitions/cosmos.evm.vm.v1.AccessControlType"},"create":{"title":"create defines the permission policy for creating contracts","$ref":"#/definitions/cosmos.evm.vm.v1.AccessControlType"}}},"cosmos.evm.vm.v1.AccessControlType":{"type":"object","title":"AccessControlType defines the permission type for policies","properties":{"access_control_list":{"type":"array","title":"access_control_list defines defines different things depending on the\nAccessType:\n- ACCESS_TYPE_PERMISSIONLESS: list of addresses that are blocked from\nperforming the operation\n- ACCESS_TYPE_RESTRICTED: ignored\n- ACCESS_TYPE_PERMISSIONED: list of addresses that are allowed to perform\nthe operation","items":{"type":"string"}},"access_type":{"title":"access_type defines which type of permission is required for the operation","$ref":"#/definitions/cosmos.evm.vm.v1.AccessType"}}},"cosmos.evm.vm.v1.AccessType":{"description":"- ACCESS_TYPE_PERMISSIONLESS: ACCESS_TYPE_PERMISSIONLESS does not restrict the operation to anyone\n - ACCESS_TYPE_RESTRICTED: ACCESS_TYPE_RESTRICTED restrict the operation to anyone\n - ACCESS_TYPE_PERMISSIONED: ACCESS_TYPE_PERMISSIONED only allows the operation for specific addresses","type":"string","title":"AccessType defines the types of permissions for the operations","default":"ACCESS_TYPE_PERMISSIONLESS","enum":["ACCESS_TYPE_PERMISSIONLESS","ACCESS_TYPE_RESTRICTED","ACCESS_TYPE_PERMISSIONED"]},"cosmos.evm.vm.v1.ChainConfig":{"description":"ChainConfig defines the Ethereum ChainConfig parameters using *sdk.Int values\ninstead of *big.Int.","type":"object","properties":{"arrow_glacier_block":{"type":"string","title":"arrow_glacier_block: Eip-4345 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"},"berlin_block":{"type":"string","title":"berlin_block: Berlin switch block (nil = no fork, 0 = already on berlin)"},"byzantium_block":{"type":"string","title":"byzantium_block: Byzantium switch block (nil no fork, 0 = already on\nbyzantium)"},"cancun_time":{"type":"string","title":"cancun_time: Cancun switch time (nil = no fork, 0 = already on cancun)"},"chain_id":{"type":"string","format":"uint64","title":"chain_id is the id of the chain (EIP-155)"},"constantinople_block":{"type":"string","title":"constantinople_block: Constantinople switch block (nil no fork, 0 = already\nactivated)"},"dao_fork_block":{"type":"string","title":"dao_fork_block corresponds to TheDAO hard-fork switch block (nil no fork)"},"dao_fork_support":{"type":"boolean","title":"dao_fork_support defines whether the nodes supports or opposes the DAO\nhard-fork"},"decimals":{"type":"string","format":"uint64","title":"decimals is the real decimal precision of the denomination used on the EVM"},"denom":{"type":"string","title":"denom is the denomination used on the EVM"},"eip150_block":{"type":"string","title":"eip150_block: EIP150 implements the Gas price changes\n(https://github.com/ethereum/EIPs/issues/150) EIP150 HF block (nil no fork)"},"eip155_block":{"type":"string","title":"eip155_block: EIP155Block HF block"},"eip158_block":{"type":"string","title":"eip158_block: EIP158 HF block"},"gray_glacier_block":{"type":"string","title":"gray_glacier_block: EIP-5133 (bomb delay) switch block (nil = no fork, 0 =\nalready activated)"},"homestead_block":{"type":"string","title":"homestead_block switch (nil no fork, 0 = already homestead)"},"istanbul_block":{"type":"string","title":"istanbul_block: Istanbul switch block (nil no fork, 0 = already on\nistanbul)"},"london_block":{"type":"string","title":"london_block: London switch block (nil = no fork, 0 = already on london)"},"merge_netsplit_block":{"type":"string","title":"merge_netsplit_block: Virtual fork after The Merge to use as a network\nsplitter"},"muir_glacier_block":{"type":"string","title":"muir_glacier_block: Eip-2384 (bomb delay) switch block (nil no fork, 0 =\nalready activated)"},"osaka_time":{"type":"string","title":"osaka_time: Osaka switch time (nil = no fork, 0 = already on osaka)"},"petersburg_block":{"type":"string","title":"petersburg_block: Petersburg switch block (nil same as Constantinople)"},"prague_time":{"type":"string","title":"prague_time: Prague switch time (nil = no fork, 0 = already on prague)"},"shanghai_time":{"type":"string","title":"shanghai_time: Shanghai switch time (nil = no fork, 0 = already on\nshanghai)"},"verkle_time":{"type":"string","title":"verkle_time: Verkle switch time (nil = no fork, 0 = already on verkle)"}}},"cosmos.evm.vm.v1.EstimateGasResponse":{"type":"object","title":"EstimateGasResponse defines EstimateGas response","properties":{"gas":{"type":"string","format":"uint64","title":"gas returns the estimated gas"},"ret":{"type":"string","format":"byte","title":"ret is the returned data from evm function (result or data supplied with\nrevert opcode)"},"vm_error":{"type":"string","title":"vm_error is the error returned by vm execution"}}},"cosmos.evm.vm.v1.Log":{"description":"Log represents an protobuf compatible Ethereum Log that defines a contract\nlog event. These events are generated by the LOG opcode and stored/indexed by\nthe node.\n\nNOTE: address, topics and data are consensus fields. The rest of the fields\nare derived, i.e. filled in by the nodes, but not secured by consensus.","type":"object","properties":{"address":{"type":"string","title":"address of the contract that generated the event"},"block_hash":{"type":"string","title":"block_hash of the block in which the transaction was included"},"block_number":{"type":"string","format":"uint64","title":"block_number of the block in which the transaction was included"},"data":{"type":"string","format":"byte","title":"data which is supplied by the contract, usually ABI-encoded"},"index":{"type":"string","format":"uint64","title":"index of the log in the block"},"removed":{"description":"removed is true if this log was reverted due to a chain\nreorganisation. You must pay attention to this field if you receive logs\nthrough a filter query.","type":"boolean"},"topics":{"description":"topics is a list of topics provided by the contract.","type":"array","items":{"type":"string"}},"tx_hash":{"type":"string","title":"tx_hash is the transaction hash"},"tx_index":{"type":"string","format":"uint64","title":"tx_index of the transaction in the block"}}},"cosmos.evm.vm.v1.MsgEthereumTx":{"description":"MsgEthereumTx encapsulates an Ethereum transaction as an SDK message.","type":"object","properties":{"data":{"title":"data is inner transaction data of the Ethereum transaction","$ref":"#/definitions/google.protobuf.Any"},"from":{"type":"string","title":"from is the ethereum signer address in hex format. This address value is\nchecked against the address derived from the signature (V, R, S) using the\nsecp256k1 elliptic curve"},"hash":{"type":"string","title":"hash of the transaction in hex format"},"size":{"type":"number","format":"double","title":"size is the encoded storage size of the transaction (DEPRECATED)"}}},"cosmos.evm.vm.v1.MsgEthereumTxResponse":{"description":"MsgEthereumTxResponse defines the Msg/EthereumTx response type.","type":"object","properties":{"gas_used":{"type":"string","format":"uint64","title":"gas_used specifies how much gas was consumed by the transaction"},"hash":{"type":"string","title":"hash of the ethereum transaction in hex format. This hash differs from the\nTendermint sha256 hash of the transaction bytes. See\nhttps://github.com/tendermint/tendermint/issues/6539 for reference"},"logs":{"description":"logs contains the transaction hash and the proto-compatible ethereum\nlogs.","type":"array","items":{"type":"object","$ref":"#/definitions/cosmos.evm.vm.v1.Log"}},"ret":{"type":"string","format":"byte","title":"ret is the returned data from evm function (result or data supplied with\nrevert opcode)"},"vm_error":{"type":"string","title":"vm_error is the error returned by vm execution"}}},"cosmos.evm.vm.v1.MsgUpdateParams":{"description":"MsgUpdateParams defines a Msg for updating the x/vm module parameters.","type":"object","properties":{"authority":{"description":"authority is the address of the governance account.","type":"string"},"params":{"description":"params defines the x/vm parameters to update.\nNOTE: All parameters must be supplied.","$ref":"#/definitions/cosmos.evm.vm.v1.Params"}}},"cosmos.evm.vm.v1.MsgUpdateParamsResponse":{"description":"MsgUpdateParamsResponse defines the response structure for executing a\nMsgUpdateParams message.","type":"object"},"cosmos.evm.vm.v1.Params":{"type":"object","title":"Params defines the EVM module parameters","properties":{"access_control":{"title":"access_control defines the permission policy of the EVM","$ref":"#/definitions/cosmos.evm.vm.v1.AccessControl"},"active_static_precompiles":{"type":"array","title":"active_static_precompiles defines the slice of hex addresses of the\nprecompiled contracts that are active","items":{"type":"string"}},"allow_unprotected_txs":{"description":"allow_unprotected_txs defines if replay-protected (i.e non EIP155\nsigned) transactions can be executed on the state machine.","type":"boolean"},"evm_channels":{"type":"array","title":"evm_channels is the list of channel identifiers from EVM compatible chains","items":{"type":"string"}},"evm_denom":{"description":"evm_denom represents the token denomination used to run the EVM state\ntransitions.","type":"string"},"extra_eips":{"type":"array","title":"extra_eips defines the additional EIPs for the vm.Config","items":{"type":"string","format":"int64"}}}},"cosmos.evm.vm.v1.QueryAccountResponse":{"description":"QueryAccountResponse is the response type for the Query/Account RPC method.","type":"object","properties":{"balance":{"description":"balance is the balance of the EVM denomination.","type":"string"},"code_hash":{"description":"code_hash is the hex-formatted code bytes from the EOA.","type":"string"},"nonce":{"description":"nonce is the account's sequence number.","type":"string","format":"uint64"}}},"cosmos.evm.vm.v1.QueryBalanceResponse":{"description":"QueryBalanceResponse is the response type for the Query/Balance RPC method.","type":"object","properties":{"balance":{"description":"balance is the balance of the EVM denomination.","type":"string"}}},"cosmos.evm.vm.v1.QueryBaseFeeResponse":{"description":"QueryBaseFeeResponse returns the EIP1559 base fee.","type":"object","properties":{"base_fee":{"type":"string","title":"base_fee is the EIP1559 base fee"}}},"cosmos.evm.vm.v1.QueryCodeResponse":{"description":"QueryCodeResponse is the response type for the Query/Code RPC\nmethod.","type":"object","properties":{"code":{"description":"code represents the code bytes from an ethereum address.","type":"string","format":"byte"}}},"cosmos.evm.vm.v1.QueryConfigResponse":{"description":"QueryConfigResponse returns the EVM config.","type":"object","properties":{"config":{"title":"config is the evm configuration","$ref":"#/definitions/cosmos.evm.vm.v1.ChainConfig"}}},"cosmos.evm.vm.v1.QueryCosmosAccountResponse":{"description":"QueryCosmosAccountResponse is the response type for the Query/CosmosAccount\nRPC method.","type":"object","properties":{"account_number":{"type":"string","format":"uint64","title":"account_number is the account number"},"cosmos_address":{"description":"cosmos_address is the cosmos address of the account.","type":"string"},"sequence":{"description":"sequence is the account's sequence number.","type":"string","format":"uint64"}}},"cosmos.evm.vm.v1.QueryGlobalMinGasPriceResponse":{"type":"object","title":"QueryGlobalMinGasPriceResponse returns the GlobalMinGasPrice","properties":{"min_gas_price":{"type":"string","title":"min_gas_price is the feemarket's min_gas_price"}}},"cosmos.evm.vm.v1.QueryParamsResponse":{"description":"QueryParamsResponse defines the response type for querying x/vm parameters.","type":"object","properties":{"params":{"description":"params define the evm module parameters.","$ref":"#/definitions/cosmos.evm.vm.v1.Params"}}},"cosmos.evm.vm.v1.QueryStorageResponse":{"description":"QueryStorageResponse is the response type for the Query/Storage RPC\nmethod.","type":"object","properties":{"value":{"description":"value defines the storage state value hash associated with the given key.","type":"string"}}},"cosmos.evm.vm.v1.QueryTraceBlockResponse":{"type":"object","title":"QueryTraceBlockResponse defines TraceBlock response","properties":{"data":{"type":"string","format":"byte","title":"data is the response serialized in bytes"}}},"cosmos.evm.vm.v1.QueryTraceTxResponse":{"type":"object","title":"QueryTraceTxResponse defines TraceTx response","properties":{"data":{"type":"string","format":"byte","title":"data is the response serialized in bytes"}}},"cosmos.evm.vm.v1.QueryValidatorAccountResponse":{"description":"QueryValidatorAccountResponse is the response type for the\nQuery/ValidatorAccount RPC method.","type":"object","properties":{"account_address":{"description":"account_address is the cosmos address of the account in bech32 format.","type":"string"},"account_number":{"type":"string","format":"uint64","title":"account_number is the account number"},"sequence":{"description":"sequence is the account's sequence number.","type":"string","format":"uint64"}}},"cosmos.evm.vm.v1.TraceConfig":{"description":"TraceConfig holds extra parameters to trace functions.","type":"object","properties":{"debug":{"type":"boolean","title":"debug can be used to print output during capture end"},"disable_stack":{"type":"boolean","title":"disable_stack switches stack capture"},"disable_storage":{"type":"boolean","title":"disable_storage switches storage capture"},"enable_memory":{"type":"boolean","title":"enable_memory switches memory capture"},"enable_return_data":{"type":"boolean","title":"enable_return_data switches the capture of return data"},"limit":{"type":"integer","format":"int32","title":"limit defines the maximum length of output, but zero means unlimited"},"overrides":{"title":"overrides can be used to execute a trace using future fork rules","$ref":"#/definitions/cosmos.evm.vm.v1.ChainConfig"},"reexec":{"type":"string","format":"uint64","title":"reexec defines the number of blocks the tracer is willing to go back"},"timeout":{"type":"string","title":"timeout overrides the default timeout of 5 seconds for JavaScript-based\ntracing calls"},"tracer":{"type":"string","title":"tracer is a custom javascript tracer"},"tracer_json_config":{"type":"string","title":"tracer_json_config configures the tracer using a JSON string"}}},"google.protobuf.Any":{"type":"object","properties":{"@type":{"type":"string"}},"additionalProperties":{}},"google.rpc.Status":{"type":"object","properties":{"code":{"type":"integer","format":"int32"},"details":{"type":"array","items":{"type":"object","$ref":"#/definitions/google.protobuf.Any"}},"message":{"type":"string"}}}},"tags":[{"name":"Query"},{"name":"Msg"}]}
+\ No newline at end of file
+diff --git a/go.mod b/go.mod
+index 37e6f90..40ab0e6 100644
+--- a/go.mod
++++ b/go.mod
+@@ -14,7 +14,6 @@ replace (
+ require (
+ 	cosmossdk.io/api v0.9.2
+ 	cosmossdk.io/client/v2 v2.0.0-beta.11
+-	cosmossdk.io/collections v1.2.1
+ 	cosmossdk.io/core v0.11.3
+ 	cosmossdk.io/depinject v1.2.1
+ 	cosmossdk.io/log v1.6.0
+@@ -29,7 +28,9 @@ require (
+ 	github.com/cometbft/cometbft v0.38.17
+ 	github.com/cosmos/cosmos-db v1.1.1
+ 	github.com/cosmos/cosmos-sdk v0.53.3
++	github.com/cosmos/evm v0.3.0
+ 	github.com/cosmos/ibc-go/v10 v10.2.0
++	github.com/ethereum/go-ethereum v1.15.10
+ 	github.com/gorilla/mux v1.8.1
+ 	github.com/spf13/cast v1.8.0
+ 	github.com/spf13/cobra v1.9.1
+@@ -64,6 +65,7 @@ require (
+ 	cloud.google.com/go/storage v1.49.0 // indirect
+ 	connectrpc.com/connect v1.18.1 // indirect
+ 	connectrpc.com/otelconnect v0.7.2 // indirect
++	cosmossdk.io/collections v1.2.1 // indirect
+ 	cosmossdk.io/errors v1.0.2 // indirect
+ 	cosmossdk.io/schema v1.1.0 // indirect
+ 	cosmossdk.io/x/tx v0.14.0 // indirect
+@@ -88,6 +90,8 @@ require (
+ 	github.com/Masterminds/semver/v3 v3.3.1 // indirect
+ 	github.com/Microsoft/go-winio v0.6.2 // indirect
+ 	github.com/OpenPeeDeeP/depguard/v2 v2.2.1 // indirect
++	github.com/StackExchange/wmi v1.2.1 // indirect
++	github.com/VictoriaMetrics/fastcache v1.12.2 // indirect
+ 	github.com/alecthomas/go-check-sumtype v0.3.1 // indirect
+ 	github.com/alexkohler/nakedret/v2 v2.0.5 // indirect
+ 	github.com/alexkohler/prealloc v1.0.0 // indirect
+@@ -131,6 +135,8 @@ require (
+ 	github.com/cockroachdb/redact v1.1.6 // indirect
+ 	github.com/cockroachdb/tokenbucket v0.0.0-20230807174530-cc333fc44b06 // indirect
+ 	github.com/cometbft/cometbft-db v0.14.1 // indirect
++	github.com/consensys/bavard v0.1.27 // indirect
++	github.com/consensys/gnark-crypto v0.16.0 // indirect
+ 	github.com/containerd/errdefs v1.0.0 // indirect
+ 	github.com/containerd/errdefs/pkg v0.3.0 // indirect
+ 	github.com/containerd/stargz-snapshotter/estargz v0.16.3 // indirect
+@@ -143,30 +149,36 @@ require (
+ 	github.com/cosmos/ics23/go v0.11.0 // indirect
+ 	github.com/cosmos/ledger-cosmos-go v0.14.0 // indirect
+ 	github.com/cpuguy83/go-md2man/v2 v2.0.7 // indirect
++	github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a // indirect
++	github.com/crate-crypto/go-kzg-4844 v1.1.0 // indirect
+ 	github.com/creachadair/atomicfile v0.3.1 // indirect
+ 	github.com/creachadair/tomledit v0.0.24 // indirect
+ 	github.com/curioswitch/go-reassign v0.3.0 // indirect
+ 	github.com/daixiang0/gci v0.13.5 // indirect
+ 	github.com/danieljoos/wincred v1.2.2 // indirect
+ 	github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc // indirect
++	github.com/deckarep/golang-set/v2 v2.6.0 // indirect
+ 	github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 // indirect
+ 	github.com/denis-tingaikin/go-header v0.5.0 // indirect
+ 	github.com/desertbit/timer v1.0.1 // indirect
+ 	github.com/dgraph-io/badger/v4 v4.2.0 // indirect
+ 	github.com/dgraph-io/ristretto v0.1.1 // indirect
+ 	github.com/distribution/reference v0.6.0 // indirect
++	github.com/dlclark/regexp2 v1.11.0 // indirect
+ 	github.com/docker/cli v28.2.2+incompatible // indirect
+ 	github.com/docker/distribution v2.8.3+incompatible // indirect
+ 	github.com/docker/docker v28.2.2+incompatible // indirect
+ 	github.com/docker/docker-credential-helpers v0.9.3 // indirect
+ 	github.com/docker/go-connections v0.5.0 // indirect
+ 	github.com/docker/go-units v0.5.0 // indirect
++	github.com/dop251/goja v0.0.0-20230806174421-c933cf95e127 // indirect
+ 	github.com/dustin/go-humanize v1.0.1 // indirect
+ 	github.com/dvsekhvalnov/jose2go v1.7.0 // indirect
+ 	github.com/emicklei/dot v1.6.2 // indirect
+ 	github.com/envoyproxy/go-control-plane/envoy v1.32.4 // indirect
+ 	github.com/envoyproxy/protoc-gen-validate v1.2.1 // indirect
+-	github.com/ethereum/go-ethereum v1.15.10 // indirect
++	github.com/ethereum/c-kzg-4844 v1.0.0 // indirect
++	github.com/ethereum/go-verkle v0.2.2 // indirect
+ 	github.com/ettle/strcase v0.2.0 // indirect
+ 	github.com/fatih/color v1.18.0 // indirect
+ 	github.com/fatih/structtag v1.2.0 // indirect
+@@ -185,6 +197,8 @@ require (
+ 	github.com/go-logfmt/logfmt v0.6.0 // indirect
+ 	github.com/go-logr/logr v1.4.3 // indirect
+ 	github.com/go-logr/stdr v1.2.2 // indirect
++	github.com/go-ole/go-ole v1.3.0 // indirect
++	github.com/go-sourcemap/sourcemap v2.1.3+incompatible // indirect
+ 	github.com/go-task/slim-sprig/v3 v3.0.0 // indirect
+ 	github.com/go-toolsmith/astcast v1.1.0 // indirect
+ 	github.com/go-toolsmith/astcopy v1.1.0 // indirect
+@@ -248,11 +262,14 @@ require (
+ 	github.com/hashicorp/yamux v0.1.2 // indirect
+ 	github.com/hdevalence/ed25519consensus v0.2.0 // indirect
+ 	github.com/hexops/gotextdiff v1.0.3 // indirect
++	github.com/holiman/bloomfilter/v2 v2.0.3 // indirect
+ 	github.com/holiman/uint256 v1.3.2 // indirect
+ 	github.com/huandu/skiplist v1.2.1 // indirect
++	github.com/huin/goupnp v1.3.0 // indirect
+ 	github.com/iancoleman/strcase v0.3.0 // indirect
+ 	github.com/improbable-eng/grpc-web v0.15.0 // indirect
+ 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
++	github.com/jackpal/go-nat-pmp v1.0.2 // indirect
+ 	github.com/jdx/go-netrc v1.0.0 // indirect
+ 	github.com/jgautheron/goconst v1.7.1 // indirect
+ 	github.com/jingyugao/rowserrcheck v1.1.1 // indirect
+@@ -278,7 +295,7 @@ require (
+ 	github.com/ldez/usetesting v0.4.2 // indirect
+ 	github.com/leonklingele/grouper v1.1.2 // indirect
+ 	github.com/lib/pq v1.10.9 // indirect
+-	github.com/linxGnu/grocksdb v1.9.2 // indirect
++	github.com/linxGnu/grocksdb v1.9.8 // indirect
+ 	github.com/macabu/inamedparam v0.1.3 // indirect
+ 	github.com/manifoldco/promptui v0.9.0 // indirect
+ 	github.com/maratori/testableexamples v1.0.0 // indirect
+@@ -292,6 +309,7 @@ require (
+ 	github.com/minio/highwayhash v1.0.3 // indirect
+ 	github.com/mitchellh/go-homedir v1.1.0 // indirect
+ 	github.com/mitchellh/go-testing-interface v1.14.1 // indirect
++	github.com/mmcloughlin/addchain v0.4.0 // indirect
+ 	github.com/moby/docker-image-spec v1.3.1 // indirect
+ 	github.com/moby/term v0.5.2 // indirect
+ 	github.com/moricho/tparallel v0.3.2 // indirect
+@@ -310,6 +328,11 @@ require (
+ 	github.com/opencontainers/image-spec v1.1.1 // indirect
+ 	github.com/pelletier/go-toml/v2 v2.2.4 // indirect
+ 	github.com/petermattis/goid v0.0.0-20240813172612-4fcff4a6cae7 // indirect
++	github.com/pion/dtls/v2 v2.2.7 // indirect
++	github.com/pion/logging v0.2.2 // indirect
++	github.com/pion/stun/v2 v2.0.0 // indirect
++	github.com/pion/transport/v2 v2.2.1 // indirect
++	github.com/pion/transport/v3 v3.0.1 // indirect
+ 	github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c // indirect
+ 	github.com/pkg/errors v0.9.1 // indirect
+ 	github.com/planetscale/vtprotobuf v0.6.1-0.20240319094008-0393e58bdf10 // indirect
+@@ -344,6 +367,7 @@ require (
+ 	github.com/securego/gosec/v2 v2.22.2 // indirect
+ 	github.com/segmentio/asm v1.2.0 // indirect
+ 	github.com/segmentio/encoding v0.5.1 // indirect
++	github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible // indirect
+ 	github.com/sirupsen/logrus v1.9.3 // indirect
+ 	github.com/sivchari/containedctx v1.0.3 // indirect
+ 	github.com/sivchari/tenv v1.12.1 // indirect
+@@ -357,14 +381,21 @@ require (
+ 	github.com/stoewer/go-strcase v1.3.0 // indirect
+ 	github.com/stretchr/objx v0.5.2 // indirect
+ 	github.com/subosito/gotenv v1.6.0 // indirect
++	github.com/supranational/blst v0.3.14 // indirect
+ 	github.com/syndtr/goleveldb v1.0.1-0.20220721030215-126854af5e6d // indirect
+ 	github.com/tdakkota/asciicheck v0.4.1 // indirect
+ 	github.com/tendermint/go-amino v0.16.0 // indirect
+ 	github.com/tetafro/godot v1.5.0 // indirect
+ 	github.com/tetratelabs/wazero v1.9.0 // indirect
+ 	github.com/tidwall/btree v1.7.0 // indirect
++	github.com/tidwall/gjson v1.18.0 // indirect
++	github.com/tidwall/match v1.1.1 // indirect
++	github.com/tidwall/pretty v1.2.0 // indirect
++	github.com/tidwall/sjson v1.2.5 // indirect
+ 	github.com/timakin/bodyclose v0.0.0-20241017074812-ed6a65f985e3 // indirect
+ 	github.com/timonwong/loggercheck v0.10.1 // indirect
++	github.com/tklauser/go-sysconf v0.3.12 // indirect
++	github.com/tklauser/numcpus v0.6.1 // indirect
+ 	github.com/tomarrell/wrapcheck/v2 v2.10.0 // indirect
+ 	github.com/tommy-muehle/go-mnd/v2 v2.5.1 // indirect
+ 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
+@@ -432,6 +463,7 @@ require (
+ 	pgregory.net/rapid v1.2.0 // indirect
+ 	pluginrpc.com/pluginrpc v0.5.0 // indirect
+ 	rsc.io/qr v0.2.0 // indirect
++	rsc.io/tmplfunc v0.0.3 // indirect
+ 	sigs.k8s.io/yaml v1.4.0 // indirect
+ )
+ 
+diff --git a/go.sum b/go.sum
+index 88b9591..61adfb4 100644
+--- a/go.sum
++++ b/go.sum
+@@ -737,6 +737,10 @@ github.com/OpenPeeDeeP/depguard/v2 v2.2.1 h1:vckeWVESWp6Qog7UZSARNqfu/cZqvki8zsu
+ github.com/OpenPeeDeeP/depguard/v2 v2.2.1/go.mod h1:q4DKzC4UcVaAvcfd41CZh0PWpGgzrVxUYBlgKNGquUo=
+ github.com/Shopify/sarama v1.19.0/go.mod h1:FVkBWblsNy7DGZRfXLU0O9RCGt5g3g3yEuWXgklEdEo=
+ github.com/Shopify/toxiproxy v2.1.4+incompatible/go.mod h1:OXgGpZ6Cli1/URJOF1DMxUHB2q5Ap20/P/eIdh4G0pI=
++github.com/StackExchange/wmi v1.2.1 h1:VIkavFPXSjcnS+O8yTq7NI32k0R5Aj+v39y29VYDOSA=
++github.com/StackExchange/wmi v1.2.1/go.mod h1:rcmrprowKIVzvc+NUiLncP2uuArMWLCbu9SBzvHz7e8=
++github.com/VictoriaMetrics/fastcache v1.12.2 h1:N0y9ASrJ0F6h0QaC3o6uJb3NIZ9VKLjCM7NQbSmF7WI=
++github.com/VictoriaMetrics/fastcache v1.12.2/go.mod h1:AmC+Nzz1+3G2eCPapF6UcsnkThDcMsQicp4xDukwJYI=
+ github.com/VividCortex/gohistogram v1.0.0 h1:6+hBz+qvs0JOrrNhhmR7lFxo5sINxBCGXrdtl/UvroE=
+ github.com/VividCortex/gohistogram v1.0.0/go.mod h1:Pf5mBqqDxYaXu3hDrrU+w6nw50o/4+TcAqDqk/vUH7g=
+ github.com/adlio/schema v1.3.6 h1:k1/zc2jNfeiZBA5aFTRy37jlBIuCkXCm0XmvpzCKI9I=
+@@ -765,6 +769,8 @@ github.com/alingse/asasalint v0.0.11 h1:SFwnQXJ49Kx/1GghOFz1XGqHYKp21Kq1nHad/0WQ
+ github.com/alingse/asasalint v0.0.11/go.mod h1:nCaoMhw7a9kSJObvQyVzNTPBDbNpdocqrSP7t/cW5+I=
+ github.com/alingse/nilnesserr v0.1.2 h1:Yf8Iwm3z2hUUrP4muWfW83DF4nE3r1xZ26fGWUKCZlo=
+ github.com/alingse/nilnesserr v0.1.2/go.mod h1:1xJPrXonEtX7wyTq8Dytns5P2hNzoWymVUIaKm4HNFg=
++github.com/allegro/bigcache v1.2.1-0.20190218064605-e24eb225f156 h1:eMwmnE/GDgah4HI848JfFxHt+iPb26b4zyfspmqY0/8=
++github.com/allegro/bigcache v1.2.1-0.20190218064605-e24eb225f156/go.mod h1:Cb/ax3seSYIx7SuZdm2G2xzfwmv3TPSk2ucNfQESPXM=
+ github.com/andybalholm/brotli v1.0.4/go.mod h1:fO7iG3H7G2nSZ7m0zPUDn85XEX2GTukHGRSepvi9Eig=
+ github.com/antihax/optional v1.0.0/go.mod h1:uupD/76wgC+ih3iEmQUL+0Ugr19nfwCT1kdvxnR2qWY=
+ github.com/antlr4-go/antlr/v4 v4.13.1 h1:SqQKkuVZ+zWkMMNkjy5FZe5mr5WURWnlpmOuzYWrPrQ=
+@@ -813,8 +819,9 @@ github.com/breml/bidichk v0.3.2 h1:xV4flJ9V5xWTqxL+/PMFF6dtJPvZLPsyixAoPe8BGJs=
+ github.com/breml/bidichk v0.3.2/go.mod h1:VzFLBxuYtT23z5+iVkamXO386OB+/sVwZOpIj6zXGos=
+ github.com/breml/errchkjson v0.4.0 h1:gftf6uWZMtIa/Is3XJgibewBm2ksAQSY/kABDNFTAdk=
+ github.com/breml/errchkjson v0.4.0/go.mod h1:AuBOSTHyLSaaAFlWsRSuRBIroCh3eh7ZHh5YeelDIk8=
+-github.com/btcsuite/btcd/btcec/v2 v2.3.2 h1:5n0X6hX0Zk+6omWcihdYvdAlGf2DfasC0GMf7DClJ3U=
+-github.com/btcsuite/btcd/btcec/v2 v2.3.2/go.mod h1:zYzJ8etWJQIv1Ogk7OzpWjowwOdXY1W/17j2MW85J04=
++github.com/btcsuite/btcd v0.24.2 h1:aLmxPguqxza+4ag8R1I2nnJjSu2iFn/kqtHTIImswcY=
++github.com/btcsuite/btcd/btcec/v2 v2.3.4 h1:3EJjcN70HCu/mwqlUsGK8GcNVyLVxFDlWurTXGPFfiQ=
++github.com/btcsuite/btcd/btcec/v2 v2.3.4/go.mod h1:zYzJ8etWJQIv1Ogk7OzpWjowwOdXY1W/17j2MW85J04=
+ github.com/btcsuite/btcd/btcutil v1.1.6 h1:zFL2+c3Lb9gEgqKNzowKUPQNb8jV7v5Oaodi/AYFd6c=
+ github.com/btcsuite/btcd/btcutil v1.1.6/go.mod h1:9dFymx8HpuLqBnsPELrImQeTQfKBQqzqGbbV3jK55aE=
+ github.com/bufbuild/buf v1.55.1 h1:yaRXO9YmtgyEhiqT/gwuJWhHN9xBBbqlQvXVnPauvCk=
+@@ -860,12 +867,15 @@ github.com/cheggaaa/pb v1.0.27/go.mod h1:pQciLPpbU0oxA0h+VJYYLxO+XeDQb5pZijXscXH
+ github.com/chenzhuoyu/base64x v0.0.0-20211019084208-fb5309c8db06/go.mod h1:DH46F32mSOjUmXrMHnKwZdA8wcEefY7UVqBKYGjpdQY=
+ github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311/go.mod h1:b583jCggY9gE99b6G5LEC39OIiVsWj+R97kbl5odCEk=
+ github.com/chzyer/logex v1.1.10/go.mod h1:+Ywpsq7O8HXn0nuIou7OrIPyXbp3wmkHB+jjWRnGsAI=
++github.com/chzyer/logex v1.2.0/go.mod h1:9+9sk7u7pGNWYMkh0hdiL++6OeibzJccyQU4p4MedaY=
+ github.com/chzyer/logex v1.2.1 h1:XHDu3E6q+gdHgsdTPH6ImJMIp436vR6MPtH8gP05QzM=
+ github.com/chzyer/logex v1.2.1/go.mod h1:JLbx6lG2kDbNRFnfkgvh4eRJRPX1QCoOIWomwysCBrQ=
+ github.com/chzyer/readline v0.0.0-20180603132655-2972be24d48e/go.mod h1:nSuG5e5PlCu98SY8svDHJxuZscDgtXS6KTTbou5AhLI=
++github.com/chzyer/readline v1.5.0/go.mod h1:x22KAscuvRqlLoK9CsoYsmxoXZMMFVyOl86cAH8qUic=
+ github.com/chzyer/readline v1.5.1 h1:upd/6fQk4src78LMRzh5vItIt361/o4uq553V8B5sGI=
+ github.com/chzyer/readline v1.5.1/go.mod h1:Eh+b79XXUwfKfcPLepksvw2tcLE/Ct21YObkaSkeBlk=
+ github.com/chzyer/test v0.0.0-20180213035817-a1ea475d72b1/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
++github.com/chzyer/test v0.0.0-20210722231415-061457976a23/go.mod h1:Q3SI9o4m/ZMnBNeIyt5eFwwo7qiLfzFZmjNmxjkiQlU=
+ github.com/chzyer/test v1.0.0 h1:p3BQDXSxOhOG0P9z6/hGnII4LGiEPOYBhs8asl/fC04=
+ github.com/chzyer/test v1.0.0/go.mod h1:2JlltgoNkt4TW/z9V/IzDdFaMTM2JPIi26O1pF38GC8=
+ github.com/circonus-labs/circonus-gometrics v2.3.1+incompatible/go.mod h1:nmEj6Dob7S7YxXgwXpfOuvO54S+tGdZdw9fuRZt25Ag=
+@@ -916,6 +926,10 @@ github.com/cometbft/cometbft v0.38.17 h1:FkrQNbAjiFqXydeAO81FUzriL4Bz0abYxN/eOHr
+ github.com/cometbft/cometbft v0.38.17/go.mod h1:5l0SkgeLRXi6bBfQuevXjKqML1jjfJJlvI1Ulp02/o4=
+ github.com/cometbft/cometbft-db v0.14.1 h1:SxoamPghqICBAIcGpleHbmoPqy+crij/++eZz3DlerQ=
+ github.com/cometbft/cometbft-db v0.14.1/go.mod h1:KHP1YghilyGV/xjD5DP3+2hyigWx0WTp9X+0Gnx0RxQ=
++github.com/consensys/bavard v0.1.27 h1:j6hKUrGAy/H+gpNrpLU3I26n1yc+VMGmd6ID5+gAhOs=
++github.com/consensys/bavard v0.1.27/go.mod h1:k/zVjHHC4B+PQy1Pg7fgvG3ALicQw540Crag8qx+dZs=
++github.com/consensys/gnark-crypto v0.16.0 h1:8Dl4eYmUWK9WmlP1Bj6je688gBRJCJbT8Mw4KoTAawo=
++github.com/consensys/gnark-crypto v0.16.0/go.mod h1:Ke3j06ndtPTVvo++PhGNgvm+lgpLvzbcE2MqljY7diU=
+ github.com/containerd/continuity v0.3.0 h1:nisirsYROK15TAMVukJOUyGJjz4BNQJBVsNvAXZJ/eg=
+ github.com/containerd/continuity v0.3.0/go.mod h1:wJEAIwKOm/pBZuBd0JmeTvnLquTB1Ag8espWhkykbPM=
+ github.com/containerd/errdefs v1.0.0 h1:tg5yIfIlQIrxYtu9ajqY42W3lpS19XqdxRQeEwYG8PI=
+@@ -938,6 +952,8 @@ github.com/cosmos/cosmos-proto v1.0.0-beta.5 h1:eNcayDLpip+zVLRLYafhzLvQlSmyab+R
+ github.com/cosmos/cosmos-proto v1.0.0-beta.5/go.mod h1:hQGLpiIUloJBMdQMMWb/4wRApmI9hjHH05nefC0Ojec=
+ github.com/cosmos/cosmos-sdk v0.53.3 h1:GbDJNUP9OD0gGDVnjecZVZr0ZReD1BtIIxmtgrAsWiw=
+ github.com/cosmos/cosmos-sdk v0.53.3/go.mod h1:90S054hIbadFB1MlXVZVC5w0QbKfd1P4b79zT+vvJxw=
++github.com/cosmos/evm v0.3.0 h1:eXELtkofmbfuDvbUqpZdRYuXRdpn7tZd6EyXQfBTkzU=
++github.com/cosmos/evm v0.3.0/go.mod h1:5CXFoQfFcu5XfouVLcAm6uJnGg01hmmU20OLJ0gJgLY=
+ github.com/cosmos/go-bip39 v1.0.0 h1:pcomnQdrdH22njcAatO0yWojsUnCO3y2tNoV1cb6hHY=
+ github.com/cosmos/go-bip39 v1.0.0/go.mod h1:RNJv0H/pOIVgxw6KS7QeX2a0Uo0aKUlfhZ4xuwvCdJw=
+ github.com/cosmos/gogogateway v1.2.0 h1:Ae/OivNhp8DqBi/sh2A8a1D0y638GpL3tkmLQAiKxTE=
+@@ -947,6 +963,8 @@ github.com/cosmos/gogoproto v1.7.0 h1:79USr0oyXAbxg3rspGh/m4SWNyoz/GLaAh0QlCe2fr
+ github.com/cosmos/gogoproto v1.7.0/go.mod h1:yWChEv5IUEYURQasfyBW5ffkMHR/90hiHgbNgrtp4j0=
+ github.com/cosmos/iavl v1.2.2 h1:qHhKW3I70w+04g5KdsdVSHRbFLgt3yY3qTMd4Xa4rC8=
+ github.com/cosmos/iavl v1.2.2/go.mod h1:GiM43q0pB+uG53mLxLDzimxM9l/5N9UuSY3/D0huuVw=
++github.com/cosmos/ibc-go/modules/capability v1.0.1 h1:ibwhrpJ3SftEEZRxCRkH0fQZ9svjthrX2+oXdZvzgGI=
++github.com/cosmos/ibc-go/modules/capability v1.0.1/go.mod h1:rquyOV262nGJplkumH+/LeYs04P3eV8oB7ZM4Ygqk4E=
+ github.com/cosmos/ibc-go/v10 v10.2.0 h1:wlk/zqz2O0WRyE6UConoR1ci2HSW02P9ywamZCh5/N4=
+ github.com/cosmos/ibc-go/v10 v10.2.0/go.mod h1:ijeyJ1FDvXoc5w+rlhpMntjhZ558EF02SBFjroW1hPo=
+ github.com/cosmos/ics23/go v0.11.0 h1:jk5skjT0TqX5e5QJbEnwXIS2yI2vnmLOgpQPeM5RtnU=
+@@ -957,6 +975,10 @@ github.com/cpuguy83/go-md2man/v2 v2.0.0-20190314233015-f79a8a8ca69d/go.mod h1:ma
+ github.com/cpuguy83/go-md2man/v2 v2.0.6/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
+ github.com/cpuguy83/go-md2man/v2 v2.0.7 h1:zbFlGlXEAKlwXpmvle3d8Oe3YnkKIK4xSRTd3sHPnBo=
+ github.com/cpuguy83/go-md2man/v2 v2.0.7/go.mod h1:oOW0eioCTA6cOiMLiUPZOpcVxMig6NIQQ7OS05n1F4g=
++github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a h1:W8mUrRp6NOVl3J+MYp5kPMoUZPp7aOYHtaua31lwRHg=
++github.com/crate-crypto/go-ipa v0.0.0-20240724233137-53bbb0ceb27a/go.mod h1:sTwzHBvIzm2RfVCGNEBZgRyjwK40bVoun3ZnGOCafNM=
++github.com/crate-crypto/go-kzg-4844 v1.1.0 h1:EN/u9k2TF6OWSHrCCDBBU6GLNMq88OspHHlMnHfoyU4=
++github.com/crate-crypto/go-kzg-4844 v1.1.0/go.mod h1:JolLjpSff1tCCJKaJx4psrlEdlXuJEC996PL3tTAFks=
+ github.com/creachadair/atomicfile v0.3.1 h1:yQORkHjSYySh/tv5th1dkKcn02NEW5JleB84sjt+W4Q=
+ github.com/creachadair/atomicfile v0.3.1/go.mod h1:mwfrkRxFKwpNAflYZzytbSwxvbK6fdGRRlp0KEQc0qU=
+ github.com/creachadair/tomledit v0.0.24 h1:5Xjr25R2esu1rKCbQEmjZYlrhFkDspoAbAKb6QKQDhQ=
+@@ -975,6 +997,8 @@ github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSs
+ github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
+ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc h1:U9qPSI2PIWSS1VwoXQT9A3Wy9MM3WgvqSxFWenqJduM=
+ github.com/davecgh/go-spew v1.1.2-0.20180830191138-d8f796af33cc/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
++github.com/deckarep/golang-set/v2 v2.6.0 h1:XfcQbWM1LlMB8BsJ8N9vW5ehnnPVIw0je80NsVHagjM=
++github.com/deckarep/golang-set/v2 v2.6.0/go.mod h1:VAky9rY/yGXJOLEDv3OMci+7wtDpOF4IN+y82NBOac4=
+ github.com/decred/dcrd/crypto/blake256 v1.1.0 h1:zPMNGQCm0g4QTY27fOCorQW7EryeQ/U0x++OzVrdms8=
+ github.com/decred/dcrd/crypto/blake256 v1.1.0/go.mod h1:2OfgNZ5wDpcsFmHmCK5gZTPcCXqlm2ArzUIkw9czNJo=
+ github.com/decred/dcrd/dcrec/secp256k1/v4 v4.4.0 h1:NMZiJj8QnKe1LgsbDayM4UoHwbvwDRwnI3hwNaAHRnc=
+@@ -994,6 +1018,8 @@ github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13 h1:fAjc9m62+UWV/WA
+ github.com/dgryski/go-farm v0.0.0-20200201041132-a6ae2369ad13/go.mod h1:SqUrOPUnsFjfmXRMNPybcSiG0BgUW2AuFH8PAnS2iTw=
+ github.com/distribution/reference v0.6.0 h1:0IXCQ5g4/QMHHkarYzh5l+u8T3t73zM5QvfrDyIgxBk=
+ github.com/distribution/reference v0.6.0/go.mod h1:BbU0aIcezP1/5jX/8MP0YiH4SdvB5Y4f/wlDRiLyi3E=
++github.com/dlclark/regexp2 v1.4.1-0.20201116162257-a2a8dda75c91/go.mod h1:2pZnwuY/m+8K6iRw6wQdMtk+rH5tNGR1i55kozfMjCc=
++github.com/dlclark/regexp2 v1.7.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+ github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=
+ github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+ github.com/docker/cli v28.2.2+incompatible h1:qzx5BNUDFqlvyq4AHzdNB7gSyVTmU4cgsyN9SdInc1A=
+@@ -1009,6 +1035,11 @@ github.com/docker/go-connections v0.5.0/go.mod h1:ov60Kzw0kKElRwhNs9UlUHAE/F9Fe6
+ github.com/docker/go-units v0.5.0 h1:69rxXcBk27SvSaaxTtLh/8llcHD8vYHT7WSdRZ/jvr4=
+ github.com/docker/go-units v0.5.0/go.mod h1:fgPhTUdO+D/Jk86RDLlptpiXQzgHJF7gydDDbaIK4Dk=
+ github.com/docopt/docopt-go v0.0.0-20180111231733-ee0de3bc6815/go.mod h1:WwZ+bS3ebgob9U8Nd0kOddGdZWjyMGR8Wziv+TBNwSE=
++github.com/dop251/goja v0.0.0-20211022113120-dc8c55024d06/go.mod h1:R9ET47fwRVRPZnOGvHxxhuZcbrMCuiqOz3Rlrh4KSnk=
++github.com/dop251/goja v0.0.0-20230806174421-c933cf95e127 h1:qwcF+vdFrvPSEUDSX5RVoRccG8a5DhOdWdQ4zN62zzo=
++github.com/dop251/goja v0.0.0-20230806174421-c933cf95e127/go.mod h1:QMWlm50DNe14hD7t24KEqZuUdC9sOTy8W6XbCU1mlw4=
++github.com/dop251/goja_nodejs v0.0.0-20210225215109-d91c329300e7/go.mod h1:hn7BA7c8pLvoGndExHudxTDKZ84Pyvv+90pbBjbTz0Y=
++github.com/dop251/goja_nodejs v0.0.0-20211022123610-8dd9abb0616d/go.mod h1:DngW8aVqWbuLRMHItjPUyqdj+HWPvnQe8V8y1nDpIbM=
+ github.com/dustin/go-humanize v0.0.0-20171111073723-bb3d318650d4/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+ github.com/dustin/go-humanize v1.0.0/go.mod h1:HtrtbFcZ19U5GC7JDqmcUSB87Iq5E25KnS6fMYU6eOk=
+ github.com/dustin/go-humanize v1.0.1 h1:GzkhY7T5VNhEkwH0PVJgjz+fX1rhBrR7pRT3mDkpeCY=
+@@ -1045,8 +1076,12 @@ github.com/envoyproxy/protoc-gen-validate v0.9.1/go.mod h1:OKNgG7TCp5pF4d6XftA0+
+ github.com/envoyproxy/protoc-gen-validate v0.10.1/go.mod h1:DRjgyB0I43LtJapqN6NiRwroiAU2PaFuvk/vjgh61ss=
+ github.com/envoyproxy/protoc-gen-validate v1.2.1 h1:DEo3O99U8j4hBFwbJfrz9VtgcDfUKS7KJ7spH3d86P8=
+ github.com/envoyproxy/protoc-gen-validate v1.2.1/go.mod h1:d/C80l/jxXLdfEIhX1W2TmLfsJ31lvEjwamM4DxlWXU=
++github.com/ethereum/c-kzg-4844 v1.0.0 h1:0X1LBXxaEtYD9xsyj9B9ctQEZIpnvVDeoBx8aHEwTNA=
++github.com/ethereum/c-kzg-4844 v1.0.0/go.mod h1:VewdlzQmpT5QSrVhbBuGoCdFJkpaJlO1aQputP83wc0=
+ github.com/ethereum/go-ethereum v1.15.10 h1:UxqBhpsF2TNF1f7Z/k3RUUHEuLvDGAlHuh/lQ99ZA0w=
+ github.com/ethereum/go-ethereum v1.15.10/go.mod h1:+S9k+jFzlyVTNcYGvqFhzN/SFhI6vA+aOY4T5tLSPL0=
++github.com/ethereum/go-verkle v0.2.2 h1:I2W0WjnrFUIzzVPwm8ykY+7pL2d4VhlsePn4j7cnFk8=
++github.com/ethereum/go-verkle v0.2.2/go.mod h1:M3b90YRnzqKyyzBEWJGqj8Qff4IDeXnzFw0P9bFw3uk=
+ github.com/ettle/strcase v0.2.0 h1:fGNiVF21fHXpX1niBgk0aROov1LagYsOwV/xqKDKR/Q=
+ github.com/ettle/strcase v0.2.0/go.mod h1:DajmHElDSaX76ITe3/VHVyMin4LWSJN5Z909Wp+ED1A=
+ github.com/fatih/color v1.7.0/go.mod h1:Zm6kSWBoL9eyXnKyktHP6abPY2pDugNf5KwzbycvMj4=
+@@ -1121,6 +1156,9 @@ github.com/go-logr/logr v1.4.3 h1:CjnDlHq8ikf6E492q6eKboGOC0T8CDaOvkHCIg8idEI=
+ github.com/go-logr/logr v1.4.3/go.mod h1:9T104GzyrTigFIr8wt5mBrctHMim0Nb2HLGrmQ40KvY=
+ github.com/go-logr/stdr v1.2.2 h1:hSWxHoqTgW2S2qGc0LTAI563KZ5YKYRhT3MFKZMbjag=
+ github.com/go-logr/stdr v1.2.2/go.mod h1:mMo/vtBO5dYbehREoey6XUKy/eSumjCCveDpRre4VKE=
++github.com/go-ole/go-ole v1.2.5/go.mod h1:pprOEPIfldk/42T2oK7lQ4v4JSDwmV0As9GaiUsvbm0=
++github.com/go-ole/go-ole v1.3.0 h1:Dt6ye7+vXGIKZ7Xtk4s6/xVdGDQynvom7xCFEdWr6uE=
++github.com/go-ole/go-ole v1.3.0/go.mod h1:5LS6F96DhAwUc7C+1HLexzMXY1xGRSryjyPPKW6zv78=
+ github.com/go-pdf/fpdf v0.5.0/go.mod h1:HzcnA+A23uwogo0tp9yU+l3V+KXhiESpt1PMayhOh5M=
+ github.com/go-pdf/fpdf v0.6.0/go.mod h1:HzcnA+A23uwogo0tp9yU+l3V+KXhiESpt1PMayhOh5M=
+ github.com/go-playground/assert/v2 v2.2.0/go.mod h1:VDjEfimB/XKnb+ZQfWdccd7VUvScMdVu0Titje2rxJ4=
+@@ -1132,6 +1170,8 @@ github.com/go-playground/validator/v10 v10.14.0 h1:vgvQWe3XCz3gIeFDm/HnTIbj6UGmg
+ github.com/go-playground/validator/v10 v10.14.0/go.mod h1:9iXMNT7sEkjXb0I+enO7QXmzG6QCsPWY4zveKFVRSyU=
+ github.com/go-quicktest/qt v1.101.0 h1:O1K29Txy5P2OK0dGo59b7b0LR6wKfIhttaAhHUyn7eI=
+ github.com/go-quicktest/qt v1.101.0/go.mod h1:14Bz/f7NwaXPtdYEgzsx46kqSxVwTbzVZsDC26tQJow=
++github.com/go-sourcemap/sourcemap v2.1.3+incompatible h1:W1iEw64niKVGogNgBN3ePyLFfuisuzeidWPMPWmECqU=
++github.com/go-sourcemap/sourcemap v2.1.3+incompatible/go.mod h1:F8jJfvm2KbVjc5NqelyYJmf/v5J0dwNLS2mL4sNA1Jg=
+ github.com/go-sql-driver/mysql v1.4.0/go.mod h1:zAC/RDZ24gD3HViQzih4MyKcchzm+sOG5ZlKdlhCg5w=
+ github.com/go-stack/stack v1.8.0/go.mod h1:v0f6uXyyMGvRgIKkXu+yp6POWl0qKG85gN/melR3HDY=
+ github.com/go-task/slim-sprig/v3 v3.0.0 h1:sUs3vkvUymDpBKi3qH1YSqBQk9+9D/8M2mN1vB6EwHI=
+@@ -1308,11 +1348,13 @@ github.com/google/pprof v0.0.0-20210226084205-cbba55b83ad5/go.mod h1:kpwsk12EmLe
+ github.com/google/pprof v0.0.0-20210601050228-01bbb1931b22/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
+ github.com/google/pprof v0.0.0-20210609004039-a478d1d731e9/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
+ github.com/google/pprof v0.0.0-20210720184732-4bb14d4b1be1/go.mod h1:kpwsk12EmLew5upagYY7GY0pfYCcupk39gWOCRROcvE=
++github.com/google/pprof v0.0.0-20230207041349-798e818bf904/go.mod h1:uglQLonpP8qtYCYyzA+8c/9qtqgA3qsXGYqCPKARAFg=
+ github.com/google/pprof v0.0.0-20250607225305-033d6d78b36a h1://KbezygeMJZCSHH+HgUZiTeSoiuFspbMg1ge+eFj18=
+ github.com/google/pprof v0.0.0-20250607225305-033d6d78b36a/go.mod h1:5hDyRhoBCxViHszMt12TnOpEI4VVi+U8Gm9iphldiMA=
+ github.com/google/renameio v0.1.0/go.mod h1:KWCgfxg9yswjAJkECMjeO8J8rahYeXnNhOm40UhjYkI=
+ github.com/google/s2a-go v0.1.9 h1:LGD7gtMgezd8a/Xak7mEWL0PjoTQFvpRudN895yqKW0=
+ github.com/google/s2a-go v0.1.9/go.mod h1:YA0Ei2ZQL3acow2O62kdp9UlnvMmU7kA6Eutn0dXayM=
++github.com/google/subcommands v1.2.0/go.mod h1:ZjhPrFU+Olkh9WazFPsl27BQ4UPiG37m3yTrtFlrHVk=
+ github.com/google/uuid v1.0.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+ github.com/google/uuid v1.1.2/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+ github.com/google/uuid v1.3.0/go.mod h1:TIyPZe4MgqvfeYDBFedMoGGpEw/LqOeaOT+nhxU+yHo=
+@@ -1435,6 +1477,8 @@ github.com/hdevalence/ed25519consensus v0.2.0 h1:37ICyZqdyj0lAZ8P4D1d1id3HqbbG1N
+ github.com/hdevalence/ed25519consensus v0.2.0/go.mod h1:w3BHWjwJbFU29IRHL1Iqkw3sus+7FctEyM4RqDxYNzo=
+ github.com/hexops/gotextdiff v1.0.3 h1:gitA9+qJrrTCsiCl7+kh75nPqQt1cx4ZkudSTLoUqJM=
+ github.com/hexops/gotextdiff v1.0.3/go.mod h1:pSWU5MAI3yDq+fZBTazCSJysOMbxWL1BSow5/V2vxeg=
++github.com/holiman/bloomfilter/v2 v2.0.3 h1:73e0e/V0tCydx14a0SCYS/EWCxgwLZ18CZcZKVu0fao=
++github.com/holiman/bloomfilter/v2 v2.0.3/go.mod h1:zpoh+gs7qcpqrHr3dB55AMiJwo0iURXE7ZOP9L9hSkA=
+ github.com/holiman/uint256 v1.3.2 h1:a9EgMPSC1AAaj1SZL5zIQD3WbwTuHrMGOerLjGmM/TA=
+ github.com/holiman/uint256 v1.3.2/go.mod h1:EOMSn4q6Nyt9P6efbI3bueV4e1b3dGlUCXeiRV4ng7E=
+ github.com/hpcloud/tail v1.0.0/go.mod h1:ab1qPbhIpdTxEkNHXyeSf5vhxWSCs/tWer42PpOxQnU=
+@@ -1443,17 +1487,22 @@ github.com/huandu/go-assert v1.1.5/go.mod h1:yOLvuqZwmcHIC5rIzrBhT7D3Q9c3GFnd0Jr
+ github.com/huandu/skiplist v1.2.1 h1:dTi93MgjwErA/8idWTzIw4Y1kZsMWx35fmI2c8Rij7w=
+ github.com/huandu/skiplist v1.2.1/go.mod h1:7v3iFjLcSAzO4fN5B8dvebvo/qsfumiLiDXMrPiHF9w=
+ github.com/hudl/fargo v1.3.0/go.mod h1:y3CKSmjA+wD2gak7sUSXTAoopbhU08POFhmITJgmKTg=
++github.com/huin/goupnp v1.3.0 h1:UvLUlWDNpoUdYzb2TCn+MuTWtcjXKSza2n6CBdQ0xXc=
++github.com/huin/goupnp v1.3.0/go.mod h1:gnGPsThkYa7bFi/KWmEysQRf48l2dvR5bxr2OFckNX8=
+ github.com/iancoleman/strcase v0.2.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+ github.com/iancoleman/strcase v0.3.0 h1:nTXanmYxhfFAMjZL34Ov6gkzEsSJZ5DbhxWjvSASxEI=
+ github.com/iancoleman/strcase v0.3.0/go.mod h1:iwCmte+B7n89clKwxIoIXy/HfoL7AsD47ZCWhYzw7ho=
+ github.com/ianlancetaylor/demangle v0.0.0-20181102032728-5e5cf60278f6/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
+ github.com/ianlancetaylor/demangle v0.0.0-20200824232613-28f6c0f3b639/go.mod h1:aSSvb/t6k1mPoxDqO4vJh6VOCGPwU4O0C2/Eqndh1Sc=
++github.com/ianlancetaylor/demangle v0.0.0-20220319035150-800ac71e25c2/go.mod h1:aYm2/VgdVmcIU8iMfdMvDMsRAQjcfZSKFby6HOFvi/w=
+ github.com/improbable-eng/grpc-web v0.15.0 h1:BN+7z6uNXZ1tQGcNAuaU1YjsLTApzkjt2tzCixLaUPQ=
+ github.com/improbable-eng/grpc-web v0.15.0/go.mod h1:1sy9HKV4Jt9aEs9JSnkWlRJPuPtwNr0l57L4f878wP8=
+ github.com/inconshreveable/mousetrap v1.0.0/go.mod h1:PxqpIevigyE2G7u3NXJIT2ANytuPF1OarO4DADm73n8=
+ github.com/inconshreveable/mousetrap v1.1.0 h1:wN+x4NVGpMsO7ErUn/mUI3vEoE6Jt13X2s0bqwp9tc8=
+ github.com/inconshreveable/mousetrap v1.1.0/go.mod h1:vpF70FUmC8bwa3OWnCshd2FqLfsEA9PFc4w1p2J65bw=
+ github.com/influxdata/influxdb1-client v0.0.0-20191209144304-8bf82d3c094d/go.mod h1:qj24IKcXYK6Iy9ceXlo3Tc+vtHo9lIhSX5JddghvEPo=
++github.com/jackpal/go-nat-pmp v1.0.2 h1:KzKSgb7qkJvOUTqYl9/Hg/me3pWgBmERKrTGD7BdWus=
++github.com/jackpal/go-nat-pmp v1.0.2/go.mod h1:QPH045xvCAeXUZOxsnwmrtiCoxIr9eob+4orBN1SBKc=
+ github.com/jdx/go-netrc v1.0.0 h1:QbLMLyCZGj0NA8glAhxUpf1zDg6cxnWgMBbjq40W0gQ=
+ github.com/jdx/go-netrc v1.0.0/go.mod h1:Gh9eFQJnoTNIRHXl2j5bJXA1u84hQWJWgGh569zF3v8=
+ github.com/jgautheron/goconst v1.7.1 h1:VpdAG7Ca7yvvJk5n8dMwQhfEZJh95kl/Hl9S1OI5Jkk=
+@@ -1548,6 +1597,8 @@ github.com/ldez/tagliatelle v0.7.1 h1:bTgKjjc2sQcsgPiT902+aadvMjCeMHrY7ly2XKFORI
+ github.com/ldez/tagliatelle v0.7.1/go.mod h1:3zjxUpsNB2aEZScWiZTHrAXOl1x25t3cRmzfK1mlo2I=
+ github.com/ldez/usetesting v0.4.2 h1:J2WwbrFGk3wx4cZwSMiCQQ00kjGR0+tuuyW0Lqm4lwA=
+ github.com/ldez/usetesting v0.4.2/go.mod h1:eEs46T3PpQ+9RgN9VjpY6qWdiw2/QmfiDeWmdZdrjIQ=
++github.com/leanovate/gopter v0.2.11 h1:vRjThO1EKPb/1NsDXuDrzldR28RLkBflWYcU9CvzWu4=
++github.com/leanovate/gopter v0.2.11/go.mod h1:aK3tzZP/C+p1m3SPRE4SYZFGP7jjkuSI4f7Xvpt0S9c=
+ github.com/leodido/go-urn v1.2.4 h1:XlAE/cm/ms7TE/VMVoduSpNBoyc2dOxHs5MZSwAN63Q=
+ github.com/leodido/go-urn v1.2.4/go.mod h1:7ZrI8mTSeBSHl/UaRyKQW1qZeMgak41ANeCNaVckg+4=
+ github.com/leonklingele/grouper v1.1.2 h1:o1ARBDLOmmasUaNDesWqWCIFH3u7hoFlM84YrjT3mIY=
+@@ -1556,8 +1607,8 @@ github.com/lib/pq v1.10.9 h1:YXG7RB+JIjhP29X+OtkiDnYaXQwpS4JEWq7dtCCRUEw=
+ github.com/lib/pq v1.10.9/go.mod h1:AlVN5x4E4T544tWzH6hKfbfQvm3HdbOxrmggDNAPY9o=
+ github.com/lightstep/lightstep-tracer-common/golang/gogo v0.0.0-20190605223551-bc2310a04743/go.mod h1:qklhhLq1aX+mtWk9cPHPzaBjWImj5ULL6C7HFJtXQMM=
+ github.com/lightstep/lightstep-tracer-go v0.18.1/go.mod h1:jlF1pusYV4pidLvZ+XD0UBX0ZE6WURAspgAczcDHrL4=
+-github.com/linxGnu/grocksdb v1.9.2 h1:O3mzvO0wuzQ9mtlHbDrShixyVjVbmuqTjFrzlf43wZ8=
+-github.com/linxGnu/grocksdb v1.9.2/go.mod h1:QYiYypR2d4v63Wj1adOOfzglnoII0gLj3PNh4fZkcFA=
++github.com/linxGnu/grocksdb v1.9.8 h1:vOIKv9/+HKiqJAElJIEYv3ZLcihRxyP7Suu/Mu8Dxjs=
++github.com/linxGnu/grocksdb v1.9.8/go.mod h1:C3CNe9UYc9hlEM2pC82AqiGS3LRW537u9LFV4wIZuHk=
+ github.com/lyft/protoc-gen-star v0.6.0/go.mod h1:TGAoBVkt8w7MPG72TrKIu85MIdXwDuzJYeZuUPFPNwA=
+ github.com/lyft/protoc-gen-star v0.6.1/go.mod h1:TGAoBVkt8w7MPG72TrKIu85MIdXwDuzJYeZuUPFPNwA=
+ github.com/lyft/protoc-gen-star/v2 v2.0.1/go.mod h1:RcCdONR2ScXaYnQC5tUzxzlpA3WVYF7/opLeUgcQs/o=
+@@ -1617,6 +1668,9 @@ github.com/mitchellh/gox v0.4.0/go.mod h1:Sd9lOJ0+aimLBi73mGofS1ycjY8lL3uZM3JPS4
+ github.com/mitchellh/iochan v1.0.0/go.mod h1:JwYml1nuB7xOzsp52dPpHFffvOCDupsG0QubkSMEySY=
+ github.com/mitchellh/mapstructure v0.0.0-20160808181253-ca63d7c062ee/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
+ github.com/mitchellh/mapstructure v1.1.2/go.mod h1:FVVH3fgwuzCH5S8UJGiWEs2h04kUh9fWfEaFds41c1Y=
++github.com/mmcloughlin/addchain v0.4.0 h1:SobOdjm2xLj1KkXN5/n0xTIWyZA2+s99UCY1iPfkHRY=
++github.com/mmcloughlin/addchain v0.4.0/go.mod h1:A86O+tHqZLMNO4w6ZZ4FlVQEadcoqkyU72HC5wJ4RlU=
++github.com/mmcloughlin/profile v0.1.1/go.mod h1:IhHD7q1ooxgwTgjxQYkACGA77oFTDdFVejUS1/tS/qU=
+ github.com/moby/docker-image-spec v1.3.1 h1:jMKff3w6PgbfSa69GfNg+zN/XLhfXJGnEx3Nl2EsFP0=
+ github.com/moby/docker-image-spec v1.3.1/go.mod h1:eKmb5VW8vQEh/BAr2yvVNvuiJuY6UIocYsFu/DxxRpo=
+ github.com/moby/sys/atomicwriter v0.1.0 h1:kw5D/EqkBwsBFi0ss9v1VG3wIkVhzGvLklJ+w3A14Sw=
+@@ -1728,6 +1782,16 @@ github.com/pierrec/lz4 v2.0.5+incompatible/go.mod h1:pdkljMzZIN41W+lC3N2tnIh5sFi
+ github.com/pierrec/lz4/v4 v4.1.15/go.mod h1:gZWDp/Ze/IJXGXf23ltt2EXimqmTUXEy0GFuRQyBid4=
+ github.com/pingcap/errors v0.11.4 h1:lFuQV/oaUMGcD2tqt+01ROSmJs75VG1ToEOkZIZ4nE4=
+ github.com/pingcap/errors v0.11.4/go.mod h1:Oi8TUi2kEtXXLMJk9l1cGmz20kV3TaQ0usTwv5KuLY8=
++github.com/pion/dtls/v2 v2.2.7 h1:cSUBsETxepsCSFSxC3mc/aDo14qQLMSL+O6IjG28yV8=
++github.com/pion/dtls/v2 v2.2.7/go.mod h1:8WiMkebSHFD0T+dIU+UeBaoV7kDhOW5oDCzZ7WZ/F9s=
++github.com/pion/logging v0.2.2 h1:M9+AIj/+pxNsDfAT64+MAVgJO0rsyLnoJKCqf//DoeY=
++github.com/pion/logging v0.2.2/go.mod h1:k0/tDVsRCX2Mb2ZEmTqNa7CWsQPc+YYCB7Q+5pahoms=
++github.com/pion/stun/v2 v2.0.0 h1:A5+wXKLAypxQri59+tmQKVs7+l6mMM+3d+eER9ifRU0=
++github.com/pion/stun/v2 v2.0.0/go.mod h1:22qRSh08fSEttYUmJZGlriq9+03jtVmXNODgLccj8GQ=
++github.com/pion/transport/v2 v2.2.1 h1:7qYnCBlpgSJNYMbLCKuSY9KbQdBFoETvPNETv0y4N7c=
++github.com/pion/transport/v2 v2.2.1/go.mod h1:cXXWavvCnFF6McHTft3DWS9iic2Mftcz1Aq29pGcU5g=
++github.com/pion/transport/v3 v3.0.1 h1:gDTlPJwROfSfz6QfSi0ZmeCSkFcnWWiiR9ES0ouANiM=
++github.com/pion/transport/v3 v3.0.1/go.mod h1:UY7kiITrlMv7/IKgd5eTUcaahZx5oUN3l9SzK5f5xE0=
+ github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c h1:+mdjkGKdHQG3305AYmdv1U2eRNDiU2ErMBj1gwrq8eQ=
+ github.com/pkg/browser v0.0.0-20240102092130-5ac0b6a4141c/go.mod h1:7rwL4CYBLnjLxUqIJNnCWiEdr3bn6IUYi15bNlnbCCU=
+ github.com/pkg/diff v0.0.0-20210226163009-20ebb0f2a09e/go.mod h1:pJLUxLENpZxwdsKMEsNbx1VGcRFpLqf3715MtcvvzbA=
+@@ -1850,6 +1914,8 @@ github.com/segmentio/asm v1.2.0 h1:9BQrFxC+YOHJlTlHGkTrFWf59nbL3XnCoFLTwDCI7ys=
+ github.com/segmentio/asm v1.2.0/go.mod h1:BqMnlJP91P8d+4ibuonYZw9mfnzI9HfxselHZr5aAcs=
+ github.com/segmentio/encoding v0.5.1 h1:LhmgXA5/alniiqfc4cYYrxF6DbUQ3m8MVz4/LQIU1mg=
+ github.com/segmentio/encoding v0.5.1/go.mod h1:HS1ZKa3kSN32ZHVZ7ZLPLXWvOVIiZtyJnO1gPH1sKt0=
++github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible h1:Bn1aCHHRnjv4Bl16T8rcaFjYSrGrIZvpiGO6P3Q4GpU=
++github.com/shirou/gopsutil v3.21.4-0.20210419000835-c7a38de76ee5+incompatible/go.mod h1:5b4v6he4MtMOwMlS0TUMTu2PcXUg8+E1lC7eC3UO/RA=
+ github.com/shurcooL/go v0.0.0-20180423040247-9e1955d9fb6e/go.mod h1:TDJrrUr11Vxrven61rcy3hJMUqaf/CLWYhHNPmT14Lk=
+ github.com/shurcooL/go-goon v0.0.0-20170922171312-37c2f522c041/go.mod h1:N5mDOmsrJOB+vfqUK+7DmDyjhSLIIBnXo9lvZJj3MWQ=
+ github.com/shurcooL/sanitized_anchor_name v1.0.0/go.mod h1:1NzhyTcUVG4SuEtjjoZeVRXNmyL/1OwPU0+IJeTBvfc=
+@@ -1924,6 +1990,8 @@ github.com/stretchr/testify v1.10.0 h1:Xv5erBjTwe/5IxqUQTdXv5kgmIvbHo3QQyRwhJsOf
+ github.com/stretchr/testify v1.10.0/go.mod h1:r2ic/lqez/lEtzL7wO/rwa5dbSLXVDPFyf8C91i36aY=
+ github.com/subosito/gotenv v1.6.0 h1:9NlTDc1FTs4qu0DDq7AEtTPNw6SVm7uBMsUCUjABIf8=
+ github.com/subosito/gotenv v1.6.0/go.mod h1:Dk4QP5c2W3ibzajGcXpNraDfq2IrhjMIvMSWPKKo0FU=
++github.com/supranational/blst v0.3.14 h1:xNMoHRJOTwMn63ip6qoWJ2Ymgvj7E2b9jY2FAwY+qRo=
++github.com/supranational/blst v0.3.14/go.mod h1:jZJtfjgudtNl4en1tzwPIV3KjUnQUvG3/j+w+fVonLw=
+ github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7 h1:epCh84lMvA70Z7CTTCmYQn2CKbY8j86K7/FAIr141uY=
+ github.com/syndtr/goleveldb v1.0.1-0.20210819022825-2ae1ddf74ef7/go.mod h1:q4W45IWZaF22tdD+VEXcAWRA037jwmWEB5VWYORlTpc=
+ github.com/tdakkota/asciicheck v0.4.1 h1:bm0tbcmi0jezRA2b5kg4ozmMuGAFotKI3RZfrhfovg8=
+@@ -1940,10 +2008,23 @@ github.com/tetratelabs/wazero v1.9.0 h1:IcZ56OuxrtaEz8UYNRHBrUa9bYeX9oVY93KspZZB
+ github.com/tetratelabs/wazero v1.9.0/go.mod h1:TSbcXCfFP0L2FGkRPxHphadXPjo1T6W+CseNNY7EkjM=
+ github.com/tidwall/btree v1.7.0 h1:L1fkJH/AuEh5zBnnBbmTwQ5Lt+bRJ5A8EWecslvo9iI=
+ github.com/tidwall/btree v1.7.0/go.mod h1:twD9XRA5jj9VUQGELzDO4HPQTNJsoWWfYEL+EUQ2cKY=
++github.com/tidwall/gjson v1.14.2/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
++github.com/tidwall/gjson v1.18.0 h1:FIDeeyB800efLX89e5a8Y0BNH+LOngJyGrIWxG2FKQY=
++github.com/tidwall/gjson v1.18.0/go.mod h1:/wbyibRr2FHMks5tjHJ5F8dMZh3AcwJEMf5vlfC0lxk=
++github.com/tidwall/match v1.1.1 h1:+Ho715JplO36QYgwN9PGYNhgZvoUSc9X2c80KVTi+GA=
++github.com/tidwall/match v1.1.1/go.mod h1:eRSPERbgtNPcGhD8UCthc6PmLEQXEWd3PRB5JTxsfmM=
++github.com/tidwall/pretty v1.2.0 h1:RWIZEg2iJ8/g6fDDYzMpobmaoGh5OLl4AXtGUGPcqCs=
++github.com/tidwall/pretty v1.2.0/go.mod h1:ITEVvHYasfjBbM0u2Pg8T2nJnzm8xPwvNhhsoaGGjNU=
++github.com/tidwall/sjson v1.2.5 h1:kLy8mja+1c9jlljvWTlSazM7cKDRfJuR/bOJhcY5NcY=
++github.com/tidwall/sjson v1.2.5/go.mod h1:Fvgq9kS/6ociJEDnK0Fk1cpYF4FIW6ZF7LAe+6jwd28=
+ github.com/timakin/bodyclose v0.0.0-20241017074812-ed6a65f985e3 h1:y4mJRFlM6fUyPhoXuFg/Yu02fg/nIPFMOY8tOqppoFg=
+ github.com/timakin/bodyclose v0.0.0-20241017074812-ed6a65f985e3/go.mod h1:mkjARE7Yr8qU23YcGMSALbIxTQ9r9QBVahQOBRfU460=
+ github.com/timonwong/loggercheck v0.10.1 h1:uVZYClxQFpw55eh+PIoqM7uAOHMrhVcDoWDery9R8Lg=
+ github.com/timonwong/loggercheck v0.10.1/go.mod h1:HEAWU8djynujaAVX7QI65Myb8qgfcZ1uKbdpg3ZzKl8=
++github.com/tklauser/go-sysconf v0.3.12 h1:0QaGUFOdQaIVdPgfITYzaTegZvdCjmYO52cSFAEVmqU=
++github.com/tklauser/go-sysconf v0.3.12/go.mod h1:Ho14jnntGE1fpdOqQEEaiKRpvIavV0hSfmBq8nJbHYI=
++github.com/tklauser/numcpus v0.6.1 h1:ng9scYS7az0Bk4OZLvrNXNSAO2Pxr1XXRAPyjhIx+Fk=
++github.com/tklauser/numcpus v0.6.1/go.mod h1:1XfjsgE2zo8GVw7POkMbHENHzVg3GzmoZ9fESEdAacY=
+ github.com/tmc/grpc-websocket-proxy v0.0.0-20170815181823-89b8d40f7ca8/go.mod h1:ncp9v5uamzpCO7NfCPTXjqaC+bZgJeR0sMTm6dMHP7U=
+ github.com/tomarrell/wrapcheck/v2 v2.10.0 h1:SzRCryzy4IrAH7bVGG4cK40tNUhmVmMDuJujy4XwYDg=
+ github.com/tomarrell/wrapcheck/v2 v2.10.0/go.mod h1:g9vNIyhb5/9TQgumxQyOEqDHsmGYcGsVMOx/xGkqdMo=
+@@ -2093,7 +2174,9 @@ golang.org/x/crypto v0.0.0-20210421170649-83a5a9bb288b/go.mod h1:T9bdIzuCu7OtxOm
+ golang.org/x/crypto v0.0.0-20210921155107-089bfa567519/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
+ golang.org/x/crypto v0.0.0-20211108221036-ceb1ce70b4fa/go.mod h1:GvvjBRRGRdwPK5ydBHafDWAxML/pGHZbMvKqRZ5+Abc=
+ golang.org/x/crypto v0.7.0/go.mod h1:pYwdfH91IfpZVANVyUOhSIPZaFoJGxTFbZhFTx+dXZU=
++golang.org/x/crypto v0.8.0/go.mod h1:mRqEX+O9/h5TFCrQhkgjo2yKi0yYA+9ecGkdQoHrywE=
+ golang.org/x/crypto v0.9.0/go.mod h1:yrmDGqONDYtNj3tH8X9dzUun2m2lzPa9ngI6/RUPGR0=
++golang.org/x/crypto v0.12.0/go.mod h1:NF0Gs7EO5K4qLn+Ylc+fih8BSTeIjAP05siRnAh98yw=
+ golang.org/x/crypto v0.13.0/go.mod h1:y6Z2r+Rw4iayiXXAIxJIDAJ1zMW4yaTpebo8fPOliYc=
+ golang.org/x/crypto v0.14.0/go.mod h1:MVFd36DqK4CsrnJYDkBA3VC4m2GkXAM0PvzMCn4JQf4=
+ golang.org/x/crypto v0.19.0/go.mod h1:Iy9bg/ha4yyC70EfRS8jz+B6ybOBKMaSxLj6P6oBDfU=
+@@ -2243,6 +2326,7 @@ golang.org/x/net v0.7.0/go.mod h1:2Tu9+aMcznHK/AK1HMvgo6xiTLG5rD5rZLDS+rp2Bjs=
+ golang.org/x/net v0.8.0/go.mod h1:QVkue5JL9kW//ek3r6jTKnTFis1tRmNAW2P1shuFdJc=
+ golang.org/x/net v0.9.0/go.mod h1:d48xBJpPfHeWQsugry2m+kC02ZBRGRgulfHnEXEuWns=
+ golang.org/x/net v0.10.0/go.mod h1:0qNGK6F8kojg2nk9dLZ2mShWaEBan6FAoqfSigmmuDg=
++golang.org/x/net v0.14.0/go.mod h1:PpSgVXXLK0OxS0F31C1/tv6XNguvCrnXIDrFMspZIUI=
+ golang.org/x/net v0.15.0/go.mod h1:idbUs1IY1+zTqbi8yxTbhexhEEk5ur9LInksu6HrEpk=
+ golang.org/x/net v0.16.0/go.mod h1:NxSsAGuq816PNPmqtQdLE42eU2Fs7NoRIZrHJAlaCOE=
+ golang.org/x/net v0.21.0/go.mod h1:bIjVDfnllIU7BJ2DNgfnXvpSvtn8VRwhlsaeUTyUS44=
+@@ -2323,6 +2407,7 @@ golang.org/x/sys v0.0.0-20190624142023-c5567b49c5d0/go.mod h1:h1NjWce9XRLGQEsW7w
+ golang.org/x/sys v0.0.0-20190726091711-fc99dfbffb4e/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20190826190057-c7b8b68b1456/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20190904154756-749cb33beabd/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
++golang.org/x/sys v0.0.0-20190916202348-b4ddaad3f8a3/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20191001151750-bb3f8db39f24/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20191005200804-aed5e4c7ecf9/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+ golang.org/x/sys v0.0.0-20191026070338-33540a1f6037/go.mod h1:h1NjWce9XRLGQEsW7wpKNCjG9DtNlClVuFLEZdDNbEs=
+@@ -2414,8 +2499,10 @@ golang.org/x/sys v0.5.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+ golang.org/x/sys v0.6.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+ golang.org/x/sys v0.7.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+ golang.org/x/sys v0.8.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
++golang.org/x/sys v0.11.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+ golang.org/x/sys v0.12.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
+ golang.org/x/sys v0.13.0/go.mod h1:oPkhp1MJrh7nUepCBck5+mAzfO9JrbApNNgaTdGDITg=
++golang.org/x/sys v0.14.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+ golang.org/x/sys v0.17.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+ golang.org/x/sys v0.20.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+ golang.org/x/sys v0.21.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
+@@ -2433,6 +2520,7 @@ golang.org/x/term v0.5.0/go.mod h1:jMB1sMXY+tzblOD4FWmEbocvup2/aLOaQEp7JmGp78k=
+ golang.org/x/term v0.6.0/go.mod h1:m6U89DPEgQRMq3DNkDClhWw02AUbt2daBVO4cn4Hv9U=
+ golang.org/x/term v0.7.0/go.mod h1:P32HKFT3hSsZrRxla30E9HqToFYAQPCMs/zFMBUFqPY=
+ golang.org/x/term v0.8.0/go.mod h1:xPskH00ivmX89bAKVGSKKtLOWNx2+17Eiy94tnKShWo=
++golang.org/x/term v0.11.0/go.mod h1:zC9APTIj3jG3FdV/Ons+XE1riIZXG4aZ4GTHiPZJPIU=
+ golang.org/x/term v0.12.0/go.mod h1:owVbMEjm3cBLCHdkQu9b1opXd4ETQWc3BhuQGKgXgvU=
+ golang.org/x/term v0.13.0/go.mod h1:LTmsnFJwVN6bCy1rVCoS+qHT1HhALEFxKncY3WNNh4U=
+ golang.org/x/term v0.17.0/go.mod h1:lLRBjIVuehSbZlaOtGMbcMncT+aqLLLmKrsjNrUguwk=
+@@ -2456,6 +2544,7 @@ golang.org/x/text v0.6.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=
+ golang.org/x/text v0.7.0/go.mod h1:mrYo+phRRbMaCq/xk9113O4dZlRixOauAjOtrjsXDZ8=
+ golang.org/x/text v0.8.0/go.mod h1:e1OnstbJyHTd6l/uOt8jFFHp6TRDWZR/bV3emEE/zU8=
+ golang.org/x/text v0.9.0/go.mod h1:e1OnstbJyHTd6l/uOt8jFFHp6TRDWZR/bV3emEE/zU8=
++golang.org/x/text v0.12.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
+ golang.org/x/text v0.13.0/go.mod h1:TvPlkZtksWOMsz7fbANvkp4WM8x/WCo/om8BMLbz+aE=
+ golang.org/x/text v0.14.0/go.mod h1:18ZOQIKpY8NJVqYksKHtTdi31H5itFRjB5/qKTNYzSU=
+ golang.org/x/text v0.15.0/go.mod h1:18ZOQIKpY8NJVqYksKHtTdi31H5itFRjB5/qKTNYzSU=
+@@ -2946,6 +3035,8 @@ rsc.io/qr v0.2.0 h1:6vBLea5/NRMVTz8V66gipeLycZMl/+UlFmk8DvqQ6WY=
+ rsc.io/qr v0.2.0/go.mod h1:IF+uZjkb9fqyeF/4tlBoynqmQxUoPfWEKh921coOuXs=
+ rsc.io/quote/v3 v3.1.0/go.mod h1:yEA65RcK8LyAZtP9Kv3t0HmxON59tX3rD+tICJqUlj0=
+ rsc.io/sampler v1.3.0/go.mod h1:T1hPZKmBbMNahiBKFy5HrXp6adAjACjK9JXDnKaTXpA=
++rsc.io/tmplfunc v0.0.3 h1:53XFQh69AfOa8Tw0Jm7t+GV7KZhOi6jzsCzTtKbMvzU=
++rsc.io/tmplfunc v0.0.3/go.mod h1:AG3sTPzElb1Io3Yg4voV9AGZJuleGAwaVRxL9M49PhA=
+ sigs.k8s.io/yaml v1.1.0/go.mod h1:UJmg0vDUVViEyp3mgSv9WPwZCDxu4rQW1olrI1uml+o=
+ sigs.k8s.io/yaml v1.4.0 h1:Mk1wCc2gy/F0THH0TAp1QYyJNzRm2KCLy3o5ASXVI5E=
+ sigs.k8s.io/yaml v1.4.0/go.mod h1:Ejl7/uTz7PSA4eKMyQCUTnhZYNmLIl+5c2lQPGR2BPY=
