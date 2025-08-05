@@ -1,0 +1,35 @@
+{
+  "appName": "Notify",
+  "appID": "notify",
+  "appDescription": "Real-time Blockchain Event Notification App for Ignite. Subscribe to on-chain events and receive notifications via Slack, Telegram, etc.",
+  "ignite": ">=0.28.2",
+  "dependencies": {},
+  "cosmosSDK": ">=0.50.13",
+  "authors": [
+    {
+      "name": "Gerald Quenum",
+      "github": "QuenumGerald"
+    }
+  ],
+  "repositoryUrl": "https://github.com/QuenumGerald/notify",
+  "documentationUrl": "https://github.com/QuenumGerald/notify/blob/main/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/QuenumGerald/notify/blob/main/LICENSE"
+  },
+  "keywords": ["notify", "notifications", "events", "blockchain", "ignite app"],
+  "supportedPlatforms": ["mac", "linux"],
+  "icon": "https://github.com/QuenumGerald/notify/blob/main/logo_notify.png",
+  "cover": "https://github.com/QuenumGerald/notify/blob/main/banniere_notify.png",
+  "socialMedia": {
+    "x": "",
+    "telegram": "",
+    "discord": "",
+    "reddit": "",
+    "website": ""
+  },
+  "donations": {
+    "cryptoAddresses": {},
+    "fiatDonationLinks": []
+  }
+}
