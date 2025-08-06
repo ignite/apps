@@ -22,11 +22,11 @@
   "icon": "https://github.com/QuenumGerald/notify/blob/main/logo_notify.png",
   "cover": "https://github.com/QuenumGerald/notify/blob/main/banniere_notify.png",
   "socialMedia": {
-    "x": "",
-    "telegram": "",
-    "discord": "",
+    "x": "@MachineNova",
+    "telegram": "@NanoRick",
+    "discord": "novathemachine.",
     "reddit": "",
-    "website": ""
+    "website": "https://geraldquenum.netlify.app/"
   },
   "donations": {
     "cryptoAddresses": {},
