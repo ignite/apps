@@ -5,7 +5,7 @@ const (
 
 	RollkitV0XStartHandler = "rollserv.StartHandler"
 	EvolveV1XStartHandler  = "abciserver.StartHandler"
-	evolveV1MigrateCmd     = "abciserver.MigrateToRollkitCmd()"
+	evolveV1MigrateCmd     = "abciserver.MigrateToEvolveCmd()"
 )
 
 const (
