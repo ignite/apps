@@ -1,7 +1,7 @@
 {
   "appName": "Evolve",
   "appID": "evolve",
-  "appDescription": "Scaffold a ev-abci network with ease",
+  "appDescription": "Scaffold an Evolve network with ease",
   "ignite": ">=28.4.0",
   "dependencies": {},
   "cosmosSDK": ">=0.50.6",
@@ -29,10 +29,7 @@
     "cosmos-sdk",
     "ignite app"
   ],
-  "supportedPlatforms": [
-    "mac",
-    "linux"
-  ],
+  "supportedPlatforms": ["mac", "linux"],
   "icon": "",
   "cover": ""
 }
