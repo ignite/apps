@@ -67,8 +67,8 @@ func TestEvolve(t *testing.T) {
 		)),
 	))
 
-	if !strings.Contains(buf.String(), "--rollkit.da") {
-		t.Errorf("evolved doesn't contain --rollkit flags: %s", buf.String())
+	if !strings.Contains(buf.String(), "--evnode.da") {
+		t.Errorf("evolved doesn't contain --evnode flags: %s", buf.String())
 	}
 
 	buf.Reset()
