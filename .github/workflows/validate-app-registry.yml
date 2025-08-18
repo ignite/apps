@@ -2,7 +2,7 @@ name: Validate app registry files
 
 on:
   pull_request:
-    types: [ opened, synchronize ]
+    types: [opened, synchronize]
 
 jobs:
   check-app-registry:
@@ -21,8 +21,8 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: 'stable'
-          cache: 'true'
+          go-version: "1.24"
+          cache: "true"
 
       - name: Get list of added or modified app files
         id: json_files
