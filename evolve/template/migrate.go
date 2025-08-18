@@ -23,18 +23,18 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 			return err
 		}
 
-		// Import rollkitmngr module
+		// Import migrationmngr module
 		content, err := xast.AppendImports(f.String(),
-			xast.WithNamedImport("rollkitmngrmodule", "github.com/evstack/ev-abci/modules/rollkitmngr/module"),
-			xast.WithNamedImport("rollkitmngrtypes", "github.com/evstack/ev-abci/modules/rollkitmngr/types"),
-			xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/rollkitmngr"),
+			xast.WithNamedImport("migrationmngrmodule", "github.com/evstack/ev-abci/modules/migrationmngr/module"),
+			xast.WithNamedImport("migrationmngrtypes", "github.com/evstack/ev-abci/modules/migrationmngr/types"),
+			xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/migrationmngr"),
 		)
 		if err != nil {
 			return err
 		}
 
-		// end block for rollkitmngr
-		template := `rollkitmngrtypes.ModuleName,
+		// end block for migrationmngr
+		template := `migrationmngrtypes.ModuleName,
 %[1]v`
 		replacement := fmt.Sprintf(template, module.PlaceholderSgAppEndBlockers)
 		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
