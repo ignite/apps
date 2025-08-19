@@ -13,7 +13,7 @@ const (
 	GoExecVersion = "v0.3.1-0.20250818181501-f014411689fd"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.2.0.20250818133040-d096a24e7052"
+	EvNodeVersion = "v1.0.0-beta.2.0.20250819153439-29b8ddf5a753"
 
 	EvNodeDaCmd = "github.com/evstack/ev-node/da/cmd/local-da"
 )
