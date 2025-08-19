@@ -8,5 +8,5 @@ import (
 
 // EditGenesisHandler allows to edit the genesis file to add the sequencer module.
 func EditGenesisHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	return initRollkit(ctx, cmd, false)
+	return initEVABCI(ctx, cmd, false)
 }

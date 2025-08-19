@@ -15,7 +15,7 @@ use (
 	./fee-abstraction
 	./hermes
 	./network
-	./rollkit
+	./evolve
 	./spaceship
 	./wasm
 )
