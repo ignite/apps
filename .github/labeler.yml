@@ -39,6 +39,8 @@
 
 "configs":
   - .gitignore
+  - .gitattributes
+  - .markdownlint.yaml
   - .golangci.yml
   - app.ignite.yml
   - CODE_OF_CONDUCT.md
