@@ -1,6 +1,4 @@
 "ci":
-  - "!.github/labeler.yml"
-  - "!.github/labels.json"
   - .github/**/*
 
 "app:appregistry":
