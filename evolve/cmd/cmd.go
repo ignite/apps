@@ -8,14 +8,14 @@ import (
 func GetCommands() []*plugin.Command {
 	return []*plugin.Command{
 		{
-			Use:     "rollkit [command]",
-			Aliases: []string{"r"},
-			Short:   "Ignite rollkit integration",
+			Use:     "evolve [command]",
+			Aliases: []string{"r", "e", "rollkit"},
+			Short:   "Ignite evolve integration",
 			Commands: []*plugin.Command{
 				{
 					Use:   "add",
-					Short: "Add rollkit support",
-					Long:  "Add rollkit support to your Cosmos SDK chain",
+					Short: "Add evolve support",
+					Long:  "Add evolve support to your Cosmos SDK chain",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,
@@ -32,8 +32,8 @@ func GetCommands() []*plugin.Command {
 				},
 				{
 					Use:   "init",
-					Short: "Init rollkit support",
-					Long:  "Initialize the chain and add rollkit sequencer",
+					Short: "Init ev-abci support",
+					Long:  "Initialize the chain and a ev-node sequencer via ev-abci.",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,
@@ -45,8 +45,8 @@ func GetCommands() []*plugin.Command {
 				},
 				{
 					Use:   "edit-genesis",
-					Short: "Edit the genesis file to add the rollkit sequencer",
-					Long:  "Edit the genesis file to add the rollkit sequencer module. This is an alternative to the `ignite rollkit init` command, where a chain is already initialized (but not yet started).",
+					Short: "Edit the genesis file to add the evolve sequencer",
+					Long:  "Edit the genesis file to add the evolve sequencer module. This is an alternative to the `ignite evolve init` command, where a chain is already initialized (but not yet started).",
 					Flags: []*plugin.Flag{
 						{
 							Name:      flagPath,
