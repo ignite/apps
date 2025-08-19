@@ -37,6 +37,9 @@
 "app:wasm":
   - wasm/**/*
 
+"app:evm":
+  - evm/**/*
+
 "configs":
   - .gitignore
   - .gitattributes
