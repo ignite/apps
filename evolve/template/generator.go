@@ -30,6 +30,7 @@ func NewEvolveGenerator(chain *chain.Chain, withCometMigration bool) (*genny.Gen
 
 	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 	g.RunFn(commandsGenesisModify(appPath, binaryName))
+	g.RunFn(commandsRollbackModify(appPath, binaryName))
 	if withCometMigration {
 		g.RunFn(migrateFromCometModify(appPath))
 	}

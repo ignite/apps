@@ -128,6 +128,35 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
+// commandsRollbackModify modifies the application rollback command to use evolve.
+func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
+	return func(r *genny.Runner) error {
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		f, err := r.Disk.Find(cmdPath)
+		if err != nil {
+			return err
+		}
+
+		// use ast to modify the function that initializes genesisCmd
+		content, err := xast.ModifyFunction(f.String(), "initRootCmd",
+			xast.AppendFuncCode(`
+				// override rollback command
+				evNodeRollbackCmd := abciserver.NewRollbackCmd(newApp, app.DefaultNodeHome)
+				if currentRollbackCmd, _, err := rootCmd.Find([]string{evNodeRollbackCmd.Name()}); err == nil{
+					rootCmd.RemoveCommand(currentRollbackCmd)
+				}
+				rootCmd.AddCommand(evNodeRollbackCmd)
+		    `,
+			),
+		)
+		if err != nil {
+			return err
+		}
+
+		return r.File(genny.NewFileS(cmdPath, content))
+	}
+}
+
 // updateDependencies makes sure the correct dependencies are added to the go.mod files.
 // ev-abci expects evolve v1 to be used.
 func updateDependencies(appPath string) error {
@@ -143,6 +172,9 @@ func updateDependencies(appPath string) error {
 	if err := gomod.AddTool(EvNodeDaCmd); err != nil {
 		return errors.Errorf("failed to add local-da tool: %w", err)
 	}
+
+	// add required replaces
+	gomod.AddReplace(GoDataStorePackage, "", GoDataStorePackageFork, GoDataStoreVersionFork)
 
 	// save go.mod
 	data, err := gomod.Format()
