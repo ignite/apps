@@ -13,7 +13,7 @@ const (
 	GoExecVersion = "v0.3.1-0.20250818181501-f014411689fd"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.2.0.20250819153439-29b8ddf5a753"
+	EvNodeVersion = "v1.0.0-beta.2.0.20250905094535-f79548be1384"
 
 	GoDataStorePackageFork = "github.com/celestiaorg/go-datastore"
 	GoDataStoreVersionFork = "v0.0.0-20250801131506-48a63ae531e4"
