@@ -5,6 +5,7 @@
 ## [`v0.4.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.0)
 
 - [#220](https://github.com/ignite/apps/pull/220) Rename app, flags and commands from `rollkit` to `evolve` following the rebranding of Rollkit to Evolve.
+- [#223](https://github.com/ignite/apps/pull/223) Wire rollback command.
 
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/rollkit/v0.3.0)
 
