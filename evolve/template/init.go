@@ -165,7 +165,7 @@ func updateDependencies(appPath string) error {
 		return errors.Errorf("failed to parse go.mod: %w", err)
 	}
 
-	gomod.AddNewRequire(GoExecPackage, GoExecVersion, false)
+	gomod.AddNewRequire(EvABCIPackage, EvABCIVersion, false)
 	gomod.AddNewRequire(EvNodePackage, EvNodeVersion, false)
 
 	// add local-da as go tool dependency (useful for local development)

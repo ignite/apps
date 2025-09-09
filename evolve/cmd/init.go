@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"math"
 	"os"
 	"path/filepath"
@@ -13,6 +14,9 @@ import (
 	cmttypes "github.com/cometbft/cometbft/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	genutiltypes "github.com/cosmos/cosmos-sdk/x/genutil/types"
+	"github.com/spf13/viper"
+
+	evconfig "github.com/evstack/ev-node/pkg/config"
 
 	configchain "github.com/ignite/cli/v29/ignite/config/chain"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
@@ -107,6 +111,29 @@ func initEVABCI(
 	}
 
 	if err := genesis.SaveAs(genesisPath); err != nil {
+		return err
+	}
+
+	// modify evolve config (add da namespace)
+	evolveConfigPath := filepath.Join(home, evconfig.AppConfigDir, evconfig.ConfigName)
+	evolveViper := viper.New()
+	evolveViper.SetConfigFile(evolveConfigPath)
+	evolveViper.ReadInConfig()
+
+	evolveConfig, err := evconfig.LoadFromViper(evolveViper)
+	if err != nil {
+		return err
+	}
+	evolveConfig.RootDir = home
+
+	chainID, err := rc.ID()
+	if err != nil {
+		return err
+	}
+	evolveConfig.DA.Namespace = chainID
+	evolveConfig.DA.DataNamespace = fmt.Sprintf("%s-data", chainID)
+
+	if err := evolveConfig.SaveAsYaml(); err != nil {
 		return err
 	}
 
