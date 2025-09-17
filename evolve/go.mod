@@ -10,7 +10,7 @@ require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.22
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/ignite/cli/v29 v29.3.1
+	github.com/ignite/cli/v29 v29.4.0
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 )
