@@ -10,10 +10,10 @@ const (
 
 const (
 	EvABCIPackage = "github.com/evstack/ev-abci"
-	EvABCIVersion = "v0.3.1-0.20250908162746-8c3ef4776667"
+	EvABCIVersion = "v0.4.1"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.2.0.20250908090838-0584153217ed"
+	EvNodeVersion = "v1.0.0-beta.4"
 
 	GoDataStorePackageFork = "github.com/celestiaorg/go-datastore"
 	GoDataStoreVersionFork = "v0.0.0-20250801131506-48a63ae531e4"
