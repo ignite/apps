@@ -9,12 +9,15 @@ const (
 )
 
 const (
-	GoExecPackage = "github.com/evstack/ev-abci"
-	GoExecVersion = "v0.3.1-0.20250818181501-f014411689fd" // main until tag
+	EvABCIPackage = "github.com/evstack/ev-abci"
+	EvABCIVersion = "v0.4.1"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.2.0.20250818133040-d096a24e7052" // main until tag
+	EvNodeVersion = "v1.0.0-beta.4"
 
-	EvNodeDaCmd     = "github.com/evstack/ev-node/da/cmd/local-da"
-	EvNodeDaVersion = "v1.0.0-beta.1"
+	GoDataStorePackageFork = "github.com/celestiaorg/go-datastore"
+	GoDataStoreVersionFork = "v0.0.0-20250801131506-48a63ae531e4"
+	GoDataStorePackage     = "github.com/ipfs/go-datastore"
+
+	EvNodeDaCmd = "github.com/evstack/ev-node/da/cmd/local-da"
 )
