@@ -174,7 +174,7 @@ func updateDependencies(appPath string) error {
 	}
 
 	// add required replaces
-	gomod.AddReplace(GoDataStorePackage, "", GoDataStorePackageFork, GoDataStoreVersionFork)
+	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
 
 	// save go.mod
 	data, err := gomod.Format()
