@@ -4,7 +4,7 @@
 
 ## [`v0.4.1`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.1)
 
-- []() Update dependencies.
+- [#229](https://github.com/ignite/apps/pull/229) Update dependencies.
 
 ## [`v0.4.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.0)
 
