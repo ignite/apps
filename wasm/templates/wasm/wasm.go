@@ -58,6 +58,9 @@ const funcRegisterIBCWasm = `
 //go:embed files/* files/**/*
 var fsAppWasm embed.FS
 
+//go:embed files-legacy/* files-legacy/**/*
+var fsAppLegacyWasm embed.FS
+
 // Options wasm scaffold options.
 type Options struct {
 	BinaryName         string
@@ -73,6 +76,13 @@ func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Gene
 	appWasm, err := fs.Sub(fsAppWasm, "files")
 	if err != nil {
 		return nil, errors.Errorf("fail to generate sub: %w", err)
+	}
+
+	if opts.Legacy {
+		appWasm, err = fs.Sub(fsAppLegacyWasm, "files-legacy")
+		if err != nil {
+			return nil, errors.Errorf("fail to generate sub: %w", err)
+		}
 	}
 
 	g := genny.New()
@@ -182,8 +192,8 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 
 		modules := []xast.StructOpts{
 			xast.AppendStructValue(
-				"FeeAbsKeeper",
-				"feeabskeeper.Keeper",
+				"WasmKeeper",
+				"wasmkeeper.Keeper",
 			),
 		}
 
