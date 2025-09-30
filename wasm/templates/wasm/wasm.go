@@ -147,10 +147,11 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
 
 		// Mac Perms
-		template = `{Account: wasmtypes.ModuleName, Permissions: []string{authtypes.Burner}},
-%[1]v`
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppMaccPerms)
-		content = replacer.Replace(content, module.PlaceholderSgAppMaccPerms, replacement)
+		replacement = `{Account: wasmtypes.ModuleName, Permissions: []string{authtypes.Burner}}`
+		content, err = xast.ModifyGlobalArrayVar(content, "moduleAccPerms", xast.AppendGlobalArrayValue(replacement))
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
@@ -179,27 +180,37 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 			return err
 		}
 
-		// Keeper declaration
-		templateLegacy := `
-// CosmWasm
-WasmKeeper       wasmkeeper.Keeper
-ScopedWasmKeeper capabilitykeeper.ScopedKeeper
+		modules := []xast.StructOpts{
+			xast.AppendStructValue(
+				"FeeAbsKeeper",
+				"feeabskeeper.Keeper",
+			),
+		}
 
-%[1]v`
-		template := `
-// CosmWasm
-WasmKeeper wasmkeeper.Keeper
-
-%[1]v`
-		replacement := fmt.Sprintf(templateLegacy, module.PlaceholderSgAppKeeperDeclaration)
 		if !opts.Legacy {
 			// Adds feegrantkeeper.Keeper if not already present
 			if !strings.Contains(content, "feegrantkeeper.Keeper") {
-				template = fmt.Sprintf("FeeGrantKeeper feegrantkeeper.Keeper\n\n%[1]v", template)
+				modules = append(modules, xast.AppendStructValue(
+					"FeeGrantKeeper",
+					"feegrantkeeper.Keeper",
+				))
 			}
-			replacement = fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
+		} else {
+			modules = append(modules, xast.AppendStructValue(
+				"ScopedWasmKeeper",
+				"capabilitykeeper.ScopedKeeper",
+			))
 		}
-		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
+
+		// Keeper declaration
+		content, err = xast.ModifyStruct(
+			content,
+			"App",
+			modules...,
+		)
+		if err != nil {
+			return err
+		}
 
 		funcModifiers := []xast.FunctionOptions{
 			xast.AppendFuncCode(`if err := app.WasmKeeper.InitializePinnedCodes(app.NewUncachedContext(true, tmproto.Header{})); err != nil {
