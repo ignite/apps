@@ -2,8 +2,11 @@
 
 ## Unreleased
 
-* [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/fee-abstraction/v0.2.0)
+
+- [#230](https://github.com/ignite/apps/pull/230) Make use of latest template capabilities.
+- [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
 
 ## [`v0.1.0`](https://github.com/ignite/apps/releases/tag/fee-abstraction/v0.1.0)
 
-* First release of the Fee Abstraction app compatible with Ignite >= v28.5.2
+- First release of the Fee Abstraction app compatible with Ignite >= v28.5.2
