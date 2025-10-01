@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [`v0.2.0`](https://github.com/ignite/apps/releases/tag/fee-abstraction/v0.2.0)
+## [`v0.1.1`](https://github.com/ignite/apps/releases/tag/fee-abstraction/v0.1.1)
 
 - [#230](https://github.com/ignite/apps/pull/230) Make use of latest template capabilities.
 - [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
