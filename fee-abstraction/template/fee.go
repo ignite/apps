@@ -84,14 +84,21 @@ func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		}
 
 		// Keeper declaration
-		template := `
-// Fee Abstraction
-FeeAbsKeeper		feeabskeeper.Keeper
-ScopedFeeAbsKeeper	capabilitykeeper.ScopedKeeper
-
-%[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppKeeperDeclaration)
-		content = replacer.Replace(content, module.PlaceholderSgAppKeeperDeclaration, replacement)
+		content, err = xast.ModifyStruct(
+			content,
+			"App",
+			xast.AppendStructValue(
+				"FeeAbsKeeper",
+				"feeabskeeper.Keeper",
+			),
+			xast.AppendStructValue(
+				"ScopedFeeAbsKeeper",
+				"capabilitykeeper.ScopedKeeper",
+			),
+		)
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(appPath, content))
 	}
@@ -125,10 +132,11 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
 
 		// Mac Perms
-		template = `{Account: feeabstypes.ModuleName},
-%[1]v`
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppMaccPerms)
-		content = replacer.Replace(content, module.PlaceholderSgAppMaccPerms, replacement)
+		replacement = `{Account: feeabstypes.ModuleName}`
+		content, err = xast.ModifyGlobalArrayVar(content, "moduleAccPerms", xast.AppendGlobalArrayValue(replacement))
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
