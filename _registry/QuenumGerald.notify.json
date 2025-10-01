@@ -19,8 +19,8 @@
   },
   "keywords": ["notify", "notifications", "events", "blockchain", "ignite app"],
   "supportedPlatforms": ["mac", "linux"],
-  "icon": "https://github.com/QuenumGerald/notify/blob/main/logo_notify.png",
-  "cover": "https://github.com/QuenumGerald/notify/blob/main/banniere_notify.png",
+  "logo": "_registry/img/QuenumGerald.notify.logo.png",
+  "cover": "_registry/img/QuenumGerald.notify.banner.png",
   "socialMedia": {
     "x": "@MachineNova",
     "telegram": "@NanoRick",
