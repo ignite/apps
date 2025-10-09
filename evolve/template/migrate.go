@@ -42,6 +42,12 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 		moduleConfigReplacement := fmt.Sprintf(moduleConfigTemplate, module.PlaceholderSgAppModuleConfig)
 		content = replacer.Replace(content, module.PlaceholderSgAppModuleConfig, moduleConfigReplacement)
 
+		// preblocker for migrationmngr
+		preBlockerTemplate := `migrationmngrtypes.ModuleName,
+						%[1]v`
+		preBlockerReplacement := fmt.Sprintf(preBlockerTemplate, "// this line is used by starport scaffolding # stargate/app/preBlockers")
+		content = replacer.Replace(content, "// this line is used by starport scaffolding # stargate/app/preBlockers", preBlockerReplacement)
+
 		// end block for migrationmngr
 		endBlockerTemplate := `migrationmngrtypes.ModuleName,
 %[1]v`
