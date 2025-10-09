@@ -6,6 +6,7 @@ import (
 
 	"github.com/ignite/apps/evm/template"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
@@ -39,6 +40,10 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	c, err := chain.New(absPath, chain.CollectEvents(session.EventBus()))
 	if err != nil {
 		return err
+	}
+
+	if c.Version.LT(cosmosver.StargateFiftyVersion) {
+		return errors.New("EVM App requires Ignite v28+ / Cosmos SDK v0.50+")
 	}
 
 	g, err := template.NewEVMGenerator(c)

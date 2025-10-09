@@ -40,15 +40,16 @@ func NewEVMGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
+	g.RunFn(commandsModify(appPath, binaryName))
+	g.RunFn(rootModify(appPath, binaryName))
+	g.RunFn(appModify(appPath, binaryName))
+
 	/// --------------
 
 	// Update existing files
 	if err := updateExistingFiles(appPath, binaryName); err != nil {
 		return nil, errors.Wrap(err, "failed to update existing files")
 	}
-
-	// quick fix to remove
-	strings.ReplaceAll(appPath, "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper", "")
 
 	return g, nil
 }
@@ -85,16 +86,6 @@ func updateExistingFiles(appPath, appName string) error {
 		return err
 	}
 
-	// Update cmd/root.go
-	if err := updateRootCmd(appPath, appName); err != nil {
-		return err
-	}
-
-	// Update cmd/commands.go
-	if err := updateCommands(appPath, appName); err != nil {
-		return err
-	}
-
 	return nil
 }
 
@@ -124,8 +115,6 @@ func updateAppGo(appPath, appName string) error {
 			// Add EVM imports before closing import
 			updatedLines = append(updatedLines, "")
 			updatedLines = append(updatedLines, "\t// Force-load the tracer engines to trigger registration due to Go-Ethereum v1.10.15 changes")
-			updatedLines = append(updatedLines, "\t_ \"github.com/ethereum/go-ethereum/eth/tracers/js\"")
-			updatedLines = append(updatedLines, "\t_ \"github.com/ethereum/go-ethereum/eth/tracers/native\"")
 			updatedLines = append(updatedLines, "\t\"github.com/spf13/cast\"")
 			updatedLines = append(updatedLines, "")
 			updatedLines = append(updatedLines, "\tevmsrvflags \"github.com/cosmos/evm/server/flags\"")
@@ -182,6 +171,9 @@ func updateAppGo(appPath, appName string) error {
 		}
 
 		updatedLines = append(updatedLines, line)
+
+		// quick fix to remove
+		strings.ReplaceAll(line, "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper", "")
 	}
 
 	return os.WriteFile(appGoPath, []byte(strings.Join(updatedLines, "\n")), 0644)
@@ -232,59 +224,4 @@ func updateAppConfigGo(appPath string) error {
 	}
 
 	return os.WriteFile(configPath, []byte(strings.Join(updatedLines, "\n")), 0644)
-}
-
-func updateRootCmd(appPath, appName string) error {
-	rootPath := filepath.Join(appPath, "cmd", appName, "cmd", "root.go")
-
-	content, err := os.ReadFile(rootPath)
-	if err != nil {
-		return err
-	}
-
-	lines := strings.Split(string(content), "\n")
-	var updatedLines []string
-
-	for _, line := range lines {
-		// Add EVM keyring import
-		if strings.Contains(line, "\"github.com/cosmos/cosmos-sdk/x/auth/types\"") {
-			updatedLines = append(updatedLines, line)
-			updatedLines = append(updatedLines, "\tcosmosevmkeyring \"github.com/cosmos/evm/crypto/keyring\"")
-			continue
-		}
-
-		// Update client context configuration
-		if strings.Contains(line, "WithViper(app.Name).") {
-			updatedLines = append(updatedLines, line+" // env variable prefix")
-			updatedLines = append(updatedLines, "\t\tWithKeyringOptions(cosmosevmkeyring.Option()). // evm keyring capabilities")
-			updatedLines = append(updatedLines, "\t\tWithLedgerHasProtobuf(true)")
-			continue
-		}
-
-		updatedLines = append(updatedLines, line)
-	}
-
-	return os.WriteFile(rootPath, []byte(strings.Join(updatedLines, "\n")), 0644)
-}
-
-func updateCommands(appPath, appName string) error {
-	commandsPath := filepath.Join(appPath, "cmd", appName, "cmd", "commands.go")
-
-	content, err := os.ReadFile(commandsPath)
-	if err != nil {
-		return err
-	}
-
-	lines := strings.Split(string(content), "\n")
-	var updatedLines []string
-
-	for _, line := range lines {
-		// Replace keys command with EVM-compatible version
-		line = strings.Replace(line, "\"github.com/cosmos/cosmos-sdk/client/keys\"", "cosmosevmcmd \"github.com/cosmos/evm/client\"", 1)
-		line = strings.Replace(line, "keys.Commands(),", "cosmosevmcmd.KeyCommands(app.DefaultNodeHome, true),", 1)
-
-		updatedLines = append(updatedLines, line)
-	}
-
-	return os.WriteFile(commandsPath, []byte(strings.Join(updatedLines, "\n")), 0644)
 }
