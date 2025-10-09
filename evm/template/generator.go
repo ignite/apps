@@ -1,6 +1,8 @@
 package template
 
 import (
+	"embed"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -16,17 +18,29 @@ import (
 	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
+//go:embed files/* files/**/*
+var fsAppEvm embed.FS
+
 // NewEVMGenerator returns the generator to scaffold a evm integration inside an app.
 func NewEVMGenerator(chain *chain.Chain) (*genny.Generator, error) {
-	g := genny.New()
-	appPath := chain.AppPath()
+	appEvm, err := fs.Sub(fsAppEvm, "files")
+	if err != nil {
+		return nil, errors.Errorf("fail to generate sub: %w", err)
+	}
 
-	ctx := plush.NewContext()
+	g := genny.New()
+
+	if err := g.OnlyFS(appEvm, nil, nil); err != nil {
+		return g, err
+	}
+
+	appPath := chain.AppPath()
 	modpath, _, err := gomodulepath.Find(appPath)
 	if err != nil {
 		return nil, err
 	}
 
+	ctx := plush.NewContext()
 	ctx.Set("ModulePath", modpath)
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))

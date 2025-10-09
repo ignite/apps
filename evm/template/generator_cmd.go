@@ -65,7 +65,7 @@ func rootModify(appPath, binaryName string) genny.RunFn {
 					moduleBasicManager[name] = module.CoreAppModuleBasicAdaptor(name, mod)
 					autoCliOpts.Modules[name] = mod
 				}`,
-				0),
+				5),
 		)
 		if err != nil {
 			return err
