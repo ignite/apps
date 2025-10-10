@@ -203,6 +203,9 @@ jobs:
           # build the chain
           ignite chain build --skip-proto
 
+          # init the chain
+          ignite chain init
+
       - name: Start Chain and Wait for Blocks
         run: |
           cd gm

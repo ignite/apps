@@ -61,14 +61,14 @@ func TestEVM(t *testing.T) {
 			step.Workdir(app.SourcePath()),
 		),
 		step.New(
-			step.Exec(bin, "start", "--help"),
+			step.Exec(bin, "q", "--help"),
 			step.Stdout(buf),
 			step.Workdir(app.SourcePath()),
 		)),
 	))
 
-	if !strings.Contains(buf.String(), "--evm.min-tip") {
-		t.Errorf("evmappd doesn't contain evm flags: %s", buf.String())
+	if !strings.Contains(buf.String(), "Querying commands for the evm module") {
+		t.Errorf("evmappd doesn't contain evm modules: %s", buf.String())
 	}
 
 	buf.Reset()
