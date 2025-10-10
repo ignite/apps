@@ -81,14 +81,14 @@ jobs:
           while [ $BLOCKS_FOUND -lt 5 ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
             sleep 2
             ATTEMPT=$((ATTEMPT+1))
-            
+
             # check if the chain is still running
             if ! ps -p $CHAIN_PID > /dev/null; then
               echo "Chain process died unexpectedly"
               cat chain.log
               exit 1
             fi
-            
+
             # count blocks in log
             BLOCKS_FOUND=$(grep -c "block executed successfully" chain.log || true)
             echo "Found $BLOCKS_FOUND blocks so far (attempt $ATTEMPT/$MAX_ATTEMPTS)"
@@ -126,6 +126,147 @@ jobs:
           # send transaction from bob to alice and get tx hash
           echo "Sending 100stake from Bob to Alice..."
           TX_HASH=$(gmd tx bank send $BOB_ADDRESS $ALICE_ADDRESS 100stake -y --output json | jq -r .txhash)
+
+          sleep 3
+
+          # query the transaction
+          TX_RESULT=$(gmd query tx $TX_HASH --output json)
+          TX_CODE=$(echo $TX_RESULT | jq -r '.code')
+          if [ "$TX_CODE" != "0" ]; then
+            echo "Error: Transaction failed with code $TX_CODE"
+            echo $TX_RESULT | jq
+            exit 1
+          fi
+
+          # query bob's balance after transaction
+          FINAL_BALANCE=$(gmd query bank balances $BOB_ADDRESS --output json | jq '.balances[0].amount' -r)
+          echo "Bob's final balance: $FINAL_BALANCE"
+
+          # calculate and verify the expected balance
+          EXPECTED_BALANCE=$((INITIAL_BALANCE - 100))
+          if [ "$FINAL_BALANCE" != "$EXPECTED_BALANCE" ]; then
+            echo "Error: Balance mismatch. Expected: $EXPECTED_BALANCE, Actual: $FINAL_BALANCE"
+            exit 1
+          fi
+
+          echo "✅ Transaction test successful! Balance correctly updated."
+
+      - name: Cleanup Processes
+        if: always()
+        run: |
+          # kill chain process if it exists
+          if [[ -n "${CHAIN_PID}" ]]; then
+            kill -9 $CHAIN_PID || true
+          fi
+
+          # kill DA process if it exists
+          if [[ -n "${DA_PID}" ]]; then
+            kill -9 $DA_PID || true
+          fi
+  evm-liveness:
+    name: Ignite EVM App Liveness Test
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      DO_NOT_TRACK: true
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: "stable"
+          cache: true
+
+      - name: Install Ignite CLI
+        run: |
+          curl https://get.ignite.com/cli! | bash
+
+      - name: Scaffold & Init EVM Chain
+        run: |
+          # get the path to the current checkout of ignite apps
+          EVM_APP_DIR=$(pwd)/evm
+
+          # scaffold a new chain
+          ignite scaffold chain gm --no-module --skip-git
+          cd gm
+
+          # install evolve app
+          ignite app install $EVM_APP_DIR
+
+          # add evolve to the chain
+          ignite evm add
+
+          # build the chain
+          ignite chain build --skip-proto
+
+      - name: Start Chain and Wait for Blocks
+        run: |
+          cd gm
+
+          # start the chain and send output to a log file
+          gmd start --log_format=json > chain.log 2>&1 &
+          CHAIN_PID=$!
+          echo "CHAIN_PID=$CHAIN_PID" >> $GITHUB_ENV
+
+          echo "Waiting for chain to produce blocks..."
+
+          # wait for chain to start and check for 5 blocks
+          BLOCKS_FOUND=0
+          MAX_ATTEMPTS=60
+          ATTEMPT=0
+
+          while [ $BLOCKS_FOUND -lt 5 ] && [ $ATTEMPT -lt $MAX_ATTEMPTS ]; do
+            sleep 2
+            ATTEMPT=$((ATTEMPT+1))
+
+            # check if the chain is still running
+            if ! ps -p $CHAIN_PID > /dev/null; then
+              echo "Chain process died unexpectedly"
+              cat chain.log
+              exit 1
+            fi
+
+            # count blocks in log
+            BLOCKS_FOUND=$(grep -c "block executed successfully" chain.log || true)
+            echo "Found $BLOCKS_FOUND blocks so far (attempt $ATTEMPT/$MAX_ATTEMPTS)"
+          done
+
+          if [ $BLOCKS_FOUND -lt 5 ]; then
+            echo "Failed to find 5 blocks within time limit"
+            cat chain.log
+            exit 1
+          fi
+
+          echo "Success! Chain produced at least 5 blocks."
+
+      - name: Test Transaction Submission and Query
+        run: |
+          cd gm
+
+          # get bob's address
+          BOB_ADDRESS=$(gmd keys show bob -a)
+          ALICE_ADDRESS=$(gmd keys show alice -a)
+          echo "Bob's address: $BOB_ADDRESS"
+          echo "Alice's address: $ALICE_ADDRESS"
+
+          # query bob's initial balance
+          echo "Querying Bob's initial balance..."
+          INITIAL_BALANCE=$(gmd query bank balances $BOB_ADDRESS --output json | jq '.balances[0].amount' -r)
+          echo "Bob's initial balance: $INITIAL_BALANCE stake"
+
+          # check that bob has funds
+          if [ "$INITIAL_BALANCE" == "" ] || [ "$INITIAL_BALANCE" == "null" ] || [ "$INITIAL_BALANCE" -lt 100 ]; then
+            echo "Error: Bob's account not properly funded"
+            exit 1
+          fi
+
+          # send transaction from bob to alice and get tx hash
+          echo "Sending 100stake from Bob to Alice..."
+          TX_HASH=$(gmd tx bank send $BOB_ADDRESS $ALICE_ADDRESS 100stake --fees 10000000stake -y --output json | jq -r .txhash)
 
           sleep 3
 
