@@ -11,7 +11,7 @@ import (
 // commandsModify modifies the application commands.go to use EVM.
 func commandsModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "commands.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err
@@ -40,7 +40,7 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 // rootModify modifies the application root.go to use EVM.
 func rootModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/root.go")
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "root.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err

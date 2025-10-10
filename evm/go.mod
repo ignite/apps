@@ -2,6 +2,8 @@ module github.com/ignite/apps/evm
 
 go 1.24.1
 
+replace github.com/ignite/cli/v29 => /home/julien/projects/ignite/cli
+
 require (
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.22
