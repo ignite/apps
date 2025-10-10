@@ -4,11 +4,14 @@ This Ignite App is aimed to extend [Ignite CLI](https://github.com/ignite/cli) a
 
 ## Prerequisites
 
-- Ignite CLI version v29.2.0 or greater.
+- Ignite CLI version v29.5.0 or greater (no minimal chain).
 - Knowledge of blockchain development (Cosmos SDK).
 
-## Installation
+## Usage
 
-```shell
+```sh
+ignite s chain gm --address-prefix gm --no-module
+cd gm
 ignite app install -g github.com/ignite/apps/evm
+ignite evm add
 ```

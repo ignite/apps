@@ -60,10 +60,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	err = session.Printf("🎉 EVM integration added successfully!\n\n")
-	err = errors.Join(err, session.Printf("🎉 EVM integration added (`%[1]v`).\n", c.AppPath(), c.Name()))
-
-	return err
+	return session.Printf("🎉 EVM integration added (`%[1]v`).\n", c.AppPath(), c.Name())
 }
 
 // finish finalize the scaffolded code (formating, dependencies).

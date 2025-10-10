@@ -64,6 +64,11 @@ func rootModify(appPath, binaryName string) genny.RunFn {
 
 		// add module manual registration
 		content, err = xast.ModifyFunction(content, "NewRootCmd",
+			xast.AppendInsideFuncCall(
+				"depinject.Configs", // inject custom msg signer
+				"depinject.Provide(app.ProvideMsgEthereumTxCustomGetSigner)",
+				-1,
+			),
 			xast.AppendFuncAtLine(`
 				// Since the EVM modules don't support dependency injection, we need to
 				// manually register the modules on the client side.
