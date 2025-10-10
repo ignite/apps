@@ -94,12 +94,12 @@ func appModify(appPath, binaryName string) genny.RunFn {
 				7,
 			),
 			xast.AppendInsideFuncCall(
-				"Configs", // inject custom msg signer
+				"depinject.Configs", // inject custom msg signer
 				"depinject.Provide(ProvideMsgEthereumTxCustomGetSigner)",
 				-1,
 			),
 			xast.AppendInsideFuncCall(
-				"Inject", // inject feegrant keeper via depinject
+				"depinject.Inject", // inject feegrant keeper via depinject
 				"&app.FeeGrantKeeper",
 				-1,
 			),
