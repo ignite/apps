@@ -25,6 +25,14 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 			return err
 		}
 
+		content, err = xast.RemoveImports(
+			content,
+			xast.WithImport("github.com/cosmos/cosmos-sdk/client/keys"),
+		)
+		if err != nil {
+			return err
+		}
+
 		// add keyring commands
 		content = strings.Replace(
 			content,
@@ -72,9 +80,9 @@ func rootModify(appPath, binaryName string) genny.RunFn {
 		}
 
 		// wire client context options
-		strings.ReplaceAll(content,
-			"WithViper(app.Name).",
-			"WithViper(app.Name).WithKeyringOptions(cosmosevmkeyring.Option()).WithLedgerHasProtobuf(true).",
+		content = strings.ReplaceAll(content,
+			"WithViper(app.Name) // env variable prefix",
+			"WithViper(app.Name).WithKeyringOptions(cosmosevmkeyring.Option()).WithLedgerHasProtobuf(true)",
 		)
 
 		return r.File(genny.NewFileS(cmdPath, content))

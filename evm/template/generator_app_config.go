@@ -22,7 +22,7 @@ func appConfigModify(appPath string) genny.RunFn {
 
 		// change imports
 		content, err := xast.AppendImports(f.String(),
-			xast.WithNamedImport("wasmtypes", "github.com/cosmos/evm/x/erc20/types"),
+			xast.WithNamedImport("erc20types", "github.com/cosmos/evm/x/erc20/types"),
 			xast.WithNamedImport("feemarkettypes", "github.com/cosmos/evm/x/feemarket/types"),
 			xast.WithNamedImport("evmtypes", "github.com/cosmos/evm/x/vm/types"),
 		)
