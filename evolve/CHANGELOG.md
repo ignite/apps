@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [`v0.4.3`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.3)
+
+- [#233](https://github.com/ignite/apps/pull/233) Bump dependencies.
+
 ## [`v0.4.2`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.2)
 
 - [#232](https://github.com/ignite/apps/pull/232) Fix node syncing by bumping dependencies.
