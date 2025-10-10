@@ -37,7 +37,7 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 		content = strings.Replace(
 			content,
 			"keys.Commands()",
-			"cosmosevmcmd.KeyCommands(app.DefaultNodeHome, true)",
+			"cosmosevmcmd.KeyCommands(app.DefaultNodeHome, false)",
 			1,
 		)
 
