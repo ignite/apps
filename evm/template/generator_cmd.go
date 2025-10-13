@@ -20,6 +20,7 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 		content, err := xast.AppendImports(
 			f.String(),
 			xast.WithNamedImport("cosmosevmcmd", "github.com/cosmos/evm/client"),
+			xast.WithNamedImport("cosmosevmserver", "github.com/cosmos/evm/server"),
 		)
 		if err != nil {
 			return err
@@ -28,6 +29,25 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 		content, err = xast.RemoveImports(
 			content,
 			xast.WithImport("github.com/cosmos/cosmos-sdk/client/keys"),
+		)
+		if err != nil {
+			return err
+		}
+
+		// replace server.AddCommandsWithStartCmdOptions with cosmosevmserver.AddCommands
+		content, err = xast.ModifyFunction(content, "initRootCmd",
+			xast.RemoveFuncCall("server.AddCommandsWithStartCmdOptions"),
+			xast.AppendFuncAtLine(`// add Cosmos EVM' flavored TM commands to start server, etc.
+		cosmosevmserver.AddCommands(
+			rootCmd,
+			cosmosevmserver.NewDefaultStartOptions(func(l log.Logger, d dbm.DB, w io.Writer, ao servertypes.AppOptions) cosmosevmserver.Application {
+				return newApp(l, d, w, ao).(cosmosevmserver.Application)
+			}, app.DefaultNodeHome),
+			appExport,
+			addModuleInitFlags,
+		)`,
+				1,
+			),
 		)
 		if err != nil {
 			return err

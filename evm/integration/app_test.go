@@ -70,7 +70,19 @@ func TestEVM(t *testing.T) {
 	if !strings.Contains(buf.String(), "Querying commands for the evm module") {
 		t.Errorf("evmappd doesn't contain evm modules: %s", buf.String())
 	}
+	buf.Reset()
 
+	env.Must(env.Exec("check evmappd start cmd",
+		step.NewSteps(step.New(
+			step.Exec(bin, "start", "--help"),
+			step.Stdout(buf),
+			step.Workdir(app.SourcePath()),
+		)),
+	))
+
+	if !strings.Contains(buf.String(), "--evm.") {
+		t.Errorf("evmappd doesn't contain evm modules: %s", buf.String())
+	}
 	buf.Reset()
 }
 
