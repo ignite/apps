@@ -10,11 +10,14 @@ import (
 	"cosmossdk.io/core/appmodule"
 	storetypes "cosmossdk.io/store/types"
 	"cosmossdk.io/x/tx/signing"
+	"github.com/cosmos/cosmos-sdk/baseapp"
+	"github.com/cosmos/cosmos-sdk/client"
 	"github.com/cosmos/cosmos-sdk/client/flags"
 	"github.com/cosmos/cosmos-sdk/codec"
 	codectypes "github.com/cosmos/cosmos-sdk/codec/types"
 	servertypes "github.com/cosmos/cosmos-sdk/server/types"
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	sdkmempool "github.com/cosmos/cosmos-sdk/types/mempool"
 	"github.com/cosmos/cosmos-sdk/types/module"
 	authkeeper "github.com/cosmos/cosmos-sdk/x/auth/keeper"
 	authtypes "github.com/cosmos/cosmos-sdk/x/auth/types"
@@ -23,6 +26,7 @@ import (
 	"github.com/spf13/cast"
 
 	evmconfig "github.com/cosmos/evm/config"
+	evmmempool "github.com/cosmos/evm/mempool"
 	"github.com/cosmos/evm/precompiles/bech32"
 	"github.com/cosmos/evm/precompiles/p256"
 	srvflags "github.com/cosmos/evm/server/flags"
@@ -35,6 +39,7 @@ import (
 	"github.com/cosmos/evm/x/vm"
 	evmkeeper "github.com/cosmos/evm/x/vm/keeper"
 	evmtypes "github.com/cosmos/evm/x/vm/types"
+	"github.com/ethereum/go-ethereum/common"
 	gethvm "github.com/ethereum/go-ethereum/core/vm"
 )
 
@@ -140,6 +145,44 @@ func (app *App) postRegisterEVMModules() error {
 
 	_ = app.EVMKeeper.WithStaticPrecompiles(precompiles)
 	return nil
+}
+
+// setEVMMempool sets the EVM priority nonce mempool
+// it is required for the ethereum json rpc server to work
+func (app *App) setEVMMempool() {
+	if evmtypes.GetChainConfig() != nil {
+		mempoolConfig := &evmmempool.EVMMempoolConfig{
+			AnteHandler:   app.BaseApp.AnteHandler(),
+			BlockGasLimit: 100_000_000,
+		}
+
+		evmMempool := evmmempool.NewExperimentalEVMMempool(app.CreateQueryContext, app.Logger(), app.EVMKeeper, app.FeeMarketKeeper, app.txConfig, app.clientCtx, mempoolConfig)
+		app.EVMMempool = evmMempool
+
+		app.SetMempool(evmMempool)
+		checkTxHandler := evmmempool.NewCheckTxHandler(evmMempool)
+		app.SetCheckTxHandler(checkTxHandler)
+
+		abciProposalHandler := baseapp.NewDefaultProposalHandler(evmMempool, app)
+		abciProposalHandler.SetSignerExtractionAdapter(evmmempool.NewEthSignerExtractionAdapter(sdkmempool.NewDefaultSignerExtractionAdapter()))
+		app.SetPrepareProposal(abciProposalHandler.PrepareProposalHandler())
+	}
+}
+
+// RegisterPendingTxListener a function that registers a listener for pending transactions.
+func (app *App) RegisterPendingTxListener(listener func(common.Hash)) {
+	app.pendingTxListeners = append(app.pendingTxListeners, listener)
+}
+
+// SetClientCtx a function that sets the client context on the app, required by EVM module implementation.
+func (app *App) SetClientCtx(ctx client.Context) {
+	app.clientCtx = ctx
+}
+
+// GetMempool returns the mempool of the app.
+// It is required by the EVM application interface.
+func (app *App) GetMempool() sdkmempool.ExtMempool {
+	return app.EVMMempool
 }
 
 // getCustomEVMActivators defines a map of opcode modifiers associated

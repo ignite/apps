@@ -30,6 +30,8 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			xast.WithNamedImport("feemarketkeeper", "github.com/cosmos/evm/x/feemarket/keeper"),
 			xast.WithNamedImport("ibctransferkeeper", "github.com/cosmos/evm/x/ibc/transfer/keeper"),
 			xast.WithNamedImport("evmkeeper", "github.com/cosmos/evm/x/vm/keeper"),
+			xast.WithNamedImport("evmante", "github.com/cosmos/evm/ante"),
+			xast.WithNamedImport("evmmempool", "github.com/cosmos/evm/mempool"),
 		)
 		if err != nil {
 			return err
@@ -56,6 +58,14 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			content,
 			"App",
 			xast.AppendStructValue(
+				"clientCtx",
+				"client.Context",
+			),
+			xast.AppendStructValue(
+				"pendingTxListeners",
+				"[]evmante.PendingTxListener",
+			),
+			xast.AppendStructValue(
 				"FeeGrantKeeper",
 				"feegrantkeeper.Keeper",
 			),
@@ -70,6 +80,10 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			xast.AppendStructValue(
 				"Erc20Keeper",
 				"erc20keeper.Keeper",
+			),
+			xast.AppendStructValue(
+				"EVMMempool",
+				"*evmmempool.ExperimentalEVMMempool",
 			),
 		)
 		if err != nil {
@@ -106,7 +120,9 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			xast.AppendFuncCodeAtLine(
 				`// set ante handlers
 				maxGasWanted := cast.ToUint64(appOpts.Get(evmsrvflags.EVMMaxTxGasWanted))
-				app.setAnteHandler(app.txConfig, maxGasWanted)`,
+				app.setAnteHandler(app.txConfig, maxGasWanted)
+				// set evm mempool
+				app.setEVMMempool()`,
 				12,
 			),
 		)
