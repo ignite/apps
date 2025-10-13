@@ -26,7 +26,11 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, maxGasWanted uint64) {
 		SigGasConsumer:         evmante.SigVerificationGasConsumer,
 		MaxTxGasWanted:         maxGasWanted,
 		TxFeeChecker:           cosmosevmante.NewDynamicFeeChecker(app.FeeMarketKeeper),
-		PendingTxListener:      func(hash common.Hash) {},
+		PendingTxListener: func(hash common.Hash) {
+			for _, listener := range app.pendingTxListeners {
+				listener(hash)
+			}
+		},
 	}
 	if err := options.Validate(); err != nil {
 		panic(err)
