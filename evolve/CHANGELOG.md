@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- [#236](https://github.com/ignite/apps/pull/236) Add `--start` flag to `evolve add` command to optionally disable addition of the start command.
+
 ## [`v0.4.3`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.3)
 
 - [#233](https://github.com/ignite/apps/pull/233) Bump dependencies.
