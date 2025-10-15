@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## [`v0.5.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)
+
+- []() Remove `--start` and `--migrate` flags from `evolve add` command. Split into `evolve add` and `evolve add-migrate` commands.
 - [#236](https://github.com/ignite/apps/pull/236) Add `--start` flag to `evolve add` command to optionally disable addition of the start command.
 
 ## [`v0.4.3`](https://github.com/ignite/apps/releases/tag/evolve/v0.4.3)

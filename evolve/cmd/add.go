@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"path/filepath"
 
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
@@ -17,9 +16,7 @@ import (
 const (
 	statusScaffolding = "Scaffolding..."
 
-	flagPath    = "path"
-	flagStart   = "start"
-	flagMigrate = "migrate"
+	flagPath = "path"
 )
 
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
@@ -29,16 +26,6 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	defer session.End()
 
 	appPath, err := flags.GetString(flagPath)
-	if err != nil {
-		return err
-	}
-
-	withStartCmd, err := flags.GetBool(flagStart)
-	if err != nil {
-		return err
-	}
-
-	migrateCometBFT, err := flags.GetBool(flagMigrate)
 	if err != nil {
 		return err
 	}
@@ -53,12 +40,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	binaryName, err := c.Binary()
-	if err != nil {
-		return err
-	}
-
-	g, err := template.NewEvolveGenerator(c, migrateCometBFT, withStartCmd)
+	g, err := template.NewEvolveAddGenerator(c)
 	if err != nil {
 		return err
 	}
@@ -72,16 +54,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	err = session.Printf("🎉 Evolve (ev-abci) added (`%[1]v`).\n", c.AppPath(), c.Name())
-
-	if migrateCometBFT {
-		err = errors.Join(session.Printf("\n"))
-		err = errors.Join(err, session.Println("Additionally, evolve migration commands and modules successfully scaffolded!"))
-		err = errors.Join(err, session.Printf("If %s is already live, check out the newly added evolve manager to prepare the chain for migration\n", c.Name()))
-		err = errors.Join(err, session.Printf("Run `%s evolve-migrate` to migrate CometBFT state to the evolve state.\n", binaryName))
-	}
-
-	return err
+	return session.Printf("🎉 Evolve (ev-abci) added (`%[1]v`).\n", c.AppPath())
 }
 
 // finish finalize the scaffolded code (formating, dependencies).

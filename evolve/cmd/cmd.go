@@ -23,22 +23,24 @@ func GetCommands() []*plugin.Command {
 							Shorthand: "p",
 							Type:      plugin.FlagTypeString,
 						},
+					},
+				},
+				{
+					Use:   "add-migrate",
+					Short: "Add evolve migration support",
+					Long:  "Add evolve migration helpers and modules for migrating from CometBFT",
+					Flags: []*plugin.Flag{
 						{
-							Name:         flagStart,
-							Usage:        "modify start command to use ev-abci (set to false to only add migrate command)",
-							Type:         plugin.FlagTypeBool,
-							DefaultValue: "true",
-						},
-						{
-							Name:  flagMigrate,
-							Usage: "scaffolds the migrations helpers and modules (to use when migrating from CometBFT)",
-							Type:  plugin.FlagTypeBool,
+							Name:      flagPath,
+							Usage:     "path of the app",
+							Shorthand: "p",
+							Type:      plugin.FlagTypeString,
 						},
 					},
 				},
 				{
 					Use:   "init",
-					Short: "Init ev-abci support",
+					Short: "Init evolve support",
 					Long:  "Initialize the chain and a ev-node sequencer via ev-abci.",
 					Flags: []*plugin.Flag{
 						{
