@@ -40,7 +40,9 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	g, err := template.NewEvolveGenerator(c, template.GeneratorOptions{})
+	g, err := template.NewEvolveGenerator(c, template.GeneratorOptions{
+		WithStart: true,
+	})
 	if err != nil {
 		return err
 	}

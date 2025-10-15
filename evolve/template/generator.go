@@ -12,6 +12,7 @@ import (
 
 // GeneratorOptions represents the options for the generator.
 type GeneratorOptions struct {
+	WithStart     bool
 	WithMigration bool
 }
 
@@ -34,9 +35,12 @@ func NewEvolveGenerator(chain *chain.Chain, opts GeneratorOptions) (*genny.Gener
 	}
 
 	g.RunFn(appConfigModify(appPath, opts.WithMigration))
-	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
-	g.RunFn(commandsGenesisInitModify(appPath, binaryName))
-	g.RunFn(commandsRollbackModify(appPath, binaryName))
+
+	if opts.WithStart {
+		g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
+		g.RunFn(commandsGenesisInitModify(appPath, binaryName))
+		g.RunFn(commandsRollbackModify(appPath, binaryName))
+	}
 
 	if opts.WithMigration {
 		g.RunFn(commandsMigrateModify(appPath, binaryName))
