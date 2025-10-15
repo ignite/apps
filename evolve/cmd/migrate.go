@@ -55,8 +55,8 @@ func MigrateHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 
 	err = session.Printf("🎉 Evolve migration support added (`%[1]v`).\n", c.AppPath())
 	err = errors.Join(err, session.Println("Evolve migration command and module successfully scaffolded!"))
-	err = errors.Join(err, session.Printf("If %s is already live, check out the newly added evolve manager to prepare the chain for migration\n", c.Name()))
-	err = errors.Join(err, session.Printf("Run `%s evolve-migrate` to migrate CometBFT state to the evolve state.\n", binaryName))
+	err = errors.Join(err, session.Println("Check out the newly added evolve manager to prepare the chain for migration"))
+	err = errors.Join(err, session.Printf("Once the app state is migrated, run `%s evolve-migrate` to migrate CometBFT state to the Evolve state.\n", binaryName))
 
 	return err
 }
