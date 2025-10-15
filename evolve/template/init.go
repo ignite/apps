@@ -2,14 +2,12 @@ package template
 
 import (
 	"fmt"
-	"os"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
 	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xast"
 	"github.com/ignite/cli/v29/ignite/templates/module"
@@ -154,8 +152,8 @@ func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
-// appConfigModify modifies the app to add staking modules and the migration from cometbft commands and modules.
-func appConfigModify(appPath string, withMigration bool) genny.RunFn {
+// appModify modifies the app to add the blanked staking module and optionally the migration utilities.
+func appModify(appPath string, withMigration bool) genny.RunFn {
 	replacer := placeholder.New()
 
 	appConfigModify := func(r *genny.Runner, withMigration bool) error {
@@ -201,7 +199,18 @@ func appConfigModify(appPath string, withMigration bool) genny.RunFn {
 		}
 
 		// replace staking blank import
-		content = strings.Replace(content, "github.com/cosmos/cosmos-sdk/x/staking", "github.com/evstack/ev-abci/modules/staking", 1)
+		content, err = xast.RemoveImports(content,
+			xast.WithNamedImport("_", "github.com/cosmos/cosmos-sdk/x/staking"),
+		)
+		if err != nil {
+			return err
+		}
+
+		if content, err = xast.AppendImports(content,
+			xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/staking"),
+		); err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
@@ -213,7 +222,19 @@ func appConfigModify(appPath string, withMigration bool) genny.RunFn {
 			return err
 		}
 
-		content := strings.ReplaceAll(f.String(), "github.com/cosmos/cosmos-sdk/x/staking/keeper", "github.com/evstack/ev-abci/modules/staking/keeper")
+		// replace staking import
+		content, err := xast.RemoveImports(f.String(),
+			xast.WithNamedImport("stakingkeeper", "github.com/cosmos/cosmos-sdk/x/staking/keeper"),
+		)
+		if err != nil {
+			return err
+		}
+
+		if content, err = xast.AppendImports(content,
+			xast.WithNamedImport("stakingkeeper", "github.com/evstack/ev-abci/modules/staking/keeper"),
+		); err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
@@ -237,34 +258,6 @@ func appConfigModify(appPath string, withMigration bool) genny.RunFn {
 
 		return err
 	}
-}
-
-// updateDependencies makes sure the correct dependencies are added to the go.mod files.
-// ev-abci expects evolve v1 to be used.
-func updateDependencies(appPath string) error {
-	gomod, err := gomodule.ParseAt(appPath)
-	if err != nil {
-		return errors.Errorf("failed to parse go.mod: %w", err)
-	}
-
-	gomod.AddNewRequire(EvABCIPackage, EvABCIVersion, false)
-	gomod.AddNewRequire(EvNodePackage, EvNodeVersion, false)
-
-	// add local-da as go tool dependency (useful for local development)
-	if err := gomod.AddTool(EvNodeDaCmd); err != nil {
-		return errors.Errorf("failed to add local-da tool: %w", err)
-	}
-
-	// add required replaces
-	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
-
-	// save go.mod
-	data, err := gomod.Format()
-	if err != nil {
-		return errors.Errorf("failed to format go.mod: %w", err)
-	}
-
-	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
 }
 
 // replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.
