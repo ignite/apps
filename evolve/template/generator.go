@@ -28,7 +28,7 @@ func NewEvolveAddGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
-	g.RunFn(appConfigModify(appPath))
+	g.RunFn(appConfigStakingModify(appPath))
 	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 	g.RunFn(commandsGenesisInitModify(appPath, binaryName))
 	g.RunFn(commandsRollbackModify(appPath, binaryName))
@@ -55,6 +55,7 @@ func NewEvolveMigrateGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	}
 
 	g.RunFn(appConfigMigrateModify(appPath))
+	g.RunFn(appConfigStakingModify(appPath))
 	g.RunFn(commandsMigrateModify(appPath, binaryName))
 
 	return g, nil

@@ -152,8 +152,8 @@ func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
-// appConfigModify modifies the app to add the blanked x/staking modules.
-func appConfigModify(appPath string) genny.RunFn {
+// appConfigStakingModify modifies the app to add the blanked x/staking modules.
+func appConfigStakingModify(appPath string) genny.RunFn {
 	appConfigModify := func(r *genny.Runner) error {
 		configPath := filepath.Join(appPath, module.PathAppConfigGo)
 		f, err := r.Disk.Find(configPath)
