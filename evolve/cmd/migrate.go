@@ -39,7 +39,9 @@ func MigrateHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	g, err := template.NewEvolveMigrateGenerator(c)
+	g, err := template.NewEvolveGenerator(c, template.GeneratorOptions{
+		WithMigration: true,
+	})
 	if err != nil {
 		return err
 	}

@@ -1,6 +1,7 @@
 package template
 
 import (
+	"fmt"
 	"os"
 	"path/filepath"
 	"strings"
@@ -9,6 +10,7 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xast"
 	"github.com/ignite/cli/v29/ignite/templates/module"
 )
@@ -152,17 +154,54 @@ func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
-// appConfigStakingModify modifies the app to add the blanked x/staking modules.
-func appConfigStakingModify(appPath string) genny.RunFn {
-	appConfigModify := func(r *genny.Runner) error {
+// appConfigModify modifies the app to add staking modules and the migration from cometbft commands and modules.
+func appConfigModify(appPath string, withMigration bool) genny.RunFn {
+	replacer := placeholder.New()
+
+	appConfigModify := func(r *genny.Runner, withMigration bool) error {
 		configPath := filepath.Join(appPath, module.PathAppConfigGo)
 		f, err := r.Disk.Find(configPath)
 		if err != nil {
 			return err
 		}
 
+		content := f.String()
+
+		if withMigration {
+			// Import migrationmngr module
+			content, err = xast.AppendImports(content,
+				xast.WithNamedImport("migrationmngrmodule", "github.com/evstack/ev-abci/modules/migrationmngr/module"),
+				xast.WithNamedImport("migrationmngrtypes", "github.com/evstack/ev-abci/modules/migrationmngr/types"),
+				xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/migrationmngr"),
+			)
+			if err != nil {
+				return err
+			}
+
+			// add migrationmngr module config for depinject
+			moduleConfigTemplate := `{
+				Name:   migrationmngrtypes.ModuleName,
+				Config: appconfig.WrapAny(&migrationmngrmodule.Module{}),
+			},
+			%[1]v`
+			moduleConfigReplacement := fmt.Sprintf(moduleConfigTemplate, module.PlaceholderSgAppModuleConfig)
+			content = replacer.Replace(content, module.PlaceholderSgAppModuleConfig, moduleConfigReplacement)
+
+			// preblocker for migrationmngr
+			preBlockerTemplate := `migrationmngrtypes.ModuleName,
+						%[1]v`
+			preBlockerReplacement := fmt.Sprintf(preBlockerTemplate, "// this line is used by starport scaffolding # stargate/app/preBlockers")
+			content = replacer.Replace(content, "// this line is used by starport scaffolding # stargate/app/preBlockers", preBlockerReplacement)
+
+			// end block for migrationmngr
+			endBlockerTemplate := `migrationmngrtypes.ModuleName,
+%[1]v`
+			endBlockerReplacement := fmt.Sprintf(endBlockerTemplate, module.PlaceholderSgAppEndBlockers)
+			content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, endBlockerReplacement)
+		}
+
 		// replace staking blank import
-		content := strings.Replace(f.String(), "github.com/cosmos/cosmos-sdk/x/staking", "github.com/evstack/ev-abci/modules/staking", 1)
+		content = strings.Replace(content, "github.com/cosmos/cosmos-sdk/x/staking", "github.com/evstack/ev-abci/modules/staking", 1)
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
@@ -192,7 +231,7 @@ func appConfigStakingModify(appPath string) genny.RunFn {
 	}
 
 	return func(r *genny.Runner) error {
-		err := appConfigModify(r)
+		err := appConfigModify(r, withMigration)
 		err = errors.Join(err, exportModify(r))
 		err = errors.Join(err, appGoModify(r))
 
