@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"context"
+	"errors"
 	"path/filepath"
 
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
-	"github.com/ignite/cli/v29/ignite/pkg/gocmd"
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
@@ -13,13 +13,7 @@ import (
 	"github.com/ignite/apps/evolve/template"
 )
 
-const (
-	statusScaffolding = "Scaffolding..."
-
-	flagPath = "path"
-)
-
-func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func MigrateHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 
 	session := cliui.New(cliui.StartSpinnerWithText(statusScaffolding))
@@ -40,8 +34,13 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
+	binaryName, err := c.Binary()
+	if err != nil {
+		return err
+	}
+
 	g, err := template.NewEvolveGenerator(c, template.GeneratorOptions{
-		WithStart: true,
+		WithMigration: true,
 	})
 	if err != nil {
 		return err
@@ -56,24 +55,10 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	return session.Printf("🎉 Evolve (ev-abci) added (`%[1]v`).\n", c.AppPath())
-}
+	err = session.Printf("🎉 Evolve migration support added (`%[1]v`).\n", c.AppPath())
+	err = errors.Join(err, session.Println("Evolve migration command and module successfully scaffolded!"))
+	err = errors.Join(err, session.Println("Check out the newly added evolve manager to prepare the chain for migration."))
+	err = errors.Join(err, session.Printf("Once the app state is migrated, run `%s evolve-migrate` to migrate CometBFT state to the Evolve state.\n", binaryName))
 
-// finish finalize the scaffolded code (formating, dependencies).
-func finish(ctx context.Context, session *cliui.Session, path string) error {
-	session.StopSpinner()
-	session.StartSpinner("go mod tidy...")
-	if err := gocmd.ModTidy(ctx, path); err != nil {
-		return err
-	}
-
-	session.StopSpinner()
-	session.StartSpinner("Formatting code...")
-	if err := gocmd.Fmt(ctx, path); err != nil {
-		return err
-	}
-
-	_ = gocmd.GoImports(ctx, path) // goimports installation could fail, so ignore the error
-
-	return nil
+	return err
 }

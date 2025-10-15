@@ -1,21 +1,22 @@
 package template
 
 import (
-	"os"
+	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
+	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xast"
+	"github.com/ignite/cli/v29/ignite/templates/module"
 )
 
 // commandsStartModify modifies the application start to use evolve.
 func commandsStartModify(appPath, binaryName string, version cosmosver.Version) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "commands.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err
@@ -75,7 +76,7 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 // this is only needed when the start command is also modified.
 func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "commands.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err
@@ -122,42 +123,10 @@ func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
-// commandsMigrateModify adds the evolve migrate command to the application.
-func commandsMigrateModify(appPath, binaryName string) genny.RunFn {
-	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
-		f, err := r.Disk.Find(cmdPath)
-		if err != nil {
-			return err
-		}
-
-		content, err := xast.AppendImports(
-			f.String(),
-			xast.WithNamedImport("abciserver", "github.com/evstack/ev-abci/server"),
-		)
-		if err != nil {
-			return err
-		}
-
-		// add migrate command
-		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
-		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
-			if !alreadyAdded {
-				args = append(args, evolveV1MigrateCmd)
-				alreadyAdded = true
-			}
-
-			return args, nil
-		})
-
-		return r.File(genny.NewFileS(cmdPath, content))
-	}
-}
-
 // commandsRollbackModify modifies the application rollback command to use evolve.
 func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {
-		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "commands.go")
 		f, err := r.Disk.Find(cmdPath)
 		if err != nil {
 			return err
@@ -183,32 +152,112 @@ func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
-// updateDependencies makes sure the correct dependencies are added to the go.mod files.
-// ev-abci expects evolve v1 to be used.
-func updateDependencies(appPath string) error {
-	gomod, err := gomodule.ParseAt(appPath)
-	if err != nil {
-		return errors.Errorf("failed to parse go.mod: %w", err)
+// appModify modifies the app to add the blanked staking module and optionally the migration utilities.
+func appModify(appPath string, withMigration bool) genny.RunFn {
+	replacer := placeholder.New()
+
+	appConfigModify := func(r *genny.Runner, withMigration bool) error {
+		configPath := filepath.Join(appPath, module.PathAppConfigGo)
+		f, err := r.Disk.Find(configPath)
+		if err != nil {
+			return err
+		}
+
+		content := f.String()
+
+		if withMigration {
+			// Import migrationmngr module
+			content, err = xast.AppendImports(content,
+				xast.WithNamedImport("migrationmngrmodule", "github.com/evstack/ev-abci/modules/migrationmngr/module"),
+				xast.WithNamedImport("migrationmngrtypes", "github.com/evstack/ev-abci/modules/migrationmngr/types"),
+				xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/migrationmngr"),
+			)
+			if err != nil {
+				return err
+			}
+
+			// add migrationmngr module config for depinject
+			moduleConfigTemplate := `{
+				Name:   migrationmngrtypes.ModuleName,
+				Config: appconfig.WrapAny(&migrationmngrmodule.Module{}),
+			},
+			%[1]v`
+			moduleConfigReplacement := fmt.Sprintf(moduleConfigTemplate, module.PlaceholderSgAppModuleConfig)
+			content = replacer.Replace(content, module.PlaceholderSgAppModuleConfig, moduleConfigReplacement)
+
+			// preblocker for migrationmngr
+			preBlockerTemplate := `migrationmngrtypes.ModuleName,
+						%[1]v`
+			preBlockerReplacement := fmt.Sprintf(preBlockerTemplate, "// this line is used by starport scaffolding # stargate/app/preBlockers")
+			content = replacer.Replace(content, "// this line is used by starport scaffolding # stargate/app/preBlockers", preBlockerReplacement)
+
+			// end block for migrationmngr
+			endBlockerTemplate := `migrationmngrtypes.ModuleName,
+%[1]v`
+			endBlockerReplacement := fmt.Sprintf(endBlockerTemplate, module.PlaceholderSgAppEndBlockers)
+			content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, endBlockerReplacement)
+		}
+
+		// replace staking blank import
+		content, err = xast.RemoveImports(content,
+			xast.WithNamedImport("_", "github.com/cosmos/cosmos-sdk/x/staking"),
+		)
+		if err != nil {
+			return err
+		}
+
+		if content, err = xast.AppendImports(content,
+			xast.WithNamedImport("_", "github.com/evstack/ev-abci/modules/staking"),
+		); err != nil {
+			return err
+		}
+
+		return r.File(genny.NewFileS(configPath, content))
 	}
 
-	gomod.AddNewRequire(EvABCIPackage, EvABCIVersion, false)
-	gomod.AddNewRequire(EvNodePackage, EvNodeVersion, false)
+	appGoModify := func(r *genny.Runner) error {
+		configPath := filepath.Join(appPath, module.PathAppGo)
+		f, err := r.Disk.Find(configPath)
+		if err != nil {
+			return err
+		}
 
-	// add local-da as go tool dependency (useful for local development)
-	if err := gomod.AddTool(EvNodeDaCmd); err != nil {
-		return errors.Errorf("failed to add local-da tool: %w", err)
+		// replace staking import
+		content, err := xast.RemoveImports(f.String(),
+			xast.WithNamedImport("stakingkeeper", "github.com/cosmos/cosmos-sdk/x/staking/keeper"),
+		)
+		if err != nil {
+			return err
+		}
+
+		if content, err = xast.AppendImports(content,
+			xast.WithNamedImport("stakingkeeper", "github.com/evstack/ev-abci/modules/staking/keeper"),
+		); err != nil {
+			return err
+		}
+
+		return r.File(genny.NewFileS(configPath, content))
 	}
 
-	// add required replaces
-	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
+	exportModify := func(r *genny.Runner) error {
+		configPath := filepath.Join(appPath, filepath.Join(module.PathAppModule, "export.go"))
+		f, err := r.Disk.Find(configPath)
+		if err != nil {
+			return err
+		}
 
-	// save go.mod
-	data, err := gomod.Format()
-	if err != nil {
-		return errors.Errorf("failed to format go.mod: %w", err)
+		content := strings.ReplaceAll(f.String(), "staking.WriteValidators(ctx, app.StakingKeeper)", "staking.WriteValidators(ctx, app.StakingKeeper.Keeper)")
+
+		return r.File(genny.NewFileS(configPath, content))
 	}
 
-	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
+	return func(r *genny.Runner) error {
+		err := appConfigModify(r, withMigration)
+		err = errors.Join(err, exportModify(r))
+		err = errors.Join(err, appGoModify(r))
+
+		return err
+	}
 }
 
 // replaceLegacyAddCommands replaces the legacy `AddCommands` with a temporary `AddCommandsWithStartCmdOptions` boilerplate.

@@ -1,17 +1,27 @@
 package template
 
 import (
+	"os"
+	"path/filepath"
+
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
 
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
-// NewEvolveGenerator returns the generator to scaffold a evolve integration inside an app.
-func NewEvolveGenerator(chain *chain.Chain, withCometMigration, withStartCmd bool) (*genny.Generator, error) {
+// GeneratorOptions represents the options for the generator.
+type GeneratorOptions struct {
+	WithStart     bool
+	WithMigration bool
+}
+
+// NewEvolveGenerator returns the generator to scaffold evolve integration.
+func NewEvolveGenerator(chain *chain.Chain, opts GeneratorOptions) (*genny.Generator, error) {
 	g := genny.New()
 	ctx := plush.NewContext()
 	plushhelpers.ExtendPlushContext(ctx)
@@ -28,15 +38,45 @@ func NewEvolveGenerator(chain *chain.Chain, withCometMigration, withStartCmd boo
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
-	if withStartCmd {
+	g.RunFn(appModify(appPath, opts.WithMigration))
+
+	if opts.WithStart {
 		g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 		g.RunFn(commandsGenesisInitModify(appPath, binaryName))
 		g.RunFn(commandsRollbackModify(appPath, binaryName))
 	}
-	g.RunFn(commandsMigrateModify(appPath, binaryName))
-	if withCometMigration {
-		g.RunFn(migrateFromCometModify(appPath))
+
+	if opts.WithMigration {
+		g.RunFn(commandsMigrateModify(appPath, binaryName))
 	}
 
 	return g, nil
+}
+
+// updateDependencies makes sure the correct dependencies are added to the go.mod files.
+// ev-abci expects evolve v1 to be used.
+func updateDependencies(appPath string) error {
+	gomod, err := gomodule.ParseAt(appPath)
+	if err != nil {
+		return errors.Errorf("failed to parse go.mod: %w", err)
+	}
+
+	gomod.AddNewRequire(EvABCIPackage, EvABCIVersion, false)
+	gomod.AddNewRequire(EvNodePackage, EvNodeVersion, false)
+
+	// add local-da as go tool dependency (useful for local development)
+	if err := gomod.AddTool(EvNodeDaCmd); err != nil {
+		return errors.Errorf("failed to add local-da tool: %w", err)
+	}
+
+	// add required replaces
+	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
+
+	// save go.mod
+	data, err := gomod.Format()
+	if err != nil {
+		return errors.Errorf("failed to format go.mod: %w", err)
+	}
+
+	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
 }

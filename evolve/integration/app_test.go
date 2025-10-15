@@ -49,6 +49,17 @@ func TestEvolve(t *testing.T) {
 		)),
 	))
 
+	env.Must(env.Exec("run evolve add-migrate",
+		step.NewSteps(step.New(
+			step.Exec(
+				envtest.IgniteApp,
+				"evolve",
+				"add-migrate",
+			),
+			step.Workdir(app.SourcePath()),
+		)),
+	))
+
 	buf := &bytes.Buffer{}
 	bin := path.Join(goenv.Bin(), app.Binary())
 	env.Must(env.Exec("check evolved", step.NewSteps(
