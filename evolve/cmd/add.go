@@ -18,6 +18,7 @@ const (
 	statusScaffolding = "Scaffolding..."
 
 	flagPath    = "path"
+	flagStart   = "start"
 	flagMigrate = "migrate"
 )
 
@@ -28,6 +29,11 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	defer session.End()
 
 	appPath, err := flags.GetString(flagPath)
+	if err != nil {
+		return err
+	}
+
+	withStartCmd, err := flags.GetBool(flagStart)
 	if err != nil {
 		return err
 	}
@@ -52,7 +58,7 @@ func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	g, err := template.NewEvolveGenerator(c, migrateCometBFT)
+	g, err := template.NewEvolveGenerator(c, migrateCometBFT, withStartCmd)
 	if err != nil {
 		return err
 	}

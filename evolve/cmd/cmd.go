@@ -24,6 +24,12 @@ func GetCommands() []*plugin.Command {
 							Type:      plugin.FlagTypeString,
 						},
 						{
+							Name:         flagStart,
+							Usage:        "modify start command to use ev-abci (set to false to only add migrate command)",
+							Type:         plugin.FlagTypeBool,
+							DefaultValue: "true",
+						},
+						{
 							Name:  flagMigrate,
 							Usage: "scaffolds the migrations helpers and modules (to use when migrating from CometBFT)",
 							Type:  plugin.FlagTypeBool,

@@ -71,8 +71,9 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 	}
 }
 
-// commandsGenesisModify modifies the application genesis command to use evolve.
-func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
+// commandsGenesisInitModify modifies the application genesis init command to use evolve.
+// this is only needed when the start command is also modified.
+func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {
 		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
 		f, err := r.Disk.Find(cmdPath)
@@ -109,13 +110,38 @@ func commandsGenesisModify(appPath, binaryName string) genny.RunFn {
 		}
 
 		// modify the add commands arguments using xast.
-		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
 		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
 			if strings.Contains(args[0], "InitCmd") {
 				args[0] = "genesisCmd"
 			}
 
-			// add migrate command
+			return args, nil
+		})
+
+		return r.File(genny.NewFileS(cmdPath, content))
+	}
+}
+
+// commandsMigrateModify adds the evolve migrate command to the application.
+func commandsMigrateModify(appPath, binaryName string) genny.RunFn {
+	return func(r *genny.Runner) error {
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd/commands.go")
+		f, err := r.Disk.Find(cmdPath)
+		if err != nil {
+			return err
+		}
+
+		content, err := xast.AppendImports(
+			f.String(),
+			xast.WithNamedImport("abciserver", "github.com/evstack/ev-abci/server"),
+		)
+		if err != nil {
+			return err
+		}
+
+		// add migrate command
+		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
+		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
 			if !alreadyAdded {
 				args = append(args, evolveV1MigrateCmd)
 				alreadyAdded = true

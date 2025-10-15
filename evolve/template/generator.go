@@ -11,7 +11,7 @@ import (
 )
 
 // NewEvolveGenerator returns the generator to scaffold a evolve integration inside an app.
-func NewEvolveGenerator(chain *chain.Chain, withCometMigration bool) (*genny.Generator, error) {
+func NewEvolveGenerator(chain *chain.Chain, withCometMigration, withStartCmd bool) (*genny.Generator, error) {
 	g := genny.New()
 	ctx := plush.NewContext()
 	plushhelpers.ExtendPlushContext(ctx)
@@ -28,9 +28,12 @@ func NewEvolveGenerator(chain *chain.Chain, withCometMigration bool) (*genny.Gen
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
-	g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
-	g.RunFn(commandsGenesisModify(appPath, binaryName))
-	g.RunFn(commandsRollbackModify(appPath, binaryName))
+	if withStartCmd {
+		g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
+		g.RunFn(commandsGenesisInitModify(appPath, binaryName))
+		g.RunFn(commandsRollbackModify(appPath, binaryName))
+	}
+	g.RunFn(commandsMigrateModify(appPath, binaryName))
 	if withCometMigration {
 		g.RunFn(migrateFromCometModify(appPath))
 	}

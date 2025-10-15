@@ -33,11 +33,26 @@ func migrateFromCometModify(appPath string) genny.RunFn {
 			return err
 		}
 
+		// add migrationmngr module config for depinject
+		moduleConfigTemplate := `{
+				Name:   migrationmngrtypes.ModuleName,
+				Config: appconfig.WrapAny(&migrationmngrmodule.Module{}),
+			},
+			%[1]v`
+		moduleConfigReplacement := fmt.Sprintf(moduleConfigTemplate, module.PlaceholderSgAppModuleConfig)
+		content = replacer.Replace(content, module.PlaceholderSgAppModuleConfig, moduleConfigReplacement)
+
+		// preblocker for migrationmngr
+		preBlockerTemplate := `migrationmngrtypes.ModuleName,
+						%[1]v`
+		preBlockerReplacement := fmt.Sprintf(preBlockerTemplate, "// this line is used by starport scaffolding # stargate/app/preBlockers")
+		content = replacer.Replace(content, "// this line is used by starport scaffolding # stargate/app/preBlockers", preBlockerReplacement)
+
 		// end block for migrationmngr
-		template := `migrationmngrtypes.ModuleName,
+		endBlockerTemplate := `migrationmngrtypes.ModuleName,
 %[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppEndBlockers)
-		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
+		endBlockerReplacement := fmt.Sprintf(endBlockerTemplate, module.PlaceholderSgAppEndBlockers)
+		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, endBlockerReplacement)
 
 		// replace staking blank import
 		content = strings.Replace(content, "github.com/cosmos/cosmos-sdk/x/staking", "github.com/evstack/ev-abci/modules/staking", 1)
