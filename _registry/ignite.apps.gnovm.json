@@ -1,0 +1,30 @@
+{
+  "appName": "GnoVM",
+  "appID": "gnovm",
+  "appDescription": "Scaffold a Cosmos GnoVM-enabled chain with ease",
+  "ignite": ">29.5.0",
+  "dependencies": {},
+  "cosmosSDK": ">0.50.1",
+  "authors": [
+    {
+      "name": "Julien Robert",
+      "github": "julienrbrt"
+    }
+  ],
+  "repositoryUrl": "https://github.com/ignite/apps/gnovm",
+  "documentationUrl": "https://github.com/ignite/apps/tree/main/gnovm/README.md",
+  "license": {
+    "name": "MIT",
+    "url": "https://github.com/ignite/apps/blob/main/LICENSE"
+  },
+  "keywords": [
+    "gnovm",
+    "gnolang",
+    "gno.land",
+    "cli",
+    "cosmos-sdk",
+    "ignite app",
+    "cosmos"
+  ],
+  "supportedPlatforms": ["mac", "linux"]
+}
