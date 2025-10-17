@@ -54,3 +54,6 @@ apps:
   example-hooks:
     description: A simple hooks application
     path: ./examples/hooks
+  gnovm:
+    description: Scaffold a GnoVM-enabled chain with ease
+    path: ./gnovm
