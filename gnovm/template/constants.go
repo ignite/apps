@@ -6,5 +6,5 @@ const (
 	GnolangForkVersion = "v0.0.0-20251016194523-cc39946f0d00"
 
 	GnoVMModulePackage = "github.com/ignite/gnovm"
-	GnoVMModuleVersion = "v0.0.0-20251017144407-b5ee5eec730c"
+	GnoVMModuleVersion = "v0.1.0-alpha.1"
 )
