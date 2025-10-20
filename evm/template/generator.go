@@ -3,12 +3,17 @@ package template
 import (
 	"embed"
 	"io/fs"
+	"math"
 	"os"
 	"path/filepath"
 
 	"github.com/gobuffalo/genny/v2"
 	"github.com/gobuffalo/plush/v4"
 
+	sdkmath "cosmossdk.io/math"
+	sdk "github.com/cosmos/cosmos-sdk/types"
+
+	configchain "github.com/ignite/cli/v29/ignite/config/chain"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/gomodule"
 	"github.com/ignite/cli/v29/ignite/pkg/gomodulepath"
@@ -53,6 +58,10 @@ func NewEVMGenerator(chain *chain.Chain) (*genny.Generator, error) {
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
+	if err := updateConfigYaml(chain); err != nil {
+		return nil, errors.Errorf("failed to update config.yaml: %w", err)
+	}
+
 	g.RunFn(commandsModify(appPath, binaryName))
 	g.RunFn(rootModify(appPath, binaryName))
 	g.RunFn(appModify(appPath, binaryName))
@@ -81,4 +90,29 @@ func updateDependencies(appPath string) error {
 	}
 
 	return os.WriteFile(filepath.Join(appPath, "go.mod"), data, 0o644)
+}
+
+const defaultValPower = 1
+
+// updateConfigYaml updates the default bond tokens.
+// this is required as the chain uses 18 decimals.
+func updateConfigYaml(c *chain.Chain) error {
+	igniteConfig, err := c.Config()
+	if err != nil {
+		return err
+	}
+
+	coins := sdk.NewCoin(igniteConfig.DefaultDenom, sdkmath.NewInt((defaultValPower * int64(math.Pow10(18)))))
+	igniteConfig.Validators[0].Bonded = coins.String()
+	for i, account := range igniteConfig.Accounts {
+		if account.Name == igniteConfig.Validators[0].Name {
+			igniteConfig.Accounts[i].Coins = []string{coins.String()}
+		}
+	}
+
+	if err := configchain.Save(*igniteConfig, c.ConfigPath()); err != nil {
+		return err
+	}
+
+	return nil
 }

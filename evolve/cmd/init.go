@@ -63,7 +63,7 @@ func initEVABCI(
 			return err
 		}
 
-		coins := sdk.NewCoin("stake", sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
+		coins := sdk.NewCoin(igniteConfig.DefaultDenom, sdkmath.NewInt((defaultValPower * int64(math.Pow10(6)))))
 		igniteConfig.Validators[0].Bonded = coins.String()
 		for i, account := range igniteConfig.Accounts {
 			if account.Name == igniteConfig.Validators[0].Name {
