@@ -21,6 +21,8 @@ func appModify(appPath, binaryName string) genny.RunFn {
 		// change imports
 		content, err := xast.AppendImports(
 			f.String(),
+			xast.WithImport("math/big"),
+			xast.WithImport("cosmossdk.io/math"),
 			xast.WithNamedImport("feegrantkeeper", "cosmossdk.io/x/feegrant/keeper"),
 			xast.WithNamedImport("_", "github.com/ethereum/go-ethereum/eth/tracers/js"),
 			xast.WithNamedImport("_", "github.com/ethereum/go-ethereum/eth/tracers/native"),
@@ -51,6 +53,22 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			"ChainCoinType = 60",
 			"ChainCoinType = 118",
 			1,
+		)
+
+		// change decimal to 18
+		content, err = xast.InsertGlobal(
+			content,
+			xast.GlobalTypeConst,
+			xast.WithGlobal("BaseDenomUnit", "int64", "18"),
+		)
+
+		content, err = xast.ModifyFunction(
+			content,
+			"init",
+			xast.AppendFuncCode(`// Update power reduction for 18-decimal base unit
+    sdk.DefaultPowerReduction = math.NewIntFromBigInt(
+        new(big.Int).Exp(big.NewInt(10), big.NewInt(BaseDenomUnit), nil),
+    )`),
 		)
 
 		// append modules
