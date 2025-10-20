@@ -2,7 +2,7 @@
 
 ## [`v0.1.2`](https://github.com/ignite/apps/releases/tag/evm/v0.1.2)
 
-- []() Set default token decimal to 18 as recommended.
+- [#239](https://github.com/ignite/apps/pull/239) Set default token decimal to 18 as recommended.
 
 ## [`v0.1.1`](https://github.com/ignite/apps/releases/tag/evm/v0.1.1)
 
