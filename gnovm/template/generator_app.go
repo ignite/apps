@@ -9,7 +9,7 @@ import (
 )
 
 // appModify modifies the application app.go to use GnoVM.
-func appModify(appPath, binaryName string) genny.RunFn {
+func appModify(appPath string) genny.RunFn {
 	return func(r *genny.Runner) error {
 		appGoPath := filepath.Join(appPath, module.PathAppGo)
 		f, err := r.Disk.Find(appGoPath)
@@ -40,7 +40,7 @@ func appModify(appPath, binaryName string) genny.RunFn {
 			return err
 		}
 
-		// modify new app function
+		// modify the new app function
 		content, err = xast.ModifyFunction(
 			content,
 			"New",
@@ -49,7 +49,7 @@ func appModify(appPath, binaryName string) genny.RunFn {
 				"&app.GnoVMKeeper",
 				-1,
 			),
-			xast.AppendFuncCodeAtLine(
+			xast.AppendFuncAtLine(
 				`// set ante handlers
 				if err := app.setAnteHandler(ante.HandlerOptions{
 					AccountKeeper:   app.AuthKeeper,

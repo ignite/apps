@@ -44,16 +44,11 @@ func NewGnoVMGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
-	binaryName, err := chain.Binary()
-	if err != nil {
-		return nil, err
-	}
-
 	if err := updateDependencies(appPath); err != nil {
 		return nil, errors.Errorf("failed to update go.mod: %w", err)
 	}
 
-	g.RunFn(appModify(appPath, binaryName))
+	g.RunFn(appModify(appPath))
 	g.RunFn(appConfigModify(appPath))
 
 	return g, nil
@@ -67,10 +62,14 @@ func updateDependencies(appPath string) error {
 	}
 
 	// add required dependencies
-	gomod.AddRequire(GnoVMModulePackage, GnoVMModuleVersion)
+	if err := gomod.AddRequire(GnoVMModulePackage, GnoVMModuleVersion); err != nil {
+		return errors.Errorf("failed to add gnovm module dependencie: %w", err)
+	}
 
 	// add temporary replaces
-	gomod.AddReplace(GnolangPackage, "", GnolangForkPackage, GnolangForkVersion)
+	if err := gomod.AddReplace(GnolangPackage, "", GnolangForkPackage, GnolangForkVersion); err != nil {
+		return errors.Errorf("failed to add gnolang dependencie replace: %w", err)
+	}
 
 	// save go.mod
 	data, err := gomod.Format()
