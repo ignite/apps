@@ -4,13 +4,13 @@ go 1.24.1
 
 require (
 	cosmossdk.io/math v1.5.3
-	github.com/cometbft/cometbft v0.38.17
+	github.com/cometbft/cometbft v0.38.19
 	github.com/cosmos/cosmos-sdk v0.53.4
 	github.com/evstack/ev-node v1.0.0-beta.2.0.20250908090838-0584153217ed
 	github.com/gobuffalo/genny/v2 v2.1.0
 	github.com/gobuffalo/plush/v4 v4.1.22
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/ignite/cli/v29 v29.6.0
+	github.com/ignite/cli/v29 v29.6.1
 	github.com/spf13/viper v1.20.1
 	github.com/stretchr/testify v1.10.0
 )
