@@ -5,7 +5,7 @@ go 1.24.4
 require (
 	github.com/gookit/color v1.5.4
 	github.com/hashicorp/go-plugin v1.6.3
-	github.com/ignite/cli/v29 v29.4.0
+	github.com/ignite/cli/v29 v29.6.1
 	github.com/manifoldco/promptui v0.9.0
 )
 
@@ -29,7 +29,7 @@ require (
 	github.com/cockroachdb/logtags v0.0.0-20241215232642-bb51bb14a506 // indirect
 	github.com/cockroachdb/redact v1.1.6 // indirect
 	github.com/cosmos/btcutil v1.0.5 // indirect
-	github.com/cosmos/cosmos-sdk v0.53.3 // indirect
+	github.com/cosmos/cosmos-sdk v0.53.4 // indirect
 	github.com/cyphar/filepath-securejoin v0.3.6 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/erikgeiser/coninput v0.0.0-20211004153227-1c3628e74d0f // indirect
