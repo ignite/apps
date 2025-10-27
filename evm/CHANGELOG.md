@@ -2,7 +2,7 @@
 
 ## [`v0.1.3`](https://github.com/ignite/apps/releases/tag/evm/v0.1.3)
 
-- []() Bump Cosmos EVM version to v0.4.2.
+- [#242](https://github.com/ignite/apps/pull/242) Bump Cosmos EVM version to v0.4.2.
 
 ## [`v0.1.2`](https://github.com/ignite/apps/releases/tag/evm/v0.1.2)
 
