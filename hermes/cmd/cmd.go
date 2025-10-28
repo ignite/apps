@@ -45,8 +45,18 @@ func GetCommands() []*plugin.Command {
 							Short: "Start the Hermes relayer",
 						},
 						{
-							Use:   "clear",
-							Short: "Clear all configuration files from the config path",
+							Use:   "clear [command]",
+							Short: "Clear the Hermes directories",
+							Commands: []*plugin.Command{
+								{
+									Use:   "binaries",
+									Short: "Clear all binary files from the cache path",
+								},
+								{
+									Use:   "configs",
+									Short: "Clear all configuration files from the config path",
+								},
+							},
 						},
 						{
 							Use:   "keys [command]",

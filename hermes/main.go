@@ -24,7 +24,14 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	args := c.OsArgs[3:]
 	switch args[0] {
 	case "clear":
-		return cmd.ClearHandler(ctx, c)
+		switch args[1] {
+		case "binaries":
+			return cmd.ClearBinariesHandler(ctx, c)
+		case "configs":
+			return cmd.ClearConfigsHandler(ctx, c)
+		default:
+			return errors.Errorf("unknown clear command: %s", args[1])
+		}
 	case "configure":
 		return cmd.ConfigureHandler(ctx, c)
 	case "exec":

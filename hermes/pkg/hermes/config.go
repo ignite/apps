@@ -11,15 +11,19 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/pelletier/go-toml/v2"
+
+	"github.com/ignite/cli/v29/ignite/config"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosfaucet"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/pelletier/go-toml/v2"
+	"github.com/ignite/cli/v29/ignite/pkg/xfilepath"
 )
 
 const (
 	// ConfigNameSeparator config file chain name separator.
 	ConfigNameSeparator = "_"
+	configPathDirectory = "apps/hermes/config"
 )
 
 type (
@@ -207,7 +211,7 @@ func (c *Config) ConfigPath() (string, error) {
 	return ConfigFilePath(cfgName)
 }
 
-// ClearConfigPath clear all configuration files from the config path
+// ClearConfigPath clear all configuration files from the config path.
 func ClearConfigPath() (string, error) {
 	cfgPath, err := configPath()
 	if err != nil {
@@ -218,16 +222,7 @@ func ClearConfigPath() (string, error) {
 
 // configPath returns the default hermes config path.
 func configPath() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(
-		userHomeDir,
-		".ignite",
-		"relayer",
-		"hermes",
-	), nil
+	return xfilepath.Join(config.DirPath, xfilepath.Path(hermesDirectory), xfilepath.Path("config"))()
 }
 
 // ConfigFilePath generates a config file path.
@@ -250,15 +245,6 @@ func LoadConfig(cfgPath string) (*Config, error) {
 	}
 	var cfg *Config
 	return cfg, toml.Unmarshal(cfgBytes, cfg)
-}
-
-// DefaultConfigPath returns the default Hermes config path.
-func DefaultConfigPath() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(userHomeDir, ".hermes", "config.toml"), nil
 }
 
 // WithTelemetryEnabled set telemetry enable into the Hermes config.

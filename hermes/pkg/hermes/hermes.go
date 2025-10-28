@@ -13,6 +13,8 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
+const hermesDirectory = "apps/hermes"
+
 const (
 	FlagHostChain        = "host-chain"
 	FlagReferenceChain   = "reference-chain"

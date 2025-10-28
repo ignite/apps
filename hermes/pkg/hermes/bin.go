@@ -18,9 +18,8 @@ import (
 )
 
 const (
-	DefaultVersion       = "v1.13.1"
-	apiURL               = "https://api.github.com/repos/informalsystems/hermes/releases/tags/"
-	binaryCacheDirectory = "apps/hermes/bin"
+	DefaultVersion = "v1.13.1"
+	apiURL         = "https://api.github.com/repos/informalsystems/hermes/releases/tags/"
 )
 
 type asset struct {
@@ -44,14 +43,20 @@ var osMap = map[string]string{
 	"linux":  "unknown-linux-gnu",
 }
 
+// ClearBinCachePath clear all binary files from the cache path.
+func ClearBinCachePath() (string, error) {
+	cfgPath, err := binCacheDirPath()
+	if err != nil {
+		return "", err
+	}
+	return cfgPath, os.RemoveAll(cfgPath)
+}
+
 // binCacheDirPath returns the local cache directory path where binaries are stored.
 func binCacheDirPath() (string, error) {
-	cachePath, err := xfilepath.Join(config.DirPath, xfilepath.Path(binaryCacheDirectory))()
+	cachePath, err := xfilepath.Join(config.DirPath, xfilepath.Path(hermesDirectory), xfilepath.Path("bin"))()
 	if err != nil {
 		return "", errors.Errorf("failed to construct binary cache directory path: %w", err)
-	}
-	if err := os.MkdirAll(cachePath, 0o755); err != nil {
-		return "", errors.Errorf("failed to create cache directory: %w", err)
 	}
 	return cachePath, nil
 }
@@ -61,6 +66,9 @@ func binCachePath(version string) (string, error) {
 	cachePath, err := binCacheDirPath()
 	if err != nil {
 		return "", errors.Errorf("failed to get binary cache directory: %w", err)
+	}
+	if err := os.MkdirAll(cachePath, 0o755); err != nil {
+		return "", errors.Errorf("failed to create cache directory: %w", err)
 	}
 	return filepath.Join(cachePath, version), nil
 }
