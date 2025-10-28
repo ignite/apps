@@ -204,11 +204,20 @@ func (c *Config) ConfigPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ConfigPath(cfgName)
+	return ConfigFilePath(cfgName)
 }
 
-// ConfigPath generates a config file path.
-func ConfigPath(cfgName string) (string, error) {
+// ClearConfigPath clear all configuration files from the config path
+func ClearConfigPath() (string, error) {
+	cfgPath, err := configPath()
+	if err != nil {
+		return "", err
+	}
+	return cfgPath, os.RemoveAll(cfgPath)
+}
+
+// configPath returns the default hermes config path.
+func configPath() (string, error) {
 	userHomeDir, err := os.UserHomeDir()
 	if err != nil {
 		return "", err
@@ -218,6 +227,17 @@ func ConfigPath(cfgName string) (string, error) {
 		".ignite",
 		"relayer",
 		"hermes",
+	), nil
+}
+
+// ConfigFilePath generates a config file path.
+func ConfigFilePath(cfgName string) (string, error) {
+	cfgPath, err := configPath()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(
+		cfgPath,
 		cfgName,
 	), nil
 }

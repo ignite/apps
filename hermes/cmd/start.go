@@ -31,7 +31,7 @@ func StartHandler(ctx context.Context, cmd *plugin.ExecutedCommand) (err error) 
 	session.StartSpinner("Fetching hermes config")
 	cfgPath := customCfg
 	if cfgPath == "" {
-		cfgPath, err = hermes.ConfigPath(cfgName)
+		cfgPath, err = hermes.ConfigFilePath(cfgName)
 		if err != nil {
 			return err
 		}
