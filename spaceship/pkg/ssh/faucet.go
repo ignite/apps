@@ -4,14 +4,7 @@ import (
 	"context"
 	"path/filepath"
 	"strconv"
-
-	"github.com/ignite/apps/spaceship/pkg/faucet"
 )
-
-// faucet returns the path to the faucet script within the workspace.
-func (s *SSH) faucet() string {
-	return filepath.Join(s.Bin(), faucet.BinaryName())
-}
 
 // faucetScript returns the path to the faucet runner script within the workspace.
 func (s *SSH) faucetScript() string {

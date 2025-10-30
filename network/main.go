@@ -20,7 +20,7 @@ func (app) Manifest(_ context.Context) (*plugin.Manifest, error) {
 	return m, nil
 }
 
-func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, api plugin.ClientAPI) error {
+func (app) Execute(_ context.Context, c *plugin.ExecutedCommand, _ plugin.ClientAPI) error {
 	// Instead of a switch on c.Use, we run the root command like if
 	// we were in a command line context. This implies to set os.Args
 	// correctly.

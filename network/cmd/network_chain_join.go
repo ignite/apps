@@ -4,13 +4,14 @@ import (
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/manifoldco/promptui"
+	"github.com/rdegges/go-ipify"
+	"github.com/spf13/cobra"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
-	"github.com/manifoldco/promptui"
-	"github.com/pkg/errors"
-	"github.com/rdegges/go-ipify"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"

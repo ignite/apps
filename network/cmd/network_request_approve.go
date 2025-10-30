@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/spf13/cobra"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/numbers"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
 )

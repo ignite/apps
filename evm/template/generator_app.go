@@ -10,7 +10,7 @@ import (
 )
 
 // appModify modifies the application app.go to use EVM.
-func appModify(appPath, binaryName string) genny.RunFn {
+func appModify(appPath string) genny.RunFn {
 	return func(r *genny.Runner) error {
 		appGoPath := filepath.Join(appPath, module.PathAppGo)
 		f, err := r.Disk.Find(appGoPath)

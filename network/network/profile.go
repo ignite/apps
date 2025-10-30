@@ -2,11 +2,13 @@ package network
 
 import (
 	"context"
-	"errors"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
+
 	profiletypes "github.com/ignite/network/x/profile/types"
 	projecttypes "github.com/ignite/network/x/project/types"
 

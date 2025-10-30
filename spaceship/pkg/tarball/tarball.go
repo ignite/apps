@@ -33,7 +33,7 @@ func ExtractData(ctx context.Context, file io.Reader, output string, fileList ..
 	}
 
 	extracted := make([]string, 0)
-	err = format.(archiver.Extractor).Extract(ctx, reader, func(ctx context.Context, f archiver.FileInfo) error {
+	err = format.(archiver.Extractor).Extract(ctx, reader, func(_ context.Context, f archiver.FileInfo) error {
 		fileList := fileList
 		if !fileIsIncluded(fileList, f.Name()) {
 			return nil

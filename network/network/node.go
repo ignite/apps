@@ -3,13 +3,15 @@ package network
 import (
 	"context"
 	"encoding/base64"
-	"errors"
 
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
 	ibcclienttypes "github.com/cosmos/ibc-go/v8/modules/core/02-client/types"
 	ibcconntypes "github.com/cosmos/ibc-go/v8/modules/core/03-connection/types"
 	ibcchanneltypes "github.com/cosmos/ibc-go/v8/modules/core/04-channel/types"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	spntypes "github.com/ignite/network/pkg/types"
+
 	monitoringptypes "github.com/ignite/network/x/monitoringp/types"
 
 	"github.com/ignite/apps/network/network/networktypes"

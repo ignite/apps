@@ -6,13 +6,15 @@ import (
 	"sort"
 	"sync"
 
+	"golang.org/x/sync/errgroup"
+
 	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
+
 	launchtypes "github.com/ignite/network/x/launch/types"
 	projecttypes "github.com/ignite/network/x/project/types"
 	rewardtypes "github.com/ignite/network/x/reward/types"
-	"github.com/pkg/errors"
-	"golang.org/x/sync/errgroup"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

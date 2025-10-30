@@ -12,16 +12,16 @@ import (
 )
 
 type (
-	// GentxInfo represents the basic info about gentx file.
-	GentxInfo struct {
+	// Info represents the basic info about gentx file.
+	Info struct {
 		ValidatorAddress string
 		PubKey           ed25519.PubKey
 		SelfDelegation   sdk.Coin
 		Memo             string
 	}
 
-	// Gentx represents the gentx file.
-	Gentx struct {
+	// GenTx represents the gentx file.
+	GenTx struct {
 		Body struct {
 			Messages []struct {
 				ValidatorAddress string `json:"validator_address"`
@@ -39,8 +39,8 @@ type (
 	}
 )
 
-// GentxFromPath returns GentxInfo from the json file.
-func GentxFromPath(path string) (info GentxInfo, gentx []byte, err error) {
+// FromPath returns Info from the json file.
+func FromPath(path string) (info Info, gentx []byte, err error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
 		return info, gentx, errors.New("chain home folder is not initialized yet: " + path)
 	}
@@ -54,10 +54,10 @@ func GentxFromPath(path string) (info GentxInfo, gentx []byte, err error) {
 	return info, gentx, err
 }
 
-// ParseGentx returns GentxInfo and the gentx file in bytes.
-func ParseGentx(gentxBz []byte) (info GentxInfo, err error) {
+// ParseGentx returns Info and the gentx file in bytes.
+func ParseGentx(gentxBz []byte) (info Info, err error) {
 	// Try parsing gentx
-	var gentx Gentx
+	var gentx GenTx
 	if err := json.Unmarshal(gentxBz, &gentx); err != nil {
 		return info, errors.Errorf("unmarshal gentx: %w", err)
 	}

@@ -3,15 +3,15 @@ package cmd
 import (
 	"path/filepath"
 
-	"github.com/ignite/cli/v29/ignite/config"
-	"github.com/ignite/cli/v29/ignite/pkg/cache"
-	"github.com/ignite/cli/v29/ignite/pkg/cliui"
-	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
-	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
-	"github.com/ignite/cli/v29/ignite/pkg/events"
-	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	flag "github.com/spf13/pflag"
+
+	"github.com/ignite/cli/v29/ignite/config"
+	"github.com/ignite/cli/v29/ignite/pkg/cache"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/events"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"
@@ -220,7 +220,7 @@ func getNetworkCosmosClient(cmd *cobra.Command) (cosmosclient.Client, error) {
 	cosmosOptions := []cosmosclient.Option{
 		cosmosclient.WithHome(cosmosaccount.KeyringHome),
 		cosmosclient.WithNodeAddress(spn.NodeAddress),
-		cosmosclient.WithAddressPrefix(networktypes.SPN),
+		cosmosclient.WithBech32Prefix(networktypes.SPN),
 		cosmosclient.WithUseFaucet(spn.FaucetAddress, networktypes.SPNDenom, 5),
 		cosmosclient.WithKeyringServiceName(cosmosaccount.KeyringServiceName),
 		cosmosclient.WithKeyringDir(getKeyringDir(cmd)),
@@ -350,10 +350,6 @@ func flagSetCheckDependencies() *flag.FlagSet {
 func flagGetCheckDependencies(cmd *cobra.Command) (check bool) {
 	check, _ = cmd.Flags().GetBool(flagCheckDependencies)
 	return
-}
-
-func printSection(session *cliui.Session, title string) error {
-	return session.Printf("------\n%s\n------\n\n", title)
 }
 
 func flagSetSpnAddresses() *flag.FlagSet {

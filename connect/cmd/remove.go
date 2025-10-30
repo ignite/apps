@@ -2,17 +2,17 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path"
 
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/connect/chains"
 )
 
-func RemoveHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
+func RemoveHandler(_ context.Context, cmd *plugin.ExecutedCommand) error {
 	if len(cmd.Args) < 1 {
 		return errors.New("usage: connect remove <chain>")
 	}

@@ -4,7 +4,6 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/ignite/cli/v29/ignite/pkg/cliui/colors"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
@@ -22,14 +21,6 @@ const (
 
 	ScaffoldChainHook  = "scaffold-chain"
 	ScaffoldModuleHook = "scaffold-module"
-)
-
-var (
-	modifyPrefix = colors.Modified("modify ")
-	createPrefix = colors.Success("create ")
-	removePrefix = func(s string) string {
-		return strings.TrimPrefix(strings.TrimPrefix(s, modifyPrefix), createPrefix)
-	}
 )
 
 // GetCommands returns the list of fee-abstraction app commands.

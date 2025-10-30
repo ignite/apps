@@ -2,16 +2,17 @@ package cmd
 
 import (
 	"context"
-	"errors"
 	"fmt"
-	"strings"
 
 	authv1betav1 "cosmossdk.io/api/cosmos/auth/v1beta1"
 	"github.com/charmbracelet/bubbles/spinner"
 	tea "github.com/charmbracelet/bubbletea"
+	"golang.org/x/text/cases"
+	"golang.org/x/text/language"
 	"google.golang.org/grpc"
 
 	"github.com/ignite/cli/v29/ignite/pkg/chainregistry"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 
 	"github.com/ignite/apps/connect/chains"
@@ -28,7 +29,7 @@ type addCmdModel struct {
 }
 
 func newAddCmdModel(chain chainregistry.Chain) *addCmdModel {
-	s := spinner.NewModel()
+	s := spinner.New()
 	s.Spinner = spinner.Dot
 
 	c := &chain
@@ -119,10 +120,10 @@ func (m *addCmdModel) View() string {
 		end = totalSize
 	}
 
-	out := "\033[K" // clear current line before printing
+	out := outLine
 	out += "Select endpoint:\n"
 	for i, item := range items[start:end] {
-		out += "\033[K" // clear current line before printing
+		out += outLine
 		if i == m.selectedIndex {
 			out += "\033[32m✓ \033[1m" + item + "\033[0m\n"
 		} else {
@@ -130,7 +131,7 @@ func (m *addCmdModel) View() string {
 		}
 	}
 
-	out += "\033[K" // clear current line before printing
+	out += outLine
 	out += "(press 'n'/'right' for next, 'p'/'left' for prev, 'enter' to add chain, 'q'/'ctrl+c' to quit)\n"
 
 	return out
@@ -204,7 +205,8 @@ func initChain(ctx context.Context, chain chainregistry.Chain, endpoint string) 
 		return err
 	}
 
-	fmt.Printf("%s is ready to Connect!\n", strings.Title(chain.ChainName)) //nolintlint:staticcheck // strings.Title has a better API.
+	c := cases.Title(language.English, cases.NoLower)
+	fmt.Printf("%s is ready to Connect!\n", c.String(chain.ChainName))
 	return nil
 }
 

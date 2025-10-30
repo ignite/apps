@@ -53,7 +53,7 @@ func (n Network) GetJoinRequestContents(
 	)
 
 	// parse the gentx content
-	gentxInfo, gentx, err := gentx.GentxFromPath(gentxPath)
+	gentxInfo, gentx, err := gentx.FromPath(gentxPath)
 	if err != nil {
 		return reqs, err
 	}

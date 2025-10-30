@@ -96,7 +96,7 @@ func NewWasmGenerator(replacer placeholder.Replacer, opts *Options) (*genny.Gene
 	g.Transformer(xgenny.Transformer(ctx))
 
 	g.RunFn(cmdConfigModify(opts))
-	g.RunFn(appModify(replacer, opts))
+	g.RunFn(appModify(opts))
 	g.RunFn(appConfigModify(replacer, opts))
 	g.RunFn(ibcModify(replacer, opts))
 	g.RunFn(cmdModify(opts))
@@ -168,7 +168,7 @@ func appConfigModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
 }
 
 // appModify app.go modification when adding wasm integration.
-func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
+func appModify(opts *Options) genny.RunFn {
 	return func(r *genny.Runner) error {
 		appPath := filepath.Join(opts.AppPath, module.PathAppGo)
 		f, err := r.Disk.Find(appPath)

@@ -2,7 +2,6 @@ package networkchain
 
 import (
 	"context"
-	"errors"
 	"os"
 	"os/exec"
 	"time"
@@ -10,13 +9,16 @@ import (
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
+
 	chainconfig "github.com/ignite/cli/v29/ignite/config/chain"
 	"github.com/ignite/cli/v29/ignite/pkg/cache"
 	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
 	"github.com/ignite/cli/v29/ignite/pkg/checksum"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
 	"github.com/ignite/cli/v29/ignite/services/chain"
+
 	"github.com/ignite/network/pkg/chainid"
 
 	"github.com/ignite/apps/network/network/networktypes"

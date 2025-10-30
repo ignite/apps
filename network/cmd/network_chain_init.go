@@ -1,19 +1,19 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
-	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
+	"github.com/manifoldco/promptui"
+	"github.com/spf13/cobra"
 
 	"github.com/ignite/cli/v29/ignite/pkg/chaincmd"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
+	"github.com/ignite/cli/v29/ignite/pkg/cliui/bubbleconfirm"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/icons"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
 	cosmosgenesis "github.com/ignite/cli/v29/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/services/chain"
-	"github.com/manifoldco/promptui"
-	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"

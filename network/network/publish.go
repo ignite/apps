@@ -3,13 +3,15 @@ package network
 import (
 	"context"
 	"encoding/json"
-	"errors"
 	"os"
 	"path/filepath"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+
 	cosmosgenesis "github.com/ignite/cli/v29/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
+
 	launchtypes "github.com/ignite/network/x/launch/types"
 	profiletypes "github.com/ignite/network/x/profile/types"
 	projecttypes "github.com/ignite/network/x/project/types"

@@ -4,7 +4,6 @@ import (
 	"context"
 	"path/filepath"
 
-	"github.com/ignite/apps/evm/template"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
@@ -12,6 +11,8 @@ import (
 	"github.com/ignite/cli/v29/ignite/pkg/xgenny"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 	"github.com/ignite/cli/v29/ignite/services/plugin"
+
+	"github.com/ignite/apps/evm/template"
 )
 
 const (
@@ -20,7 +21,7 @@ const (
 	flagPath = "path"
 )
 
-// AddHandler implements the EVM integration command
+// AddHandler implements the EVM integration command.
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 

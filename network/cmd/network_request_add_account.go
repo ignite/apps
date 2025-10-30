@@ -1,14 +1,16 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
+	"github.com/spf13/cobra"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+
 	launchtypes "github.com/ignite/network/x/launch/types"
-	"github.com/spf13/cobra"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networkchain"
