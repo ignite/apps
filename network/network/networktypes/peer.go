@@ -3,9 +3,9 @@ package networktypes
 import (
 	"strings"
 
-	launchtypes "github.com/ignite/network/x/launch/types"
-
 	"github.com/ignite/cli/v29/ignite/pkg/xurl"
+
+	launchtypes "github.com/ignite/network/x/launch/types"
 )
 
 // VerifyPeerFormat checks if the peer address format is valid.

@@ -21,7 +21,7 @@ const (
 	flagPath = "path"
 )
 
-// AddHandler implements the GnoVM integration command
+// AddHandler implements the GnoVM integration command.
 func AddHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 	flags := plugin.Flags(cmd.Flags)
 

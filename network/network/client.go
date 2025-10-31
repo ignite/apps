@@ -2,7 +2,8 @@ package network
 
 import (
 	"context"
-	"errors"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 
 	monitoringctypes "github.com/ignite/network/x/monitoringc/types"
 

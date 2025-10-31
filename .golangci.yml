@@ -17,7 +17,6 @@ linters:
     - gocritic
     - godot
     - gofumpt
-    - revive
     - gosimple
     - govet
     - grouper
@@ -25,16 +24,16 @@ linters:
     - misspell
     - nakedret
     - nolintlint
-    - staticcheck
     - reassign
+    - revive
+    - staticcheck
     - stylecheck
+    - thelper
     - typecheck
     - unconvert
-    - tenv
-    - thelper
-    - unused
     - unparam
-    - misspell
+    - unused
+    - usetesting
 
 linters-settings:
   forbidigo:

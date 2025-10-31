@@ -63,12 +63,12 @@ func updateDependencies(appPath string) error {
 
 	// add required dependencies
 	if err := gomod.AddRequire(GnoVMModulePackage, GnoVMModuleVersion); err != nil {
-		return errors.Errorf("failed to add gnovm module dependencie: %w", err)
+		return errors.Errorf("failed to add gnovm module dependencies: %w", err)
 	}
 
 	// add temporary replaces
 	if err := gomod.AddReplace(GnolangPackage, "", GnolangForkPackage, GnolangForkVersion); err != nil {
-		return errors.Errorf("failed to add gnolang dependencie replace: %w", err)
+		return errors.Errorf("failed to add gnolang dependencies replace: %w", err)
 	}
 
 	// save go.mod

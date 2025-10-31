@@ -28,8 +28,8 @@ func NewChainRegistry() *ChainRegistry {
 	}
 }
 
-// FetchChains fetches the list of chains from the cosmos.directory API
-// Note, the output chainregistry.Chain doesn't contain the full list of fields
+// FetchChains fetches the list of chains from the cosmos.directory API.
+// Note, the output chainregistry.Chain doesn't contain the full list of fields.
 func (r *ChainRegistry) FetchChains() error {
 	client := &http.Client{
 		Timeout: 5 * time.Second,
@@ -73,7 +73,7 @@ func (r *ChainRegistry) FetchChains() error {
 	return nil
 }
 
-// EnrichChain fetches the full chain information from the cosmos.directory API
+// EnrichChain fetches the full chain information from the cosmos.directory API.
 func EnrichChain(chain *chainregistry.Chain) error {
 	baseURL := fmt.Sprintf("%s/%s", cosmosDirectoryAPIURL, chain.ChainName)
 

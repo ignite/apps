@@ -6,6 +6,8 @@ import (
 	"github.com/ignite/cli/v29/ignite/services/plugin"
 )
 
+const outLine = "\033[K" // current line before printing
+
 // GetCommands returns the list of app commands.
 func GetCommands(availableChains []string) []*plugin.Command {
 	cmd := []*plugin.Command{

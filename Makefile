@@ -69,7 +69,7 @@ lint:
 	@for dir in $$(find $$(pwd -P) -mindepth 1 -maxdepth 4 -type d); do \
         if [ -e "$$dir/go.mod" ]; then \
             echo "Running golangci-lint in $$dir"; \
-            cd "$$dir" && golangci-lint run; \
+            cd "$$dir" && golangci-lint run --fix; \
         fi \
     done
 

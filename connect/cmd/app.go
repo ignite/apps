@@ -51,7 +51,7 @@ func AppHandler(ctx context.Context, name string, cfg *chains.ChainConfig, args 
 			ValidatorAddressCodec: addresscodec.NewBech32Codec(fmt.Sprintf("%svaloper", cfg.Bech32Prefix)),
 			ConsensusAddressCodec: addresscodec.NewBech32Codec(fmt.Sprintf("%svalcons", cfg.Bech32Prefix)),
 		},
-		GetClientConn: func(command *cobra.Command) (grpc.ClientConnInterface, error) {
+		GetClientConn: func(*cobra.Command) (grpc.ClientConnInterface, error) {
 			return conn.Connect()
 		},
 		AddQueryConnFlags: func(command *cobra.Command) {

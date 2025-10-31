@@ -16,7 +16,7 @@ import (
 
 const pageSize = 10
 
-// model holds the state of the UI
+// model holds the state of the UI.
 type discoverCmdModel struct {
 	spinner  spinner.Model
 	fetching bool
@@ -28,7 +28,7 @@ type discoverCmdModel struct {
 	chainRegistry *chains.ChainRegistry
 }
 
-// Messages
+// Messages.
 type fetchDoneMsg struct {
 	reg *chains.ChainRegistry
 }
@@ -37,12 +37,12 @@ type fetchErrMsg struct {
 	err error
 }
 
-// Init initialize Bubble Tea program
+// Init initialize Bubble Tea program.
 func (m *discoverCmdModel) Init() tea.Cmd {
 	return tea.Batch(fetchChainsCmd)
 }
 
-// fetchChainsCmd fetch the chains in the background
+// fetchChainsCmd fetch the chains in the background.
 func fetchChainsCmd() tea.Msg {
 	cr := chains.NewChainRegistry()
 	if err := cr.FetchChains(); err != nil {
@@ -51,7 +51,7 @@ func fetchChainsCmd() tea.Msg {
 	return fetchDoneMsg{cr}
 }
 
-// Update handles messages and updates the model accordingly
+// Update handles messages and updates the model accordingly.
 func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	var cmd tea.Cmd
 	var totalSize int
@@ -114,7 +114,7 @@ func (m *discoverCmdModel) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	return m, cmd
 }
 
-// View returns the UI as a string
+// View returns the UI as a string.
 func (m *discoverCmdModel) View() string {
 	if m.fetching && m.err == nil {
 		return fmt.Sprintf("%s Discovering chains... (press 'q' to quit)\n", m.spinner.View())
@@ -139,7 +139,7 @@ func (m *discoverCmdModel) View() string {
 		end = totalSize
 	}
 
-	out := "\033[K" // clear current line before printing
+	out := outLine
 	out += fmt.Sprintf("Fetched %d chains. Showing %d-%d:\n", totalSize, start+1, end)
 
 	// ANSI escape codes for highlighting
@@ -149,7 +149,7 @@ func (m *discoverCmdModel) View() string {
 	for i, k := range chainsNames[start:end] {
 		chain := m.chainRegistry.Chains[k]
 
-		out += "\033[K" // clear current line before printing
+		out += outLine
 
 		// Check if the input corresponds to this line number
 		if i == m.selectedIndex {
@@ -159,13 +159,13 @@ func (m *discoverCmdModel) View() string {
 		}
 	}
 
-	out += "\033[K" // clear current line before printing
+	out += outLine
 	out += "(press 'n'/'right' for next, 'p'/'left' for prev, 'enter' to init chain, 'q'/'ctrl+c' to quit)\n"
 	return out
 }
 
-func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
-	s := spinner.NewModel()
+func DiscoverHandler(context.Context, *plugin.ExecutedCommand) error {
+	s := spinner.New()
 	s.Spinner = spinner.Dot
 	model := &discoverCmdModel{
 		spinner:  s,
@@ -177,7 +177,7 @@ func DiscoverHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	// if the user selected a chain, execute the add command
+	// if the user selected a chain, execute the add command.
 	if len(model.selectedChain.ChainName) > 0 {
 		selectedChain := model.chainRegistry.Chains[model.selectedChain.ChainName]
 

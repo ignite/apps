@@ -13,7 +13,7 @@ import (
 var (
 	configName = "connect.yaml"
 
-	// ErrConfigNotFound is returned when the config file is not found
+	// ErrConfigNotFound is returned when the config file is not found.
 	ErrConfigNotFound = fmt.Errorf("config file not found")
 )
 

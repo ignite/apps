@@ -3,7 +3,7 @@ package networktypes
 import (
 	"fmt"
 
-	"github.com/pkg/errors"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
 
 // ErrInvalidRequest is an error returned in methods manipulating requests when they are invalid.

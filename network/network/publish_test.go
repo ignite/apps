@@ -2,7 +2,6 @@ package network
 
 import (
 	"context"
-	"errors"
 	"net/http"
 	"net/http/httptest"
 	"os"
@@ -10,11 +9,14 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	sdkerrors "github.com/cosmos/cosmos-sdk/types/errors"
+	"github.com/stretchr/testify/mock"
+	"github.com/stretchr/testify/require"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+
 	launchtypes "github.com/ignite/network/x/launch/types"
 	profiletypes "github.com/ignite/network/x/profile/types"
 	projecttypes "github.com/ignite/network/x/project/types"
-	"github.com/stretchr/testify/mock"
-	"github.com/stretchr/testify/require"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"

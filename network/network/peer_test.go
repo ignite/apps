@@ -1,11 +1,13 @@
 package network
 
 import (
-	"errors"
 	"testing"
 
-	launchtypes "github.com/ignite/network/x/launch/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+
+	launchtypes "github.com/ignite/network/x/launch/types"
 )
 
 func TestPeerAddress(t *testing.T) {

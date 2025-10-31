@@ -59,7 +59,7 @@ func NewFeeAbstractionGenerator(replacer placeholder.Replacer, opts *Options) (*
 	plushhelpers.ExtendPlushContext(ctx)
 	g.Transformer(xgenny.Transformer(ctx))
 
-	g.RunFn(appModify(replacer, opts))
+	g.RunFn(appModify(opts))
 	g.RunFn(appConfigModify(replacer, opts))
 	g.RunFn(ibcModify(replacer, opts))
 
@@ -67,7 +67,7 @@ func NewFeeAbstractionGenerator(replacer placeholder.Replacer, opts *Options) (*
 }
 
 // appModify app.go modification when adding fee abstraction integration.
-func appModify(replacer placeholder.Replacer, opts *Options) genny.RunFn {
+func appModify(opts *Options) genny.RunFn {
 	return func(r *genny.Runner) error {
 		appPath := filepath.Join(opts.AppPath, module.PathAppGo)
 		f, err := r.Disk.Find(appPath)

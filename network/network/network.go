@@ -9,16 +9,18 @@ import (
 	sdktypes "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
 	stakingtypes "github.com/cosmos/cosmos-sdk/x/staking/types"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosaccount"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
 	"github.com/ignite/cli/v29/ignite/pkg/xtime"
+
 	launchtypes "github.com/ignite/network/x/launch/types"
 	monitoringctypes "github.com/ignite/network/x/monitoringc/types"
 	profiletypes "github.com/ignite/network/x/profile/types"
 	projecttypes "github.com/ignite/network/x/project/types"
 	rewardtypes "github.com/ignite/network/x/reward/types"
-	"github.com/pkg/errors"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

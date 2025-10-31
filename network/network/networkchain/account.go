@@ -2,12 +2,12 @@ package networkchain
 
 import (
 	"context"
-	"errors"
 	"os"
 	"path/filepath"
 
 	chaincmdrunner "github.com/ignite/cli/v29/ignite/pkg/chaincmd/runner"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosutil"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/randstr"
 	"github.com/ignite/cli/v29/ignite/pkg/xos"
 	"github.com/ignite/cli/v29/ignite/services/chain"

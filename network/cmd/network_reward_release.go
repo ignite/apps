@@ -46,7 +46,7 @@ func NewNetworkRewardRelease() *cobra.Command {
 	return c
 }
 
-func networkRewardRelease(cmd *cobra.Command, args []string) (err error) {
+func networkRewardRelease(*cobra.Command, []string) (err error) {
 	return err
 }
 
@@ -170,7 +170,6 @@ func networkRewardRelease(cmd *cobra.Command, args []string) (err error) {
 		if err != nil {
 			return err
 		}
-	}
 
 	if err := printSection(session, "Paths"); err != nil {
 		return err
@@ -184,7 +183,7 @@ func networkRewardRelease(cmd *cobra.Command, args []string) (err error) {
 	}
 
 	var buf bytes.Buffer
-	w := tabwriter.NewWriter(&buf, 0, 0, 1, ' ', tabwriter.TabIndent)
+	w := tabwriter.NewWriter(&buf, 0, 1, ' ', tabwriter.TabIndent)
 	fmt.Fprintf(w, "%s:\n", path.ID)
 	fmt.Fprintf(w, "   \t%s\t>\t(port: %s)\t(channel: %s)\n", path.Src.ChainID, path.Src.PortID, path.Src.ChannelID)
 	fmt.Fprintf(w, "   \t%s\t>\t(port: %s)\t(channel: %s)\n", path.Dst.ChainID, path.Dst.PortID, path.Dst.ChannelID)
@@ -209,18 +208,18 @@ func createClient(
 ) (networktypes.RewardIBCInfo, networktypes.RewardIBCInfo, error) {
 	nodeClient, err := cosmosclient.New(cmd.Context(), cosmosclient.WithNodeAddress(nodeAPI))
 	if err != nil {
-		return networktypes.RewardIBCInfo{}, networktypes.RewardIBCInfo{}, err
+		return networktypes.RewardIBCInfo{}, err
 	}
 	node := network.NewNode(nodeClient)
 
 	chainRelayer, err := node.RewardIBCInfo(cmd.Context())
 	if err != nil {
-		return networktypes.RewardIBCInfo{}, networktypes.RewardIBCInfo{}, err
+		return networktypes.RewardIBCInfo{}, err
 	}
 
 	rewardsInfo, chainID, unboundingTime, err := node.RewardsInfo(cmd.Context())
 	if err != nil {
-		return networktypes.RewardIBCInfo{}, networktypes.RewardIBCInfo{}, err
+		return networktypes.RewardIBCInfo{}, err
 	}
 
 	spnRelayer, err := n.RewardIBCInfo(cmd.Context(), launchID)
@@ -228,7 +227,7 @@ func createClient(
 		spnRelayer.ClientID, err = n.CreateClient(cmd.Context(), launchID, unboundingTime, rewardsInfo)
 	}
 	if err != nil {
-		return networktypes.RewardIBCInfo{}, networktypes.RewardIBCInfo{}, err
+		return networktypes.RewardIBCInfo{}, err
 	}
 
 	chainRelayer.ChainID = chainID
@@ -262,7 +261,6 @@ func printRelayerOptions(session *cliui.Session, obj, chainID, option string) {
 			obj,
 		)
 	}
-}
 
 func spnRelayerConfig(
 	srcChain,
@@ -293,8 +291,6 @@ func spnRelayerConfig(
 						ConnectionID: dstChannel.ConnectionID,
 						ChannelID:    dstChannel.ChannelID,
 					},
-				},
-			},
 		}
 	)
 	switch {
@@ -310,5 +306,10 @@ func spnRelayerConfig(
 		return pathID, conf, nil
 	}
 	return pathID, conf, errors.New("connection was already established and is missing in one of the chains")
+}
+
+
+func printSection(session *cliui.Session, title string) error {
+	return session.Printf("------\n%s\n------\n\n", title)
 }
 */

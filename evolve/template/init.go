@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosver"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
@@ -46,7 +47,7 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 		content = replaceLegacyAddCommands(content)
 
 		// modify the add commands arguments using xast.
-		content, err = xast.ModifyCaller(content, ServerAddCommandsWithStartCmdOptions, func(args []string) ([]string, error) {
+		content, err = xast.ModifyCaller(content, ServerAddCommandsWithStartCmdOptions, func([]string) ([]string, error) {
 			return []string{
 				"rootCmd",
 				"app.DefaultNodeHome",

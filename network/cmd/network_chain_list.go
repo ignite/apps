@@ -1,14 +1,15 @@
 package cmd
 
 import (
-	"errors"
 	"fmt"
 	"time"
 
 	"github.com/cosmos/cosmos-sdk/types/query"
+	"github.com/spf13/cobra"
+
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui/entrywriter"
-	"github.com/spf13/cobra"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 
 	"github.com/ignite/apps/network/network"
 	"github.com/ignite/apps/network/network/networktypes"

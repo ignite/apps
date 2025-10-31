@@ -19,13 +19,13 @@ func TestParseGentx(t *testing.T) {
 	tests := []struct {
 		name      string
 		gentxPath string
-		wantInfo  GentxInfo
+		wantInfo  Info
 		wantErr   bool
 	}{
 		{
 			name:      "parse gentx file 1",
 			gentxPath: "testdata/gentx1.json",
-			wantInfo: GentxInfo{
+			wantInfo: Info{
 				ValidatorAddress: "cosmosvaloper1dd246yq6z5vzjz9gh8cff46pll75yyl8pu8cup",
 				PubKey:           ed25519.PubKey(pk1),
 				SelfDelegation: sdk.Coin{
@@ -37,7 +37,7 @@ func TestParseGentx(t *testing.T) {
 		}, {
 			name:      "parse gentx file 2",
 			gentxPath: "testdata/gentx2.json",
-			wantInfo: GentxInfo{
+			wantInfo: Info{
 				ValidatorAddress: "cosmosvaloper1mmlqwyqk7neqegffp99q86eckpm4pjah5sl2dw",
 				PubKey:           ed25519.PubKey(pk2),
 				SelfDelegation: sdk.Coin{
@@ -58,7 +58,7 @@ func TestParseGentx(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			gotInfo, _, err := GentxFromPath(tt.gentxPath)
+			gotInfo, _, err := FromPath(tt.gentxPath)
 			if tt.wantErr {
 				require.Error(t, err)
 				return

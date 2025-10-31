@@ -2,7 +2,6 @@ package networkchain
 
 import (
 	"context"
-	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -10,6 +9,7 @@ import (
 	chainconfig "github.com/ignite/cli/v29/ignite/config/chain"
 	"github.com/ignite/cli/v29/ignite/pkg/cache"
 	cosmosgenesis "github.com/ignite/cli/v29/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
 	"github.com/ignite/cli/v29/ignite/services/chain"
 )

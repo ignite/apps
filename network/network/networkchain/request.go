@@ -5,8 +5,8 @@ import (
 	"fmt"
 
 	cosmosgenesis "github.com/ignite/cli/v29/ignite/pkg/cosmosutil/genesis"
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
 	"github.com/ignite/cli/v29/ignite/pkg/events"
-	"github.com/pkg/errors"
 
 	"github.com/ignite/apps/network/network/networktypes"
 )

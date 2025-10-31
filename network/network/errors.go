@@ -18,6 +18,8 @@ func isNotFoundErr(err error) bool {
 				return true
 			}
 			return false
+		default:
+			return false
 		}
 	}
 	return false

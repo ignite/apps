@@ -2,13 +2,15 @@ package network
 
 import (
 	"context"
-	"errors"
 	"testing"
 
 	sdkmath "cosmossdk.io/math"
 	sdk "github.com/cosmos/cosmos-sdk/types"
-	rewardtypes "github.com/ignite/network/x/reward/types"
 	"github.com/stretchr/testify/require"
+
+	"github.com/ignite/cli/v29/ignite/pkg/errors"
+
+	rewardtypes "github.com/ignite/network/x/reward/types"
 
 	"github.com/ignite/apps/network/network/networktypes"
 	"github.com/ignite/apps/network/network/testutil"
