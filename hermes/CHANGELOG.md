@@ -3,6 +3,7 @@
 ## Unreleased
 
 * [#214](https://github.com/ignite/apps/pull/214) Bump ignite to `v29`.
+* [#244](https://github.com/ignite/apps/pull/244) Add clear commands and improvements.
 
 ## [`v0.3.0`](https://github.com/ignite/apps/releases/tag/hermes/v0.3.0)
 

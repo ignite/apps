@@ -11,15 +11,19 @@ import (
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 	banktypes "github.com/cosmos/cosmos-sdk/x/bank/types"
+	"github.com/pelletier/go-toml/v2"
+
+	"github.com/ignite/cli/v29/ignite/config"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosclient"
 	"github.com/ignite/cli/v29/ignite/pkg/cosmosfaucet"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
-	"github.com/pelletier/go-toml/v2"
+	"github.com/ignite/cli/v29/ignite/pkg/xfilepath"
 )
 
 const (
 	// ConfigNameSeparator config file chain name separator.
 	ConfigNameSeparator = "_"
+	configPathDirectory = "apps/hermes/config"
 )
 
 type (
@@ -204,20 +208,31 @@ func (c *Config) ConfigPath() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return ConfigPath(cfgName)
+	return ConfigFilePath(cfgName)
 }
 
-// ConfigPath generates a config file path.
-func ConfigPath(cfgName string) (string, error) {
-	userHomeDir, err := os.UserHomeDir()
+// ClearConfigPath clear all configuration files from the config path.
+func ClearConfigPath() (string, error) {
+	cfgPath, err := configPath()
+	if err != nil {
+		return "", err
+	}
+	return cfgPath, os.RemoveAll(cfgPath)
+}
+
+// configPath returns the default hermes config path.
+func configPath() (string, error) {
+	return xfilepath.Join(config.DirPath, xfilepath.Path(hermesDirectory), xfilepath.Path("config"))()
+}
+
+// ConfigFilePath generates a config file path.
+func ConfigFilePath(cfgName string) (string, error) {
+	cfgPath, err := configPath()
 	if err != nil {
 		return "", err
 	}
 	return filepath.Join(
-		userHomeDir,
-		".ignite",
-		"relayer",
-		"hermes",
+		cfgPath,
 		cfgName,
 	), nil
 }
@@ -230,15 +245,6 @@ func LoadConfig(cfgPath string) (*Config, error) {
 	}
 	var cfg *Config
 	return cfg, toml.Unmarshal(cfgBytes, cfg)
-}
-
-// DefaultConfigPath returns the default Hermes config path.
-func DefaultConfigPath() (string, error) {
-	userHomeDir, err := os.UserHomeDir()
-	if err != nil {
-		return "", err
-	}
-	return filepath.Join(userHomeDir, ".hermes", "config.toml"), nil
 }
 
 // WithTelemetryEnabled set telemetry enable into the Hermes config.

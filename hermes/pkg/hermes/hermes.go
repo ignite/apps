@@ -7,11 +7,14 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"regexp"
 
 	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/exec"
 	"github.com/ignite/cli/v29/ignite/pkg/cmdrunner/step"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 )
+
+const hermesDirectory = "apps/hermes"
 
 const (
 	FlagHostChain        = "host-chain"
@@ -401,15 +404,23 @@ func (h *Hermes) Run(ctx context.Context, options ...Option) error {
 	var out bytes.Buffer
 	stdout = io.MultiWriter(stdout, &out)
 
+	var outErr bytes.Buffer
+	stderr = io.MultiWriter(stderr, &outErr)
+
 	if err := exec.Exec(ctx, cmd,
 		exec.StepOption(step.Stdin(stdin)),
 		exec.StepOption(step.Stdout(stdout)),
 		exec.StepOption(step.Stderr(stderr)),
 	); err != nil {
-		// Try to parse stdout as a Hermes formatted error
-		if err := parseErrFromOutput(out.Bytes()); err != nil {
+		// Try to parse stderr as a Hermes formatted error
+		if err := parseErrFromStdErr(outErr.Bytes()); err != nil {
 			return err
 		}
+		// Try to parse stdout as a Hermes formatted error
+		if err := parseErrFromStdOut(out.Bytes()); err != nil {
+			return err
+		}
+
 		// Otherwise return the execution error
 		return err
 	}
@@ -440,11 +451,11 @@ func ValidateResult(data []byte) error {
 	return nil
 }
 
-// parseErrFromOutput parses any error found in the Hermes output.
+// parseErrFromOutput parses any error found in the Hermes std output.
 // Error are sent to stdout as JSON lines where the last line might
 // contain the final error message returned by Hermes. Previous lines
 // might contain standard logging entries.
-func parseErrFromOutput(out []byte) error {
+func parseErrFromStdOut(out []byte) error {
 	out = bytes.TrimSpace(out)
 	if len(out) > 0 {
 		lines := bytes.Split(out, []byte("\n"))
@@ -452,6 +463,21 @@ func parseErrFromOutput(out []byte) error {
 		if errors.Is(err, ErrResult) {
 			return err
 		}
+	}
+	return nil
+}
+
+// parseErrFromStdErr parses any error found in the Hermes std error.
+// Error are sent to stderr in the first line.
+func parseErrFromStdErr(out []byte) error {
+	out = bytes.TrimSpace(out)
+	if len(out) > 0 {
+		lines := bytes.Split(out, []byte("\n"))
+
+		// Remove timestamp and thread ID pattern from error message
+		pattern := `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d+Z\s+ERROR\s+ThreadId\(\d+\)\s+`
+		cleanError := regexp.MustCompile(pattern).ReplaceAll(lines[0], []byte(""))
+		return errors.New(string(cleanError))
 	}
 	return nil
 }

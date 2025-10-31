@@ -55,7 +55,7 @@ func ConfigureHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 			return err
 		}
 	} else {
-		hermesCfg, err = newHermesConfig(flags, args, customCfg)
+		hermesCfg, err = newHermesConfig(flags, args)
 		if err != nil {
 			return err
 		}
@@ -398,16 +398,7 @@ GetKey:
 }
 
 // newHermesConfig create a new hermes config based in the cmd args.
-func newHermesConfig(flags plugin.Flags, args []string, customCfg string) (*hermes.Config, error) {
-	// if a custom config was set, save it in the ignite hermes folder
-	if customCfg != "" {
-		c, err := hermes.LoadConfig(customCfg)
-		if err != nil {
-			return nil, err
-		}
-		return c, c.Save()
-	}
-
+func newHermesConfig(flags plugin.Flags, args []string) (*hermes.Config, error) {
 	// Create the default hermes config
 	var (
 		telemetryEnabled, _                         = flags.GetBool(flagTelemetryEnabled)

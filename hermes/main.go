@@ -23,6 +23,15 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	// Remove the three elements "ignite", "relayer" and "hermes" from OsArgs.
 	args := c.OsArgs[3:]
 	switch args[0] {
+	case "clear":
+		switch args[1] {
+		case "binaries":
+			return cmd.ClearBinariesHandler(ctx, c)
+		case "configs":
+			return cmd.ClearConfigsHandler(ctx, c)
+		default:
+			return errors.Errorf("unknown clear command: %s", args[1])
+		}
 	case "configure":
 		return cmd.ConfigureHandler(ctx, c)
 	case "exec":
