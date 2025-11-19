@@ -5,7 +5,6 @@ const (
 
 	RollkitV0XStartHandler = "rollserv.StartHandler"
 	EvolveV1XStartHandler  = "abciserver.StartHandler"
-	evolveV1MigrateCmd     = "abciserver.MigrateToEvolveCmd()"
 )
 
 const (
@@ -13,7 +12,7 @@ const (
 	EvABCIVersion = "v1.0.0-beta.3"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.7"
+	EvNodeVersion = "v1.0.0-beta.9"
 
 	GoHeaderPackageFork = "github.com/julienrbrt/go-header"
 	GoHeaderVersionFork = "v0.0.0-20250909151551-cb11b091bf58"

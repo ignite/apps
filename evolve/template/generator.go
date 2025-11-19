@@ -44,6 +44,7 @@ func NewEvolveGenerator(chain *chain.Chain, opts GeneratorOptions) (*genny.Gener
 		g.RunFn(commandsStartModify(appPath, binaryName, chain.Version))
 		g.RunFn(commandsGenesisInitModify(appPath, binaryName))
 		g.RunFn(commandsRollbackModify(appPath, binaryName))
+		g.RunFn(commandsForceInclusionModify(appPath, binaryName))
 	}
 
 	if opts.WithMigration {

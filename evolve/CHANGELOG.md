@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## [`v0.6.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)
+
+- []() Bump `ev-node` and enable force inclusion by default.
+
 ## [`v0.5.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)
 
 - [#237](https://github.com/ignite/apps/pull/237) Remove `--start` and `--migrate` flags from `evolve add` command. Split into `evolve add` and `evolve add-migrate` commands.
