@@ -1,11 +1,14 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"math"
 	"os"
 	"path/filepath"
+	"reflect"
+	"strings"
 
 	sdkmath "cosmossdk.io/math"
 	"github.com/cometbft/cometbft/crypto"
@@ -17,6 +20,7 @@ import (
 	"github.com/spf13/viper"
 
 	evconfig "github.com/evstack/ev-node/pkg/config"
+	evgenesis "github.com/evstack/ev-node/pkg/genesis"
 
 	configchain "github.com/ignite/cli/v29/ignite/config/chain"
 	"github.com/ignite/cli/v29/ignite/pkg/cliui"
@@ -114,6 +118,16 @@ func initEVABCI(
 		return err
 	}
 
+	// Add DAEpochForcedInclusion field to genesis
+	fieldTag, err := getJSONTag(evgenesis.Genesis{}, "DAEpochForcedInclusion")
+	if err != nil {
+		return fmt.Errorf("failed to get JSON tag for DAEpochForcedInclusion in Evolve genesis: %w", err)
+	}
+
+	if err := prependFieldToGenesis(genesisPath, fieldTag, "25"); err != nil {
+		return fmt.Errorf("failed to add %s to genesis: %w", fieldTag, err)
+	}
+
 	// modify evolve config (add da namespace)
 	evolveConfigPath := filepath.Join(home, evconfig.AppConfigDir, evconfig.ConfigName)
 	evolveViper := viper.New()
@@ -153,4 +167,76 @@ func getPubKey(chainHome string) (crypto.PubKey, error) {
 		return nil, errors.Errorf("error reading PrivValidator key from %v: %s", keyFilePath, err)
 	}
 	return pvKey.PubKey, nil
+}
+
+// getJSONTag extracts the JSON tag value for a given field name using reflection.
+func getJSONTag(v interface{}, fieldName string) (string, error) {
+	t := reflect.TypeOf(v)
+	field, ok := t.FieldByName(fieldName)
+	if !ok {
+		return "", fmt.Errorf("field %s not found in type %s", fieldName, t.Name())
+	}
+
+	jsonTag := field.Tag.Get("json")
+	if jsonTag == "" {
+		return "", fmt.Errorf("field %s does not have a json tag", fieldName)
+	}
+
+	// Handle tags like "field_name,omitempty" by taking only the first part
+	if idx := strings.Index(jsonTag, ","); idx != -1 {
+		jsonTag = jsonTag[:idx]
+	}
+
+	return jsonTag, nil
+}
+
+// prependFieldToGenesis adds a field as the first field in the genesis JSON file
+// without loading the entire JSON structure into memory.
+func prependFieldToGenesis(genesisPath, fieldName, fieldValue string) error {
+	data, err := os.ReadFile(genesisPath)
+	if err != nil {
+		return fmt.Errorf("failed to read genesis file: %w", err)
+	}
+
+	// Find the first opening brace
+	openBraceIdx := bytes.IndexByte(data, '{')
+	if openBraceIdx == -1 {
+		return fmt.Errorf("invalid genesis file: no opening brace found")
+	}
+
+	// Start right after the opening brace
+	insertPos := openBraceIdx + 1
+
+	// Find where the next non-whitespace content starts
+	contentStart := insertPos
+	for contentStart < len(data) && (data[contentStart] == ' ' || data[contentStart] == '\n' || data[contentStart] == '\r' || data[contentStart] == '\t') {
+		contentStart++
+	}
+
+	// Check if there's any content (not just closing brace)
+	hasContent := contentStart < len(data) && data[contentStart] != '}'
+
+	// Build the new field with proper formatting
+	var newField string
+	if hasContent {
+		// There's existing content, add comma after our field
+		newField = fmt.Sprintf("\n  \"%s\": %s,", fieldName, fieldValue)
+	} else {
+		// Empty object, no comma needed
+		newField = fmt.Sprintf("\n  \"%s\": %s\n", fieldName, fieldValue)
+	}
+
+	// Construct the new file content
+	var buf bytes.Buffer
+	buf.Write(data[:insertPos])
+	buf.WriteString(newField)
+	// Write the original whitespace and remaining content
+	buf.Write(data[insertPos:])
+
+	// Write back to file
+	if err := os.WriteFile(genesisPath, buf.Bytes(), 0644); err != nil {
+		return fmt.Errorf("failed to write genesis file: %w", err)
+	}
+
+	return nil
 }
