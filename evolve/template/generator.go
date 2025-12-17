@@ -73,10 +73,6 @@ func updateDependencies(appPath string) error {
 	// add required replaces
 	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
 
-	// add temporary replaces
-	// TODO(@julienrbrt): remove after tagged version of ev-abci and ev-node
-	gomod.AddReplace("github.com/evstack/ev-node/core", "", "github.com/evstack/ev-node/core", "v1.0.0-beta.5.0.20251216132820-afcd6bd9b354")
-
 	// save go.mod
 	data, err := gomod.Format()
 	if err != nil {
