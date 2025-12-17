@@ -18,5 +18,5 @@ const (
 	GoHeaderVersionFork = "v0.0.0-20250909151551-cb11b091bf58"
 	GoHeaderPackage     = "github.com/celestiaorg/go-header"
 
-	EvNodeDaCmd = "github.com/evstack/ev-node/da/cmd/local-da"
+	EvNodeDaCmd = "github.com/evstack/ev-node/tools/local-da"
 )

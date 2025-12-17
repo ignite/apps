@@ -2,7 +2,7 @@
 
 ## Unreleased
 
-## [`v0.6.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)
+## [`v0.6.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.6.0)
 
 - [#247](https://github.com/ignite/apps/pull/247) Bump `ev-node`, `ev-abci` and enable force inclusion by default.
 

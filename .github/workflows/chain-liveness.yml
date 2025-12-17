@@ -56,7 +56,7 @@ jobs:
         run: |
           cd gm
           # start the local da in the background
-          go tool github.com/evolve/ev-node/da/cmd/local-da &
+          go tool github.com/evolve/ev-node/tools/local-da &
           # capture the background process PID
           echo "DA_PID=$!" >> $GITHUB_ENV
           # give it a moment to start
