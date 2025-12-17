@@ -28,7 +28,7 @@ func commandsMigrateModify(appPath, binaryName string) genny.RunFn {
 		alreadyAdded := false // to avoid adding the migrate command multiple times as there are multiple calls to `rootCmd.AddCommand`
 		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
 			if !alreadyAdded {
-				args = append(args, evolveV1MigrateCmd)
+				args = append(args, "abciserver.MigrateToEvolveCmd()")
 				alreadyAdded = true
 			}
 

@@ -124,6 +124,38 @@ func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 	}
 }
 
+// commandsForceInclusionModify adds the evolve force inclusion command to the application.
+func commandsForceInclusionModify(appPath, binaryName string) genny.RunFn {
+	return func(r *genny.Runner) error {
+		cmdPath := filepath.Join(appPath, "cmd", binaryName, "cmd", "commands.go")
+		f, err := r.Disk.Find(cmdPath)
+		if err != nil {
+			return err
+		}
+
+		content, err := xast.AppendImports(
+			f.String(),
+			xast.WithNamedImport("abciserver", "github.com/evstack/ev-abci/server"),
+		)
+		if err != nil {
+			return err
+		}
+
+		// add force inclusion command
+		alreadyAdded := false // to avoid adding the force inclusion command multiple times as there are multiple calls to `rootCmd.AddCommand`
+		content, err = xast.ModifyCaller(content, "rootCmd.AddCommand", func(args []string) ([]string, error) {
+			if !alreadyAdded {
+				args = append(args, "abciserver.PostTxCmd()")
+				alreadyAdded = true
+			}
+
+			return args, nil
+		})
+
+		return r.File(genny.NewFileS(cmdPath, content))
+	}
+}
+
 // commandsRollbackModify modifies the application rollback command to use evolve.
 func commandsRollbackModify(appPath, binaryName string) genny.RunFn {
 	return func(r *genny.Runner) error {

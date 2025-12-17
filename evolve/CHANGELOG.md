@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- [#247](https://github.com/ignite/apps/pull/247) Bump `ev-node`, `ev-abci` and wire force inclusion changes.
+
 ## [`v0.5.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)
 
 - [#237](https://github.com/ignite/apps/pull/237) Remove `--start` and `--migrate` flags from `evolve add` command. Split into `evolve add` and `evolve add-migrate` commands.

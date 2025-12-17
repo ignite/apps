@@ -22,7 +22,7 @@ Then start `local-da` or use Celestia mainnet as data availability layer.
 
 ```sh
 cd gm
-go tool github.com/evstack/ev-node/da/cmd/local-da
+go tool github.com/evstack/ev-node/tools/local-da
 ```
 
 Finally, run the network:
