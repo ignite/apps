@@ -70,9 +70,6 @@ func updateDependencies(appPath string) error {
 		return errors.Errorf("failed to add local-da tool: %w", err)
 	}
 
-	// add required replaces
-	gomod.AddReplace(GoHeaderPackage, "", GoHeaderPackageFork, GoHeaderVersionFork)
-
 	// save go.mod
 	data, err := gomod.Format()
 	if err != nil {
