@@ -12,7 +12,7 @@ const (
 	EvABCIVersion = "v1.0.0-beta.4"
 
 	EvNodePackage = "github.com/evstack/ev-node"
-	EvNodeVersion = "v1.0.0-beta.12"
+	EvNodeVersion = "v1.0.0-rc.1"
 
 	EvNodeDaCmd = "github.com/evstack/ev-node/tools/local-da"
 )
