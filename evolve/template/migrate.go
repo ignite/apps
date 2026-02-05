@@ -34,6 +34,9 @@ func commandsMigrateModify(appPath, binaryName string) genny.RunFn {
 
 			return args, nil
 		})
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
