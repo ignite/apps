@@ -97,7 +97,17 @@ func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 
 		// use ast to modify the function that initializes genesisCmd
 		content, err = xast.ModifyFunction(content, "initRootCmd",
-			xast.AppendFuncAtLine("\n\t\tgenesisCmd := genutilcli.InitCmd(basicManager, app.DefaultNodeHome)\n\t\tevnodeconf.AddFlags(genesisCmd)\n\t\tgenesisCmdRunE := genesisCmd.RunE\n\t\tgenesisCmd.RunE = func(cmd *cobra.Command, args []string) error {\n\t\t\tif err := genesisCmdRunE(cmd, args); err != nil {\n\t\t\t\treturn err\n\t\t\t}\n\t\t\treturn abciserver.InitRunE(cmd, args)\n\t\t}\n\t\t",
+			xast.AppendFuncAtLine(`
+		genesisCmd := genutilcli.InitCmd(basicManager, app.DefaultNodeHome)
+		evnodeconf.AddFlags(genesisCmd)
+		genesisCmdRunE := genesisCmd.RunE
+		genesisCmd.RunE = func(cmd *cobra.Command, args []string) error {
+		    if err := genesisCmdRunE(cmd, args); err != nil {
+		        return err
+		    }
+		    return abciserver.InitRunE(cmd, args)
+		}
+		        `,
 				0),
 		)
 		if err != nil {
