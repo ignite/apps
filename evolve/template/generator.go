@@ -70,6 +70,10 @@ func updateDependencies(appPath string) error {
 		return errors.Errorf("failed to add local-da tool: %w", err)
 	}
 
+	// add temporary replace due to deps issues
+	gomod.AddReplace("github.com/libp2p/go-libp2p", "", "github.com/libp2p/go-libp2p", "v0.47.0")
+	gomod.AddReplace("github.com/quic-go/webtransport-go", "", "github.com/quic-go/webtransport-go", "v0.10.0")
+
 	// save go.mod
 	data, err := gomod.Format()
 	if err != nil {
