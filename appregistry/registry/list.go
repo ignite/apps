@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
 
@@ -48,7 +49,7 @@ func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 			continue
 		}
 
-		entry, err := r.getRegistryEntry(file, branch)
+		entry, err := r.getRegistryEntry(ctx, file, branch)
 		if err != nil {
 			return nil, err
 		}
@@ -59,16 +60,31 @@ func (r *Querier) List(ctx context.Context, branch string) (Apps, error) {
 	return entries, nil
 }
 
-func (r *Querier) getRegistryEntry(fileName, branch string) (*App, error) {
+func (r *Querier) getRegistryEntry(ctx context.Context, fileName, branch string) (*App, error) {
 	if branch == "" {
 		branch = "main"
 	}
 	// here we do not use `GetFileContent` to avoid hitting the github api rate limit
-	resp, err := http.Get(fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", IgniteGitHubOrg, IgniteAppsRepo, branch, fileName))
+	client := &http.Client{
+		Timeout: 10 * time.Second,
+	}
+	req, err := http.NewRequestWithContext(
+		ctx,
+		http.MethodGet,
+		fmt.Sprintf("https://raw.githubusercontent.com/%s/%s/%s/%s", IgniteGitHubOrg, IgniteAppsRepo, branch, fileName),
+		nil,
+	)
+	if err != nil {
+		return nil, errors.Wrapf(err, "failed to build %s request", fileName)
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, errors.Wrapf(err, "failed to get %s file content", fileName)
 	}
 	defer resp.Body.Close()
+	if resp.StatusCode != http.StatusOK {
+		return nil, errors.Errorf("failed to get %s file content: %s", fileName, resp.Status)
+	}
 
 	namespace := namespaceFromFilePath(fileName)
 	return AppFromFile(namespace, resp.Body)
