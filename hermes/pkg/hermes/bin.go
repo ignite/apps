@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"runtime"
 	"strings"
+	"time"
 
 	"github.com/ignite/cli/v29/ignite/config"
 	"github.com/ignite/cli/v29/ignite/pkg/errors"
@@ -36,6 +37,10 @@ var archMap = map[string]string{
 	"amd64": "x86_64",
 	"arm64": "aarch64",
 	"386":   "i386",
+}
+
+var httpClient = &http.Client{
+	Timeout: 30 * time.Second,
 }
 
 var osMap = map[string]string{
@@ -112,7 +117,7 @@ func getHermesAssetURL(version string) (string, error) {
 	expectedAssetName := fmt.Sprintf("hermes-%s-%s-%s.tar.gz", version, archMapped, osMapped)
 
 	// Request release metadata from GitHub
-	resp, err := http.Get(apiURL + version)
+	resp, err := httpClient.Get(apiURL + version)
 	if err != nil {
 		return "", errors.Errorf("failed to fetch release info: %w", err)
 	}
@@ -152,7 +157,7 @@ func downloadAndExtractHermes(downloadURL, version string) (string, error) {
 	}
 	defer out.Close()
 
-	resp, err := http.Get(downloadURL)
+	resp, err := httpClient.Get(downloadURL)
 	if err != nil {
 		return "", errors.Errorf("failed to download binary: %w", err)
 	}
