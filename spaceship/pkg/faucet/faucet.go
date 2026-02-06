@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/blang/semver/v4"
 	"github.com/ignite/cli/v29/ignite/config"
@@ -60,7 +61,14 @@ func FetchBinary(ctx context.Context, target string) (string, error) {
 	binaryURL := faucetReleaseName(target)
 
 	// Download the binary.
-	resp, err := http.Get(binaryURL)
+	client := &http.Client{
+		Timeout: 30 * time.Second,
+	}
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, binaryURL, nil)
+	if err != nil {
+		return "", errors.Errorf("failed to build faucet download request: %w", err)
+	}
+	resp, err := client.Do(req)
 	if err != nil {
 		return "", errors.Errorf("failed to download faucet binary: %w", err)
 	}
