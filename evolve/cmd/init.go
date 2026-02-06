@@ -234,7 +234,7 @@ func prependFieldToGenesis(genesisPath, fieldName, fieldValue string) error {
 	buf.Write(data[insertPos:])
 
 	// Write back to file
-	if err := os.WriteFile(genesisPath, buf.Bytes(), 0644); err != nil {
+	if err := os.WriteFile(genesisPath, buf.Bytes(), 0o644); err != nil {
 		return fmt.Errorf("failed to write genesis file: %w", err)
 	}
 

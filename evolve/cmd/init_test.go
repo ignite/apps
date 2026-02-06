@@ -81,7 +81,7 @@ func TestPrependFieldToGenesis(t *testing.T) {
 			tmpDir := t.TempDir()
 			genesisPath := filepath.Join(tmpDir, "genesis.json")
 
-			err := os.WriteFile(genesisPath, []byte(tt.input), 0644)
+			err := os.WriteFile(genesisPath, []byte(tt.input), 0o644)
 			assert.NilError(t, err)
 
 			err = prependFieldToGenesis(genesisPath, tt.fieldName, tt.fieldValue)
