@@ -34,8 +34,10 @@ func ExtractData(ctx context.Context, file io.Reader, output string, fileList ..
 
 	extracted := make([]string, 0)
 	err = format.(archiver.Extractor).Extract(ctx, reader, func(_ context.Context, f archiver.FileInfo) error {
-		fileList := fileList
 		if !fileIsIncluded(fileList, f.Name()) {
+			return nil
+		}
+		if f.IsDir() {
 			return nil
 		}
 
@@ -45,14 +47,32 @@ func ExtractData(ctx context.Context, file io.Reader, output string, fileList ..
 		}
 		defer rc.Close()
 
-		newFilePath := filepath.Join(output, f.Name())
-		newFile, err := os.Create(newFilePath)
+		cleanName := filepath.Clean(f.Name())
+		if filepath.IsAbs(cleanName) || cleanName == "." || cleanName == ".." || strings.HasPrefix(cleanName, ".."+string(os.PathSeparator)) {
+			return errors.Errorf("invalid path in tarball: %s", f.Name())
+		}
+
+		newFilePath := filepath.Join(output, cleanName)
+		cleanOutput := filepath.Clean(output) + string(os.PathSeparator)
+		if !strings.HasPrefix(newFilePath, cleanOutput) {
+			return errors.Errorf("invalid path in tarball: %s", f.Name())
+		}
+
+		if err := os.MkdirAll(filepath.Dir(newFilePath), 0o755); err != nil {
+			return err
+		}
+
+		newFile, err := os.OpenFile(newFilePath, os.O_CREATE|os.O_WRONLY|os.O_TRUNC, 0o644)
 		if err != nil {
 			return err
 		}
+
 		extracted = append(extracted, newFilePath)
-		_, err = newFile.ReadFrom(rc)
-		return err
+		if _, err = io.Copy(newFile, rc); err != nil {
+			_ = newFile.Close()
+			return err
+		}
+		return newFile.Close()
 	})
 	if err != nil {
 		return nil, err
