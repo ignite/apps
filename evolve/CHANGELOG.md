@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+## [`v0.6.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.6.0)
+
+- [#248](https://github.com/ignite/apps/pull/248) Bump `ev-node` and `ev-abci` to latest versions.
 - [#247](https://github.com/ignite/apps/pull/247) Bump `ev-node`, `ev-abci` and wire force inclusion changes.
 
 ## [`v0.5.0`](https://github.com/ignite/apps/releases/tag/evolve/v0.5.0)

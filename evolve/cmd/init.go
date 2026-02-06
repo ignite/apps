@@ -146,7 +146,7 @@ func initEVABCI(
 	}
 	evolveConfig.DA.Namespace = chainID
 	evolveConfig.DA.DataNamespace = fmt.Sprintf("%s-data", chainID)
-	// evolveConfig.DA.ForcedInclusionNamespace = fmt.Sprintf("%s-fi-txs", chainID) // currently disable force inclusion until https://github.com/evstack/ev-node/issues/2906
+	evolveConfig.DA.ForcedInclusionNamespace = fmt.Sprintf("%s-fi-txs", chainID)
 
 	if err := evolveConfig.SaveAsYaml(); err != nil {
 		return err
