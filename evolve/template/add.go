@@ -59,6 +59,9 @@ func commandsStartModify(appPath, binaryName string, version cosmosver.Version) 
 			}`,
 			}, nil
 		})
+		if err != nil {
+			return err
+		}
 
 		// add the start command flags
 		content, err = xast.ModifyFunction(content,
@@ -119,6 +122,9 @@ func commandsGenesisInitModify(appPath, binaryName string) genny.RunFn {
 
 			return args, nil
 		})
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
@@ -151,6 +157,9 @@ func commandsForceInclusionModify(appPath, binaryName string) genny.RunFn {
 
 			return args, nil
 		})
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(cmdPath, content))
 	}
