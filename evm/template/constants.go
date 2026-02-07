@@ -7,5 +7,5 @@ const (
 
 	CosmosEVMPackage = "github.com/cosmos/evm"
 	// Using a pseudo version because v0.4.1 was broken...
-	CosmosEVMVersion = "v1.0.0-rc2.0.20250822211227-2d3df2ba510c"
+	CosmosEVMVersion = "v0.4.2"
 )
