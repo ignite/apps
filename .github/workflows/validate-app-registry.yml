@@ -21,7 +21,8 @@ jobs:
 
       - uses: actions/setup-go@v5
         with:
-          go-version: "1.24"
+          go-version: "stable"
+
           cache: "true"
 
       - name: Get list of added or modified app files

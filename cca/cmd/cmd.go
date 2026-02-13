@@ -11,10 +11,11 @@ func GetCommands() []*plugin.Command {
 			Short:             "Ignite CCA scaffolds a Cosmos SDK chain frontend using a `create-cosmos-app` template",
 			Flags: []*plugin.Flag{
 				{
-					Name:      flagPath,
-					Usage:     "path of the app",
-					Shorthand: "p",
-					Type:      plugin.FlagTypeString,
+					Name:         flagPath,
+					Usage:        "path of the app",
+					Shorthand:    "p",
+					DefaultValue: ".",
+					Type:         plugin.FlagTypeString,
 				},
 			},
 		},
