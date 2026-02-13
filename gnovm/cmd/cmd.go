@@ -18,10 +18,11 @@ func GetCommands() []*plugin.Command {
 					Long:  "Add GnoVM support to your Cosmos SDK chain",
 					Flags: []*plugin.Flag{
 						{
-							Name:      flagPath,
-							Usage:     "path of the app",
-							Shorthand: "p",
-							Type:      plugin.FlagTypeString,
+							Name:         flagPath,
+							Usage:        "path of the app",
+							Shorthand:    "p",
+							Type:         plugin.FlagTypeString,
+							DefaultValue: ".",
 						},
 					},
 				},

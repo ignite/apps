@@ -31,10 +31,11 @@ func GetCommands() []*plugin.Command {
 					Aliases: []string{"ping-pub"},
 					Flags: []*plugin.Flag{
 						{
-							Name:      flagPath,
-							Usage:     "path of the app",
-							Shorthand: "p",
-							Type:      plugin.FlagTypeString,
+							Name:         flagPath,
+							Usage:        "path of the app",
+							Shorthand:    "p",
+							Type:         plugin.FlagTypeString,
+							DefaultValue: ".",
 						},
 					},
 				},
