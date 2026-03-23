@@ -112,27 +112,6 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		&app.TransferKeeper,
 	)
 
-	// register additional precompiles on EVMKeeper
-	// Note: default precompiles are already registered via DefaultStaticPrecompiles()
-	const bech32PrecompileBaseGas = 6_000
-
-	// secp256r1 precompile as per EIP-7212
-	p256Precompile := &p256.Precompile{}
-
-	bech32Precompile, err := bech32.NewPrecompile(bech32PrecompileBaseGas)
-	if err != nil {
-		return fmt.Errorf("failed to instantiate bech32 precompile: %w", err)
-	}
-
-	// add more stateful precompiles here, if needed.
-	// To add custom precompiles, use app.EVMKeeper.WithStaticPrecompiles()
-	// to append them to the default precompiles that were already set.
-
-	app.EVMKeeper = app.EVMKeeper.WithStaticPrecompiles(map[common.Address]gethvm.PrecompiledContract{
-		bech32Precompile.Address(): bech32Precompile,
-		p256Precompile.Address():   p256Precompile,
-	})
-
 	// register evm modules
 	if err := app.RegisterModules(
 		vm.NewAppModule(app.EVMKeeper, app.AuthKeeper, app.BankKeeper, app.AuthKeeper.AddressCodec()),
