@@ -1,5 +1,9 @@
 # GnoVM App Changelog
 
+## [`v0.1.3`](https://github.com/ignite/apps/releases/tag/gnovm/v0.1.3)
+
+- [#257](https://github.com/ignite/apps/pull/257) Add compatibility with chain template from Ignite v29.9.x
+
 ## [`v0.1.2`](https://github.com/ignite/apps/releases/tag/gnovm/v0.1.2)
 
 - [#255](https://github.com/ignite/apps/pull/255) Update GnoVM module and its dependencies.
