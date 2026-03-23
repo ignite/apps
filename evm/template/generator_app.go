@@ -62,15 +62,6 @@ func appModify(appPath string) genny.RunFn {
 			xast.WithGlobal("BaseDenomUnit", "int64", "18"),
 		)
 
-		content, err = xast.ModifyFunction(
-			content,
-			"init",
-			xast.AppendFuncCode(`// Update power reduction for 18-decimal base unit
-    sdk.DefaultPowerReduction = math.NewIntFromBigInt(
-        new(big.Int).Exp(big.NewInt(10), big.NewInt(BaseDenomUnit), nil),
-    )`),
-		)
-
 		// append modules
 		content, err = xast.ModifyStruct(
 			content,

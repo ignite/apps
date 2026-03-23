@@ -30,6 +30,7 @@ import (
 	evmmempool "github.com/cosmos/evm/mempool"
 	precompiletypes "github.com/cosmos/evm/precompiles/types"
 	srvflags "github.com/cosmos/evm/server/flags"
+	"github.com/cosmos/evm/utils"
 	erc20 "github.com/cosmos/evm/x/erc20"
 	erc20keeper "github.com/cosmos/evm/x/erc20/keeper"
 	erc20types "github.com/cosmos/evm/x/erc20/types"
@@ -44,6 +45,12 @@ import (
 
 	eips "github.com/cosmos/evm/eips"
 )
+
+func init() {
+	// manually update the power reduction by replacing micro (u) -> atto (a) evmos
+	sdk.DefaultPowerReduction = utils.AttoPowerReduction
+}
+
 
 // registerEVMModules register EVM keepers and non dependency inject modules.
 func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
@@ -97,7 +104,12 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 			app.SlashingKeeper,
 			app.appCodec,
 		),
-	)
+	).WithDefaultEvmCoinInfo(evmtypes.EvmCoinInfo{
+		Denom:         sdk.DefaultBondDenom,
+		ExtendedDenom: sdk.DefaultBondDenom,
+		DisplayDenom:  sdk.DefaultBondDenom,
+		Decimals:      evmtypes.SixDecimals.Uint32(),
+	})
 
 	app.Erc20Keeper = erc20keeper.NewKeeper(
 		app.GetKey(erc20types.StoreKey),

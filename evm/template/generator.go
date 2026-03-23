@@ -22,7 +22,7 @@ import (
 	"github.com/ignite/cli/v29/ignite/templates/field/plushhelpers"
 )
 
-//go:embed files/* files/**/*
+//go:embed files/*
 var fsAppEvm embed.FS
 
 // NewEVMGenerator returns the generator to scaffold a evm integration inside an app.
