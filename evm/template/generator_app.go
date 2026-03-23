@@ -131,11 +131,12 @@ func appModify(appPath string) genny.RunFn {
 			),
 			xast.AppendFuncCodeAtLine(
 				`// set ante handlers
+
 				maxGasWanted := cast.ToUint64(appOpts.Get(evmsrvflags.EVMMaxTxGasWanted))
 				app.setAnteHandler(app.txConfig, maxGasWanted)
 				// set evm mempool
 				app.setEVMMempool()`,
-				12,
+				9,
 			),
 		)
 		if err != nil {
