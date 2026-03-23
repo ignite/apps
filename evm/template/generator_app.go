@@ -113,14 +113,8 @@ func appModify(appPath string) genny.RunFn {
 			content,
 			"New",
 			xast.AppendFuncCodeAtLine(
-				`// evm must be instantiated before IBC modules
+				`// evm must be instantiated after IBC modules
 				if err := app.registerEVMModules(appOpts); err != nil {
-					panic(err)
-				}`,
-				5,
-			),
-			xast.AppendFuncCodeAtLine(
-				`if err := app.postRegisterEVMModules(); err != nil {
 					panic(err)
 				}`,
 				7,

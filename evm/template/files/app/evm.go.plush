@@ -43,6 +43,8 @@ import (
 	evmtypes "github.com/cosmos/evm/x/vm/types"
 	"github.com/ethereum/go-ethereum/common"
 	gethvm "github.com/ethereum/go-ethereum/core/vm"
+
+	eips "github.com/cosmos/evm/eips"
 )
 
 // registerEVMModules register EVM keepers and non dependency inject modules.
@@ -110,19 +112,6 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		&app.TransferKeeper,
 	)
 
-	// register evm modules
-	if err := app.RegisterModules(
-		vm.NewAppModule(app.EVMKeeper, app.AuthKeeper, app.BankKeeper, app.AuthKeeper.AddressCodec()),
-		feemarket.NewAppModule(app.FeeMarketKeeper),
-		erc20.NewAppModule(app.Erc20Keeper, app.AuthKeeper),
-	); err != nil {
-		return err
-	}
-
-	return nil
-}
-
-func (app *App) postRegisterEVMModules() error {
 	// register additional precompiles on EVMKeeper
 	// Note: default precompiles are already registered via DefaultStaticPrecompiles()
 	const bech32PrecompileBaseGas = 6_000
@@ -139,10 +128,20 @@ func (app *App) postRegisterEVMModules() error {
 	// To add custom precompiles, use app.EVMKeeper.WithStaticPrecompiles()
 	// to append them to the default precompiles that were already set.
 
-	_ = app.EVMKeeper.WithStaticPrecompiles(map[common.Address]gethvm.PrecompiledContract{
+	app.EVMKeeper = app.EVMKeeper.WithStaticPrecompiles(map[common.Address]gethvm.PrecompiledContract{
 		bech32Precompile.Address(): bech32Precompile,
 		p256Precompile.Address():   p256Precompile,
 	})
+
+	// register evm modules
+	if err := app.RegisterModules(
+		vm.NewAppModule(app.EVMKeeper, app.AuthKeeper, app.BankKeeper, app.AuthKeeper.AddressCodec()),
+		feemarket.NewAppModule(app.FeeMarketKeeper),
+		erc20.NewAppModule(app.Erc20Keeper, app.AuthKeeper),
+	); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -182,40 +181,7 @@ func (app *App) SetClientCtx(ctx client.Context) {
 // It is required by the EVM application interface.
 func (app *App) GetMempool() sdkmempool.ExtMempool {
 	return app.EVMMempool
-}
-
-// getCustomEVMActivators defines a map of opcode modifiers associated
-// with a key defining the corresponding EIP.
-func getCustomEVMActivators() map[int]func(*gethvm.JumpTable) {
-	var (
-		multiplier        = uint64(10)
-		sstoreConstantGas = uint64(500)
-	)
-
-	return map[int]func(*gethvm.JumpTable){
-		0o000: func(jt *gethvm.JumpTable) {
-			// enable0000 contains the logic to modify the CREATE and CREATE2 opcodes
-			// constant gas value.
-			currentValCreate := jt[gethvm.CREATE].GetConstantGas()
-			jt[gethvm.CREATE].SetConstantGas(currentValCreate * multiplier)
-
-			currentValCreate2 := jt[gethvm.CREATE2].GetConstantGas()
-			jt[gethvm.CREATE2].SetConstantGas(currentValCreate2 * multiplier)
-		},
-		0o001: func(jt *gethvm.JumpTable) {
-			// enable0001 contains the logic to modify the CALL opcode
-			// constant gas value.
-			currentVal := jt[gethvm.CALL].GetConstantGas()
-			jt[gethvm.CALL].SetConstantGas(currentVal * multiplier)
-		},
-		0o002: func(jt *gethvm.JumpTable) {
-			// enable0002 contains the logic to modify the SSTORE opcode
-			// constant gas value.
-			jt[gethvm.SSTORE].SetConstantGas(sstoreConstantGas)
-		},
 	}
-}
-
 // getEVMChainID returns the EVM chain ID from the app options.
 func getEVMChainID(appOpts servertypes.AppOptions) uint64 {
 	chainID := cast.ToString(appOpts.Get(flags.FlagChainID))
