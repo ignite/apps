@@ -30,7 +30,7 @@ func appModify(appPath string) genny.RunFn {
 			xast.WithNamedImport("evmsrvflags", "github.com/cosmos/evm/server/flags"),
 			xast.WithNamedImport("erc20keeper", "github.com/cosmos/evm/x/erc20/keeper"),
 			xast.WithNamedImport("feemarketkeeper", "github.com/cosmos/evm/x/feemarket/keeper"),
-			xast.WithNamedImport("ibctransferkeeper", "github.com/cosmos/evm/x/ibc/transfer/keeper"),
+			xast.WithNamedImport("ibctransferkeeper", "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"),
 			xast.WithNamedImport("evmkeeper", "github.com/cosmos/evm/x/vm/keeper"),
 			xast.WithNamedImport("evmante", "github.com/cosmos/evm/ante"),
 			xast.WithNamedImport("evmmempool", "github.com/cosmos/evm/mempool"),

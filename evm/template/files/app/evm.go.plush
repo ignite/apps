@@ -86,7 +86,6 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		app.UnsafeFindStoreKey(feemarkettypes.TransientKey),
 	)
 
-	// NOTE: it's required to set up the EVM keeper before the ERC-20 keeper, because it is used in its instantiation.
 	app.EVMKeeper = evmkeeper.NewKeeper(
 		app.appCodec,
 		app.GetKey(evmtypes.StoreKey),
@@ -99,6 +98,7 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		app.FeeMarketKeeper,
 		&app.ConsensusParamsKeeper,
 		&app.Erc20Keeper,
+		chainID,
 		tracer,
 	)
 
@@ -156,7 +156,7 @@ func (app *App) setEVMMempool() {
 			BlockGasLimit: 100_000_000,
 		}
 
-		evmMempool := evmmempool.NewExperimentalEVMMempool(app.CreateQueryContext, app.Logger(), app.EVMKeeper, app.FeeMarketKeeper, app.txConfig, app.clientCtx, mempoolConfig)
+		evmMempool := evmmempool.NewExperimentalEVMMempool(app.CreateQueryContext, app.Logger(), app.EVMKeeper, app.FeeMarketKeeper, app.txConfig, app.clientCtx, mempoolConfig, 4096)
 		app.EVMMempool = evmMempool
 
 		app.SetMempool(evmMempool)
