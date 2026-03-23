@@ -66,7 +66,6 @@ func NewEVMGenerator(chain *chain.Chain) (*genny.Generator, error) {
 	g.RunFn(rootModify(appPath, binaryName))
 	g.RunFn(appModify(appPath))
 	g.RunFn(appConfigModify(appPath))
-	g.RunFn(ibcModify(appPath))
 
 	return g, nil
 }
