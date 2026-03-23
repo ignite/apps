@@ -8,7 +8,7 @@ import (
 	cosmosevmante "github.com/cosmos/evm/ante/evm"
 	"github.com/ethereum/go-ethereum/common"
 
-	appante "<%= ModulePath %>/app/ante"
+
 )
 
 // setAnteHandler sets the ante handler for the application.
@@ -35,5 +35,5 @@ func (app *App) setAnteHandler(txConfig client.TxConfig, maxGasWanted uint64) {
 		panic(err)
 	}
 
-	app.SetAnteHandler(appante.NewAnteHandler(options))
+	app.SetAnteHandler(evmante.NewAnteHandler(options))
 }

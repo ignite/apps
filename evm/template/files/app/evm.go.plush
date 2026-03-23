@@ -25,11 +25,13 @@ import (
 	govtypes "github.com/cosmos/cosmos-sdk/x/gov/types"
 	"github.com/spf13/cast"
 
-	evmconfig "github.com/cosmos/evm/config"
+	evmencoding "github.com/cosmos/evm/encoding"
+	evmaddress "github.com/cosmos/evm/encoding/address"
 	evmmempool "github.com/cosmos/evm/mempool"
+	precompiletypes "github.com/cosmos/evm/precompiles/types"
+	srvflags "github.com/cosmos/evm/server/flags"
 	"github.com/cosmos/evm/precompiles/bech32"
 	"github.com/cosmos/evm/precompiles/p256"
-	srvflags "github.com/cosmos/evm/server/flags"
 	erc20 "github.com/cosmos/evm/x/erc20"
 	erc20keeper "github.com/cosmos/evm/x/erc20/keeper"
 	erc20types "github.com/cosmos/evm/x/erc20/types"
@@ -54,15 +56,6 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 			DisplayDenom:  sdk.DefaultBondDenom,
 			Decimals:      evmtypes.SixDecimals, // in line with Cosmos SDK default decimals
 		},
-	}
-
-	// configure evm modules
-	if err := evmconfig.EvmAppOptionsWithConfig(
-		chainID,
-		coinInfoMap,
-		getCustomEVMActivators(),
-	); err != nil {
-		return err
 	}
 
 	// set up non depinject support modules store keys
@@ -100,6 +93,18 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		&app.Erc20Keeper,
 		chainID,
 		tracer,
+	).WithStaticPrecompiles(
+		precompiletypes.DefaultStaticPrecompiles(
+			*app.StakingKeeper,
+			app.DistrKeeper,
+			app.BankKeeper,
+			&app.Erc20Keeper,
+			&app.TransferKeeper,
+			app.IBCKeeper.ChannelKeeper,
+			app.GovKeeper,
+			app.SlashingKeeper,
+			app.appCodec,
+		),
 	)
 
 	app.Erc20Keeper = erc20keeper.NewKeeper(
@@ -126,7 +131,8 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 }
 
 func (app *App) postRegisterEVMModules() error {
-	// register precompiles on EVMKeeper
+	// register additional precompiles on EVMKeeper
+	// Note: default precompiles are already registered via DefaultStaticPrecompiles()
 	const bech32PrecompileBaseGas = 6_000
 
 	// secp256r1 precompile as per EIP-7212
@@ -137,13 +143,14 @@ func (app *App) postRegisterEVMModules() error {
 		return fmt.Errorf("failed to instantiate bech32 precompile: %w", err)
 	}
 
-	precompiles := maps.Clone(gethvm.PrecompiledContractsPrague) // clone from latest vm fork.
-	precompiles[bech32Precompile.Address()] = bech32Precompile
-	precompiles[p256Precompile.Address()] = p256Precompile
-
 	// add more stateful precompiles here, if needed.
+	// To add custom precompiles, use app.EVMKeeper.WithStaticPrecompiles()
+	// to append them to the default precompiles that were already set.
 
-	_ = app.EVMKeeper.WithStaticPrecompiles(precompiles)
+	_ = app.EVMKeeper.WithStaticPrecompiles(map[common.Address]gethvm.PrecompiledContract{
+		bech32Precompile.Address(): bech32Precompile,
+		p256Precompile.Address():   p256Precompile,
+	})
 	return nil
 }
 

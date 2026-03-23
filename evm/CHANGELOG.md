@@ -2,7 +2,7 @@
 
 ## [`v0.2.0](https://github.com/ignite/apps/releases/tag/evm/v0.2.0)
 
-- []() Upgrade `cosmos/evm` to v0.6.0.
+- [#256](https://github.com/ignite/apps/pull/256) Upgrade `cosmos/evm` to v0.6.0.
   - Follow those instructions if you scaffolded your chain with Ignite EVM App `v0.1.x`.
 
 ## [`v0.1.2`](https://github.com/ignite/apps/releases/tag/evm/v0.1.2)
