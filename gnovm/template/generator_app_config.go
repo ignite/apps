@@ -1,13 +1,12 @@
 package template
 
 import (
-	"fmt"
 	"path/filepath"
 
 	"github.com/gobuffalo/genny/v2"
-	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xast"
 	"github.com/ignite/cli/v29/ignite/templates/module"
+	modulecreate "github.com/ignite/cli/v29/ignite/templates/module/create"
 )
 
 // appConfigModify modifies the application app_config.go to use GnoVM.
@@ -38,28 +37,10 @@ func appConfigModify(appPath string) genny.RunFn {
 			return err
 		}
 
-		replacer := placeholder.New()
-
-		// init genesis / begin block / end block configuration
-		template := `gnovmmoduletypes.ModuleName,
-%[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppBeginBlockers)
-		content = replacer.Replace(content, module.PlaceholderSgAppBeginBlockers, replacement)
-
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppEndBlockers)
-		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
-
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppInitGenesis)
-		content = replacer.Replace(content, module.PlaceholderSgAppInitGenesis, replacement)
-
-		// add module config for depinject
-		moduleConfigTemplate := `{
-			Name:   gnovmmoduletypes.ModuleName,
-			Config: appconfig.WrapAny(&gnovmmoduletypes.Module{}),
-		},
-		%[1]v`
-		moduleConfigReplacement := fmt.Sprintf(moduleConfigTemplate, module.PlaceholderSgAppModuleConfig)
-		content = replacer.Replace(content, module.PlaceholderSgAppModuleConfig, moduleConfigReplacement)
+		content, err = modulecreate.AddModuleToAppConfig(content, "gnovm")
+		if err != nil {
+			return err
+		}
 
 		return r.File(genny.NewFileS(configPath, content))
 	}
