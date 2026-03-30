@@ -51,7 +51,7 @@ func MigrateHandler(ctx context.Context, cmd *plugin.ExecutedCommand) error {
 		return err
 	}
 
-	if finish(ctx, session, c.AppPath()) != nil {
+	if err := finish(ctx, session, c.AppPath()); err != nil {
 		return err
 	}
 

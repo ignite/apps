@@ -30,7 +30,7 @@ func appModify(appPath string) genny.RunFn {
 			xast.WithNamedImport("evmsrvflags", "github.com/cosmos/evm/server/flags"),
 			xast.WithNamedImport("erc20keeper", "github.com/cosmos/evm/x/erc20/keeper"),
 			xast.WithNamedImport("feemarketkeeper", "github.com/cosmos/evm/x/feemarket/keeper"),
-			xast.WithNamedImport("ibctransferkeeper", "github.com/cosmos/evm/x/ibc/transfer/keeper"),
+			xast.WithNamedImport("ibctransferkeeper", "github.com/cosmos/ibc-go/v10/modules/apps/transfer/keeper"),
 			xast.WithNamedImport("evmkeeper", "github.com/cosmos/evm/x/vm/keeper"),
 			xast.WithNamedImport("evmante", "github.com/cosmos/evm/ante"),
 			xast.WithNamedImport("evmmempool", "github.com/cosmos/evm/mempool"),
@@ -60,15 +60,6 @@ func appModify(appPath string) genny.RunFn {
 			content,
 			xast.GlobalTypeConst,
 			xast.WithGlobal("BaseDenomUnit", "int64", "18"),
-		)
-
-		content, err = xast.ModifyFunction(
-			content,
-			"init",
-			xast.AppendFuncCode(`// Update power reduction for 18-decimal base unit
-    sdk.DefaultPowerReduction = math.NewIntFromBigInt(
-        new(big.Int).Exp(big.NewInt(10), big.NewInt(BaseDenomUnit), nil),
-    )`),
 		)
 
 		// append modules
@@ -113,14 +104,8 @@ func appModify(appPath string) genny.RunFn {
 			content,
 			"New",
 			xast.AppendFuncCodeAtLine(
-				`// evm must be instantiated before IBC modules
+				`// evm must be instantiated after IBC modules
 				if err := app.registerEVMModules(appOpts); err != nil {
-					panic(err)
-				}`,
-				5,
-			),
-			xast.AppendFuncCodeAtLine(
-				`if err := app.postRegisterEVMModules(); err != nil {
 					panic(err)
 				}`,
 				7,
@@ -137,11 +122,12 @@ func appModify(appPath string) genny.RunFn {
 			),
 			xast.AppendFuncCodeAtLine(
 				`// set ante handlers
+
 				maxGasWanted := cast.ToUint64(appOpts.Get(evmsrvflags.EVMMaxTxGasWanted))
 				app.setAnteHandler(app.txConfig, maxGasWanted)
 				// set evm mempool
 				app.setEVMMempool()`,
-				12,
+				9,
 			),
 		)
 		if err != nil {

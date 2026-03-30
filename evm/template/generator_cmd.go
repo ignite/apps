@@ -21,6 +21,7 @@ func commandsModify(appPath, binaryName string) genny.RunFn {
 			f.String(),
 			xast.WithNamedImport("cosmosevmcmd", "github.com/cosmos/evm/client"),
 			xast.WithNamedImport("cosmosevmserver", "github.com/cosmos/evm/server"),
+			xast.WithNamedImport("cosmosevmkeyring", "github.com/cosmos/evm/crypto/keyring"),
 		)
 		if err != nil {
 			return err
@@ -77,9 +78,6 @@ func rootModify(appPath, binaryName string) genny.RunFn {
 		content, err := xast.AppendImports(
 			f.String(),
 			xast.WithNamedImport("cosmosevmkeyring", "github.com/cosmos/evm/crypto/keyring"),
-			xast.WithNamedImport("ibctransferevm", "github.com/cosmos/evm/x/ibc/transfer"),
-			xast.WithNamedImport("ibctransfer", "github.com/cosmos/ibc-go/v10/modules/apps/transfer"),
-			xast.WithNamedImport("ibctransfertypes", "github.com/cosmos/ibc-go/v10/modules/apps/transfer/types"),
 		)
 		if err != nil {
 			return err
@@ -100,10 +98,6 @@ func rootModify(appPath, binaryName string) genny.RunFn {
 				for name, mod := range evmModules {
 					moduleBasicManager[name] = module.CoreAppModuleBasicAdaptor(name, mod)
 					autoCliOpts.Modules[name] = mod
-				}
-				// Fix basic manager transfer wrapping
-				moduleBasicManager[ibctransfertypes.ModuleName] = ibctransferevm.AppModuleBasic{
-					AppModuleBasic: &ibctransfer.AppModuleBasic{},
 				}`,
 				5),
 		)

@@ -1,14 +1,13 @@
 package template
 
 import (
-	"fmt"
 	"path/filepath"
 	"strings"
 
 	"github.com/gobuffalo/genny/v2"
-	"github.com/ignite/cli/v29/ignite/pkg/placeholder"
 	"github.com/ignite/cli/v29/ignite/pkg/xast"
 	"github.com/ignite/cli/v29/ignite/templates/module"
+	modulecreate "github.com/ignite/cli/v29/ignite/templates/module/create"
 )
 
 // appConfigModify modifies the application app_config.go to use EVM.
@@ -22,9 +21,9 @@ func appConfigModify(appPath string) genny.RunFn {
 
 		// change imports
 		content, err := xast.AppendImports(f.String(),
-			xast.WithNamedImport("erc20types", "github.com/cosmos/evm/x/erc20/types"),
-			xast.WithNamedImport("feemarkettypes", "github.com/cosmos/evm/x/feemarket/types"),
-			xast.WithNamedImport("evmtypes", "github.com/cosmos/evm/x/vm/types"),
+			xast.WithNamedImport("erc20moduletypes", "github.com/cosmos/evm/x/erc20/types"),
+			xast.WithNamedImport("feemarketmoduletypes", "github.com/cosmos/evm/x/feemarket/types"),
+			xast.WithNamedImport("evmmoduletypes", "github.com/cosmos/evm/x/vm/types"),
 		)
 		if err != nil {
 			return err
@@ -34,46 +33,38 @@ func appConfigModify(appPath string) genny.RunFn {
 		content, err = xast.ModifyGlobalArrayVar(
 			content,
 			"moduleAccPerms",
-			xast.AppendGlobalArrayValue(`{Account: evmtypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}`),
-			xast.AppendGlobalArrayValue(`{Account: erc20types.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}`),
-			xast.AppendGlobalArrayValue(`{Account: feemarkettypes.ModuleName}`),
+			xast.AppendGlobalArrayValue(`{Account: evmmoduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}`),
+			xast.AppendGlobalArrayValue(`{Account: erc20moduletypes.ModuleName, Permissions: []string{authtypes.Minter, authtypes.Burner}}`),
+			xast.AppendGlobalArrayValue(`{Account: feemarketmoduletypes.ModuleName}`),
 		)
 		if err != nil {
 			return err
 		}
 
-		replacer := placeholder.New()
+		content, err = modulecreate.AddModuleToAppConfig(content, "erc20", modulecreate.SkipConfigEntry())
+		if err != nil {
+			return err
+		}
 
-		// begin block / end block configuration
-		template := `// cosmos evm modules
-		erc20types.ModuleName,
-		feemarkettypes.ModuleName,
-		evmtypes.ModuleName,
-%[1]v`
-		replacement := fmt.Sprintf(template, module.PlaceholderSgAppBeginBlockers)
-		content = replacer.Replace(content, module.PlaceholderSgAppBeginBlockers, replacement)
+		content, err = modulecreate.AddModuleToAppConfig(content, "feemarket", modulecreate.SkipConfigEntry())
+		if err != nil {
+			return err
+		}
 
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppEndBlockers)
-		content = replacer.Replace(content, module.PlaceholderSgAppEndBlockers, replacement)
-
-		// init genesis configuration
-		content = strings.Replace(content, "genutiltypes.ModuleName,", "", 1) // delete genutil current position
-
-		template = `// cosmos evm modules
-		erc20types.ModuleName,
-		feemarkettypes.ModuleName,
-		evmtypes.ModuleName,
-		// moved down because of evm modules
-		genutiltypes.ModuleName,
-%[1]v`
-		replacement = fmt.Sprintf(template, module.PlaceholderSgAppInitGenesis)
-		content = replacer.Replace(content, module.PlaceholderSgAppInitGenesis, replacement)
+		content, err = modulecreate.AddModuleToAppConfig(content,
+			"evm",
+			modulecreate.SkipConfigEntry(),
+			modulecreate.SpecifyModuleEntry("PreBlockers", "InitGenesis", "BeginBlockers", "EndBlockers"),
+		)
+		if err != nil {
+			return err
+		}
 
 		// Add new function
 		content, err = xast.AppendFunction(content, `// getBlockAccAddrs returns the list of block accounts addresses.
 // it appends the addresses of the static precompiles to the blockAccAddrs slice.
 func getBlockAccAddrs() []string {
-			for _, precompile := range evmtypes.AvailableStaticPrecompiles {
+			for _, precompile := range evmmoduletypes.AvailableStaticPrecompiles {
 				blockAccAddrs = append(blockAccAddrs, precompile)
 			}
 

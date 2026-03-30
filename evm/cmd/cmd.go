@@ -26,6 +26,20 @@ func GetCommands() []*plugin.Command {
 						},
 					},
 				},
+				{
+					Use:   "init",
+					Short: "Initialize the chain with EVM genesis",
+					Long:  "Initialize the chain genesis with proper bank denom metadata for EVM compatibility",
+					Flags: []*plugin.Flag{
+						{
+							Name:         flagPath,
+							Usage:        "path of the app",
+							Shorthand:    "p",
+							Type:         plugin.FlagTypeString,
+							DefaultValue: ".",
+						},
+					},
+				},
 			},
 		},
 	}

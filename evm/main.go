@@ -32,6 +32,8 @@ func (app) Execute(ctx context.Context, c *plugin.ExecutedCommand, _ plugin.Clie
 	switch args[0] {
 	case "add":
 		return cmd.AddHandler(ctx, c)
+	case "init":
+		return cmd.InitHandler(ctx, c)
 	default:
 		return errors.Errorf("unknown command: %s", strings.Join(c.OsArgs, " "))
 	}
