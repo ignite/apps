@@ -113,7 +113,7 @@ func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 		Denom:         sdk.DefaultBondDenom,
 		ExtendedDenom: sdk.DefaultBondDenom,
 		DisplayDenom:  sdk.DefaultBondDenom,
-		Decimals:      evmtypes.SixDecimals.Uint32(),
+		Decimals:      evmtypes.EighteenDecimals.Uint32(),
 	})
 
 	app.Erc20Keeper = erc20keeper.NewKeeper(
