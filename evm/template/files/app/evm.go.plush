@@ -49,13 +49,18 @@ import (
 func init() {
 	// manually update the power reduction by replacing micro (u) -> atto (a) evmos
 	sdk.DefaultPowerReduction = utils.AttoPowerReduction
+
+	// set default EVM denom
+	evmtypes.DefaultEVMDenom = sdk.DefaultBondDenom
+	evmtypes.DefaultEVMDisplayDenom = sdk.DefaultBondDenom
+	evmtypes.DefaultEVMExtendedDenom = sdk.DefaultBondDenom
 }
 
 
 // registerEVMModules register EVM keepers and non dependency inject modules.
 func (app *App) registerEVMModules(appOpts servertypes.AppOptions) error {
 	// chain config
-	chainID := getEVMChainID(appOpts)
+	chainID := GetEVMChainID(appOpts)
 
 	// set up non depinject support modules store keys
 	if err := app.RegisterStores(
@@ -170,9 +175,10 @@ func (app *App) SetClientCtx(ctx client.Context) {
 // It is required by the EVM application interface.
 func (app *App) GetMempool() sdkmempool.ExtMempool {
 	return app.EVMMempool
-	}
-// getEVMChainID returns the EVM chain ID from the app options.
-func getEVMChainID(appOpts servertypes.AppOptions) uint64 {
+}
+
+// GetEVMChainID returns the EVM chain ID from the app options.
+func GetEVMChainID(appOpts servertypes.AppOptions) uint64 {
 	chainID := cast.ToString(appOpts.Get(flags.FlagChainID))
 	if chainID == "" {
 		// fallback to genesis chain-id
@@ -183,7 +189,7 @@ func getEVMChainID(appOpts servertypes.AppOptions) uint64 {
 
 		reader, err := os.Open(filepath.Join(DefaultNodeHome, genesisPathCfg))
 		if err != nil {
-			panic(err)
+			return cosmosChainIDToEVMChainID("ignite")
 		}
 		defer reader.Close()
 

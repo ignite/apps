@@ -15,3 +15,9 @@ cd gm
 ignite app install -g github.com/ignite/apps/evm
 ignite evm add
 ```
+
+After scaffolding the EVM integration, initialize the chain with proper EVM genesis (bank denom metadata is set with 18 decimals based on the chain's default denom):
+
+```sh
+ignite evm init
+```
