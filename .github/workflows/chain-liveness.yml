@@ -204,7 +204,7 @@ jobs:
           ignite chain build --skip-proto
 
           # init the chain
-          ignite chain init
+          ignite evm init
 
       - name: Start Chain and Wait for Blocks
         run: |
