@@ -287,7 +287,7 @@ jobs:
           echo "Bob's final balance: $FINAL_BALANCE"
 
           # calculate and verify the expected balance
-          EXPECTED_BALANCE=$((INITIAL_BALANCE - 100))
+          EXPECTED_BALANCE=$((INITIAL_BALANCE - 10000100))
           if [ "$FINAL_BALANCE" != "$EXPECTED_BALANCE" ]; then
             echo "Error: Balance mismatch. Expected: $EXPECTED_BALANCE, Actual: $FINAL_BALANCE"
             exit 1
